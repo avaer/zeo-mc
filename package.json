@@ -25,6 +25,7 @@
     "mkdirp": "",
     "express": "",
     "mime": "",
+    "keypair": "",
     "cheerio": "",
     "website-scraper": "",
     "random-word-generator": ""
