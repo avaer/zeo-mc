@@ -8,7 +8,7 @@ const api = {
     allRoutes.forEach(route => {
       const method = route.method || 'get';
       const path = route.path;
-      const handler = route.handler;
+      const handler = Array.isArray(route.handler) ? route.handler : [ route.handler ];
 
       app[method](path, handler);
     });
