@@ -22,8 +22,11 @@
     "react-hot-loader": "^1.3.0",
     "webpack": "^1.12.2",
     "webpack-dev-server": "^1.12.1",
-    "random-word-generator": "",
-    "website-scraper": ""
+    "express": "",
+    "mime": "",
+    "cheerio": "",
+    "website-scraper": "",
+    "random-word-generator": ""
   },
   "dependencies": {
     "react": "^0.14.0",

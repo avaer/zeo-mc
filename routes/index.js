@@ -1,11 +1,10 @@
-const importRoute = require('./import.js');
+const express = require('express');
 
-const allRoutes = [
-  importRoute
-];
+const allRoutes = ['import', 'world'].map(name => require('./' + name + '.js'));
 
 const api = {
-  bind(app) {
+  app() {
+    const app = express();
     allRoutes.forEach(route => {
       const method = route.method || 'get';
       const path = route.path;
@@ -13,6 +12,7 @@ const api = {
 
       app[method](path, handler);
     });
+    return app;
   }
 };
 
