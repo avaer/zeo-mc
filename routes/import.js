@@ -1,6 +1,6 @@
 const url = require('url');
 
-const config = require('../config/index.json');
+const config = require('../lib/config/index.js').get();
 const PageDownloader = require('../lib/page-downloader/index.js');
 
 const pageDownloader = new PageDownloader({

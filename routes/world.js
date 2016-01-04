@@ -1,6 +1,6 @@
 const url = require('url');
 
-const config = require('../config/index.json');
+const config = require('../lib/config/index.js').get();
 const WorldReader = require('../lib/site-reader/index.js');
 
 const worldReader = new WorldReader({
