@@ -1,7 +1,7 @@
 const url = require('url');
 
 const config = require('../lib/config/index.js').get();
-const WorldReader = require('../lib/site-reader/index.js');
+const WorldReader = require('../lib/world-reader/index.js');
 
 const worldReader = new WorldReader({
   dataDirectory: config.dataDirectory

@@ -1,6 +1,6 @@
 const express = require('express');
 
-const allRoutes = ['import', 'world'].map(name => require('./' + name + '.js'));
+const allRoutes = ['import', 'world', 'player'].map(name => require('./' + name + '.js'));
 
 const api = {
   app() {
