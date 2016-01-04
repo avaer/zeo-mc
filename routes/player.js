@@ -20,15 +20,33 @@ const routes = [
     }
   },
   {
+    method: 'put',
+    path: '/players/:player',
+    handler: function(req, res) {
+      const player = req.param('player');
+
+      const name = player;
+      const password = req.query.password || '';
+
+      playerReader.createPlayer({
+        name,
+        password
+      }, u.ok(u.resErr(res), playerJson => {
+        res.contentType(playerJson.contentType);
+        res.send(playerJson.data);
+	  }));
+    }
+  },
+  {
     method: 'post',
     path: '/players/:player',
     handler: function(req, res) {
       const player = req.param('player');
 
       const name = player;
-      const password = req.query.password;
+      const password = req.query.password || '';
 
-      playerReader.createPlayer({
+      playerReader.login({
         name,
         password
       }, u.ok(u.resErr(res), playerJson => {
