@@ -6,6 +6,7 @@ const allRoutes = u.flatten(['import', 'world', 'player'].map(name => require('.
 const api = {
   app() {
     const app = express();
+
     allRoutes.forEach(route => {
       const method = route.method || 'get';
       const path = route.path;
@@ -13,6 +14,7 @@ const api = {
 
       app[method](path, handler);
     });
+
     return app;
   }
 };

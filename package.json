@@ -24,6 +24,7 @@
     "webpack-dev-server": "^1.12.1",
     "express": "",
     "mime": "",
+    "engine.io": "",
     "mkdirp": "",
     "keypair": "",
     "cheerio": "",
