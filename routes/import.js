@@ -1,9 +1,9 @@
 const url = require('url');
 
 const config = require('../lib/config/index.js').get();
-const PageDownloader = require('../lib/page-downloader/index.js');
+const SiteImporter  = require('../lib/site-importer');
 
-const pageDownloader = new PageDownloader({
+const siteImporter = new SiteImporter({
   dataDirectory: config.dataDirectory
 });
 
@@ -17,7 +17,7 @@ const routes = [
 
       if (url) {
         const name = rng.generate();
-        pageDownloader.download({url, name}, function(err) {
+        siteImporter.import({url, name}, function(err) {
           if (!err) {
             res.json({
               world: name
