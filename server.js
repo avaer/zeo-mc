@@ -2,8 +2,8 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const webpackConfig = require('./webpack.config');
 
-const config = require('config');
-const u = require('./lib/js-utils/index.js');
+const config = require('./lib/config');
+const u = require('./lib/js-utils');
 const routes = require('./routes/index.js');
 
 config.bootstrap(u.ok(() => {
@@ -14,7 +14,7 @@ config.bootstrap(u.ok(() => {
   });
 
   const routesApp = routes.app();
-  server.use('/kazmer', routesApp);
+  server.use('/api', routesApp);
 
   server.listen(3000, 'localhost', function (err, result) {
     if (err) {

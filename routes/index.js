@@ -1,6 +1,7 @@
 const express = require('express');
+const u = require('../lib/js-utils');
 
-const allRoutes = ['import', 'world', 'player'].map(name => require('./' + name + '.js'));
+const allRoutes = u.flatten(['import', 'world', 'player'].map(name => require('./' + name + '.js')));
 
 const api = {
   app() {
@@ -16,4 +17,4 @@ const api = {
   }
 };
 
-modules.exports = api;
+module.exports = api;
