@@ -12,7 +12,7 @@ const streams = require('./streams/index.js');
 const API_PREFIX = '/api';
 
 config.bootstrap(u.ok(() => {
-  const server = new WebpackDevServer(webpack(webpackConfig), {
+  const webpackDevServer = new WebpackDevServer(webpack(webpackConfig), {
     publicPath: webpackConfig.output.publicPath,
     hot: true,
     historyApiFallback: true
@@ -21,12 +21,12 @@ config.bootstrap(u.ok(() => {
   const streamApp = streams.app({
     prefix: path.join(API_PREFIX, '/stream')
   });
-  streamApp.attach(server);
+  streamApp.attach(webpackDevServer.listeningApp);
 
   const routesApp = routes.app();
-  server.use(API_PREFIX, routesApp);
+  webpackDevServer.use(API_PREFIX, routesApp);
 
-  server.listen(3000, 'localhost', function (err, result) {
+  webpackDevServer.listen(3000, 'localhost', function (err, result) {
     if (err) {
       console.log(err);
     }
