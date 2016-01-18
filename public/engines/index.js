@@ -127,13 +127,17 @@ export default class Engines {
           let state = oldState;
           state = (() => {
             if (downKeys.up) {
-              return state.update('position', Vector.bindAdd(new Vector(0, 0, -1).multiplyScalar(MOVE_PER_FRAME * framesPassed)));
+              return state.update('position', Vector.bindAdd(new Vector(0, 0, -1)
+                .multiplyScalar(MOVE_PER_FRAME * framesPassed)));
             } else if (downKeys.down) {
-              return state.update('position', Vector.bindAdd(new Vector(0, 0, 1).multiplyScalar(MOVE_PER_FRAME * framesPassed)));
+              return state.update('position', Vector.bindAdd(new Vector(0, 0, 1)
+                .multiplyScalar(MOVE_PER_FRAME * framesPassed)));
             } else if (downKeys.left) {
-              return state.update('position', Vector.bindAdd(new Vector(-1, 0, 0).multiplyScalar(MOVE_PER_FRAME * framesPassed)));
+              return state.update('position', Vector.bindAdd(new Vector(-1, 0, 0)
+                .multiplyScalar(MOVE_PER_FRAME * framesPassed)));
             } else if (downKeys.right) {
-              return state.update('position', Vector.bindAdd(new Vector(1, 0, 0).multiplyScalar(MOVE_PER_FRAME * framesPassed)));
+              return state.update('position', Vector.bindAdd(new Vector(1, 0, 0)
+                .multiplyScalar(MOVE_PER_FRAME * framesPassed)));
             } else {
               return state;
             }
@@ -142,7 +146,19 @@ export default class Engines {
             if (downMouseButtons.left) {
               const xDiff = newMousePosition.x - oldMousePosition.x;
               const yDiff = newMousePosition.y - oldMousePosition.y;
-              return state.update('rotation', Point.bindAdd(new Point(xDiff, yDiff).multiplyScalar(ROTATE_PER_FRAME * width * framesPassed)));
+              const c = ROTATE_PER_FRAME * width * framesPassed;
+              return state.update('rotation', rotation => rotation
+                .update('x', x => {
+                   let result = x + (xDiff * c);
+                   while (result / Math.PI < -1) {
+                     result += Math.PI * 2;
+                   }
+                   while (result / Math.PI > 1) {
+                     result -= Math.PI * 2;
+                   }
+                   return result;
+                })
+                .update('y', y => Math.min(Math.max(y + (yDiff * c), -(Math.PI / 2)), Math.PI / 2)));
             } else {
               return state;
             }
