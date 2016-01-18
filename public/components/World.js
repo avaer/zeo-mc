@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 
-const WORLD_SIZE = 32;
+import {is} from 'immutable';
+
+import {WORLD_SIZE, CAMERA_HEIGHT} from '../constants/index';
 
 function makeThreeRenderer({width, height, pixelRatio}) {
   const scene = new THREE.Scene(); 
@@ -54,9 +56,9 @@ function makeThreeRenderer({width, height, pixelRatio}) {
 
   const aspectRatio = width / height;
   const camera = new THREE.PerspectiveCamera(90, aspectRatio, 0.1, 100);
-  camera.position.y = 1;
+  /* camera.position.y = 1;
   camera.position.x = WORLD_SIZE / 2;
-  camera.position.z = 0;
+  camera.position.z = 0; */
   camera.rotation.order = 'YXZ';
 
   const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -84,7 +86,12 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       renderer.setPixelRatio(pixelRatio);
       canvas.style.width = width;
       canvas.style.height = height;
-    }
+    },
+    updateCamera: ({position, rotation}) => {
+      camera.position.set(position.x, CAMERA_HEIGHT + position.y, position.z);
+      camera.rotation.x = -rotation.y;
+      camera.rotation.y = -rotation.x;
+	}
   };
 }
 
@@ -97,19 +104,44 @@ export default class World extends React.Component {
     const canvas = this.renderer.getCanvas();
     $(domNode).append(canvas);
 
-    this.renderer.render();
+    this.resize();
+    this.updateCamera();
+    this.rerender();
   }
 
   componentWillReceiveProps(nextProps) {
     const {width: oldWidth, height: oldHeight, pixelRatio: oldPixelRatio} = this.props;
     const {width, height, pixelRatio} = nextProps;
-
-    if (width !== oldWidth || height !== oldHeight || pixelRatio !== oldPixelRatio) {
-      this.renderer.resize({width, height, pixelRatio});
+    if (!is(width, oldWidth) || !is(height, oldHeight) || !is(pixelRatio, oldPixelRatio)) {
+      this.resize(nextProps);
 	}
+
+    const {position: oldPosition, rotation: oldRotation} = this.props;
+    const {position, rotation} = nextProps;
+    if (!is(position, oldPosition) || !is(rotation, oldRotation)) {
+      this.updateCamera(nextProps);
+    }
   }
 
   componentDidUpdate() {
+    this.rerender();
+  }
+
+  resize(props) {
+    props === undefined && ({props} = this);
+
+    const {width, height, pixelRatio} = props;
+    this.renderer.resize({width, height, pixelRatio});
+  }
+
+  updateCamera(props) {
+    props === undefined && ({props} = this);
+
+    const {position, rotation} = props;
+    this.renderer.updateCamera({position, rotation});
+  }
+
+  rerender() {
     this.renderer.render();
   }
 

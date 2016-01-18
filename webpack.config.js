@@ -26,6 +26,7 @@ module.exports = {
       loaders: ['react-hot', 'babel'],
       include: [
         path.join(__dirname, 'public/index'),
+        path.join(__dirname, 'public/constants'),
         path.join(__dirname, 'public/components'),
         path.join(__dirname, 'public/stores'),
         path.join(__dirname, 'public/engines'),

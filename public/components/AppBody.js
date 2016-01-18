@@ -8,10 +8,14 @@ export default class App extends React.Component {
     const {window: windowState, world: worldState} = stores;
 
     const {width, height, pixelRatio} = windowState;
+    const {position, rotation} = worldState;
     const worldProps = {
       width,
       height,
-      pixelRatio
+      pixelRatio,
+
+      position,
+      rotation
     };
 
     return (

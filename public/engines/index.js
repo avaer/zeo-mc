@@ -1,9 +1,9 @@
 import Point from '../records/point/index';
 import Vector from '../records/vector/index';
 
-const FRAME_RATE = 30;
+const FRAME_RATE = 10;
 const MOVE_PER_FRAME = 0.2;
-const ROTATE_PER_FRAME = Math.PI / 100;
+const ROTATE_PER_FRAME = Math.PI / (10e6);
 const KEYS = {
   W: 87,
   S: 83,
@@ -16,7 +16,7 @@ const MOUSE_BUTTONS = {
   RIGHT: 2
 };
 
-function updateWindow(oldState) {
+function syncWindow(oldState) {
   const $window = $(window);
   const width = $window.width();
   const height = $window.height();
@@ -55,13 +55,51 @@ export default class Engines {
   }
 
   initWindow() {
-    this.updateState('window', updateWindow);
+    this.updateState('window', syncWindow);
   }
 
   listen() {
-    this.listenFrame();
     this.listenWindow();
+    this.listenInput();
+    this.listenFrame();
+  }
+
+  listenInput() {
     this.listenKeyboard();
+    this.listenMouse();
+  }
+
+  listenWindow() {
+    const $window = $(window);
+    $window.on('resize', () => {
+      this.updateState('window', syncWindow);
+    });
+  }
+
+  listenKeyboard() {
+    const $window = $(window);
+    $window.on('keydown', e => {
+      this.updateState('window', oldState => oldState.setIn([ 'keys', String(e.which) ], true));
+    });
+    $window.on('keyup', e => {
+      this.updateState('window', oldState => oldState.setIn([ 'keys', String(e.which) ], false));
+    });
+  }
+
+  listenMouse() {
+    const $window = $(window);
+    $window.on('mousedown', e => {
+      this.updateState('window', oldState => oldState.setIn([ 'mouse', 'buttons', String(e.button) ], true));
+    });
+    $window.on('mouseup', e => {
+      this.updateState('window', oldState => oldState.setIn([ 'mouse', 'buttons', String(e.button) ], false));
+    });
+    $window.on('mousemove', e => {
+      const {clientX: x, clientY: y} = e;
+      this.updateState('window', oldState => oldState
+        .setIn([ 'mouse', 'position', 'x' ], x)
+        .setIn([ 'mouse', 'position', 'y' ], y));
+    });
   }
 
   listenFrame() {
@@ -78,26 +116,20 @@ export default class Engines {
       };
       const getDownMouseButtons = mouseButtons => {
         return {
-          left: keys.get(String(MOUSE_BUTTONS.LEFT)),
-          middle: keys.get(String(MOUSE_BUTTONS.MIDDLE)),
-          right: keys.get(String(MOUSE_BUTTONS.RIGHT))
+          left: mouseButtons.get(String(MOUSE_BUTTONS.LEFT)),
+          middle: mouseButtons.get(String(MOUSE_BUTTONS.MIDDLE)),
+          right: mouseButtons.get(String(MOUSE_BUTTONS.RIGHT))
         };
       };
-      /* const getMouseDiff = (oldMousePosition, newMousePosition) => {
-        return {
-          x: newMousePosition.x - oldMousePosition.x,
-          y: newMousePosition.y - oldMousePosition.y
-        };
-      }); */
 
-      const updateWorld = ({framesPassed, downKeys, downMouseButtons, oldMousePosition, newMousePosition}) => {
+      const updateWorld = ({framesPassed, downKeys, downMouseButtons, oldMousePosition, newMousePosition, width}) => {
         return oldState => {
           let state = oldState;
           state = (() => {
             if (downKeys.up) {
-              return state.update('position', Vector.bindAdd(new Vector(0, 0, 1).multiplyScalar(MOVE_PER_FRAME * framesPassed)));
-            } else if (downKeys.down) {
               return state.update('position', Vector.bindAdd(new Vector(0, 0, -1).multiplyScalar(MOVE_PER_FRAME * framesPassed)));
+            } else if (downKeys.down) {
+              return state.update('position', Vector.bindAdd(new Vector(0, 0, 1).multiplyScalar(MOVE_PER_FRAME * framesPassed)));
             } else if (downKeys.left) {
               return state.update('position', Vector.bindAdd(new Vector(-1, 0, 0).multiplyScalar(MOVE_PER_FRAME * framesPassed)));
             } else if (downKeys.right) {
@@ -110,7 +142,7 @@ export default class Engines {
             if (downMouseButtons.left) {
               const xDiff = newMousePosition.x - oldMousePosition.x;
               const yDiff = newMousePosition.y - oldMousePosition.y;
-              return state.update('rotation', Point.bindAdd(new Point(xDiff, yDiff).multiplyScalar(ROTATE_PER_FRAME * framesPassed)));
+              return state.update('rotation', Point.bindAdd(new Point(xDiff, yDiff).multiplyScalar(ROTATE_PER_FRAME * width * framesPassed)));
             } else {
               return state;
             }
@@ -122,7 +154,7 @@ export default class Engines {
         return oldState => {
           let state = oldState;
           state = (() => {
-            const mousePosition = state.get(['mouse', 'position']);
+            const mousePosition = state.getIn(['mouse', 'position']);
             return state.setIn(['mouse', 'oldPosition'], mousePosition);
           })();
           return state;
@@ -139,8 +171,9 @@ export default class Engines {
 
       const oldMousePosition = windowState.getIn(['mouse', 'oldPosition']);
       const newMousePosition = windowState.getIn(['mouse', 'position']);
+      const {width} = windowState;
 
-      this.updateState('world', updateWorld({framesPassed, downKeys, downMouseButtons, oldMousePosition, newMousePosition}));
+      this.updateState('world', updateWorld({framesPassed, downKeys, downMouseButtons, oldMousePosition, newMousePosition, width}));
       this.updateState('window', updateWindow());
     };
 
@@ -160,38 +193,5 @@ export default class Engines {
     };
 
     waitForFrame();
-  }
-
-  listenWindow() {
-    const $window = $(window);
-    $window.on('resize', () => {
-      this.updateState('window', updateWindow);
-    });
-  }
-
-  listenKeyboard() {
-    const $window = $(window);
-    $window.on('keydown', e => {
-      this.updateState('window', oldState => oldState.setIn([ 'keys', String(e.which) ], true));
-    });
-    $window.on('keyup', e => {
-      this.updateState('window', oldState => oldState.setIn([ 'keys', String(e.which) ], false));
-    });
-  }
-
-  listenMouse() {
-    const $window = $(window);
-    $window.on('mousedown', e => {
-      this.updateState('window', oldState => oldState.setIn([ 'mouse', 'buttons', String(e.which) ], true));
-    });
-    $window.on('mouseup', e => {
-      this.updateState('window', oldState => oldState.setIn([ 'mouse', 'buttons', String(e.which) ], false));
-    });
-    $window.on('mousemove', e => {
-      const {clientX: x, clientY: y} = e;
-      this.updateState('window', oldState => oldState
-        .setIn([ 'mouse', 'position', 'x' ], x)
-        .setIn([ 'mouse', 'position', 'y' ], y));
-    });
   }
 }
