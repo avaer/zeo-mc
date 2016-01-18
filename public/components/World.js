@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 
+const WORLD_SIZE = 32;
+
 function makeThreeRenderer({width, height, pixelRatio}) {
   const scene = new THREE.Scene(); 
 
@@ -18,19 +20,19 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   scene.add(lights[1]);
   scene.add(lights[2]);
 
-  const mesh = (() => {
-    const mesh = new THREE.Object3D();
-    const sphereGeometry = new THREE.SphereGeometry(5, 8, 8);
-    mesh.add(new THREE.LineSegments(
-      new THREE.WireframeGeometry(sphereGeometry),
+  const sphereMesh = (() => {
+    const result = new THREE.Object3D();
+    const geometry = new THREE.SphereGeometry(5, 8, 8);
+    result.add(new THREE.LineSegments(
+      new THREE.WireframeGeometry(geometry),
       new THREE.LineBasicMaterial({
         color: 0xffffff,
         transparent: true,
         opacity: 0.5
       })
     ));
-    mesh.add(new THREE.Mesh(
-      sphereGeometry,
+    result.add(new THREE.Mesh(
+      geometry,
       new THREE.MeshPhongMaterial({
         color: 0x156289,
         emissive: 0x072534,
@@ -38,17 +40,28 @@ function makeThreeRenderer({width, height, pixelRatio}) {
         shading: THREE.FlatShading
       })
     ));
-    return mesh;
+    result.position.z = -(WORLD_SIZE / 2);
+    result.position.x = (WORLD_SIZE / 2);
+    return result;
   })();
-  scene.add(mesh);
+  scene.add(sphereMesh);
+
+  const grid = new THREE.GridHelper(WORLD_SIZE, 1);
+  grid.position.x = WORLD_SIZE;
+  grid.position.z = -WORLD_SIZE;
+  grid.setColors(0xCCCCCC, 0xCCCCCC);
+  scene.add(grid);
 
   const aspectRatio = width / height;
-  const camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 50);
-  camera.position.z = 10;
+  const camera = new THREE.PerspectiveCamera(90, aspectRatio, 0.1, 100);
+  camera.position.y = 1;
+  camera.position.x = WORLD_SIZE / 2;
+  camera.position.z = 0;
 
   const renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setSize(width * pixelRatio, height * pixelRatio);
   renderer.setPixelRatio(pixelRatio);
+  renderer.setClearColor(0xFFFFFF, 1);
 
   const canvas = renderer.domElement;
   canvas.style.width = width;
