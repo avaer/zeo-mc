@@ -135,14 +135,40 @@ export default class Engines {
 
               return Vector.bindAdd(diffVector);
             };
-            if (downKeys.up) {
-              return state.update('position', move(0));
-            } else if (downKeys.down) {
-              return state.update('position', move(Math.PI));
-            } else if (downKeys.left) {
-              return state.update('position', move(-(Math.PI / 2)));
-            } else if (downKeys.right) {
-              return state.update('position', move(Math.PI / 2));
+            const normalize = a => {
+              if (a.some(e => e === Math.PI) && a.some(e => e === -(Math.PI / 2))) {
+                return a.map(e => ((e >= 0) ? e : (e + (Math.PI * 2))));
+              } else {
+                return a.slice();
+              }
+            };
+            const avg = a => {
+              const l = a.length;
+              if (l > 0) {
+                let result = 0;
+                for (var i = 0; i < l; i++) {
+                  result += a[i];
+                }
+                return result / l;
+              } else {
+                return 0;
+              }
+            };
+            let angles = [];
+
+            if (downKeys.up && !downKeys.down) {
+              angles.push(0);
+            } else if (downKeys.down && !downKeys.up) {
+              angles.push(Math.PI);
+            }
+            if (downKeys.left && !downKeys.right) {
+              angles.push(-(Math.PI / 2));
+            } else if (downKeys.right && !downKeys.left) {
+              angles.push(Math.PI / 2);
+            }
+
+            if (angles.length > 0) {
+              return state.update('position', move(avg(normalize(angles))));
             } else {
               return state;
             }
