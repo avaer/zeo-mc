@@ -11,7 +11,7 @@
     "url": "https://github.com/modulesio/kazmer"
   },
   "author": "Avaer Kazmer <a@kazmer.com>",
-  "devDependencies": {
+  "dependencies": {
     "babel-core": "^6.0.20",
     "babel-eslint": "^4.1.3",
     "babel-loader": "^6.0.1",
@@ -24,19 +24,15 @@
     "webpack-dev-server": "^1.12.1",
     "express": "",
     "mime": "",
+    "react": "",
+    "react-dom": "",
     "immutable": "",
     "engine.io": "",
-    "three": "^0.72.0",
-    "react-three": "^0.7.5",
     "mkdirp": "",
     "glob": "",
     "keypair": "",
     "cheerio": "",
     "website-scraper": "",
     "random-word-generator": ""
-  },
-  "dependencies": {
-    "react": "^0.14.0",
-    "react-dom": "^0.14.0"
   }
 }
