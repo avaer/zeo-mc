@@ -126,18 +126,23 @@ export default class Engines {
         return oldState => {
           let state = oldState;
           state = (() => {
+            const move = angle => {
+              const rotation = state.get('rotation');
+              const directionAngle = rotation.x + angle;
+              const x = Math.sin(directionAngle);
+              const y = Math.cos(directionAngle);
+              const diffVector = new Vector(x, 0, -y).multiplyScalar(MOVE_PER_FRAME * framesPassed);
+
+              return Vector.bindAdd(diffVector);
+            };
             if (downKeys.up) {
-              return state.update('position', Vector.bindAdd(new Vector(0, 0, -1)
-                .multiplyScalar(MOVE_PER_FRAME * framesPassed)));
+              return state.update('position', move(0));
             } else if (downKeys.down) {
-              return state.update('position', Vector.bindAdd(new Vector(0, 0, 1)
-                .multiplyScalar(MOVE_PER_FRAME * framesPassed)));
+              return state.update('position', move(Math.PI));
             } else if (downKeys.left) {
-              return state.update('position', Vector.bindAdd(new Vector(-1, 0, 0)
-                .multiplyScalar(MOVE_PER_FRAME * framesPassed)));
+              return state.update('position', move(-(Math.PI / 2)));
             } else if (downKeys.right) {
-              return state.update('position', Vector.bindAdd(new Vector(1, 0, 0)
-                .multiplyScalar(MOVE_PER_FRAME * framesPassed)));
+              return state.update('position', move(Math.PI / 2));
             } else {
               return state;
             }
