@@ -3,5 +3,6 @@ import Immutable from 'immutable';
 export default class Window extends Immutable.Record({
   width: 0,
   height: 0,
-  pixelRatio: 1
+  pixelRatio: 1,
+  keys: new Immutable.Map()
 }) {}
