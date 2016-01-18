@@ -1,3 +1,5 @@
 {
+  "hostname": "kazmer.io",
+  "port": 80,
   "dataDirectory": "./data"
 }

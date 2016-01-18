@@ -12,8 +12,16 @@ const streams = require('./streams/index.js');
 const API_PREFIX = '/api';
 
 config.bootstrap(u.ok(() => {
-  const webpackDevServer = new WebpackDevServer(webpack(webpackConfig), {
-    publicPath: webpackConfig.output.publicPath,
+  const c = config.get();
+
+  const boundWebpackConfig = (() => {
+    const result = u.shallow(webpackConfig);
+    result.entry = result.entry.map(entry => entry.replace(/HOSTNAME/, c.hostname).replace(/PORT/, c.port));
+    return result;
+  })();
+
+  const webpackDevServer = new WebpackDevServer(webpack(boundWebpackConfig), {
+    publicPath: boundWebpackConfig.output.publicPath,
     hot: true,
     historyApiFallback: true
   });
@@ -26,11 +34,11 @@ config.bootstrap(u.ok(() => {
   const routesApp = routes.app();
   webpackDevServer.use(API_PREFIX, routesApp);
 
-  webpackDevServer.listen(3000, 'localhost', function (err, result) {
+  webpackDevServer.listen(c.port, null, function (err, result) {
     if (err) {
       console.log(err);
     }
 
-    console.log('Listening at localhost:3000');
+    console.log('Listening at :' + c.port);
   });
 }));

@@ -6,7 +6,7 @@ var glob = require('glob');
 module.exports = {
   devtool: 'eval',
   entry: [
-    'webpack-dev-server/client?http://localhost:3000',
+    'webpack-dev-server/client?http://HOSTNAME:PORT',
     'webpack/hot/only-dev-server'
   ].concat(glob.sync('./public/lib/*/index.js')).concat([
     './src/index'

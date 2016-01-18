@@ -27,7 +27,7 @@ const api = {
     }
 
     function _isHandledRequest(req) {
-      return req.path.startsWith(prefix);
+      return req.url.startsWith(prefix);
     }
 
     const app = {
