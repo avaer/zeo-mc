@@ -7,7 +7,8 @@ export default class App extends React.Component {
     const $window = $(window);
     const worldProps = {
       width: $window.width(),
-      height: $(window).height()
+      height: $window.height(),
+      pixelRatio: window.devicePixelRatio
     };
 
     return (
