@@ -88,8 +88,6 @@ function makeThreeRenderer({width, height, pixelRatio}) {
 }
 
 export default class World extends React.Component {
-  onResize = this.onResize();
-
   componentDidMount() {
     const {width, height, pixelRatio} = this.props;
     this.renderer = makeThreeRenderer({width, height, pixelRatio});
@@ -99,25 +97,19 @@ export default class World extends React.Component {
     $(domNode).append(canvas);
 
     this.renderer.render();
-
-    $(window).on('resize', this.onResize);
   }
 
-  componentWillUnmount() {
-    $(window).off('resize', this.onResize);
-  }
+  componentWillReceiveProps(nextProps) {
+    const {width: oldWidth, height: oldHeight, pixelRatio: oldPixelRatio} = this.props;
+    const {width, height, pixelRatio} = nextProps;
 
-  onResize() {
-    return () => {
-      const $window = $(window);
-
-      const width = $window.width();
-      const height = $window.height();
-      const pixelRatio = window.devicePixelRatio;
-
+    if (width !== oldWidth || height !== oldHeight || pixelRatio !== oldPixelRatio) {
       this.renderer.resize({width, height, pixelRatio});
-      this.renderer.render();
-    };
+	}
+  }
+
+  componentDidUpdate() {
+    this.renderer.render();
   }
 
   render() {

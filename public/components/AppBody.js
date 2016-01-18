@@ -4,11 +4,14 @@ import World from './World';
 
 export default class App extends React.Component {
   render() {
-    const $window = $(window);
+    const {stores} = this.props;
+    const {window: windowState, world: worldState} = stores;
+
+    const {width, height, pixelRatio} = windowState;
     const worldProps = {
-      width: $window.width(),
-      height: $window.height(),
-      pixelRatio: window.devicePixelRatio
+      width,
+      height,
+      pixelRatio
     };
 
     return (
