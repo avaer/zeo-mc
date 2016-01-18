@@ -59,6 +59,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   /* camera.position.y = 1;
   camera.position.x = WORLD_SIZE / 2;
   camera.position.z = 0; */
+  camera.zoom = 2;
   camera.rotation.order = 'YXZ';
 
   const renderer = new THREE.WebGLRenderer({antialias: true});
