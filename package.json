@@ -26,6 +26,7 @@
     "mime": "",
     "engine.io": "",
     "mkdirp": "",
+    "glob": "",
     "keypair": "",
     "cheerio": "",
     "website-scraper": "",
