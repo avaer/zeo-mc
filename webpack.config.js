@@ -8,8 +8,8 @@ module.exports = {
   entry: [
     'webpack-dev-server/client?http://HOSTNAME:PORT',
     'webpack/hot/only-dev-server'
-  ].concat(glob.sync('./public/lib/*/index.js')).concat([
-    './src/index'
+  ].concat(glob.sync('./public/dist/*/index.js')).concat([
+    './public/index'
   ]),
   output: {
     path: path.join(__dirname, 'dist'),
@@ -22,9 +22,9 @@ module.exports = {
   module: {
     loaders: [{
       test: /\.js$/,
-      exclude: /^\.\/public\/lib\/[^\/]+\/index.js$/,
+      exclude: /^\.\/public\/dist\/[^\/]+\/index.js$/,
       loaders: ['react-hot', 'babel'],
-      include: path.join(__dirname, 'src')
+      include: [ path.join(__dirname, 'public/index'), path.join(__dirname, 'public/components') ]
     }]
   }
 };
