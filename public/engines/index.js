@@ -241,4 +241,8 @@ export default class Engines {
 
     waitForFrame();
   }
+
+  hoverCoords(coords) {
+    this.updateState('world', oldState => oldState.set('hoverCoords', coords));
+  }
 }

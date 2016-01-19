@@ -7,5 +7,6 @@ import {WORLD_SIZE} from '../constants/index';
 
 export default class World extends Immutable.Record({
   position: new Vector(WORLD_SIZE / 2, 0, 0),
-  rotation: new Point(0, 0)
+  rotation: new Point(0, 0),
+  hoverCoords: null
 }) {}

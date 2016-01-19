@@ -56,6 +56,29 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   grid.setColors(0xCCCCCC, 0xCCCCCC);
   meshes.push(grid);
 
+  const previewMeshMaterial = (() => {
+    const material = new THREE.MeshPhongMaterial({
+      color: 0xCCCCCC,
+      emissive: 0x808080
+    });
+    material.transparent = true;
+    material._opacity = 0.5;
+    material.opacity = 0;
+    return material;
+  })();
+  const previewMesh = (() => {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+	const cube = new THREE.Mesh(geometry, previewMeshMaterial);
+    cube.position.x = 0.5;
+    cube.position.y = 0.5;
+    cube.position.z = -0.5;
+
+    const object = new THREE.Object3D();
+    object.add(cube);
+    return object;
+  })();
+  meshes.push(previewMesh);
+
   const intersectMeshes = (() => {
     const result = [];
     const geometry = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE);
@@ -124,6 +147,16 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       camera.rotation.x = -rotation.y;
       camera.rotation.y = -rotation.x;
 	},
+    updateHover: ({hoverCoords}) => {
+      if (hoverCoords) {
+        const {x, y, z} = hoverCoords;
+        previewMesh.position.x = x;
+        previewMesh.position.z = -z;
+        previewMeshMaterial.opacity = previewMeshMaterial._opacity;
+      } else {
+        previewMeshMaterial.opacity = 0;
+      }
+	},
     getHoverCoords({x, y}) {
       mouse.x = (x / width) * 2 - 1;
       mouse.y = -(y / height) * 2 + 1;
@@ -151,6 +184,7 @@ export default class World extends React.Component {
 
     this.resize();
     this.updateCamera();
+    this.updateHover();
     this.rerender();
   }
 
@@ -172,6 +206,12 @@ export default class World extends React.Component {
     if (!is(position, oldPosition) || !is(rotation, oldRotation) || !is(mousePosition, oldMousePosition)) {
       this.detectHover(nextProps);
     }
+
+    const {hoverCoords: oldHoverCoords} = this.props;
+    const {hoverCoords} = nextProps;
+    if (!is(hoverCoords, oldHoverCoords)) {
+      this.updateHover(nextProps);
+    }
   }
 
   componentDidUpdate() {
@@ -192,6 +232,13 @@ export default class World extends React.Component {
     this.renderer.updateCamera({position, rotation});
   }
 
+  updateHover(props) {
+    props === undefined && ({props} = this);
+
+    const {hoverCoords} = props;
+    this.renderer.updateHover({hoverCoords});
+  }
+
   rerender() {
     this.renderer.render();
   }
@@ -200,16 +247,18 @@ export default class World extends React.Component {
     props === undefined && ({props} = this);
 
     const {mousePosition} = props;
-    const coords = this.renderer.getHoverCoords(mousePosition);
-    const gridCoods = (() => {
-      if (coords) {
-        const {x, y, z} = coords;
+    const hoverCoords = this.renderer.getHoverCoords(mousePosition);
+    const coords = (() => {
+      if (hoverCoords) {
+        const {x, y, z} = hoverCoords;
         return new Vector(Math.floor(x), Math.floor(y), Math.floor(-z));
       } else {
         return null;
       }
     })();
-console.log('got coords', gridCoods && gridCoods.toJS());
+
+    const {engines} = props;
+    engines.hoverCoords(coords);
   }
 
   render() {

@@ -26,8 +26,8 @@ class App {
   }
 
   render() {
-    const {stores} = this;
-    ReactDOM.render(<AppBody {...{stores}}/>, this._domElement);
+    const {stores, engines} = this;
+    ReactDOM.render(<AppBody {...{stores, engines}}/>, this._domElement);
   }
 
   lazyRender() {
