@@ -1,20 +1,11 @@
 import Point from '../records/point/index';
 import Vector from '../records/vector/index';
 
+import * as inputUtils from '../utils/input/index';
+
 const FRAME_RATE = 30;
 const MOVE_PER_FRAME = 4 / FRAME_RATE;
 const ROTATE_PER_FRAME = (Math.PI * 2 / (10e4)) / FRAME_RATE;
-const KEYS = {
-  W: 87,
-  S: 83,
-  A: 65,
-  D: 68
-};
-const MOUSE_BUTTONS = {
-  LEFT: 0,
-  MIDDLE: 1,
-  RIGHT: 2
-};
 
 function syncWindow(oldState) {
   const $window = $(window);
@@ -106,22 +97,6 @@ export default class Engines {
     let lastFrameTime = new Date();
 
     const handleFrames = framesPassed => {
-      const getDownKeys = keys => {
-        return {
-          up: keys.get(String(KEYS.W)),
-          down: keys.get(String(KEYS.S)),
-          left: keys.get(String(KEYS.A)),
-          right: keys.get(String(KEYS.D))
-        };
-      };
-      const getDownMouseButtons = mouseButtons => {
-        return {
-          left: mouseButtons.get(String(MOUSE_BUTTONS.LEFT)),
-          middle: mouseButtons.get(String(MOUSE_BUTTONS.MIDDLE)),
-          right: mouseButtons.get(String(MOUSE_BUTTONS.RIGHT))
-        };
-      };
-
       const updateWorld = ({framesPassed, downKeys, downMouseButtons, oldMousePosition, newMousePosition, width}) => {
         return oldState => {
           let state = oldState;
@@ -211,10 +186,10 @@ export default class Engines {
       const windowState = this.getState('window');
 
       const keys = windowState.get('keys');
-      const downKeys = getDownKeys(keys);
+      const downKeys = inputUtils.getDownKeys(keys);
 
       const mouseButtons = windowState.getIn(['mouse', 'buttons']);
-      const downMouseButtons = getDownMouseButtons(mouseButtons);
+      const downMouseButtons = inputUtils.getDownMouseButtons(mouseButtons);
 
       const oldMousePosition = windowState.getIn(['mouse', 'oldPosition']);
       const newMousePosition = windowState.getIn(['mouse', 'position']);
@@ -244,5 +219,9 @@ export default class Engines {
 
   hoverCoords(coords) {
     this.updateState('world', oldState => oldState.set('hoverCoords', coords));
+  }
+
+  hoverEndCoords(coords) {
+    this.updateState('world', oldState => oldState.set('hoverEndCoords', coords));
   }
 }

@@ -7,8 +7,8 @@ export default class AppBody extends React.Component {
     const {stores, engines} = this.props;
     const {window: windowState, world: worldState} = stores;
 
-    const {width, height, pixelRatio, mouse: {position: mousePosition}} = windowState;
-    const {position, rotation, hoverCoords} = worldState;
+    const {width, height, pixelRatio, mouse: {position: mousePosition, buttons: mouseButtons}} = windowState;
+    const {position, rotation, hoverCoords, hoverEndCoords} = worldState;
     const worldProps = {
       width,
       height,
@@ -17,7 +17,9 @@ export default class AppBody extends React.Component {
       position,
       rotation,
       mousePosition,
+      mouseButtons,
       hoverCoords,
+      hoverEndCoords,
 
       engines
     };

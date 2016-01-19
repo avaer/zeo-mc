@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {is} from 'immutable';
 
+import * as inputUtils from '../utils/input/index';
 import Vector from '../records/vector/index';
 
 import {WORLD_SIZE, CAMERA_HEIGHT} from '../constants/index';
@@ -147,7 +148,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       camera.rotation.x = -rotation.y;
       camera.rotation.y = -rotation.x;
 	},
-    updateHover: ({hoverCoords}) => {
+    updateHover: ({hoverCoords, hoverEndCoords}) => {
       if (hoverCoords) {
         const {x, y, z} = hoverCoords;
         previewMesh.position.x = x;
@@ -207,9 +208,9 @@ export default class World extends React.Component {
       this.detectHover(nextProps);
     }
 
-    const {hoverCoords: oldHoverCoords} = this.props;
-    const {hoverCoords} = nextProps;
-    if (!is(hoverCoords, oldHoverCoords)) {
+    const {hoverCoords: oldHoverCoords, hoverEndCoords: oldHoverEndCoords} = this.props;
+    const {hoverCoords, hoverEndCoords} = nextProps;
+    if (!is(hoverCoords, oldHoverCoords) || !is(hoverEndCoords, oldHoverEndCoords)) {
       this.updateHover(nextProps);
     }
   }
@@ -235,8 +236,8 @@ export default class World extends React.Component {
   updateHover(props) {
     props === undefined && ({props} = this);
 
-    const {hoverCoords} = props;
-    this.renderer.updateHover({hoverCoords});
+    const {hoverCoords, hoverEndCoords} = props;
+    this.renderer.updateHover({hoverCoords, hoverEndCoords});
   }
 
   rerender() {
@@ -257,8 +258,33 @@ export default class World extends React.Component {
       }
     })();
 
+    const {mouseButtons} = props;
+    const downMouseButtons = inputUtils.getDownMouseButtons(mouseButtons);
+
     const {engines} = props;
-    engines.hoverCoords(coords);
+    if (!downMouseButtons.left) {
+      engines.hoverCoords(coords);
+
+      const last = (() => {
+        const {hoverEndCoords} = props;
+        return hoverEndCoords !== null;
+      })();
+      if (last) {
+        engines.hoverEndCoords(null);
+      }
+    } else {
+      const first = (() => {
+        const {hoverEndCoords} = props;
+        return hoverEndCoords === null;
+      })();
+      if (first) {
+        engines.hoverCoords(coords);
+      }
+
+      if (coords !== null) {
+        engines.hoverEndCoords(coords);
+      }
+    }
   }
 
   render() {
