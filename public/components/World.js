@@ -210,6 +210,8 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     }
   };
 
+  const nodeMap = new Map();
+
   return {
     getCanvas: () => {
       return canvas;
@@ -290,6 +292,24 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       } else {
         return null;
       }
+    },
+    updateNodes({nodes}) {
+      const missingNodes = nodes.filter(node => !nodeMap.has(node.id));
+      missingNodes.forEach(node => {
+        const {id, blocks, position} = node;
+
+        const makeNodeMesh = ({blocks, position}) => {
+          const mesh = new THREE.Object3D();
+console.log('make node', {blocks, position});
+          // XXX
+          return mesh;
+        };
+
+        const nodeMesh = makeNodeMesh({blocks, position});
+        scene.add(nodeMesh);
+
+        nodeMap.set(id, true);
+      });
     }
   };
 }
@@ -306,6 +326,7 @@ export default class World extends React.Component {
     this.resize();
     this.updateCamera();
     this.updateHover();
+    this.updateNodes();
     this.rerender();
   }
 
@@ -333,6 +354,12 @@ export default class World extends React.Component {
     if (!is(hoverCoords, oldHoverCoords) || !is(hoverEndCoords, oldHoverEndCoords)) {
       this.updateHover(nextProps);
     }
+
+    const {nodes: oldNodes} = this.props;
+    const {nodes} = nextProps;
+    if (!is(nodes, oldNodes)) {
+      this.updateNodes(nextProps);
+    }
   }
 
   componentDidUpdate() {
@@ -358,6 +385,13 @@ export default class World extends React.Component {
 
     const {hoverCoords, hoverEndCoords} = props;
     this.renderer.updateHover({hoverCoords, hoverEndCoords});
+  }
+
+  updateNodes(props) {
+    props === undefined && ({props} = this);
+
+    const {nodes} = props;
+    this.renderer.updateNodes({nodes});
   }
 
   rerender() {
@@ -423,6 +457,8 @@ export default class World extends React.Component {
         return hoverEndCoords !== null;
       })();
       if (last) {
+        const {hoverCoords: startCoords, hoverEndCoords: endCoords} = props;
+        engines.hoverCommit({startCoords, endCoords});
         engines.hoverEndCoords(null);
       }
     } else {

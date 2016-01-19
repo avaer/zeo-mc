@@ -18,6 +18,11 @@ export default class Vector extends Immutable.Record({
     return new Vector(a.x + b.x, a.y + b.y, a.z + b.z);
   }
 
+  subtract(b) {
+    const a = this;
+    return new Vector(a.x - b.x, a.y - b.y, a.z - b.z);
+  }
+
   multiplyScalar(c) {
     const a = this;
     return new Vector(a.x * c, a.y * c, a.z * c);

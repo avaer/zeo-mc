@@ -1,5 +1,6 @@
 import Point from '../records/point/index';
 import Vector from '../records/vector/index';
+import Node from '../records/node/index';
 
 import * as inputUtils from '../utils/input/index';
 
@@ -260,5 +261,12 @@ export default class Engines {
 
   hoverEndCoords(coords) {
     this.updateState('world', oldState => oldState.set('hoverEndCoords', coords));
+  }
+
+  hoverCommit({startCoords, endCoords}) {
+    this.updateState('world', oldState => oldState.update('nodes', nodes => {
+      const node = Node.fromCoords({startCoords, endCoords});
+      return nodes.push(node);
+    }));
   }
 }

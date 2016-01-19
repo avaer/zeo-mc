@@ -10,5 +10,6 @@ export default class World extends Immutable.Record({
   rotation: new Point(0, 0),
   velocity: new Vector(0, 0, 0),
   hoverCoords: null,
-  hoverEndCoords: null
+  hoverEndCoords: null,
+  nodes: new Immutable.List()
 }) {}
