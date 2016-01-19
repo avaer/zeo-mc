@@ -5,6 +5,7 @@ import * as inputUtils from '../utils/input/index';
 
 const FRAME_RATE = 30;
 const MOVE_PER_FRAME = 4 / FRAME_RATE;
+const MOVE_PER_FRAME_FAST = MOVE_PER_FRAME * 2.5;
 const ROTATE_PER_FRAME = (Math.PI * 2 / (10e4)) / FRAME_RATE;
 
 function syncWindow(oldState) {
@@ -106,7 +107,7 @@ export default class Engines {
               const directionAngle = rotation.x + angle;
               const x = Math.sin(directionAngle);
               const y = Math.cos(directionAngle);
-              const diffVector = new Vector(x, 0, -y).multiplyScalar(MOVE_PER_FRAME * framesPassed);
+              const diffVector = new Vector(x, 0, -y).multiplyScalar((!downKeys.shift ? MOVE_PER_FRAME : MOVE_PER_FRAME_FAST) * framesPassed);
 
               return Vector.bindAdd(diffVector);
             };
