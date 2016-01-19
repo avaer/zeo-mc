@@ -78,6 +78,25 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   })();
   meshes.push(previewBox);
 
+  const previewGrid = (() => {
+    const geometry = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE);
+    const material = (() => {
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x000000,
+        side: THREE.DoubleSide
+      });
+      material.transparent = true;
+      material.opacity = 0;
+      return material;
+    })();
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.x = Math.PI / 2;
+    mesh.position.x = WORLD_SIZE / 2;
+    mesh.position.z = -(WORLD_SIZE / 2);
+    return mesh;
+  })();
+  meshes.push(previewGrid);
+
   const previewAxes = (() => {
     const result = new THREE.Object3D();
     const xyAxis = (() => {
@@ -122,35 +141,12 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     })();
     result.add(xzAxis);
 
+    result.axes = [xyAxis, yzAxis, xzAxis];
     result.materials = result.children.map(child => child.material);
 
     return result;
   })();
   meshes.push(previewAxes);
-
-  const intersectMeshes = (() => {
-    const result = [];
-    const geometry = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE);
-    const material = (() => {
-      const material = new THREE.MeshPhongMaterial({
-        color: 0x000000,
-        side: THREE.DoubleSide
-      });
-      material.transparent = true;
-      material.opacity = 0;
-      return material;
-    })();
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.rotation.x = Math.PI / 2;
-    mesh.position.x = WORLD_SIZE / 2;
-    mesh.position.z = -(WORLD_SIZE / 2);
-    result.push(mesh);
-    return result;
-  })();
-  for (let i = 0; i < intersectMeshes.length; i++) {
-    const intersectMesh = intersectMeshes[i];
-    meshes.push(intersectMesh);
-  }
 
   for (let i = 0; i < meshes.length; i++) {
     const mesh = meshes[i];
@@ -173,6 +169,20 @@ function makeThreeRenderer({width, height, pixelRatio}) {
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
+
+  const getCoords = ({x, y, intersectMeshes}) => {
+    mouse.x = (x / width) * 2 - 1;
+    mouse.y = -(y / height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(intersectMeshes, false);
+    if (intersects.length > 0) {
+      const {x, y, z} = intersects[0].point;
+      return new Vector(x, y, z);
+    } else {
+      return null;
+    }
+  };
 
   return {
     getCanvas: () => {
@@ -219,17 +229,12 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       }
 	},
     getHoverCoords({x, y}) {
-      mouse.x = (x / width) * 2 - 1;
-      mouse.y = -(y / height) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
-
-      const intersects = raycaster.intersectObjects(intersectMeshes, false);
-      if (intersects.length > 0) {
-        const {x, y, z} = intersects[0].point;
-        return new Vector(x, y, z);
-      } else {
-        return null;
-      }
+      const intersectMeshes = [previewGrid];
+      return getCoords({x, y, intersectMeshes});
+    },
+    getHoverEndCoords({x, y}) {
+      const intersectMeshes = previewAxes.axes;
+      return getCoords({x, y, intersectMeshes});
     }
   };
 }
@@ -307,23 +312,24 @@ export default class World extends React.Component {
   detectHover(props) {
     props === undefined && ({props} = this);
 
-    const {mousePosition} = props;
-    const hoverCoords = this.renderer.getHoverCoords(mousePosition);
-    const coords = (() => {
-      if (hoverCoords) {
-        const {x, y, z} = hoverCoords;
+    const normalizeCoords = coords => {
+      if (coords) {
+        const {x, y, z} = coords;
         return new Vector(Math.floor(x), Math.floor(y), Math.floor(-z));
       } else {
         return null;
       }
-    })();
+    };
+
+    const {mousePosition} = props;
+    const hoverCoords = normalizeCoords(this.renderer.getHoverCoords(mousePosition));
 
     const {mouseButtons} = props;
     const downMouseButtons = inputUtils.getDownMouseButtons(mouseButtons);
 
     const {engines} = props;
     if (!downMouseButtons.left) {
-      engines.hoverCoords(coords);
+      engines.hoverCoords(hoverCoords);
 
       const last = (() => {
         const {hoverEndCoords} = props;
@@ -338,11 +344,14 @@ export default class World extends React.Component {
         return hoverEndCoords === null;
       })();
       if (first) {
-        engines.hoverCoords(coords);
+        engines.hoverCoords(hoverCoords);
+        engines.hoverEndCoords(hoverCoords);
       }
 
-      if (coords !== null) {
-        engines.hoverEndCoords(coords);
+      const hoverEndCoords = normalizeCoords(this.renderer.getHoverEndCoords(mousePosition));
+console.log('hover end coords', hoverEndCoords && hoverEndCoords.toJS());
+      if (hoverEndCoords !== null) {
+        engines.hoverEndCoords(hoverEndCoords);
       }
     }
   }
