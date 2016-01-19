@@ -1,9 +1,9 @@
 import Point from '../records/point/index';
 import Vector from '../records/vector/index';
 
-const FRAME_RATE = 10;
-const MOVE_PER_FRAME = 0.2;
-const ROTATE_PER_FRAME = Math.PI / (10e6);
+const FRAME_RATE = 30;
+const MOVE_PER_FRAME = 4 / FRAME_RATE;
+const ROTATE_PER_FRAME = (Math.PI * 2 / (10e4)) / FRAME_RATE;
 const KEYS = {
   W: 87,
   S: 83,
@@ -218,7 +218,7 @@ export default class Engines {
 
       const oldMousePosition = windowState.getIn(['mouse', 'oldPosition']);
       const newMousePosition = windowState.getIn(['mouse', 'position']);
-      const {width} = windowState;
+      const width = windowState.get('width');
 
       this.updateState('world', updateWorld({framesPassed, downKeys, downMouseButtons, oldMousePosition, newMousePosition, width}));
       this.updateState('window', updateWindow());

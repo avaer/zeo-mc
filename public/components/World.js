@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDom from 'react-dom';
-
 import {is} from 'immutable';
+
+import Vector from '../records/vector/index';
 
 import {WORLD_SIZE, CAMERA_HEIGHT} from '../constants/index';
 
@@ -22,6 +23,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   scene.add(lights[1]);
   scene.add(lights[2]);
 
+  const meshes = [];
   const sphereMesh = (() => {
     const result = new THREE.Object3D();
     const geometry = new THREE.SphereGeometry(5, 8, 8);
@@ -46,19 +48,45 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     result.position.x = (WORLD_SIZE / 2);
     return result;
   })();
-  scene.add(sphereMesh);
+  meshes.push(sphereMesh); 
 
-  const grid = new THREE.GridHelper(WORLD_SIZE, 1);
-  grid.position.x = WORLD_SIZE;
-  grid.position.z = -WORLD_SIZE;
+  const grid = new THREE.GridHelper(WORLD_SIZE / 2, 1);
+  grid.position.x = WORLD_SIZE / 2;
+  grid.position.z = -(WORLD_SIZE / 2);
   grid.setColors(0xCCCCCC, 0xCCCCCC);
-  scene.add(grid);
+  meshes.push(grid);
+
+  const intersectMeshes = (() => {
+    const result = [];
+    const geometry = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE);
+    const material = (() => {
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x000000,
+        side: THREE.DoubleSide
+      });
+      material.transparent = true;
+      material.opacity = 0;
+      return material;
+    })();
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.x = Math.PI / 2;
+    mesh.position.x = WORLD_SIZE / 2;
+    mesh.position.z = -(WORLD_SIZE / 2);
+    result.push(mesh);
+    return result;
+  })();
+  for (let i = 0; i < intersectMeshes.length; i++) {
+    const intersectMesh = intersectMeshes[i];
+    meshes.push(intersectMesh);
+  }
+
+  for (let i = 0; i < meshes.length; i++) {
+    const mesh = meshes[i];
+    scene.add(mesh);
+  }
 
   const aspectRatio = width / height;
   const camera = new THREE.PerspectiveCamera(90, aspectRatio, 0.1, 100);
-  /* camera.position.y = 1;
-  camera.position.x = WORLD_SIZE / 2;
-  camera.position.z = 0; */
   camera.zoom = 2;
   camera.rotation.order = 'YXZ';
 
@@ -70,6 +98,9 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   const canvas = renderer.domElement;
   canvas.style.width = width;
   canvas.style.height = height;
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
 
   return {
     getCanvas: () => {
@@ -92,7 +123,20 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       camera.position.set(position.x, CAMERA_HEIGHT + position.y, position.z);
       camera.rotation.x = -rotation.y;
       camera.rotation.y = -rotation.x;
-	}
+	},
+    getHoverCoords({x, y}) {
+      mouse.x = (x / width) * 2 - 1;
+      mouse.y = -(y / height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+
+      const intersects = raycaster.intersectObjects(intersectMeshes, false);
+      if (intersects.length > 0) {
+        const {x, y, z} = intersects[0].point;
+        return new Vector(x, y, z);
+      } else {
+        return null;
+      }
+    }
   };
 }
 
@@ -122,6 +166,12 @@ export default class World extends React.Component {
     if (!is(position, oldPosition) || !is(rotation, oldRotation)) {
       this.updateCamera(nextProps);
     }
+
+    const {mousePosition: oldMousePosition} = this.props;
+    const {mousePosition} = nextProps;
+    if (!is(position, oldPosition) || !is(rotation, oldRotation) || !is(mousePosition, oldMousePosition)) {
+      this.detectHover(nextProps);
+    }
   }
 
   componentDidUpdate() {
@@ -144,6 +194,22 @@ export default class World extends React.Component {
 
   rerender() {
     this.renderer.render();
+  }
+
+  detectHover(props) {
+    props === undefined && ({props} = this);
+
+    const {mousePosition} = props;
+    const coords = this.renderer.getHoverCoords(mousePosition);
+    const gridCoods = (() => {
+      if (coords) {
+        const {x, y, z} = coords;
+        return new Vector(Math.floor(x), Math.floor(y), Math.floor(-z));
+      } else {
+        return null;
+      }
+    })();
+console.log('got coords', gridCoods && gridCoods.toJS());
   }
 
   render() {

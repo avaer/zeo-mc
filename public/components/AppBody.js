@@ -7,7 +7,7 @@ export default class App extends React.Component {
     const {stores} = this.props;
     const {window: windowState, world: worldState} = stores;
 
-    const {width, height, pixelRatio} = windowState;
+    const {width, height, pixelRatio, mouse: {position: mousePosition}} = windowState;
     const {position, rotation} = worldState;
     const worldProps = {
       width,
@@ -15,7 +15,8 @@ export default class App extends React.Component {
       pixelRatio,
 
       position,
-      rotation
+      rotation,
+      mousePosition
     };
 
     return (
