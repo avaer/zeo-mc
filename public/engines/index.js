@@ -6,6 +6,8 @@ import * as inputUtils from '../utils/input/index';
 const FRAME_RATE = 30;
 const MOVE_PER_FRAME = 4 / FRAME_RATE;
 const MOVE_PER_FRAME_FAST = MOVE_PER_FRAME * 2.5;
+const GRAVITY_PER_FRAME = 1 / FRAME_RATE;
+const JUMP_VELOCITY = 0.35;
 const ROTATE_PER_FRAME = (Math.PI * 2 / (10e4)) / FRAME_RATE;
 
 function syncWindow(oldState) {
@@ -98,9 +100,11 @@ export default class Engines {
     let lastFrameTime = new Date();
 
     const handleFrames = framesPassed => {
-      const updateWorld = ({framesPassed, downKeys, downMouseButtons, oldMousePosition, newMousePosition, width}) => {
+      const updateWorld = ({framesPassed, downKeys, position, velocity, downMouseButtons, oldMousePosition, newMousePosition, width}) => {
         return oldState => {
           let state = oldState;
+
+          // movment
           state = (() => {
             const move = angle => {
               const rotation = state.get('rotation');
@@ -149,6 +153,8 @@ export default class Engines {
               return state;
             }
           })();
+
+          // rotation
           state = (() => {
             if (downMouseButtons.left) {
               const xDiff = newMousePosition.x - oldMousePosition.x;
@@ -170,6 +176,34 @@ export default class Engines {
               return state;
             }
           })();
+
+          // jumping
+          state = (() => {
+            if (downKeys.space) {
+              const {y: yv} = velocity;
+              if (yv === 0) {
+                velocity = velocity.set('y', JUMP_VELOCITY);
+                return state.set('velocity', velocity);
+              } else {
+                return state;
+              }
+            } else {
+              return state;
+            }
+          })();
+
+          // falling
+          state = (() => {
+            const {y} = position;
+            const {y: yv} = velocity;
+            const newY = Math.max(y + yv, 0);
+            const newYv = (newY > 0) ? (yv - (GRAVITY_PER_FRAME * framesPassed)) : 0;
+
+            return state
+              .setIn(['position', 'y'], newY)
+              .setIn(['velocity', 'y'], newYv);
+          })();
+
           return state;
         };
       };
@@ -185,18 +219,20 @@ export default class Engines {
       };
 
       const windowState = this.getState('window');
+      const worldState = this.getState('world');
 
-      const keys = windowState.get('keys');
+      const {keys} = windowState;
       const downKeys = inputUtils.getDownKeys(keys);
+      const {position, velocity} = worldState;
 
       const mouseButtons = windowState.getIn(['mouse', 'buttons']);
       const downMouseButtons = inputUtils.getDownMouseButtons(mouseButtons);
 
       const oldMousePosition = windowState.getIn(['mouse', 'oldPosition']);
       const newMousePosition = windowState.getIn(['mouse', 'position']);
-      const width = windowState.get('width');
+      const {width} = windowState;
 
-      this.updateState('world', updateWorld({framesPassed, downKeys, downMouseButtons, oldMousePosition, newMousePosition, width}));
+      this.updateState('world', updateWorld({framesPassed, downKeys, position, velocity, downMouseButtons, oldMousePosition, newMousePosition, width}));
       this.updateState('window', updateWindow());
     };
 

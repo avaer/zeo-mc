@@ -3,7 +3,8 @@ export const KEYS = {
   S: 83,
   A: 65,
   D: 68,
-  SHIFT: 16
+  SHIFT: 16,
+  SPACE: 32
 };
 
 export const MOUSE_BUTTONS = {
@@ -18,7 +19,8 @@ export function getDownKeys(keys) {
     down: keys.get(String(KEYS.S)),
     left: keys.get(String(KEYS.A)),
     right: keys.get(String(KEYS.D)),
-    shift: keys.get(String(KEYS.SHIFT))
+    shift: keys.get(String(KEYS.SHIFT)),
+    space: keys.get(String(KEYS.SPACE))
   };
 }
 
