@@ -8,6 +8,7 @@ import Vector from '../records/vector/index';
 import {WORLD_SIZE, CAMERA_HEIGHT} from '../constants/index';
 
 const AXIS_SIZE = 6;
+const RAYTRACE_EPSILON = 10e-14;
 
 function makeThreeRenderer({width, height, pixelRatio}) {
   const scene = new THREE.Scene(); 
@@ -236,6 +237,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
         const {x: x1, y: y1, z: z1} = hoverCoords;
 
         previewBox.position.x = x1;
+        previewBox.position.y = y1;
         previewBox.position.z = -z1;
         previewBox.material.opacity = previewBox.material._opacity;
 
@@ -365,13 +367,15 @@ export default class World extends React.Component {
   detectHover(props) {
     props === undefined && ({props} = this);
 
+    const normalizeHoverCoord = coord => Math.floor(coord + RAYTRACE_EPSILON);
     const normalizeHoverCoords = ({hoverCoords}) => {
       if (hoverCoords) {
         let {x, y, z} = hoverCoords;
-        const normalizeHoverCoord = coord => Math.floor(coord);
+
         x = normalizeHoverCoord(x);
         y = normalizeHoverCoord(y);
         z = normalizeHoverCoord(-z);
+
         return new Vector(x, y, z);
       } else {
         return null;
@@ -381,7 +385,6 @@ export default class World extends React.Component {
       if (hoverStartCoords && hoverEndCoords) {
         let {x, y, z, axis} = hoverEndCoords;
 
-        const normalizeHoverCoord = coord => Math.floor(coord);
         x = normalizeHoverCoord(x);
         y = normalizeHoverCoord(y);
         z = normalizeHoverCoord(-z);
