@@ -57,7 +57,8 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   grid.setColors(0xCCCCCC, 0xCCCCCC);
   meshes.push(grid);
 
-  const previewMeshMaterial = (() => {
+  const previewBox = (() => {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
     const material = new THREE.MeshPhongMaterial({
       color: 0xCCCCCC,
       emissive: 0x808080
@@ -65,20 +66,67 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     material.transparent = true;
     material._opacity = 0.5;
     material.opacity = 0;
-    return material;
-  })();
-  const previewMesh = (() => {
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-	const cube = new THREE.Mesh(geometry, previewMeshMaterial);
+    const cube = new THREE.Mesh(geometry, material);
     cube.position.x = 0.5;
     cube.position.y = 0.5;
     cube.position.z = -0.5;
 
     const object = new THREE.Object3D();
     object.add(cube);
+    object.material = material;
     return object;
   })();
-  meshes.push(previewMesh);
+  meshes.push(previewBox);
+
+  const previewAxes = (() => {
+    const result = new THREE.Object3D();
+    const xyAxis = (() => {
+      const geometry = new THREE.PlaneGeometry(6, 6);
+      const material = new THREE.MeshPhongMaterial({
+        color: 0xFF0000,
+        emissive: 0x808080
+      });
+      material.transparent = true;
+      material._opacity = 0.5;
+      material.opacity = 0;
+      const mesh = new THREE.Mesh(geometry, material);
+      return mesh;
+    })();
+    result.add(xyAxis);
+    const yzAxis = (() => {
+      const geometry = new THREE.PlaneGeometry(6, 6);
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x00FF00,
+        emissive: 0x808080
+      });
+      material.transparent = true;
+      material._opacity = 0.5;
+      material.opacity = 0;
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.y = Math.PI / 2;
+      return mesh;
+    })();
+    result.add(yzAxis);
+    const xzAxis = (() => {
+      const geometry = new THREE.PlaneGeometry(6, 6);
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x0000FF,
+        emissive: 0x808080
+      });
+      material.transparent = true;
+      material._opacity = 0.5;
+      material.opacity = 0;
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -(Math.PI / 2);
+      return mesh;
+    })();
+    result.add(xzAxis);
+
+    result.materials = result.children.map(child => child.material);
+
+    return result;
+  })();
+  meshes.push(previewAxes);
 
   const intersectMeshes = (() => {
     const result = [];
@@ -151,11 +199,23 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     updateHover: ({hoverCoords, hoverEndCoords}) => {
       if (hoverCoords) {
         const {x, y, z} = hoverCoords;
-        previewMesh.position.x = x;
-        previewMesh.position.z = -z;
-        previewMeshMaterial.opacity = previewMeshMaterial._opacity;
+
+        previewBox.position.x = x;
+        previewBox.position.z = -z;
+        previewBox.material.opacity = previewBox.material._opacity;
+
+        previewAxes.position.x = x;
+        previewAxes.position.z = -z;
+        for (let i = 0; i < previewAxes.materials.length; i++) {
+          const material = previewAxes.materials[i];
+          material.opacity = material._opacity;
+        }
       } else {
-        previewMeshMaterial.opacity = 0;
+        previewBox.material.opacity = 0;
+        for (let i = 0; i < previewAxes.materials.length; i++) {
+          const material = previewAxes.materials[i];
+          material.opacity = 0;
+        }
       }
 	},
     getHoverCoords({x, y}) {
