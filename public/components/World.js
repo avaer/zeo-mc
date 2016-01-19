@@ -7,6 +7,8 @@ import Vector from '../records/vector/index';
 
 import {WORLD_SIZE, CAMERA_HEIGHT} from '../constants/index';
 
+const AXIS_SIZE = 6;
+
 function makeThreeRenderer({width, height, pixelRatio}) {
   const scene = new THREE.Scene(); 
 
@@ -78,6 +80,27 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   })();
   meshes.push(previewBox);
 
+  const previewEndBox = (() => {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshPhongMaterial({
+      color: 0x00FF00,
+      emissive: 0x808080
+    });
+    material.transparent = true;
+    material._opacity = 0.5;
+    material.opacity = 0;
+    const cube = new THREE.Mesh(geometry, material);
+    cube.position.x = 0.5;
+    cube.position.y = 0.5;
+    cube.position.z = -0.5;
+
+    const object = new THREE.Object3D();
+    object.add(cube);
+    object.material = material;
+    return object;
+  })();
+  meshes.push(previewEndBox);
+
   const previewGrid = (() => {
     const geometry = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE);
     const material = (() => {
@@ -100,7 +123,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   const previewAxes = (() => {
     const result = new THREE.Object3D();
     const xyAxis = (() => {
-      const geometry = new THREE.PlaneGeometry(6, 6);
+      const geometry = new THREE.PlaneGeometry(AXIS_SIZE, AXIS_SIZE);
       const material = new THREE.MeshPhongMaterial({
         color: 0xFF0000,
         emissive: 0x808080
@@ -109,11 +132,12 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       material._opacity = 0.5;
       material.opacity = 0;
       const mesh = new THREE.Mesh(geometry, material);
+      mesh.axis = 'xy';
       return mesh;
     })();
     result.add(xyAxis);
     const yzAxis = (() => {
-      const geometry = new THREE.PlaneGeometry(6, 6);
+      const geometry = new THREE.PlaneGeometry(AXIS_SIZE, AXIS_SIZE);
       const material = new THREE.MeshPhongMaterial({
         color: 0x00FF00,
         emissive: 0x808080
@@ -123,11 +147,12 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       material.opacity = 0;
       const mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.y = Math.PI / 2;
+      mesh.axis = 'yz';
       return mesh;
     })();
     result.add(yzAxis);
     const xzAxis = (() => {
-      const geometry = new THREE.PlaneGeometry(6, 6);
+      const geometry = new THREE.PlaneGeometry(AXIS_SIZE, AXIS_SIZE);
       const material = new THREE.MeshPhongMaterial({
         color: 0x0000FF,
         emissive: 0x808080
@@ -137,6 +162,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       material.opacity = 0;
       const mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.x = -(Math.PI / 2);
+      mesh.axis = 'xz';
       return mesh;
     })();
     result.add(xzAxis);
@@ -170,15 +196,14 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
-  const getCoords = ({x, y, intersectMeshes}) => {
+  const getIntersect = ({x, y, intersectMeshes}) => {
     mouse.x = (x / width) * 2 - 1;
     mouse.y = -(y / height) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
 
     const intersects = raycaster.intersectObjects(intersectMeshes, false);
     if (intersects.length > 0) {
-      const {x, y, z} = intersects[0].point;
-      return new Vector(x, y, z);
+      return intersects[0];
     } else {
       return null;
     }
@@ -208,17 +233,27 @@ function makeThreeRenderer({width, height, pixelRatio}) {
 	},
     updateHover: ({hoverCoords, hoverEndCoords}) => {
       if (hoverCoords) {
-        const {x, y, z} = hoverCoords;
+        const {x: x1, y: y1, z: z1} = hoverCoords;
 
-        previewBox.position.x = x;
-        previewBox.position.z = -z;
+        previewBox.position.x = x1;
+        previewBox.position.z = -z1;
         previewBox.material.opacity = previewBox.material._opacity;
 
-        previewAxes.position.x = x;
-        previewAxes.position.z = -z;
+        previewAxes.position.x = x1;
+        previewAxes.position.y = y1;
+        previewAxes.position.z = -z1;
         for (let i = 0; i < previewAxes.materials.length; i++) {
           const material = previewAxes.materials[i];
           material.opacity = material._opacity;
+        }
+
+        if (hoverEndCoords) {
+          const {x: x2, y: y2, z: z2} = hoverEndCoords;
+
+          previewEndBox.position.x = x2;
+          previewEndBox.position.y = y2;
+          previewEndBox.position.z = -z2;
+          previewEndBox.material.opacity = previewBox.material._opacity;
         }
       } else {
         previewBox.material.opacity = 0;
@@ -227,14 +262,32 @@ function makeThreeRenderer({width, height, pixelRatio}) {
           material.opacity = 0;
         }
       }
+
+      if (!hoverCoords || !hoverEndCoords) {
+        previewEndBox.material.opacity = 0;
+      }
 	},
     getHoverCoords({x, y}) {
       const intersectMeshes = [previewGrid];
-      return getCoords({x, y, intersectMeshes});
+      const intersect = getIntersect({x, y, intersectMeshes});
+      if (intersect) {
+        const {point: {x, y, z}} = intersect;
+        return new Vector(x, y, z);
+      } else {
+        return null;
+      }
     },
     getHoverEndCoords({x, y}) {
       const intersectMeshes = previewAxes.axes;
-      return getCoords({x, y, intersectMeshes});
+      const intersect = getIntersect({x, y, intersectMeshes});
+      if (intersect) {
+        const {point: {x, y, z}, object: {axis}} = intersect;
+        const result = new Vector(x, y, z);
+        result.axis = axis;
+        return result;
+      } else {
+        return null;
+      }
     }
   };
 }
@@ -267,9 +320,9 @@ export default class World extends React.Component {
       this.updateCamera(nextProps);
     }
 
-    const {mousePosition: oldMousePosition} = this.props;
-    const {mousePosition} = nextProps;
-    if (!is(position, oldPosition) || !is(rotation, oldRotation) || !is(mousePosition, oldMousePosition)) {
+    const {mousePosition: oldMousePosition, mouseButtons: oldMouseButtons} = this.props;
+    const {mousePosition, mouseButtons} = nextProps;
+    if (!is(position, oldPosition) || !is(rotation, oldRotation) || !is(mousePosition, oldMousePosition) || !is(mouseButtons, oldMouseButtons)) {
       this.detectHover(nextProps);
     }
 
@@ -312,24 +365,55 @@ export default class World extends React.Component {
   detectHover(props) {
     props === undefined && ({props} = this);
 
-    const normalizeCoords = coords => {
-      if (coords) {
-        const {x, y, z} = coords;
-        return new Vector(Math.floor(x), Math.floor(y), Math.floor(-z));
+    const normalizeHoverCoords = ({hoverCoords}) => {
+      if (hoverCoords) {
+        let {x, y, z} = hoverCoords;
+        const normalizeHoverCoord = coord => Math.floor(coord);
+        x = normalizeHoverCoord(x);
+        y = normalizeHoverCoord(y);
+        z = normalizeHoverCoord(-z);
+        return new Vector(x, y, z);
+      } else {
+        return null;
+      }
+    };
+    const normalizeHoverEndCoords = ({hoverStartCoords, hoverEndCoords}) => {
+      if (hoverStartCoords && hoverEndCoords) {
+        let {x, y, z, axis} = hoverEndCoords;
+
+        const normalizeHoverCoord = coord => Math.floor(coord);
+        x = normalizeHoverCoord(x);
+        y = normalizeHoverCoord(y);
+        z = normalizeHoverCoord(-z);
+
+        switch (axis) {
+          case 'xy':
+            z = hoverStartCoords.z;
+            break;
+          case 'yz':
+            x = hoverStartCoords.x;
+            break;
+          case 'xz':
+            y = hoverStartCoords.y;
+            break;
+        }
+
+        return new Vector(x, y, z);
       } else {
         return null;
       }
     };
 
     const {mousePosition} = props;
-    const hoverCoords = normalizeCoords(this.renderer.getHoverCoords(mousePosition));
+    const hoverCoords = this.renderer.getHoverCoords(mousePosition);
+    const hoverCoordsNormalized = normalizeHoverCoords({hoverCoords});
 
     const {mouseButtons} = props;
     const downMouseButtons = inputUtils.getDownMouseButtons(mouseButtons);
 
     const {engines} = props;
     if (!downMouseButtons.left) {
-      engines.hoverCoords(hoverCoords);
+      engines.hoverCoords(hoverCoordsNormalized);
 
       const last = (() => {
         const {hoverEndCoords} = props;
@@ -344,14 +428,15 @@ export default class World extends React.Component {
         return hoverEndCoords === null;
       })();
       if (first) {
-        engines.hoverCoords(hoverCoords);
-        engines.hoverEndCoords(hoverCoords);
+        engines.hoverCoords(hoverCoordsNormalized);
+        engines.hoverEndCoords(hoverCoordsNormalized);
       }
 
-      const hoverEndCoords = normalizeCoords(this.renderer.getHoverEndCoords(mousePosition));
-console.log('hover end coords', hoverEndCoords && hoverEndCoords.toJS());
-      if (hoverEndCoords !== null) {
-        engines.hoverEndCoords(hoverEndCoords);
+      const {hoverCoords: hoverStartCoords} = props;
+      const hoverEndCoords = this.renderer.getHoverEndCoords(mousePosition);
+      const hoverEndCoordsNormalized = normalizeHoverEndCoords({hoverStartCoords, hoverEndCoords});
+      if (hoverEndCoordsNormalized !== null) {
+        engines.hoverEndCoords(hoverEndCoordsNormalized);
       }
     }
   }
