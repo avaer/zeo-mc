@@ -74,7 +74,14 @@ export default class Engines {
   listenKeyboard() {
     const $window = $(window);
     $window.on('keydown', e => {
-      this.updateState('window', oldState => oldState.setIn([ 'keys', String(e.which) ], true));
+      const {which} = e;
+
+      this.updateState('window', oldState => oldState.setIn([ 'keys', String(which) ], true));
+
+      const tool = inputUtils.TOOL_KEYS[which] || null;
+      if (tool) {
+        this.updateState('world', oldState => oldState.set('tool', tool));
+      }
     });
     $window.on('keyup', e => {
       this.updateState('window', oldState => oldState.setIn([ 'keys', String(e.which) ], false));
