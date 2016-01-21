@@ -299,10 +299,31 @@ function makeThreeRenderer({width, height, pixelRatio}) {
         const {id, blocks, position} = node;
 
         const makeNodeMesh = ({blocks, position}) => {
-          const mesh = new THREE.Object3D();
-console.log('make node', {blocks, position});
-          // XXX
-          return mesh;
+          const {x, y, z} = position;
+
+          const geometry = new THREE.BoxGeometry(1, 1, 1);
+          const material = new THREE.MeshPhongMaterial({
+            color: 0x808080,
+            emissive: 0x808080,
+            side: THREE.DoubleSide
+          });
+
+          const nodeMesh = new THREE.Object3D();
+          blocks.forEach(block => {
+            const {x, y, z} = block;
+
+            const blockMesh = new THREE.Mesh(geometry, material);
+            blockMesh.position.x = x + 0.5;
+            blockMesh.position.y = y + 0.5;
+            blockMesh.position.z = -(z + 0.5);
+
+            nodeMesh.add(blockMesh);
+          });
+          nodeMesh.position.x = x;
+          nodeMesh.position.y = y;
+          nodeMesh.position.z = -z;
+
+          return nodeMesh;
         };
 
         const nodeMesh = makeNodeMesh({blocks, position});
