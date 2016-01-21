@@ -211,6 +211,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   };
 
   const nodeMap = new Map();
+  const nodeMeshMap = new Map();
 
   return {
     getCanvas: () => {
@@ -294,42 +295,61 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       }
     },
     updateNodes({nodes}) {
-      const missingNodes = nodes.filter(node => !nodeMap.has(node.id));
-      missingNodes.forEach(node => {
+      const makeNodeMesh = ({blocks, position}) => {
+        const {x, y, z} = position;
+
+        const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const blockMaterial = new THREE.MeshPhongMaterial({
+          color: 0x808080,
+          emissive: 0x808080,
+          side: THREE.DoubleSide
+        });
+
+        const nodeMesh = new THREE.Object3D();
+        blocks.forEach(block => {
+          const {x, y, z} = block;
+
+          const blockMesh = new THREE.Mesh(blockGeometry, blockMaterial);
+          blockMesh.position.x = x + 0.5;
+          blockMesh.position.y = y + 0.5;
+          blockMesh.position.z = -(z + 0.5);
+
+          nodeMesh.add(blockMesh);
+        });
+        nodeMesh.position.x = x;
+        nodeMesh.position.y = y;
+        nodeMesh.position.z = -z;
+
+        return nodeMesh;
+      };
+
+      nodes.forEach(node => {
         const {id, blocks, position} = node;
 
-        const makeNodeMesh = ({blocks, position}) => {
-          const {x, y, z} = position;
+        const removeOldNode = () => {
+          const oldNodeMesh = nodeMeshMap.get(id);
+          scene.remove(oldNodeMesh);
 
-          const geometry = new THREE.BoxGeometry(1, 1, 1);
-          const material = new THREE.MeshPhongMaterial({
-            color: 0x808080,
-            emissive: 0x808080,
-            side: THREE.DoubleSide
-          });
+          nodeMap.set(id, null);
+          nodeMeshMap.set(id, null);
+        };
+        const addNewNode = () => {
+          const newNodeMesh = makeNodeMesh({blocks, position});
+          scene.add(newNodeMesh);
 
-          const nodeMesh = new THREE.Object3D();
-          blocks.forEach(block => {
-            const {x, y, z} = block;
-
-            const blockMesh = new THREE.Mesh(geometry, material);
-            blockMesh.position.x = x + 0.5;
-            blockMesh.position.y = y + 0.5;
-            blockMesh.position.z = -(z + 0.5);
-
-            nodeMesh.add(blockMesh);
-          });
-          nodeMesh.position.x = x;
-          nodeMesh.position.y = y;
-          nodeMesh.position.z = -z;
-
-          return nodeMesh;
+          nodeMap.set(id, node);
+          nodeMeshMap.set(id, newNodeMesh);
         };
 
-        const nodeMesh = makeNodeMesh({blocks, position});
-        scene.add(nodeMesh);
-
-        nodeMap.set(id, true);
+        const oldNode = nodeMap.get(id);
+        if (oldNode) {
+          if (!is(node, oldNode)) {
+            removeOldNode();
+            addNewNode();
+          }
+        } else {
+          addNewNode();
+        }
       });
     }
   };
