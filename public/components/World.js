@@ -10,6 +10,35 @@ import {WORLD_SIZE, CAMERA_HEIGHT} from '../constants/index';
 const AXIS_SIZE = 6;
 const RAYTRACE_EPSILON = 10e-14;
 
+const GEOMETRIES = (() => {
+  return {
+    PREVIEW_BOX: (() => {
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const material = new THREE.MeshPhongMaterial({
+        color: 0xCCCCCC,
+        emissive: 0x808080
+      });
+      material.transparent = true;
+      material.opacity = 0.5;
+      return {geometry, material};
+    })(),
+    PREVIEW_END_BOX: (() => {
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x00FF00,
+        emissive: 0x808080
+      });
+      material.transparent = true;
+      material.opacity = 0.5;
+      return {geometry, material};
+    })(),
+    PREVIEW_AXES: (() => {
+      const geometry = new THREE.PlaneGeometry(AXIS_SIZE, AXIS_SIZE);
+      return {geometry};
+    })()
+  };
+})();
+
 function makeThreeRenderer({width, height, pixelRatio}) {
   const scene = new THREE.Scene(); 
 
@@ -61,14 +90,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   meshes.push(grid);
 
   const previewBox = (() => {
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({
-      color: 0xCCCCCC,
-      emissive: 0x808080
-    });
-    material.transparent = true;
-    material._opacity = 0.5;
-    material.opacity = 0;
+    const {geometry, material} = GEOMETRIES.PREVIEW_BOX;
     const cube = new THREE.Mesh(geometry, material);
     cube.position.x = 0.5;
     cube.position.y = 0.5;
@@ -79,17 +101,9 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     object.material = material;
     return object;
   })();
-  meshes.push(previewBox);
 
   const previewEndBox = (() => {
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const material = new THREE.MeshPhongMaterial({
-      color: 0x00FF00,
-      emissive: 0x808080
-    });
-    material.transparent = true;
-    material._opacity = 0.5;
-    material.opacity = 0;
+    const {geometry, material} = GEOMETRIES.PREVIEW_END_BOX;
     const cube = new THREE.Mesh(geometry, material);
     cube.position.x = 0.5;
     cube.position.y = 0.5;
@@ -100,7 +114,6 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     object.material = material;
     return object;
   })();
-  meshes.push(previewEndBox);
 
   const previewGrid = (() => {
     const geometry = new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE);
@@ -124,28 +137,26 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   const previewAxes = (() => {
     const result = new THREE.Object3D();
     const xyAxis = (() => {
-      const geometry = new THREE.PlaneGeometry(AXIS_SIZE, AXIS_SIZE);
+      const {geometry} = GEOMETRIES.PREVIEW_AXES;
       const material = new THREE.MeshPhongMaterial({
         color: 0xFF0000,
         emissive: 0x808080
       });
       material.transparent = true;
-      material._opacity = 0.5;
-      material.opacity = 0;
+      material.opacity = 0.5;
       const mesh = new THREE.Mesh(geometry, material);
       mesh.axis = 'xy';
       return mesh;
     })();
     result.add(xyAxis);
     const yzAxis = (() => {
-      const geometry = new THREE.PlaneGeometry(AXIS_SIZE, AXIS_SIZE);
+      const {geometry} = GEOMETRIES.PREVIEW_AXES;
       const material = new THREE.MeshPhongMaterial({
         color: 0x00FF00,
         emissive: 0x808080
       });
       material.transparent = true;
-      material._opacity = 0.5;
-      material.opacity = 0;
+      material.opacity = 0.5;
       const mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.y = Math.PI / 2;
       mesh.axis = 'yz';
@@ -153,14 +164,13 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     })();
     result.add(yzAxis);
     const xzAxis = (() => {
-      const geometry = new THREE.PlaneGeometry(AXIS_SIZE, AXIS_SIZE);
+      const {geometry} = GEOMETRIES.PREVIEW_AXES;
       const material = new THREE.MeshPhongMaterial({
         color: 0x0000FF,
         emissive: 0x808080
       });
       material.transparent = true;
-      material._opacity = 0.5;
-      material.opacity = 0;
+      material.opacity = 0.5;
       const mesh = new THREE.Mesh(geometry, material);
       mesh.rotation.x = -(Math.PI / 2);
       mesh.axis = 'xz';
@@ -169,11 +179,9 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     result.add(xzAxis);
 
     result.axes = [xyAxis, yzAxis, xzAxis];
-    result.materials = result.children.map(child => child.material);
 
     return result;
   })();
-  meshes.push(previewAxes);
 
   for (let i = 0; i < meshes.length; i++) {
     const mesh = meshes[i];
@@ -242,15 +250,12 @@ function makeThreeRenderer({width, height, pixelRatio}) {
         previewBox.position.x = x1;
         previewBox.position.y = y1;
         previewBox.position.z = -z1;
-        previewBox.material.opacity = previewBox.material._opacity;
+        scene.add(previewBox);
 
         previewAxes.position.x = x1;
         previewAxes.position.y = y1;
         previewAxes.position.z = -z1;
-        for (let i = 0; i < previewAxes.materials.length; i++) {
-          const material = previewAxes.materials[i];
-          material.opacity = material._opacity;
-        }
+        scene.add(previewAxes);
 
         if (hoverEndCoords) {
           const {x: x2, y: y2, z: z2} = hoverEndCoords;
@@ -258,18 +263,15 @@ function makeThreeRenderer({width, height, pixelRatio}) {
           previewEndBox.position.x = x2;
           previewEndBox.position.y = y2;
           previewEndBox.position.z = -z2;
-          previewEndBox.material.opacity = previewBox.material._opacity;
+          scene.add(previewEndBox);
         }
       } else {
-        previewBox.material.opacity = 0;
-        for (let i = 0; i < previewAxes.materials.length; i++) {
-          const material = previewAxes.materials[i];
-          material.opacity = 0;
-        }
+        scene.remove(previewBox);
+        scene.remove(previewAxes);
       }
 
       if (!hoverCoords || !hoverEndCoords) {
-        previewEndBox.material.opacity = 0;
+        scene.remove(previewEndBox);
       }
 	},
     getHoverCoords({x, y}) {
