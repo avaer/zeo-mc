@@ -2,14 +2,14 @@ import Point from '../records/point/index';
 import Vector from '../records/vector/index';
 import Node from '../records/node/index';
 
+import {FRAME_RATE} from '../constants/index';
 import * as inputUtils from '../utils/input/index';
 
-const FRAME_RATE = 30;
-const MOVE_PER_FRAME = 4 / FRAME_RATE;
+const MOVE_PER_FRAME = 0.005 * FRAME_RATE;
 const MOVE_PER_FRAME_FAST = MOVE_PER_FRAME * 2.5;
-const GRAVITY_PER_FRAME = 1 / FRAME_RATE;
-const JUMP_VELOCITY = 0.35;
-const ROTATE_PER_FRAME = (Math.PI * 2 / (10e4)) / FRAME_RATE;
+const GRAVITY_PER_FRAME = 0.0005 * FRAME_RATE;
+const JUMP_VELOCITY = 0.175;
+const ROTATE_PER_WIDTH = Math.PI * 2;
 
 function syncWindow(oldState) {
   const $window = $(window);
@@ -167,7 +167,7 @@ export default class Engines {
             if (downMouseButtons.left) {
               const xDiff = newMousePosition.x - oldMousePosition.x;
               const yDiff = newMousePosition.y - oldMousePosition.y;
-              const c = ROTATE_PER_FRAME * width * framesPassed;
+              const c = ROTATE_PER_WIDTH / width;
               return state.update('rotation', rotation => rotation
                 .update('x', x => {
                    let result = x + (xDiff * c);

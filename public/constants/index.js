@@ -1,3 +1,5 @@
+export const FRAME_RATE = 60;
+
 export const WORLD_SIZE = 32;
 export const CAMERA_HEIGHT = 1;
 
