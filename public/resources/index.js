@@ -1,6 +1,8 @@
 import {TOOL_NAMES, TOOL_SIZE} from '../constants/index';
 
-const IMAGE_URLS = TOOL_NAMES.map(suffix => '/api/img/tools/' + suffix + '.png');
+const IMAGE_URLS = TOOL_NAMES.map(suffix => '/api/img/tools/' + suffix + '.png').concat([
+  '/api/img/sky/skybox.jpg'
+]);
 
 class Resources {
   constructor() {

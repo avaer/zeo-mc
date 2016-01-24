@@ -10,6 +10,7 @@ import {WORLD_SIZE, CAMERA_HEIGHT, TOOLS, TOOL_NAMES, TOOL_SIZE} from '../consta
 
 const AXIS_SIZE = 6;
 const RAYTRACE_EPSILON = 10e-14;
+const SKYBOX_SIZE = 256;
 
 const GEOMETRIES = (() => {
   return {
@@ -49,6 +50,53 @@ const GEOMETRIES = (() => {
 })();
 
 function makeThreeRenderer({width, height, pixelRatio}) {
+  const skyboxScene = new THREE.Scene();
+  const skyboxMeshes = [];
+
+  const skyboxMesh = (() => {
+    const geometry = new THREE.BoxGeometry(1024, 1024, 1024);
+    const img = resources.getImage('/api/img/sky/skybox.jpg');
+    const images = [
+      {x: SKYBOX_SIZE * 0, y: SKYBOX_SIZE * 1}, // px
+      {x: SKYBOX_SIZE * 2, y: SKYBOX_SIZE * 1}, // nx
+      {x: SKYBOX_SIZE * 1, y: SKYBOX_SIZE * 0}, // py
+      {x: SKYBOX_SIZE * 1, y: SKYBOX_SIZE * 2}, // ny
+      {x: SKYBOX_SIZE * 1, y: SKYBOX_SIZE * 1}, // pz
+      {x: SKYBOX_SIZE * 3, y: SKYBOX_SIZE * 1}, // nz
+    ].map(({x, y}) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = SKYBOX_SIZE;
+      canvas.height = SKYBOX_SIZE;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, -x, -y);
+      return canvas;
+    });
+
+    const texture = new THREE.CubeTexture(images);
+    texture.needsUpdate = true;
+    const shader = THREE.ShaderLib['cube'];
+    shader.uniforms['tCube'].value = texture;
+    const material = new THREE.ShaderMaterial({
+      fragmentShader: shader.fragmentShader,
+      vertexShader: shader.vertexShader,
+      uniforms: shader.uniforms,
+      depthWrite: false,
+      side: THREE.BackSide
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    return mesh;
+  })();
+  skyboxMeshes.push(skyboxMesh);
+
+  for (let i = 0; i < skyboxMeshes.length; i++) {
+    const skyboxMesh = skyboxMeshes[i];
+    skyboxScene.add(skyboxMesh);
+  }
+
+  const skyboxCamera = new THREE.PerspectiveCamera(90, aspectRatio, 0.1, 1024 * 1024);
+  skyboxCamera.zoom = 2;
+  skyboxCamera.rotation.order = 'YXZ';
+
   const scene = new THREE.Scene(); 
   const meshes = [];
 
@@ -301,6 +349,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
 	},
     render: () => {
       renderer.clear();
+      renderer.render(skyboxScene, skyboxCamera);
       renderer.render(scene, camera);
       renderer.render(hudScene, hudCamera);
     },
@@ -320,6 +369,10 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       canvas.style.height = height;
     },
     updateCamera: ({position, rotation}) => {
+      skyboxCamera.position.set(position.x, CAMERA_HEIGHT + position.y, position.z);
+      skyboxCamera.rotation.x = -rotation.y;
+      skyboxCamera.rotation.y = -rotation.x;
+
       camera.position.set(position.x, CAMERA_HEIGHT + position.y, position.z);
       camera.rotation.x = -rotation.y;
       camera.rotation.y = -rotation.x;
