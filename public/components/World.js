@@ -297,36 +297,31 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       }
     },
     updateNodes({nodes}) {
-      const makeNodeMesh = ({blocks, position}) => {
-        const {x, y, z} = position;
+      const makeNodeMesh = ({position, box}) => {
+        const {x: x1, y: y1, z: z1} = position;
+        const {x: x2, y: y2, z: z2} = box;
 
-        const blockGeometry = new THREE.BoxGeometry(1, 1, 1);
-        const blockMaterial = new THREE.MeshPhongMaterial({
-          color: 0x808080,
-          emissive: 0x808080,
+        const geometry = new THREE.BoxGeometry(x2 + 1, y2 + 1, z2 + 1);
+        const material = new THREE.MeshPhongMaterial({
+          color: 0xFFFFFF,
+          emissive: 0x606060,
           side: THREE.DoubleSide
         });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.x = x1 + ((x2 + 1) / 2);
+        mesh.position.y = y1 + ((y2 + 1) / 2);
+        mesh.position.z = -(z1 + (z2 + 1) / 2);
 
-        const nodeMesh = new THREE.Object3D();
-        blocks.forEach(block => {
-          const {x, y, z} = block;
+        const edges = new THREE.EdgesHelper(mesh, 0xCCCCCC);
 
-          const blockMesh = new THREE.Mesh(blockGeometry, blockMaterial);
-          blockMesh.position.x = x + 0.5;
-          blockMesh.position.y = y + 0.5;
-          blockMesh.position.z = -(z + 0.5);
-
-          nodeMesh.add(blockMesh);
-        });
-        nodeMesh.position.x = x;
-        nodeMesh.position.y = y;
-        nodeMesh.position.z = -z;
-
-        return nodeMesh;
+        const result = new THREE.Object3D();
+        result.add(mesh);
+        result.add(edges);
+        return result;
       };
 
       nodes.forEach(node => {
-        const {id, blocks, position} = node;
+        const {id, position, box} = node;
 
         const removeOldNode = () => {
           const oldNodeMesh = nodeMeshMap.get(id);
@@ -336,7 +331,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
           nodeMeshMap.set(id, null);
         };
         const addNewNode = () => {
-          const newNodeMesh = makeNodeMesh({blocks, position});
+          const newNodeMesh = makeNodeMesh({position, box});
           scene.add(newNodeMesh);
 
           nodeMap.set(id, node);
