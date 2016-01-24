@@ -228,7 +228,10 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     render: () => {
       renderer.render(scene, camera);
     },
-    resize: ({width, height, pixelRatio}) => {
+    resize: ({width: newWidth, height: newHeight, pixelRatio}) => {
+      width = newWidth;
+      height = newHeight;
+
       const aspectRatio = width / height;
       camera.aspect = aspectRatio;
       camera.updateProjectionMatrix();
