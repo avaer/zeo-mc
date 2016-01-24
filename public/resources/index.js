@@ -1,10 +1,10 @@
 const IMAGE_URLS = [
-  '/img/tools/eraser.png',
-  '/img/tools/magnifying-glass.png',
-  '/img/tools/paint-brush.png',
-  '/img/tools/pencil.png',
-  '/img/tools/wrench.png',
-];
+  '/tools/eraser.png',
+  '/tools/magnifying-glass.png',
+  '/tools/paint-brush.png',
+  '/tools/pencil.png',
+  '/tools/wrench.png',
+].map(suffix => '/api/img' + suffix);
 
 class Resources {
   constructor() {
@@ -16,7 +16,7 @@ class Resources {
   }
 
   load(cb) {
-    let pending = IMAGE_URLS, error = null;
+    let pending = IMAGE_URLS.length, error = null;
 
     const makePend = url => {
       return (err, img) => {
@@ -41,9 +41,15 @@ class Resources {
         cb(err);
       };
       img.src = src;
+      img.style.position = 'absolute';
+      img.style.top = 0;
+      img.style.left = 0;
+      img.style.visibility = 'hidden';
+
+      $(document.body).append(img);
     };
 
-    IMAGES_URLS.forEach(url => {
+    IMAGE_URLS.forEach(url => {
       loadImage(url, makePend(url));
     });
   }

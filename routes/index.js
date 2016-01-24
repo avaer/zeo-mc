@@ -1,7 +1,8 @@
 const express = require('express');
 const u = require('../lib/js-utils');
 
-const allRoutes = u.flatten(['import', 'world', 'player'].map(name => require('./' + name + '.js')));
+const ROUTE_NAMES = ['static', 'import', 'world', 'player'];
+const allRoutes = u.flatten(ROUTE_NAMES.map(name => require('./' + name + '.js')));
 
 const api = {
   app() {

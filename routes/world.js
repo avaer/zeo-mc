@@ -10,7 +10,7 @@ const worldReader = new WorldReader({
 const routes = [
   {
     path: '/worlds/:world',
-    handler: function(req, res) {
+    handler: function(req, res, next) {
       const world = req.param('world');
 
       worldReader.getIndexJson(world, u.ok(u.resErr(res), indexJson => {
@@ -21,7 +21,7 @@ const routes = [
   },
   {
     path: '/worlds/:world/:path*',
-    handler: function(req, res) {
+    handler: function(req, res, next) {
       const world = req.param('world');
       const path = req.param('path');
 

@@ -10,7 +10,7 @@ const siteImporter = new SiteImporter({
 const routes = [
   {
     path: '/',
-    handler: function(req, res) {
+    handler: function(req, res, next) {
       const parsedUrl = url.parse(req.url, true);
       const query = parsedUrl.query;
       const url = query.url;

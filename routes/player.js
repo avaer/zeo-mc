@@ -10,7 +10,7 @@ const playerReader = new PlayerReader({
 const routes = [
   {
     path: '/players/:player',
-    handler: function(req, res) {
+    handler: function(req, res, next) {
       const player = req.param('player');
 
       playerReader.getPlayerJson(player, u.ok(u.resErr(res), playerJson => {
@@ -22,7 +22,7 @@ const routes = [
   {
     method: 'put',
     path: '/players/:player',
-    handler: function(req, res) {
+    handler: function(req, res, next) {
       const player = req.param('player');
 
       const name = player;
@@ -40,7 +40,7 @@ const routes = [
   {
     method: 'post',
     path: '/players/:player',
-    handler: function(req, res) {
+    handler: function(req, res, next) {
       const player = req.param('player');
 
       const name = player;
@@ -57,7 +57,7 @@ const routes = [
   },
   {
     path: '/players/:player/inventory',
-    handler: [ authCookie, function(req, res) {
+    handler: [ authCookie, function(req, res, next) {
       const player = req.param('player');
 
       const name = player;
@@ -73,7 +73,7 @@ const routes = [
   {
     method: 'put',
     path: '/players/:player/inventory',
-    handler: [ authCookie, readJson, function(req, res) {
+    handler: [ authCookie, readJson, function(req, res, next) {
       const player = req.param('player');
       const item = req.param('item');
       const inventory = req.json;
@@ -88,7 +88,7 @@ const routes = [
   },
   {
     path: '/players/:player/data/:item',
-    handler: [ authCookie, function(req, res) {
+    handler: [ authCookie, function(req, res, next) {
       const player = req.param('player');
       const item = req.param('item');
 
@@ -106,7 +106,7 @@ const routes = [
   {
     method: 'put',
     path: '/players/:player/data/:item',
-    handler: [ authCookie, function(req, res) {
+    handler: [ authCookie, function(req, res, next) {
       const player = req.param('player');
       const item = req.param('item');
 
