@@ -28,6 +28,7 @@ module.exports = {
         path.join(__dirname, 'public/index'),
         path.join(__dirname, 'public/constants'),
         path.join(__dirname, 'public/utils'),
+        path.join(__dirname, 'public/resources'),
         path.join(__dirname, 'public/components'),
         path.join(__dirname, 'public/stores'),
         path.join(__dirname, 'public/engines'),

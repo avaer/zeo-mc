@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import AppBody from './components/AppBody';
 
+import resources from './resources/index';
+
 import Stores from './stores/index';
 import Engines from './engines/index';
 
@@ -43,5 +45,11 @@ class App {
   }
 }
 
-const domElement = document.getElementById('app-body');
-new App(domElement);
+resources.load(err => {
+  if (!err) {
+    const domElement = document.getElementById('app-body');
+    new App(domElement);
+  } else {
+    console.warn(err);
+  }
+});
