@@ -168,7 +168,8 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       const {geometry} = GEOMETRIES.PREVIEW_AXES;
       const material = new THREE.MeshPhongMaterial({
         color: 0xFF0000,
-        emissive: 0x808080
+        emissive: 0x808080,
+        side: THREE.DoubleSide
       });
       material.transparent = true;
       material.opacity = 0.5;
@@ -181,7 +182,8 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       const {geometry} = GEOMETRIES.PREVIEW_AXES;
       const material = new THREE.MeshPhongMaterial({
         color: 0x00FF00,
-        emissive: 0x808080
+        emissive: 0x808080,
+        side: THREE.DoubleSide
       });
       material.transparent = true;
       material.opacity = 0.5;
@@ -195,7 +197,8 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       const {geometry} = GEOMETRIES.PREVIEW_AXES;
       const material = new THREE.MeshPhongMaterial({
         color: 0x0000FF,
-        emissive: 0x808080
+        emissive: 0x808080,
+        side: THREE.DoubleSide
       });
       material.transparent = true;
       material.opacity = 0.5;
