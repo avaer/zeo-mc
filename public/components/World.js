@@ -77,7 +77,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     mesh.position.y = y1 + ((y2 + 1) / 2);
     mesh.position.z = -(z1 + (z2 + 1) / 2);
 
-    const edges = new THREE.EdgesHelper(mesh, 0xCCCCCC);
+    const edges = new THREE.EdgesHelper(mesh, 0x666666);
 
     const result = new THREE.Object3D();
     result.add(mesh);

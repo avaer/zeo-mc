@@ -1,3 +1,5 @@
+import Immutable from 'immutable';
+
 import Point from '../records/point/index';
 import Vector from '../records/vector/index';
 import Node from '../records/node/index';
@@ -68,6 +70,11 @@ export default class Engines {
     const $window = $(window);
     $window.on('resize', () => {
       this.updateState('window', syncWindow);
+    });
+    $window.on('blur', () => {
+      this.updateState('window', oldState => oldState
+        .set('keys', new Immutable.Map())
+        .setIn([ 'mouse', 'buttons' ], new Immutable.Map()));
     });
   }
 
