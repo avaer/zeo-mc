@@ -1,10 +1,6 @@
-const IMAGE_URLS = [
-  '/tools/eraser.png',
-  '/tools/magnifying-glass.png',
-  '/tools/paint-brush.png',
-  '/tools/pencil.png',
-  '/tools/wrench.png',
-].map(suffix => '/api/img' + suffix);
+import {TOOL_NAMES, TOOL_SIZE} from '../constants/index';
+
+const IMAGE_URLS = TOOL_NAMES.map(suffix => '/api/img/tools/' + suffix + '.png');
 
 class Resources {
   constructor() {
@@ -41,9 +37,13 @@ class Resources {
         cb(err);
       };
       img.src = src;
+      img.width = TOOL_SIZE;
+      img.height = TOOL_SIZE;
       img.style.position = 'absolute';
       img.style.top = 0;
       img.style.left = 0;
+      img.width = TOOL_SIZE;
+      img.height = TOOL_SIZE;
       img.style.visibility = 'hidden';
 
       $(document.body).append(img);

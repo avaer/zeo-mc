@@ -5,7 +5,8 @@ import {is} from 'immutable';
 import * as inputUtils from '../utils/input/index';
 import Vector from '../records/vector/index';
 
-import {WORLD_SIZE, CAMERA_HEIGHT} from '../constants/index';
+import resources from '../resources/index';
+import {WORLD_SIZE, CAMERA_HEIGHT, TOOLS, TOOL_NAMES} from '../constants/index';
 
 const AXIS_SIZE = 6;
 const RAYTRACE_EPSILON = 10e-14;
@@ -84,6 +85,34 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     result.add(edges);
     return result;
   };
+
+  const toolSprite = (() => {
+    const materials = (() => {
+      const result = {};
+      TOOL_NAMES.forEach(tool => {
+        const img = resources.getImage('/api/img/tools/' + tool + '.png');
+        /* const canvas = document.createElement('canvas');
+        canvas.width = 16;
+        canvas.height = 16;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 16, 16); */
+		const texture = new THREE.Texture(img);
+        texture.magFilter = THREE.NearestFilter;
+        texture.minFilter = THREE.LinearMipMapLinearFilter;
+        texture.needsUpdate = true;
+        const material = new THREE.SpriteMaterial({map: texture});
+        result[tool] = material;
+      });
+      return result;
+    })();
+
+    const sprite = new THREE.Sprite(materials[TOOLS.MAGNIFYING_GLASS]);
+    sprite.position.x = 1;
+    sprite.position.y = 1;
+    sprite.position.z = -1;
+    return sprite;
+  })();
+  meshes.push(toolSprite);
 
   const sphereMesh = (() => {
     const result = new THREE.Object3D();
