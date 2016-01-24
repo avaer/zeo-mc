@@ -6,7 +6,7 @@ import * as inputUtils from '../utils/input/index';
 import Vector from '../records/vector/index';
 
 import resources from '../resources/index';
-import {WORLD_SIZE, CAMERA_HEIGHT, TOOLS, TOOL_NAMES} from '../constants/index';
+import {WORLD_SIZE, CAMERA_HEIGHT, TOOLS, TOOL_NAMES, TOOL_SIZE} from '../constants/index';
 
 const AXIS_SIZE = 6;
 const RAYTRACE_EPSILON = 10e-14;
@@ -50,6 +50,7 @@ const GEOMETRIES = (() => {
 
 function makeThreeRenderer({width, height, pixelRatio}) {
   const scene = new THREE.Scene(); 
+  const meshes = [];
 
   const ambientLight = new THREE.AmbientLight(0x000000);
   scene.add(ambientLight);
@@ -64,8 +65,6 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   scene.add(lights[0]);
   scene.add(lights[1]);
   scene.add(lights[2]);
-
-  const meshes = [];
 
   const makeNodeMesh = ({position, box}) => {
     const {x: x1, y: y1, z: z1} = position;
@@ -85,34 +84,6 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     result.add(edges);
     return result;
   };
-
-  const toolSprite = (() => {
-    const materials = (() => {
-      const result = {};
-      TOOL_NAMES.forEach(tool => {
-        const img = resources.getImage('/api/img/tools/' + tool + '.png');
-        /* const canvas = document.createElement('canvas');
-        canvas.width = 16;
-        canvas.height = 16;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, 16, 16); */
-		const texture = new THREE.Texture(img);
-        texture.magFilter = THREE.NearestFilter;
-        texture.minFilter = THREE.LinearMipMapLinearFilter;
-        texture.needsUpdate = true;
-        const material = new THREE.SpriteMaterial({map: texture});
-        result[tool] = material;
-      });
-      return result;
-    })();
-
-    const sprite = new THREE.Sprite(materials[TOOLS.MAGNIFYING_GLASS]);
-    sprite.position.x = 1;
-    sprite.position.y = 1;
-    sprite.position.z = -1;
-    return sprite;
-  })();
-  meshes.push(toolSprite);
 
   const sphereMesh = (() => {
     const result = new THREE.Object3D();
@@ -248,19 +219,13 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     scene.add(mesh);
   }
 
+  const nodeMap = new Map();
+  const nodeMeshMap = new Map();
+
   const aspectRatio = width / height;
   const camera = new THREE.PerspectiveCamera(90, aspectRatio, 0.1, 100);
   camera.zoom = 2;
   camera.rotation.order = 'YXZ';
-
-  const renderer = new THREE.WebGLRenderer({antialias: true});
-  renderer.setSize(width * pixelRatio, height * pixelRatio);
-  renderer.setPixelRatio(pixelRatio);
-  renderer.setClearColor(0xFFFFFF, 1);
-
-  const canvas = renderer.domElement;
-  canvas.style.width = width;
-  canvas.style.height = height;
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
@@ -278,15 +243,66 @@ function makeThreeRenderer({width, height, pixelRatio}) {
     }
   };
 
-  const nodeMap = new Map();
-  const nodeMeshMap = new Map();
+  const hudScene = new THREE.Scene();
+  const hudMeshes = [];
+
+  const toolMesh = (() => {
+    const materials = (() => {
+      const result = {};
+      TOOL_NAMES.forEach(tool => {
+        const img = resources.getImage('/api/img/tools/' + tool + '.png');
+        const canvas = document.createElement('canvas');
+        canvas.width = TOOL_SIZE;
+        canvas.height = TOOL_SIZE;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, TOOL_SIZE, TOOL_SIZE);
+		const texture = new THREE.Texture(canvas);
+        texture.magFilter = THREE.NearestFilter;
+        texture.minFilter = THREE.LinearMipMapLinearFilter;
+        texture.needsUpdate = true;
+        const material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide, transparent: true});
+        result[tool] = material;
+      });
+      return result;
+    })();
+
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    const mesh = new THREE.Mesh(geometry, materials[TOOLS.MAGNIFYING_GLASS]);
+    mesh.rotateY(1.8);
+    mesh.position.x = 1.5;
+    mesh.position.y = -0.6;
+    mesh.position.z = -1;
+    mesh._materials = materials;
+    return mesh;
+  })();
+  hudMeshes.push(toolMesh);
+
+  for (let i = 0; i < hudMeshes.length; i++) {
+    const hudMesh = hudMeshes[i];
+    hudScene.add(hudMesh);
+  }
+
+  const hudCamera = new THREE.PerspectiveCamera(90, aspectRatio, 0.1, 100);
+  hudCamera.rotation.order = 'YXZ';
+
+  const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+  renderer.setSize(width * pixelRatio, height * pixelRatio);
+  renderer.setPixelRatio(pixelRatio);
+  renderer.setClearColor(0xFFFFFF, 1);
+  renderer.autoClear = false;
+
+  const canvas = renderer.domElement;
+  canvas.style.width = width;
+  canvas.style.height = height;
 
   return {
     getCanvas: () => {
       return canvas;
 	},
     render: () => {
+      renderer.clear();
       renderer.render(scene, camera);
+      renderer.render(hudScene, hudCamera);
     },
     resize: ({width: newWidth, height: newHeight, pixelRatio}) => {
       width = newWidth;
@@ -295,6 +311,8 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       const aspectRatio = width / height;
       camera.aspect = aspectRatio;
       camera.updateProjectionMatrix();
+      hudCamera.aspect = aspectRatio;
+      hudCamera.updateProjectionMatrix();
 
       renderer.setSize(width * pixelRatio, height * pixelRatio);
       renderer.setPixelRatio(pixelRatio);
@@ -305,6 +323,11 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       camera.position.set(position.x, CAMERA_HEIGHT + position.y, position.z);
       camera.rotation.x = -rotation.y;
       camera.rotation.y = -rotation.x;
+	},
+    updateTool: ({tool}) => {
+      const {_materials: materials} = toolMesh;
+      const material = materials[tool];
+      toolMesh.material = material;
 	},
     updateHover: ({hoverCoords, hoverEndCoords}) => {
       if (hoverCoords) {
@@ -403,6 +426,7 @@ export default class World extends React.Component {
 
     this.resize();
     this.updateCamera();
+    this.updateTool();
     this.updateHover();
     this.updateNodes();
     this.rerender();
@@ -419,6 +443,12 @@ export default class World extends React.Component {
     const {position, rotation} = nextProps;
     if (!is(position, oldPosition) || !is(rotation, oldRotation)) {
       this.updateCamera(nextProps);
+    }
+
+    const {position: oldTool} = this.props;
+    const {tool} = nextProps;
+    if (!is(tool, oldTool)) {
+      this.updateTool(nextProps);
     }
 
     const {mousePosition: oldMousePosition, mouseButtons: oldMouseButtons} = this.props;
@@ -456,6 +486,13 @@ export default class World extends React.Component {
 
     const {position, rotation} = props;
     this.renderer.updateCamera({position, rotation});
+  }
+
+  updateTool(props) {
+    props === undefined && ({props} = this);
+
+    const {tool} = props;
+    this.renderer.updateTool({tool});
   }
 
   updateHover(props) {
