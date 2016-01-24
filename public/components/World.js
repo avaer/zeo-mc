@@ -12,6 +12,14 @@ const RAYTRACE_EPSILON = 10e-14;
 
 const GEOMETRIES = (() => {
   return {
+    NODE_MESH: (() => {
+      const material = new THREE.MeshPhongMaterial({
+        color: 0xFFFFFF,
+        emissive: 0x606060,
+        side: THREE.DoubleSide
+      });
+      return {material};
+    })(),
     PREVIEW_BOX: (() => {
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const material = new THREE.MeshPhongMaterial({
@@ -57,6 +65,26 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   scene.add(lights[2]);
 
   const meshes = [];
+
+  const makeNodeMesh = ({position, box}) => {
+    const {x: x1, y: y1, z: z1} = position;
+    const {x: x2, y: y2, z: z2} = box;
+
+    const geometry = new THREE.BoxGeometry(x2 + 1, y2 + 1, z2 + 1);
+    const {material} = GEOMETRIES.NODE_MESH;
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.x = x1 + ((x2 + 1) / 2);
+    mesh.position.y = y1 + ((y2 + 1) / 2);
+    mesh.position.z = -(z1 + (z2 + 1) / 2);
+
+    const edges = new THREE.EdgesHelper(mesh, 0xCCCCCC);
+
+    const result = new THREE.Object3D();
+    result.add(mesh);
+    result.add(edges);
+    return result;
+  };
+
   const sphereMesh = (() => {
     const result = new THREE.Object3D();
     const geometry = new THREE.SphereGeometry(5, 8, 8);
@@ -83,10 +111,10 @@ function makeThreeRenderer({width, height, pixelRatio}) {
   })();
   meshes.push(sphereMesh); 
 
-  const grid = new THREE.GridHelper(WORLD_SIZE / 2, 1);
-  grid.position.x = WORLD_SIZE / 2;
-  grid.position.z = -(WORLD_SIZE / 2);
-  grid.setColors(0xCCCCCC, 0xCCCCCC);
+  const grid = makeNodeMesh({
+    position: new Vector(0, -1, 0),
+    box: new Vector(WORLD_SIZE, 0, WORLD_SIZE)
+  });
   meshes.push(grid);
 
   const previewBox = (() => {
@@ -300,29 +328,6 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       }
     },
     updateNodes({nodes}) {
-      const makeNodeMesh = ({position, box}) => {
-        const {x: x1, y: y1, z: z1} = position;
-        const {x: x2, y: y2, z: z2} = box;
-
-        const geometry = new THREE.BoxGeometry(x2 + 1, y2 + 1, z2 + 1);
-        const material = new THREE.MeshPhongMaterial({
-          color: 0xFFFFFF,
-          emissive: 0x606060,
-          side: THREE.DoubleSide
-        });
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.x = x1 + ((x2 + 1) / 2);
-        mesh.position.y = y1 + ((y2 + 1) / 2);
-        mesh.position.z = -(z1 + (z2 + 1) / 2);
-
-        const edges = new THREE.EdgesHelper(mesh, 0xCCCCCC);
-
-        const result = new THREE.Object3D();
-        result.add(mesh);
-        result.add(edges);
-        return result;
-      };
-
       nodes.forEach(node => {
         const {id, position, box} = node;
 
