@@ -7,6 +7,9 @@ import resources from './resources/index';
 import Stores from './stores/index';
 import Engines from './engines/index';
 
+import NodeScript from './lib/node-script/index';
+window.NodeScript = NodeScript; // XXX
+
 class App {
   constructor(domElement) {
     this._domElement = domElement;
