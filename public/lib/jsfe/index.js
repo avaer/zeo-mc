@@ -1,17 +1,20 @@
-var WORKER_HEADER = '(' + (function() {
-  var _postMessage = window.postMessage;
-  delete window.postMessage;
+var URL = window.URL || window.webkitURL;
+
+var WORKER_HEADER = '"use strict";\n' +
+'(' + (function() {
+  var _postMessage = self.postMessage;
+  delete self.postMessage;
 
   var _cbs = {};
-  window.on = function(e, cb) {
-    var l = cbs[e];
+  self.on = function(e, cb) {
+    var l = _cbs[e];
     if (!l) {
       l = [];
-      cbs[e] = l;
+      _cbs[e] = l;
     }
     l.push(cb);
   };
-  window.off = function(e, cb) {
+  self.off = function(e, cb) {
     var l = _cbs[e];
     if (l) {
       if (typeof cb === 'undefined') {
@@ -24,7 +27,7 @@ var WORKER_HEADER = '(' + (function() {
       }
     }
   };
-  window.emit = function(e, d) {
+  self.emit = function(e, d) {
     var msg = {
       type: e,
       data: d
@@ -32,7 +35,7 @@ var WORKER_HEADER = '(' + (function() {
     _postMessage(msg);
   };
 
-  window.onmessage = function(m) {
+  self.onmessage = function(m) {
     var msg = m.data;
     var e = msg.type;
     var data = msg.data;
@@ -48,21 +51,20 @@ var WORKER_HEADER = '(' + (function() {
 }).toString() + ')();\n';
 
 function Script(src) {
-  this.src = src;
-
+  this._src = src;
+  this._cbs = {};
   this._worker = null;
 }
 Script.prototype = {
   start: function() {
-    function makeWorker(src) {
-      var src = WORKER_HEADER + this.src;
-      var blob = new Blob([src], {type: 'application/javascript'});
+    function makeWorker(src, cbs) {
+      var prefixedSrc = WORKER_HEADER + src;
+      var blob = new Blob([prefixedSrc], {type: 'application/javascript'});
+      var objectUrl = URL.createObjectURL(blob);
 
-      var worker = new Worker(blob);
-      var cbs = {};
-      worker._cbs = cbs;
-      worker.onmessage = function(e) {
-        var msg = e.data;
+      var worker = new Worker(objectUrl);
+      worker.onmessage = function(event) {
+        var msg = event.data;
         var e = msg.type;
         var data = msg.data;
 
@@ -79,7 +81,7 @@ Script.prototype = {
     }
 
     if (!this._worker) {
-      this._worker = makeWorker(this.src);
+      this._worker = makeWorker(this._src, this._cbs);
     }
   },
   kill: function() {
@@ -97,29 +99,25 @@ Script.prototype = {
       this._worker.postMessage(msg);
     }
   },
-  on: function(e, d) {
-    if (this._worker) {
-      var cbs = this._worker._cbs;
-      var l = cbs[e];
-      if (!l) {
-        l = [];
-        cbs[e] = l;
-      }
-      l.push(cb);
+  on: function(e, cb) {
+    var cbs = this._cbs;
+    var l = cbs[e];
+    if (!l) {
+      l = [];
+      cbs[e] = l;
     }
+    l.push(cb);
   },
   off: function(e, cb) {
-    if (this._worker) {
-      var cbs = this._worker._cbs;
-      var l = cbs[e];
-      if (l) {
-        if (typeof cb === 'undefined') {
-          cbs[e] = [];
-        } else {
-          var index = l.indexOf(cb);
-          if (~index) {
-            l.splice(index, 1);
-          }
+    var cbs = this._cbs;
+    var l = cbs[e];
+    if (l) {
+      if (typeof cb === 'undefined') {
+        cbs[e] = [];
+      } else {
+        var index = l.indexOf(cb);
+        if (~index) {
+          l.splice(index, 1);
         }
       }
     }
