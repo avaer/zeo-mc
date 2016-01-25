@@ -348,4 +348,8 @@ export default class Engines {
   editorSave({value}) {
     this.updateState('ui', oldState => oldState.set('oldValue', value));
   }
+
+  editorQuit() {
+    this.updateState('ui', oldState => oldState.set('mode', UI_MODES.WORLD));
+  }
 }

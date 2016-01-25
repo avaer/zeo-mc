@@ -93,6 +93,18 @@ class Editor extends React.Component {
         onSave(value);
       }
     });
+    this._editor.commands.addCommand({
+      name: 'quit',
+      bindKey: {
+        win: 'Ctrl-Q',
+        mac: 'Ctrl-Q',
+        sender: 'editor|cli'
+      },
+      exec: (env, args, request) => {
+        const {onQuit} = this.props;
+        onQuit();
+      }
+    });
   }
 
   render() {

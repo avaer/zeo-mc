@@ -44,6 +44,9 @@ export default class AppBody extends React.Component {
       },
       onSave: value => {
         engines.editorSave({value});
+      },
+      onQuit: () => {
+        engines.editorQuit();
       }
     };
 
