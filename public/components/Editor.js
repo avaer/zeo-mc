@@ -12,10 +12,6 @@ class Editor extends React.Component {
     focus: true,
   };
 
-  state = {
-    value: 'lol'
-  };
-
   componentWillMount() {
     this._editor = null;
   }
@@ -32,19 +28,28 @@ class Editor extends React.Component {
     });
 
     this.update();
+    this.bind();
   }
 
   componentWillReceiveProps(nextProps) {
     const {visible} = nextProps;
     const {visible: oldVisible} = this.props;
-    if (!is(visible, oldVisible)) {
-      this.updateVisibility(nextProps);
-    }
+    const updateVisibility = !is(visible, oldVisible);
 
     const {focused} = nextProps;
     const {focused: oldFocused} = this.props;
-    if (!is(focused, oldFocused)) {
-      this.updateFocus(nextProps);
+    const updateFocus = !is(focused, oldFocused);
+
+    if (updateVisibility || updateFocus) {
+      // avoid value update FOUC
+      requestAnimationFrame(() => {      
+        if (updateVisibility) {
+          this.updateVisibility(nextProps);
+        }
+        if (updateFocus) {
+          this.updateFocus(nextProps);
+        }
+      });
     }
   }
 
@@ -75,14 +80,29 @@ class Editor extends React.Component {
     }
   }
 
+  bind() {
+    this._editor.commands.addCommand({
+      name: 'save',
+      bindKey: {
+        win: 'Ctrl-S',
+        mac: 'Ctrl-S',
+        sender: 'editor|cli'
+      },
+      exec: (env, args, request) => {
+        const {value, onSave} = this.props;
+        onSave(value);
+      }
+    });
+  }
+
   render() {
     const {value, onChange} = this.props;
 
     return <AceEditor
       mode='jsx'
       theme='chrome'
-      value={this.state.value}
-      onChange={value => this.setState({value})}
+      value={value}
+      onChange={onChange}
       name='editor'
       tabSize={2}
       onLoad={editor => { this._editor = editor; }}

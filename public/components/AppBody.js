@@ -2,6 +2,7 @@ import React from 'react';
 
 import World from './World';
 import Editor from './Editor';
+import Node from './Node';
 
 import {UI_MODES} from '../constants/index';
 
@@ -10,7 +11,7 @@ export default class AppBody extends React.Component {
     const {stores, engines} = this.props;
     const {ui: uiState, window: windowState, world: worldState} = stores;
 
-    const {mode} = uiState;
+    const {mode, value} = uiState;
     const {width, height, pixelRatio, mouse: {position: mousePosition, buttons: mouseButtons}} = windowState;
     const {position, rotation, velocity, tool, nodes, hoverCoords, hoverEndCoords} = worldState;
     const worldProps = {
@@ -34,14 +35,27 @@ export default class AppBody extends React.Component {
     };
 
     const editorProps = {
+      value,
       visible: mode === UI_MODES.EDITOR,
       focused: mode === UI_MODES.EDITOR,
+
+      onChange: value => {
+        engines.editorChange({value});
+      },
+      onSave: value => {
+        engines.editorSave({value});
+      }
+    };
+
+    const nodeProps = {
+      value,
     };
 
     return (
       <div className='app-body'>
         <World {...worldProps} />
         <Editor {...editorProps} />
+        <Node {...nodeProps} />
       </div>
     );
   }

@@ -115,7 +115,7 @@ export default class Engines {
     let lastFrameTime = new Date();
 
     const handleFrames = framesPassed => {
-      const updateUi = ({mode, pressedKeys, pressedMouseButtons, tool}) => {
+      const updateUi = ({mode, oldValue, pressedKeys, pressedMouseButtons, tool}) => {
         return oldState => {
           let state = oldState;
 
@@ -123,7 +123,9 @@ export default class Engines {
           state = (() => {
             if (mode === UI_MODES.WORLD) {
               if (tool === TOOLS.PENCIL && pressedMouseButtons['LEFT']) {
-                return state.set('mode', UI_MODES.EDITOR);
+                return state
+                  .set('mode', UI_MODES.EDITOR)
+                  .set('value', oldValue);
               } else {
                 return state;
               }
@@ -280,7 +282,7 @@ export default class Engines {
       const windowState = this.getState('window');
       const worldState = this.getState('world');
 
-      const {mode} = uiState;
+      const {mode, oldValue} = uiState;
 
       const {width} = windowState;
 
@@ -301,7 +303,7 @@ export default class Engines {
 
       const {position, velocity, tool} = worldState;
 
-      this.updateState('ui', updateUi({mode, pressedKeys, pressedMouseButtons, tool}));
+      this.updateState('ui', updateUi({mode, oldValue, pressedKeys, pressedMouseButtons, tool}));
       this.updateState('world', updateWorld({mode, framesPassed, downKeys, position, velocity, downMouseButtons, oldMousePosition, newMousePosition, width}));
       this.updateState('window', updateWindow());
     };
@@ -337,5 +339,13 @@ export default class Engines {
       const node = Node.fromCoords({startCoords, endCoords});
       return nodes.push(node);
     }));
+  }
+
+  editorChange({value}) {
+    this.updateState('ui', oldState => oldState.set('value', value));
+  }
+
+  editorSave({value}) {
+    this.updateState('ui', oldState => oldState.set('oldValue', value));
   }
 }
