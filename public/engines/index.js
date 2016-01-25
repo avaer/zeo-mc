@@ -4,7 +4,7 @@ import Point from '../records/point/index';
 import Vector from '../records/vector/index';
 import Node from '../records/node/index';
 
-import {FRAME_RATE} from '../constants/index';
+import {FRAME_RATE, UI_MODES, TOOLS} from '../constants/index';
 import * as inputUtils from '../utils/input/index';
 
 const MOVE_PER_FRAME = 0.005 * FRAME_RATE;
@@ -82,7 +82,6 @@ export default class Engines {
     const $window = $(window);
     $window.on('keydown', e => {
       const {which} = e;
-
       this.updateState('window', oldState => oldState.setIn([ 'keys', String(which) ], true));
 
       const tool = inputUtils.TOOL_KEYS[which] || null;
@@ -91,7 +90,8 @@ export default class Engines {
       }
     });
     $window.on('keyup', e => {
-      this.updateState('window', oldState => oldState.setIn([ 'keys', String(e.which) ], false));
+      const {which} = e;
+      this.updateState('window', oldState => oldState.setIn([ 'keys', String(which) ], false));
     });
   }
 
@@ -115,90 +115,21 @@ export default class Engines {
     let lastFrameTime = new Date();
 
     const handleFrames = framesPassed => {
-      const updateWorld = ({framesPassed, downKeys, position, velocity, downMouseButtons, oldMousePosition, newMousePosition, width}) => {
+      const updateUi = ({mode, pressedKeys, pressedMouseButtons, tool}) => {
         return oldState => {
           let state = oldState;
 
-          // movment
+          // modes
           state = (() => {
-            const move = angle => {
-              const rotation = state.get('rotation');
-              const directionAngle = rotation.x + angle;
-              const x = Math.sin(directionAngle);
-              const y = Math.cos(directionAngle);
-              const diffVector = new Vector(x, 0, -y).multiplyScalar((!downKeys.shift ? MOVE_PER_FRAME : MOVE_PER_FRAME_FAST) * framesPassed);
-
-              return Vector.bindAdd(diffVector);
-            };
-            const normalize = a => {
-              if (a.some(e => e === Math.PI) && a.some(e => e === -(Math.PI / 2))) {
-                return a.map(e => ((e >= 0) ? e : (e + (Math.PI * 2))));
+            if (mode === UI_MODES.WORLD) {
+              if (tool === TOOLS.PENCIL && pressedMouseButtons['LEFT']) {
+                return state.set('mode', UI_MODES.EDITOR);
               } else {
-                return a.slice();
+                return state;
               }
-            };
-            const avg = a => {
-              const l = a.length;
-              if (l > 0) {
-                let result = 0;
-                for (var i = 0; i < l; i++) {
-                  result += a[i];
-                }
-                return result / l;
-              } else {
-                return 0;
-              }
-            };
-            let angles = [];
-
-            if (downKeys.up && !downKeys.down) {
-              angles.push(0);
-            } else if (downKeys.down && !downKeys.up) {
-              angles.push(Math.PI);
-            }
-            if (downKeys.left && !downKeys.right) {
-              angles.push(-(Math.PI / 2));
-            } else if (downKeys.right && !downKeys.left) {
-              angles.push(Math.PI / 2);
-            }
-
-            if (angles.length > 0) {
-              return state.update('position', move(avg(normalize(angles))));
-            } else {
-              return state;
-            }
-          })();
-
-          // rotation
-          state = (() => {
-            if (downMouseButtons.left) {
-              const xDiff = newMousePosition.x - oldMousePosition.x;
-              const yDiff = newMousePosition.y - oldMousePosition.y;
-              const c = ROTATE_PER_WIDTH / width;
-              return state.update('rotation', rotation => rotation
-                .update('x', x => {
-                   let result = x + (xDiff * c);
-                   while (result / Math.PI < -1) {
-                     result += Math.PI * 2;
-                   }
-                   while (result / Math.PI > 1) {
-                     result -= Math.PI * 2;
-                   }
-                   return result;
-                })
-                .update('y', y => Math.min(Math.max(y + (yDiff * c), -(Math.PI / 2)), Math.PI / 2)));
-            } else {
-              return state;
-            }
-          })();
-
-          // jumping
-          state = (() => {
-            if (downKeys.space) {
-              const {y: yv} = velocity;
-              if (yv === 0) {
-                velocity = velocity.set('y', JUMP_VELOCITY);
-                return state.set('velocity', velocity);
+            } else if (mode === UI_MODES.EDITOR) {
+              if (pressedKeys['ESCAPE']) {
+                return state.set('mode', UI_MODES.WORLD);
               } else {
                 return state;
               }
@@ -207,17 +138,121 @@ export default class Engines {
             }
           })();
 
-          // falling
-          state = (() => {
-            const {y} = position;
-            const {y: yv} = velocity;
-            const newY = Math.max(y + yv, 0);
-            const newYv = (newY > 0) ? (yv - (GRAVITY_PER_FRAME * framesPassed)) : 0;
+          return state;
+        };
+      };
+      const updateWorld = ({mode, framesPassed, downKeys, position, velocity, downMouseButtons, oldMousePosition, newMousePosition, width}) => {
+        return oldState => {
+          let state = oldState;
 
-            return state
-              .setIn(['position', 'y'], newY)
-              .setIn(['velocity', 'y'], newYv);
-          })();
+          if (mode === UI_MODES.WORLD) {
+            // movment
+            state = (() => {
+              const move = angle => {
+                const rotation = state.get('rotation');
+                const directionAngle = rotation.x + angle;
+                const x = Math.sin(directionAngle);
+                const y = Math.cos(directionAngle);
+                const diffVector = new Vector(x, 0, -y).multiplyScalar((!downKeys['SHIFT'] ? MOVE_PER_FRAME : MOVE_PER_FRAME_FAST) * framesPassed);
+
+                return Vector.bindAdd(diffVector);
+              };
+              const normalize = a => {
+                if (a.some(e => e === Math.PI) && a.some(e => e === -(Math.PI / 2))) {
+                  return a.map(e => ((e >= 0) ? e : (e + (Math.PI * 2))));
+                } else {
+                  return a.slice();
+                }
+              };
+              const avg = a => {
+                const l = a.length;
+                if (l > 0) {
+                  let result = 0;
+                  for (var i = 0; i < l; i++) {
+                    result += a[i];
+                  }
+                  return result / l;
+                } else {
+                  return 0;
+                }
+              };
+              let angles = [];
+
+              if (downKeys[inputUtils.WASD.UP] && !downKeys[inputUtils.WASD.DOWN]) {
+                angles.push(0);
+              } else if (downKeys[inputUtils.WASD.DOWN] && !downKeys[inputUtils.WASD.UP]) {
+                angles.push(Math.PI);
+              }
+              if (downKeys[inputUtils.WASD.LEFT] && !downKeys[inputUtils.WASD.RIGHT]) {
+                angles.push(-(Math.PI / 2));
+              } else if (downKeys[inputUtils.WASD.RIGHT] && !downKeys[inputUtils.WASD.LEFT]) {
+                angles.push(Math.PI / 2);
+              }
+
+              if (angles.length > 0) {
+                return state.update('position', move(avg(normalize(angles))));
+              } else {
+                return state;
+              }
+            })();
+
+            // rotation
+            state = (() => {
+              const worldState = this.getState('world');
+              const {tool} = worldState;
+
+              if (tool === TOOLS.MAGNIFYING_GLASS) {
+                if (downMouseButtons['LEFT']) {
+                  const xDiff = newMousePosition.x - oldMousePosition.x;
+                  const yDiff = newMousePosition.y - oldMousePosition.y;
+                  const c = ROTATE_PER_WIDTH / width;
+                  return state.update('rotation', rotation => rotation
+                    .update('x', x => {
+                       let result = x + (xDiff * c);
+                       while (result / Math.PI < -1) {
+                         result += Math.PI * 2;
+                       }
+                       while (result / Math.PI > 1) {
+                         result -= Math.PI * 2;
+                       }
+                       return result;
+                    })
+                    .update('y', y => Math.min(Math.max(y + (yDiff * c), -(Math.PI / 2)), Math.PI / 2)));
+                } else {
+                  return state;
+                }
+              } else {
+                return state;
+              }
+            })();
+
+            // jumping
+            state = (() => {
+              if (downKeys['SPACE']) {
+                const {y: yv} = velocity;
+                if (yv === 0) {
+                  velocity = velocity.set('y', JUMP_VELOCITY);
+                  return state.set('velocity', velocity);
+                } else {
+                  return state;
+                }
+              } else {
+                return state;
+              }
+            })();
+
+            // falling
+            state = (() => {
+              const {y} = position;
+              const {y: yv} = velocity;
+              const newY = Math.max(y + yv, 0);
+              const newYv = (newY > 0) ? (yv - (GRAVITY_PER_FRAME * framesPassed)) : 0;
+
+              return state
+                .setIn(['position', 'y'], newY)
+                .setIn(['velocity', 'y'], newYv);
+            })();
+          }
 
           return state;
         };
@@ -225,29 +260,49 @@ export default class Engines {
       const updateWindow = () => {
         return oldState => {
           let state = oldState;
+
           state = (() => {
+            const keys = state.get('keys');
+            const mouseButtons = state.getIn(['mouse', 'buttons']);
             const mousePosition = state.getIn(['mouse', 'position']);
-            return state.setIn(['mouse', 'oldPosition'], mousePosition);
+
+            return state
+              .set('oldKeys', keys)
+              .setIn(['mouse', 'oldButtons'], mouseButtons)
+              .setIn(['mouse', 'oldPosition'], mousePosition);
           })();
+
           return state;
         };
       };
 
+      const uiState = this.getState('ui');
       const windowState = this.getState('window');
       const worldState = this.getState('world');
 
-      const {keys} = windowState;
-      const downKeys = inputUtils.getDownKeys(keys);
-      const {position, velocity} = worldState;
+      const {mode} = uiState;
 
+      const {width} = windowState;
+
+      const oldKeys = windowState.get('oldKeys');
+      const oldDownKeys = inputUtils.getDownKeys(oldKeys);
+      const keys = windowState.get('keys');
+      const downKeys = inputUtils.getDownKeys(keys);
+      const pressedKeys = inputUtils.getPressedKeys(oldDownKeys, downKeys);
+
+      const oldMouseButtons = windowState.getIn(['mouse', 'oldButtons']);
+      const oldDownMouseButtons = inputUtils.getDownMouseButtons(oldMouseButtons);
       const mouseButtons = windowState.getIn(['mouse', 'buttons']);
       const downMouseButtons = inputUtils.getDownMouseButtons(mouseButtons);
+      const pressedMouseButtons = inputUtils.getPressedMouseButtons(oldDownMouseButtons, downMouseButtons);
 
       const oldMousePosition = windowState.getIn(['mouse', 'oldPosition']);
       const newMousePosition = windowState.getIn(['mouse', 'position']);
-      const {width} = windowState;
 
-      this.updateState('world', updateWorld({framesPassed, downKeys, position, velocity, downMouseButtons, oldMousePosition, newMousePosition, width}));
+      const {position, velocity, tool} = worldState;
+
+      this.updateState('ui', updateUi({mode, pressedKeys, pressedMouseButtons, tool}));
+      this.updateState('world', updateWorld({mode, framesPassed, downKeys, position, velocity, downMouseButtons, oldMousePosition, newMousePosition, width}));
       this.updateState('window', updateWindow());
     };
 

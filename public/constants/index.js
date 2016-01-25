@@ -1,5 +1,10 @@
 export const FRAME_RATE = 60;
 
+export const UI_MODES = {
+  WORLD: 'world',
+  EDITOR: 'editor'
+};
+
 export const WORLD_SIZE = 32;
 export const CAMERA_HEIGHT = 1;
 

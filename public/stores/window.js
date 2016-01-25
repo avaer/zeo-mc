@@ -9,8 +9,9 @@ class MousePosition extends Immutable.Record({
 }) {}
 class Mouse extends Immutable.Record({
   buttons: new MouseButtons(),
+  oldButtons: new MouseButtons(),
+  position: new MousePosition(),
   oldPosition: new MousePosition(),
-  position: new MousePosition()
 }) {}
 
 export default class Window extends Immutable.Record({
@@ -18,5 +19,6 @@ export default class Window extends Immutable.Record({
   height: 0,
   pixelRatio: 1,
   keys: new Keys(),
+  oldKeys: new Keys(),
   mouse: new Mouse()
 }) {}

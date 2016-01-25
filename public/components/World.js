@@ -377,6 +377,36 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       camera.rotation.x = -rotation.y;
       camera.rotation.y = -rotation.x;
 	},
+    updateNodes({nodes}) {
+      nodes.forEach(node => {
+        const {id, position, box} = node;
+
+        const removeOldNode = () => {
+          const oldNodeMesh = nodeMeshMap.get(id);
+          scene.remove(oldNodeMesh);
+
+          nodeMap.set(id, null);
+          nodeMeshMap.set(id, null);
+        };
+        const addNewNode = () => {
+          const newNodeMesh = makeNodeMesh({position, box});
+          scene.add(newNodeMesh);
+
+          nodeMap.set(id, node);
+          nodeMeshMap.set(id, newNodeMesh);
+        };
+
+        const oldNode = nodeMap.get(id);
+        if (oldNode) {
+          if (!is(node, oldNode)) {
+            removeOldNode();
+            addNewNode();
+          }
+        } else {
+          addNewNode();
+        }
+      });
+    },
     updateTool: ({tool}) => {
       const {_materials: materials} = toolMesh;
       const material = materials[tool];
@@ -434,36 +464,6 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       } else {
         return null;
       }
-    },
-    updateNodes({nodes}) {
-      nodes.forEach(node => {
-        const {id, position, box} = node;
-
-        const removeOldNode = () => {
-          const oldNodeMesh = nodeMeshMap.get(id);
-          scene.remove(oldNodeMesh);
-
-          nodeMap.set(id, null);
-          nodeMeshMap.set(id, null);
-        };
-        const addNewNode = () => {
-          const newNodeMesh = makeNodeMesh({position, box});
-          scene.add(newNodeMesh);
-
-          nodeMap.set(id, node);
-          nodeMeshMap.set(id, newNodeMesh);
-        };
-
-        const oldNode = nodeMap.get(id);
-        if (oldNode) {
-          if (!is(node, oldNode)) {
-            removeOldNode();
-            addNewNode();
-          }
-        } else {
-          addNewNode();
-        }
-      });
     }
   };
 }
@@ -479,9 +479,9 @@ export default class World extends React.Component {
 
     this.resize();
     this.updateCamera();
+    this.updateNodes();
     this.updateTool();
     this.updateHover();
-    this.updateNodes();
     this.rerender();
   }
 
@@ -498,28 +498,30 @@ export default class World extends React.Component {
       this.updateCamera(nextProps);
     }
 
+    const {nodes: oldNodes} = this.props;
+    const {nodes} = nextProps;
+    if (!is(nodes, oldNodes)) {
+      this.updateNodes(nextProps);
+    }
+
     const {position: oldTool} = this.props;
     const {tool} = nextProps;
     if (!is(tool, oldTool)) {
       this.updateTool(nextProps);
     }
 
-    const {mousePosition: oldMousePosition, mouseButtons: oldMouseButtons} = this.props;
-    const {mousePosition, mouseButtons} = nextProps;
-    if (!is(position, oldPosition) || !is(rotation, oldRotation) || !is(mousePosition, oldMousePosition) || !is(mouseButtons, oldMouseButtons)) {
-      this.detectHover(nextProps);
-    }
+    if (tool === TOOLS.WRENCH) {
+      const {mousePosition: oldMousePosition, mouseButtons: oldMouseButtons} = this.props;
+      const {mousePosition, mouseButtons} = nextProps;
+      if (!is(position, oldPosition) || !is(rotation, oldRotation) || !is(mousePosition, oldMousePosition) || !is(mouseButtons, oldMouseButtons)) {
+        this.detectHover(nextProps);
+      }
 
-    const {hoverCoords: oldHoverCoords, hoverEndCoords: oldHoverEndCoords} = this.props;
-    const {hoverCoords, hoverEndCoords} = nextProps;
-    if (!is(hoverCoords, oldHoverCoords) || !is(hoverEndCoords, oldHoverEndCoords)) {
-      this.updateHover(nextProps);
-    }
-
-    const {nodes: oldNodes} = this.props;
-    const {nodes} = nextProps;
-    if (!is(nodes, oldNodes)) {
-      this.updateNodes(nextProps);
+      const {hoverCoords: oldHoverCoords, hoverEndCoords: oldHoverEndCoords} = this.props;
+      const {hoverCoords, hoverEndCoords} = nextProps;
+      if (!is(hoverCoords, oldHoverCoords) || !is(hoverEndCoords, oldHoverEndCoords)) {
+        this.updateHover(nextProps);
+      }
     }
   }
 
@@ -541,6 +543,13 @@ export default class World extends React.Component {
     this.renderer.updateCamera({position, rotation});
   }
 
+  updateNodes(props) {
+    props === undefined && ({props} = this);
+
+    const {nodes} = props;
+    this.renderer.updateNodes({nodes});
+  }
+
   updateTool(props) {
     props === undefined && ({props} = this);
 
@@ -553,13 +562,6 @@ export default class World extends React.Component {
 
     const {hoverCoords, hoverEndCoords} = props;
     this.renderer.updateHover({hoverCoords, hoverEndCoords});
-  }
-
-  updateNodes(props) {
-    props === undefined && ({props} = this);
-
-    const {nodes} = props;
-    this.renderer.updateNodes({nodes});
   }
 
   rerender() {
@@ -617,7 +619,7 @@ export default class World extends React.Component {
     const downMouseButtons = inputUtils.getDownMouseButtons(mouseButtons);
 
     const {engines} = props;
-    if (!downMouseButtons.left) {
+    if (!downMouseButtons['LEFT']) {
       engines.hoverCoords(hoverCoordsNormalized);
 
       const last = (() => {
