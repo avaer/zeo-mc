@@ -77,7 +77,6 @@ function _makeWorker(url, cbs) {
 }
 
 function Script(src) {
-  this._src = src;
   this._url = _makeUrl(src);
   this._cbs = {};
   this._worker = null;

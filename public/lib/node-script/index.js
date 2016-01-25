@@ -5,17 +5,16 @@ import jsfe from '../jsfe/index';
 const BABEL_OPTIONS = {
 };
 
+function _compileSrc(src) {
+  const result = babel.transform(src, BABEL_OPTIONS);
+  const {code} = result;
+  return code;
+}
+
 class NodeScript {
   constructor(src) {
-    this._src = src;
-    this._compiledSrc = this.compile();
-    this._script = new jsfe.Script(this._compiledSrc);
-  }
-
-  compile() {
-    const result = babel.transform(this._src, BABEL_OPTIONS);
-    const {code} = result;
-    return code;
+    const compiledSrc = _compileSrc(src);
+    this._script = new jsfe.Script(compiledSrc);
   }
 
   start() {
