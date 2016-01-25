@@ -15,7 +15,6 @@ class NodeScript {
   compile() {
     const result = babel.transform(this._src, BABEL_OPTIONS);
     const {code} = result;
-// XXX include React helpers here
     return code;
   }
 
@@ -38,6 +37,10 @@ class NodeScript {
   emit(e, d) {
     this._script.emit(e, d);
   }
+
+  destroy() {
+    this._script.destroy();
+  }
 }
 
 NodeScript.test = () => {
@@ -47,6 +50,7 @@ NodeScript.test = () => {
     console.log('got render', d);
     s.kill();
     s.emit('frame', {lol: 'zol'});
+    s.destroy();
   });
   s.emit('frame', {lol: 'zol'});
 };

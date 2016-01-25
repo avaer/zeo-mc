@@ -50,44 +50,54 @@ var WORKER_HEADER = '"use strict";\n' +
   };
 }).toString() + ')();\n';
 
+function _makeUrl(src) {
+  var prefixedSrc = WORKER_HEADER + src;
+  var blob = new Blob([prefixedSrc], {type: 'application/javascript'});
+  var url = URL.createObjectURL(blob);
+  return url;
+}
+
+function _makeWorker(url, cbs) {
+  var worker = new Worker(url);
+  worker.onmessage = function(event) {
+    var msg = event.data;
+    var e = msg.type;
+    var data = msg.data;
+
+    var l = cbs[e];
+    if (l) {
+      for (var i = 0; i < l.length; i++) {
+      var cb = l[i];
+        cb(data);
+      }
+    }
+  };
+
+  return worker;
+}
+
 function Script(src) {
   this._src = src;
+  this._url = _makeUrl(src);
   this._cbs = {};
   this._worker = null;
 }
 Script.prototype = {
   start: function() {
-    function makeWorker(src, cbs) {
-      var prefixedSrc = WORKER_HEADER + src;
-      var blob = new Blob([prefixedSrc], {type: 'application/javascript'});
-      var objectUrl = URL.createObjectURL(blob);
-
-      var worker = new Worker(objectUrl);
-      worker.onmessage = function(event) {
-        var msg = event.data;
-        var e = msg.type;
-        var data = msg.data;
-
-        var l = cbs[e];
-        if (l) {
-          for (var i = 0; i < l.length; i++) {
-            var cb = l[i];
-            cb(data);
-          }
-        }
-      };
-
-      return worker;
-    }
-
     if (!this._worker) {
-      this._worker = makeWorker(this._src, this._cbs);
+      this._worker = _makeWorker(this._url, this._cbs);
     }
   },
   kill: function() {
     if (this._worker) {
       this._worker.terminate();
       this._worker = null;
+    }
+  },
+  destroy: function() {
+    if (this._url) {
+      URL.revokeObjectURL(this._url);
+      this._url = null;
     }
   },
   emit: function(e, d) {
