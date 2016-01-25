@@ -1,6 +1,7 @@
 import React from 'react';
 
 import World from './World';
+import Editor from './Editor';
 
 export default class AppBody extends React.Component {
   render() {
@@ -29,8 +30,15 @@ export default class AppBody extends React.Component {
       engines
     };
 
+    const editorProps = {
+      visible: false
+    };
+
     return (
-      <World {...worldProps}/>
+      <div className='app-body'>
+        <World {...worldProps} />
+        <Editor {...editorProps} />
+      </div>
     );
   }
 }
