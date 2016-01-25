@@ -28,6 +28,7 @@
     "react": "",
     "react-dom": "",
     "react-ace": "",
+    "brace": "",
     "immutable": "",
     "engine.io": "",
     "mkdirp": "",

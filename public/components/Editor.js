@@ -3,6 +3,8 @@ import ReactDom from 'react-dom';
 import {is} from 'immutable';
 
 import AceEditor from 'react-ace';
+import 'brace/mode/jsx';
+import 'brace/theme/chrome';
 
 class Editor extends React.Component {
   static defaultProps = {
@@ -82,6 +84,7 @@ class Editor extends React.Component {
       value={this.state.value}
       onChange={value => this.setState({value})}
       name='editor'
+      tabSize={2}
       onLoad={editor => { this._editor = editor; }}
       // editorProps={{$blockScrolling: true}}
     />;
