@@ -1,12 +1,18 @@
 var URL = window.URL || window.webkitURL;
 
-var WORKER_HEADER = '"use strict";\n' +
-'(' + (function() {
+var FUNCTION_PREFIX = '(function() {\n';
+var FUNCTION_SUFFIX = '\n})();\n';
+
+function _wrapFunction(src) {
+  return FUNCTION_PREFIX + src + FUNCTION_SUFFIX;
+}
+
+var WORKER_HEADER = '"use strict";\n' + _wrapFunction(`
   var _postMessage = self.postMessage;
   delete self.postMessage;
 
   var _cbs = {};
-  self.on = function(e, cb) {
+  var on = function(e, cb) {
     var l = _cbs[e];
     if (!l) {
       l = [];
@@ -14,7 +20,8 @@ var WORKER_HEADER = '"use strict";\n' +
     }
     l.push(cb);
   };
-  self.off = function(e, cb) {
+  self.on = on;
+  var off = function(e, cb) {
     var l = _cbs[e];
     if (l) {
       if (typeof cb === 'undefined') {
@@ -27,15 +34,17 @@ var WORKER_HEADER = '"use strict";\n' +
       }
     }
   };
-  self.emit = function(e, d) {
+  self.off = off;
+  var emit = function(e, d) {
     var msg = {
       type: e,
       data: d
     };
     _postMessage(msg);
   };
+  self.emit = emit;
 
-  self.onmessage = function(m) {
+  var onmessage = function(m) {
     var msg = m.data;
     var e = msg.type;
     var data = msg.data;
@@ -48,29 +57,59 @@ var WORKER_HEADER = '"use strict";\n' +
       }
     }
   };
-}).toString() + ')();\n';
+  self.onmessage = onmessage;
+
+  var console = {};
+  console.log = function() {
+    var s = '';
+    for (var i = 0; i < arguments.length; i++) {
+      var a = arguments[i];
+      if (typeof a === 'object') {
+        a = JSON.stringify(a, null, 2);
+      } else {
+        a = String(a);
+      }
+      s += a;
+      if (i !== arguments.length - 1) {
+        s += ' ';
+      }
+    }
+    s += '\\n';
+    emit('console', s);
+  };
+  self.console = console;
+
+  self.exports = {};
+`);
 
 function _makeUrl(src) {
-  var prefixedSrc = WORKER_HEADER + src;
+  var prefixedSrc = WORKER_HEADER + _wrapFunction(src);
   var blob = new Blob([prefixedSrc], {type: 'application/javascript'});
   var url = URL.createObjectURL(blob);
   return url;
 }
 
 function _makeWorker(url, cbs) {
-  var worker = new Worker(url);
-  worker.onmessage = function(event) {
-    var msg = event.data;
-    var e = msg.type;
-    var data = msg.data;
-
+  function _handleMessage(e, d) {
     var l = cbs[e];
     if (l) {
       for (var i = 0; i < l.length; i++) {
       var cb = l[i];
-        cb(data);
+        cb(d);
       }
     }
+  }
+
+  var worker = new Worker(url);
+  worker.onmessage = function(event) {
+    var msg = event.data;
+    var e = msg.type;
+    var d = msg.data;
+
+    _handleMessage(e, d);
+  };
+  worker.onerror = function(error) {
+    _handleMessage('error', error);
   };
 
   return worker;

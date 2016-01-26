@@ -42,16 +42,4 @@ class NodeScript {
   }
 }
 
-NodeScript.test = () => {
-  const s = new NodeScript('on("frame", frameData => { emit("render", frameData); });');
-  s.start();
-  s.on('render', d => {
-    console.log('got render', d);
-    s.kill();
-    s.emit('frame', {lol: 'zol'});
-    s.destroy();
-  });
-  s.emit('frame', {lol: 'zol'});
-};
-
 export default NodeScript;

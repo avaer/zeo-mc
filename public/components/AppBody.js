@@ -1,4 +1,5 @@
 import React from 'react';
+import Immutable from 'immutable'; // XXX
 
 import World from './World';
 import Editor from './Editor';
@@ -11,7 +12,7 @@ export default class AppBody extends React.Component {
     const {stores, engines} = this.props;
     const {ui: uiState, window: windowState, world: worldState} = stores;
 
-    const {mode, value} = uiState;
+    const {mode, value, oldValue} = uiState;
     const {width, height, pixelRatio, mouse: {position: mousePosition, buttons: mouseButtons}} = windowState;
     const {position, rotation, velocity, tool, nodes, hoverCoords, hoverEndCoords} = worldState;
     const worldProps = {
@@ -51,7 +52,8 @@ export default class AppBody extends React.Component {
     };
 
     const nodeProps = {
-      value,
+      src: oldValue,
+      state: new Immutable.Map({lol: 'zol'}),
     };
 
     return (
