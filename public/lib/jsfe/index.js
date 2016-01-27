@@ -1,4 +1,20 @@
+var babel = require('../../dist/babel-core/index');
+
 var URL = window.URL || window.webkitURL;
+
+var BABEL_OPTIONS = {
+};
+
+function _compileSrc(src) {
+  var result, error = null;
+  try {
+    result = babel.transform(src, BABEL_OPTIONS);
+  } catch(err) {
+    error = err;
+  }
+  var code = !error ? result.code : null;
+  return {error: error, code: code};
+}
 
 var FUNCTION_PREFIX = '(function() {\n';
 var FUNCTION_SUFFIX = '\n})();\n';
@@ -83,47 +99,70 @@ var WORKER_HEADER = '"use strict";\n' + _wrapFunction(`
 `);
 
 function _makeUrl(src) {
-  var prefixedSrc = WORKER_HEADER + _wrapFunction(src);
-  var blob = new Blob([prefixedSrc], {type: 'application/javascript'});
-  var url = URL.createObjectURL(blob);
-  return url;
-}
-
-function _makeWorker(url, cbs) {
-  function _handleMessage(e, d) {
-    var l = cbs[e];
-    if (l) {
-      for (var i = 0; i < l.length; i++) {
-      var cb = l[i];
-        cb(d);
-      }
+  var compiledSrc = _compileSrc(src);
+  var error = compiledSrc.error;
+  var url = (function() {
+    if (!error) {
+      var code = compiledSrc.code;
+      var prefixedSrc = WORKER_HEADER + _wrapFunction(compiledSrc);
+      var blob = new Blob([prefixedSrc], {type: 'application/javascript'});
+      var url = URL.createObjectURL(blob);
+      return url;
+    } else {
+      return null;
     }
-  }
-
-  var worker = new Worker(url);
-  worker.onmessage = function(event) {
-    var msg = event.data;
-    var e = msg.type;
-    var d = msg.data;
-
-    _handleMessage(e, d);
-  };
-  worker.onerror = function(error) {
-    _handleMessage('error', error);
-  };
-
-  return worker;
+  })();
+  return {error: error, url: url};
 }
 
 function Script(src) {
-  this._url = _makeUrl(src);
+  var compiledUrl = _makeUrl(src); 
+  this._url = compiledUrl.url;
+  this._error = compiledUrl.error;
+
   this._cbs = {};
   this._worker = null;
 }
 Script.prototype = {
   start: function() {
+    var cbs = this._cbs;
+
+    function _makeWorker(url) {
+      var worker = new Worker(url);
+      worker.onmessage = function(event) {
+        var msg = event.data;
+        var e = msg.type;
+        var d = msg.data;
+
+        _handleMessage(e, d);
+      };
+      worker.onerror = function(error) {
+        _handleMessage('error', error);
+      };
+
+      return worker;
+    }
+
+    function _handleMessage(e, d) {
+      var l = cbs[e];
+      if (l) {
+        for (var i = 0; i < l.length; i++) {
+        var cb = l[i];
+          cb(d);
+        }
+      }
+    }
+
     if (!this._worker) {
-      this._worker = _makeWorker(this._url, this._cbs);
+      var error = this._error;
+      if (!error) {
+        var url = this._url;
+        this._worker = _makeWorker(url);
+      } else {
+        requestAnimationFrame(function() {
+          _handleMessag('error', error);
+        });
+      }
     }
   },
   kill: function() {

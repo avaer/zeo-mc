@@ -1,20 +1,8 @@
-import babel from '../../dist/babel-core/index';
-
 import jsfe from '../jsfe/index';
-
-const BABEL_OPTIONS = {
-};
-
-function _compileSrc(src) {
-  const result = babel.transform(src, BABEL_OPTIONS);
-  const {code} = result;
-  return code;
-}
 
 class NodeScript {
   constructor(src) {
-    const compiledSrc = _compileSrc(src);
-    this._script = new jsfe.Script(compiledSrc);
+    this._script = new jsfe.Script(src);
   }
 
   start() {
