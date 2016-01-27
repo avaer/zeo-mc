@@ -27,21 +27,21 @@ var WORKER_HEADER = '"use strict";\n' + _wrapFunction(`
   var _postMessage = self.postMessage;
   delete self.postMessage;
 
-  var _cbs = {};
+  var cbs = {};
   var on = function(e, cb) {
-    var l = _cbs[e];
+    var l = cbs[e];
     if (!l) {
       l = [];
-      _cbs[e] = l;
+      cbs[e] = l;
     }
     l.push(cb);
   };
   self.on = on;
   var off = function(e, cb) {
-    var l = _cbs[e];
+    var l = cbs[e];
     if (l) {
       if (typeof cb === 'undefined') {
-        _cbs[e] = [];
+        cbs[e] = [];
       } else {
         var index = l.indexOf(cb);
         if (~index) {
@@ -51,6 +51,29 @@ var WORKER_HEADER = '"use strict";\n' + _wrapFunction(`
     }
   };
   self.off = off;
+  var once = function(e, cb) {
+    function on() {
+      off();
+
+      cb.apply(this, arguments);
+    }
+
+    function off() {
+      var index = l.indexOf(on);
+      if (~index) {
+        l.splice(index, 1);
+      }
+    }
+
+    var l = cbs[e];
+    if (!l) {
+      l = [];
+      cbs[e] = l;
+    }
+    l.push(on);
+  };
+  self.once = once;
+
   var emit = function(e, d) {
     var msg = {
       type: e,
@@ -65,7 +88,7 @@ var WORKER_HEADER = '"use strict";\n' + _wrapFunction(`
     var e = msg.type;
     var data = msg.data;
 
-    var l = _cbs[e];
+    var l = cbs[e];
     if (l) {
       for (var i = 0; i < l.length; i++) {
         var cb = l[i];
