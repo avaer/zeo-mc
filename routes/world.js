@@ -1,6 +1,6 @@
 const url = require('url');
 
-const db = require('../lib/db/index.js');
+const Worlds = require('../lib/worlds');
 
 const routes = [
   {
