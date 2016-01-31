@@ -1,11 +1,6 @@
 const url = require('url');
 
-const config = require('../lib/config/index.js').get();
-const WorldReader = require('../lib/world-reader/index.js');
-
-const worldReader = new WorldReader({
-  dataDirectory: config.dataDirectory
-});
+const db = require('../lib/db/index.js');
 
 const routes = [
   {
@@ -13,22 +8,16 @@ const routes = [
     handler: function(req, res, next) {
       const world = req.param('world');
 
-      worldReader.getIndexJson(world, u.ok(u.resErr(res), indexJson => {
-        res.contentType(indexJson.contentType);
-        res.send(indexJson.data);
-	  }));
+      res.send(db.getWorld(world));
     }
   },
   {
-    path: '/worlds/:world/:path*',
+    method: 'put',
+    path: '/worlds/:world',
     handler: function(req, res, next) {
       const world = req.param('world');
-      const path = req.param('path');
 
-      worldReader.getFileStream({world, path}, u.ok(u.resErr(res), rs => {
-        res.contentType(rs.contentType);
-        rs.data.pipe(res);
-	  }));
+      res.send(db.setWorld(world));
     }
   }
 ];

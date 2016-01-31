@@ -31,6 +31,7 @@
     "brace": "",
     "immutable": "",
     "engine.io": "",
+    "pouchdb": "",
     "mkdirp": "",
     "glob": "",
     "keypair": "",
