@@ -34,7 +34,6 @@
     "engine.io": "",
     "pouchdb": "",
     "mkdirp": "",
-    "rimraf": "",
     "glob": "",
     "keypair": "",
     "cheerio": "",
