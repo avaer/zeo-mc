@@ -2,7 +2,7 @@ const eio = require('engine.io');
 const u = require('../lib/js-utils');
 
 const STREAMS = [
-  'world'
+  'worlds'
 ];
 
 const allStreams = u.flatten(STREAMS.map(name => require('./' + name + '.js')));
@@ -14,15 +14,41 @@ const api = {
     const eios = _makeServer();
 
     function _makeServer() {
-      const eios = new eio.Server();
+      const eios = new eio.Server({
+        transports: ['websocket']
+      });
 
       eios.on('connection', c => {
-        const s = u.find(allStreams, p => c.path.replace(prefix, '').startsWith(p));
+        const connectionPath = c.request.url.replace(prefix, '').replace(/\/\?.*$/, '');
+        const stream = u.find(allStreams, s => s.path === connectionPath);
 
-        if (stream) {
-          const handler = stream.handler;
-          handler(c);
-        } else {
+        const handled = allStreams.some(stream => {
+          const match = (() => {
+            if (typeof stream.path === 'string') {
+              if (connectionPath === stream.path) {
+                return [connectionPath];
+              } else {
+                return null;
+              }
+            } else if (stream.path instanceof RegExp) {
+              return connectionPath.match(stream.path);
+            } else {
+              return null;
+            }
+          })();
+          if (match) {
+            c.params = match;
+
+            const handler = stream.handler;
+            handler(c);
+
+            return true;
+          } else {
+            return false;
+          }
+        });
+
+        if (!handled) {
           c.close();
         }
       });

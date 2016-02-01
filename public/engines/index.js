@@ -1,6 +1,6 @@
 import Immutable from 'immutable';
 
-import eio from '../dist/engine.io/index.js'; // XXX
+import eio from '../dist/engine.io/index.js';
 
 import Point from '../records/point/index';
 import Vector from '../records/vector/index';
@@ -60,12 +60,8 @@ export default class Engines {
   listen() {
     this.listenWindow();
     this.listenInput();
+    this.listenNetwork();
     this.listenFrame();
-  }
-
-  listenInput() {
-    this.listenKeyboard();
-    this.listenMouse();
   }
 
   listenWindow() {
@@ -78,6 +74,11 @@ export default class Engines {
         .set('keys', new Immutable.Map())
         .setIn([ 'mouse', 'buttons' ], new Immutable.Map()));
     });
+  }
+
+  listenInput() {
+    this.listenKeyboard();
+    this.listenMouse();
   }
 
   listenKeyboard() {
@@ -110,6 +111,23 @@ export default class Engines {
       this.updateState('window', oldState => oldState
         .setIn([ 'mouse', 'position', 'x' ], x)
         .setIn([ 'mouse', 'position', 'y' ], y));
+    });
+  }
+
+  listenNetwork() {
+    const host = window.location.host;
+    const socket = new eio.Socket('ws://' + host + '/', {
+      path: '/api/stream/worlds/test-world',
+      transports: ['websocket']
+    });
+    socket.on('open', () => { // XXX push render/load changes here
+      console.log('socket open');
+    });
+    socket.on('close', () => {
+      console.log('socket close');
+    });
+    socket.on('error', err => {
+      console.log('socket error', err);
     });
   }
 

@@ -38,10 +38,13 @@ config.bootstrap(u.ok(() => {
     next();
   });
 
+  const streamPrefix = path.join(API_PREFIX, '/stream');
   const streamApp = streams.app({
-    prefix: path.join(API_PREFIX, '/stream')
+    prefix: streamPrefix
   });
-  streamApp.attach(webpackDevServer.listeningApp);
+  streamApp.attach(webpackDevServer.listeningApp, {
+    path: streamPrefix
+  });
 
   const routesApp = routes.app();
   webpackDevServer.use(API_PREFIX, routesApp);
