@@ -70,7 +70,8 @@ class Node extends React.Component {
 
     this.setState(_initialState());
 
-    this._nodeScript = new NodeScript(src);
+    // XXX replace with backend worlds handling via engine.io
+    /* this._nodeScript = new NodeScript(src);
     this._nodeScript.start();
     this._nodeScript.on('render', d => { // XXX refactor this into an exported render() call
       this.setState(({state}) => {state: state.update('value', oldValue => oldValue + JSON.stringify(d, null, 2) + '\n')});
@@ -82,7 +83,7 @@ class Node extends React.Component {
       const {filename, lineno, message} = error;
       const s = 'script.js:' + lineno + ': ' + message + '\n';
       this.setState(({state}) => {state: state.update('value', oldValue => oldValue + s)});
-    });
+    }); */
   }
 
   stop(props) {
