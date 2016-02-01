@@ -1,5 +1,7 @@
 import Immutable from 'immutable';
 
+import eio from '../dist/engine.io/index.js'; // XXX
+
 import Point from '../records/point/index';
 import Vector from '../records/vector/index';
 import Node from '../records/node/index';
