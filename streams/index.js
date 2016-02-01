@@ -1,7 +1,11 @@
 const eio = require('engine.io');
 const u = require('../lib/js-utils');
 
-const allStreams = u.flatten(['page'].map(name => require('./' + name + '.js')));
+const STREAMS = [
+  'world'
+];
+
+const allStreams = u.flatten(STREAMS.map(name => require('./' + name + '.js')));
 
 const api = {
   app(opts) {
