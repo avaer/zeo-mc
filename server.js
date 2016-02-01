@@ -4,8 +4,6 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const webpackConfig = require('./webpack.config');
 
-const expressPromise = require('express-promise');
-
 const config = require('./lib/config');
 const u = require('./lib/js-utils');
 const routes = require('./routes/index.js');
@@ -27,7 +25,18 @@ config.bootstrap(u.ok(() => {
     hot: true,
     historyApiFallback: true
   });
-  webpackDevServer.use(expressPromise);
+  webpackDevServer.use(function(req, res, next) {
+    res.promise = function(p) {
+      p.then(function(result) {
+        res.json(result);
+      }).catch(function(err) {
+        res.statusCode = 500;
+        res.send(err);
+      });
+    };
+
+    next();
+  });
 
   const streamApp = streams.app({
     prefix: path.join(API_PREFIX, '/stream')

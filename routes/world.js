@@ -8,7 +8,7 @@ const routes = [
     handler: function(req, res, next) {
       const world = req.param('world');
 
-      res.send(db.getWorld(world));
+      res.promise(db.getWorld(world));
     }
   },
   {
@@ -17,7 +17,7 @@ const routes = [
     handler: function(req, res, next) {
       const world = req.param('world');
 
-      res.send(db.setWorld(world));
+      res.promise(db.setWorld(world));
     }
   }
 ];
