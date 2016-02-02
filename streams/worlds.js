@@ -1,4 +1,6 @@
-const worlds = [
+const worlds = require('../lib/worlds-instance');
+
+const worldStreams = [
   {
     path: /^\/worlds\/([^\/]+)$/,
     handler: c => {
@@ -8,4 +10,4 @@ const worlds = [
   }
 ];
 
-module.exports = worlds;
+module.exports = worldStreams;
