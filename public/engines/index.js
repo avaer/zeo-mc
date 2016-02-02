@@ -15,7 +15,7 @@ const GRAVITY_PER_FRAME = 0.0005 * FRAME_RATE;
 const JUMP_VELOCITY = 0.175;
 const ROTATE_PER_WIDTH = Math.PI * 2;
 
-function syncWindow(oldState) {
+function _syncWindow(oldState) {
   const $window = $(window);
   const width = $window.width();
   const height = $window.height();
@@ -25,6 +25,94 @@ function syncWindow(oldState) {
     .set('width', width)
     .set('height', height)
     .set('pixelRatio', pixelRatio);
+}
+
+function _connectToWorld(id) {
+  const c = new eio.Transport({});
+
+  const handlers = [];
+  function _connectionRead(handler) {
+    handlers.push(handler);
+  }
+  c.read = _connectionRead;
+
+  const queue = [];
+  function _connectionWrite(e, d) {
+    const msg = {
+      event: e,
+      data: d
+    };
+    const msgJson = JSON.stringify(msg);
+    if (s !== null) {
+      s.send(msgJson);
+    } else {
+      queue.push(msgJson);
+    }
+  }
+  c.write = _connectionWrite;
+
+  function _handleMessage(e, d) {
+    for (let i = 0; i < handlers.length; i++) {
+      const handler = handlers[i];
+      handler(e, d);
+    }
+  }
+
+  let socket = null;
+  function init() {
+    const host = window.location.host;
+    socket = new eio.Socket('ws://' + host + '/', {
+      path: '/api/stream/worlds/' + id,
+      transports: ['websocket']
+    });
+    socket.on('open', () => {
+      console.log('socket open');
+
+      while (queue.length > 0) {
+        const msgJson = queue.shift();
+        socket.send(msgJson);
+      }
+
+      socket.on('message', s => {
+        let result, error = null;
+        try {
+          result = JSON.parse(s);
+          if (typeof result === 'object' && result !== null && (typeof result.event === 'string') && ('data' in result)) {
+            // nothing
+          } else {
+            throw new Error('invalid message');
+          }
+        } catch(err) {
+          error = err;
+        }
+        if (!error) {
+          _handleMessage(result.event, result.data);
+        } else {
+          _handleMessage('error', {
+            code: 'EPARSE'
+          });
+        }
+      });
+    });
+    socket.on('close', () => {
+      console.warn('socket closed');
+
+      socket = null;
+
+      setTimeout(init, 1000);
+    });
+    socket.on('error', err => {
+      console.warn('socket error', err);
+
+      socket = null;
+
+      setTimeout(init, 1000);
+    });
+  }
+
+  init();
+
+  return c;
 }
 
 export default class Engines {
@@ -54,7 +142,7 @@ export default class Engines {
   }
 
   initWindow() {
-    this.updateState('window', syncWindow);
+    this.updateState('window', _syncWindow);
   }
 
   listen() {
@@ -67,7 +155,7 @@ export default class Engines {
   listenWindow() {
     const $window = $(window);
     $window.on('resize', () => {
-      this.updateState('window', syncWindow);
+      this.updateState('window', _syncWindow);
     });
     $window.on('blur', () => {
       this.updateState('window', oldState => oldState
@@ -115,19 +203,9 @@ export default class Engines {
   }
 
   listenNetwork() {
-    const host = window.location.host;
-    const socket = new eio.Socket('ws://' + host + '/', {
-      path: '/api/stream/worlds/test-world',
-      transports: ['websocket']
-    });
-    socket.on('open', () => { // XXX push render/load changes here
-      console.log('socket open');
-    });
-    socket.on('close', () => {
-      console.log('socket close');
-    });
-    socket.on('error', err => {
-      console.log('socket error', err);
+    const c = _connectToWorld('test-world');
+    c.read((e, d) => {
+      console.log('got message', {event: e, data: d});
     });
   }
 

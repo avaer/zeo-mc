@@ -1,3 +1,5 @@
+"use strict";
+
 const eio = require('engine.io');
 const u = require('../lib/js-utils');
 
@@ -6,6 +8,38 @@ const STREAMS = [
 ];
 
 const allStreams = u.flatten(STREAMS.map(name => require('./' + name + '.js')));
+
+function _connectionRead(handler) {
+  this.on('message', s => {
+    let result, error = null;
+    try {
+      result = JSON.parse(s);
+      if (typeof result === 'object' && result !== null && (typeof result.event === 'string') && ('data' in result)) {
+        // nothing
+      } else {
+        throw new Error('invalid message');
+      }
+    } catch(err) {
+      error = err;
+    }
+    if (!error) {
+      handler(result.event, result.data);
+    } else {
+      handler('error', {
+        code: 'EPARSE'
+      });
+    }
+  });
+}
+
+function _connectionWrite(e, d) {
+  const msg = {
+    event: e,
+    data: d
+  };
+  const msgJson = JSON.stringify(msg);
+  this.send(msgJson);
+}
 
 const api = {
   app(opts) {
@@ -38,6 +72,8 @@ const api = {
           })();
           if (match) {
             c.params = match;
+            c.read = _connectionRead;
+            c.write = _connectionWrite;
 
             const handler = stream.handler;
             handler(c);
