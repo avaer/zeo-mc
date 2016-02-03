@@ -10,16 +10,17 @@ const worldStreams = [
       if (world) {
         console.log('got connection to world', id);
 
-        world.forEachCachedRender(d => {
-          c.write('render', d);
+        world.forEachNode(node => {
+          const nodeData = node.getData();
+          c.write('nodeUpdate', nodeData);
         });
 
-        const handleRender = d => {
-          c.write('render', d);
+        const handleNodeUpdate = d => {
+          c.write('nodeUpdate', d);
         };
-        world.on('render', handleRender);
+        world.on('nodeUpdate', handleNodeUpdate);
         c.on('close', () => {
-          world.removeListener('render', handleRender);
+          world.removeListener('nodeUpdate', handleNodeUpdate);
         });
 
         c.read((e, d) => {

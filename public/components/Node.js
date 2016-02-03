@@ -69,21 +69,6 @@ class Node extends React.Component {
     const {src} = props;
 
     this.setState(_initialState());
-
-    // XXX replace with backend worlds handling via engine.io
-    /* this._nodeScript = new NodeScript(src);
-    this._nodeScript.start();
-    this._nodeScript.on('render', d => { // XXX refactor this into an exported render() call
-      this.setState(({state}) => {state: state.update('value', oldValue => oldValue + JSON.stringify(d, null, 2) + '\n')});
-    });
-    this._nodeScript.on('console', s => {
-      this.setState(({state}) => {state: state.update('value', oldValue => oldValue + s)});
-    });
-    this._nodeScript.on('error', error => {
-      const {filename, lineno, message} = error;
-      const s = 'script.js:' + lineno + ': ' + message + '\n';
-      this.setState(({state}) => {state: state.update('value', oldValue => oldValue + s)});
-    }); */
   }
 
   stop(props) {

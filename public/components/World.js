@@ -376,7 +376,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       camera.position.set(position.x, CAMERA_HEIGHT + position.y, position.z);
       camera.rotation.x = -rotation.y;
       camera.rotation.y = -rotation.x;
-	},
+    },
     updateNodes({nodes}) {
       nodes.forEach(node => {
         const {id, position, box} = node;
@@ -411,7 +411,7 @@ function makeThreeRenderer({width, height, pixelRatio}) {
       const {_materials: materials} = toolMesh;
       const material = materials[tool];
       toolMesh.material = material;
-	},
+    },
     updateHover: ({hoverCoords, hoverEndCoords}) => {
       if (hoverCoords) {
         const {x: x1, y: y1, z: z1} = hoverCoords;
