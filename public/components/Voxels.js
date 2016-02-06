@@ -4,7 +4,7 @@ import {is} from 'immutable';
 import voxel from 'voxel';
 import voxelEngine from 'voxel-engine';
 import voxelPerlinTerrain from '../lib/voxel-perlin-terrain/index';
-import voxelSky from 'voxel-sky';
+import voxelSky from '../lib/voxel-sky/index';
 import voxelHighlight from 'voxel-highlight';
 import voxelPlayer from 'voxel-player';
 import voxelWalk from 'voxel-walk';
