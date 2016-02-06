@@ -7,8 +7,8 @@ module.exports = function(r, color) {
 
   // bg glow
   this.context.beginPath();
-  x = (this.canvas.width/2);
-  y = (this.canvas.height/2);
+  var x = (this.canvas.width/2);
+  var y = (this.canvas.height/2);
   var grd = this.context.createRadialGradient(x, y, 1, x, y, r * 2);
   grd.addColorStop(0, this.rgba(1, 1, 1, 0.3));
   grd.addColorStop(1, this.rgba(1, 1, 1, 0));
