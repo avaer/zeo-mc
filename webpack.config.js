@@ -20,21 +20,27 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin()
   ],
   module: {
-    loaders: [{
-      test: /\.js$/,
-      exclude: /^\.\/public\/(?:include|dist)\/[^\/]+\/index.js$/,
-      loaders: ['react-hot', 'babel'],
-      include: [
-        path.join(__dirname, 'public/index'),
-        path.join(__dirname, 'public/lib'),
-        path.join(__dirname, 'public/constants'),
-        path.join(__dirname, 'public/utils'),
-        path.join(__dirname, 'public/resources'),
-        path.join(__dirname, 'public/components'),
-        path.join(__dirname, 'public/stores'),
-        path.join(__dirname, 'public/engines'),
-        path.join(__dirname, 'public/records')
-      ]
-    }]
+    loaders: [
+      {
+        test: /\.js$/,
+        exclude: /^\.\/public\/(?:include|dist)\/[^\/]+\/index.js$/,
+        loaders: ['react-hot', 'babel'],
+        include: [
+          path.join(__dirname, 'public/index'),
+          path.join(__dirname, 'public/lib'),
+          path.join(__dirname, 'public/constants'),
+          path.join(__dirname, 'public/utils'),
+          path.join(__dirname, 'public/resources'),
+          path.join(__dirname, 'public/components'),
+          path.join(__dirname, 'public/stores'),
+          path.join(__dirname, 'public/engines'),
+          path.join(__dirname, 'public/records')
+        ]
+      },
+      {
+        test: /\.json$/,
+        loaders: ['json-loader'],
+      },
+    ]
   }
 };
