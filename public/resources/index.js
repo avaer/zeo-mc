@@ -1,6 +1,28 @@
 import {TOOL_NAMES, TOOL_SIZE} from '../constants/index';
 
-const IMAGE_URLS = TOOL_NAMES.map(suffix => '/api/img/tools/' + suffix + '.png').concat([
+const TEXTURES = [
+  'bedrock',
+  'brick',
+  'crate',
+  'dirt',
+  'drone-bottom',
+  'drone-front',
+  'drone-side',
+  'drone-top',
+  'grass',
+  'grass_dirt',
+  'grass_top',
+  'leaves_opaque',
+  'obsidian',
+  'plank',
+  'tree_side',
+  'whitewool',
+  'player',
+];
+
+const IMAGE_URLS = TEXTURES.map(suffix => '/api/img/textures/' + suffix + '.png').concat(
+  TOOL_NAMES.map(suffix => '/api/img/tools/' + suffix + '.png')
+).concat([
   '/api/img/sky/skybox.jpg'
 ]);
 
