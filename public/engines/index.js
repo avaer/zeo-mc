@@ -203,10 +203,11 @@ export default class Engines {
   }
 
   listenNetwork() {
-    const c = _connectToWorld('test-world');
+    // XXX
+    /* const c = _connectToWorld('test-world');
     c.read((e, d) => {
       console.log('got message', {event: e, data: d});
-    });
+    }); */
   }
 
   listenFrame() {
