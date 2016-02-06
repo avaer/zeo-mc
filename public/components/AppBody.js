@@ -1,7 +1,8 @@
 import React from 'react';
 import Immutable from 'immutable'; // XXX
 
-import World from './World';
+// import World from './World';
+import Voxels from './Voxels';
 import Editor from './Editor';
 import Node from './Node';
 
@@ -35,6 +36,10 @@ export default class AppBody extends React.Component {
       engines,
     };
 
+    const voxelsProps = {
+      // XXX
+    };
+
     const editorProps = {
       value,
       visible: mode === UI_MODES.EDITOR,
@@ -58,7 +63,8 @@ export default class AppBody extends React.Component {
 
     return (
       <div className='app-body'>
-        <World {...worldProps} />
+        {/*<World {...worldProps} />*/}
+        <Voxels {...voxelsProps} />
         <Editor {...editorProps} />
         <Node {...nodeProps} />
       </div>
