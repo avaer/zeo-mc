@@ -3,7 +3,7 @@ import ReactDom from 'react-dom';
 import {is} from 'immutable';
 import voxel from 'voxel';
 import voxelEngine from 'voxel-engine';
-import voxelPerlinTerrain from 'voxel-perlin-terrain';
+import voxelPerlinTerrain from '../lib/voxel-perlin-terrain/index';
 import voxelSky from 'voxel-sky';
 import voxelHighlight from 'voxel-highlight';
 import voxelPlayer from 'voxel-player';
