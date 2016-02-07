@@ -1,8 +1,8 @@
 var min = Math.min;
 var abs = Math.abs;
-var floor = function(n) {
-  return ~~n;
-};
+var floor = Math.floor;
+var pow = Math.pow;
+var sqrt = Math.sqrt;
 
 var Alea = require('alea');
 var noise = require('perlin').noise;
@@ -19,15 +19,38 @@ var TERRAIN_FREQUENCY = 1;
 var TERRAIN_OCTAVES = 8;
 var TERRAIN_DIVISOR = 80;
 
+var TREE_RATE = 0.1;
+var TREE_MIN_HEIGHT = 4;
+var TREE_MAX_HEIGHT = 14;
+var TREE_BASE_RATIO = 0.3;
+var TREE_LEAF_RATE = 0.6;
+var TREE_LEAF_SIZE = 4;
+
 module.exports = function(opts) {
   opts = opts || {};
-  var rng = new Alea(opts.seed);
-  var noise = new FastSimplexNoise({
+  var terrainRng = new Alea(opts.seed + '-terrain');
+  var terrainNoise = new FastSimplexNoise({
     min: TERRAIN_FLOOR,
     max: TERRAIN_CEILING,
     frequency: TERRAIN_FREQUENCY,
     octaves: TERRAIN_OCTAVES,
-    random: rng
+    random: terrainRng
+  });
+  var treeRng = new Alea(opts.seed + '-tree');
+  var treeNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: 1,
+    octaves: 2,
+    random: treeRng
+  });
+  var treeLeafRng = new Alea(opts.seed + '-leaf');
+  var treeLeafNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: 0.5,
+    octaves: 1,
+    random: treeLeafRng
   });
 
   return function generateChunk(position, width) {
@@ -40,121 +63,107 @@ module.exports = function(opts) {
     var endZ = startZ + width;
 
     var chunk = new Int8Array(width * width * width);
-    pointsInside(startX, startZ, width, function(x, z) {
-      // var n = noise.simplex2(x / divisor, z / divisor);
-      // var y = ~~scale(n, -1, 1, floor, ceiling);
-      var y = floor(noise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
-      /* if (y > startY + width) {
-        console.log('got y', {y, limit: startY + width});
-        y = startY + width - 1;
-      } */
+    pointsInside(point);
+
+    function point(x, z) {
+      var y = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
       if (y === TERRAIN_FLOOR || (y >= startY && y < endY)) {
-        // floor
-        var idx = getIndex(x, y, z, width);
-        chunk[idx] = GRASS;
-
-        // trees
-        if (rng() < 0.01) {
-          tree(x, y, z);
-        }
-
-        // mines
-        for (var i = startY; i < y; i++) {
-          var idx = getIndex(x, i, z, width);
-          chunk[idx] = OBSIDIAN;
-        }
+        land(x, y, z);
+        tree(x, y, z);
+        mines(x, y, z);
+      } else {
+        mines(x, width, z);
       }
-    });
-
-    function tree(x, y, z) {
-      var opts = {};
-      if (!opts.height) opts.height = rng() * 16 + 4;
-      if (opts.base === undefined) opts.base = opts.height / 3;
-
-      var chunkSize = width;
-      var cubeSize = 1;
-      var step = chunkSize * cubeSize;
-      
-      function position () {
-        return { x: x, y: y, z: z };
-      }
-      
-      /* var ymax = 1 * step;
-      var ymin = 0 * step;
-      if (occupied(pos_.y)) {
-          for (var y = pos_.y; occupied(y); y += cubeSize);
-          if (y >= ymax) return false;
-          pos_.y = y;
-      }
-      else {
-          for (var y = pos_.y; !occupied(y); y -= cubeSize);
-          if (y <= ymin) return false;
-          pos_.y = y + cubeSize;
-      }
-      function occupied (y) {
-          var pos = position();
-          pos.y = y;
-          return y <= ymax && y >= ymin && chunk[getIndex(pos.x, pos.y, pos.z, chunkSize)] === undefined;
-      } */
-      
-      var around = [
-          [ 0, 1 ], [ 0, -1 ],
-          [ 1, 1 ], [ 1, 0 ], [ 1, -1 ],
-          [ -1, 1 ], [ -1, 0 ], [ -1, -1 ]
-      ];
-      for (var y = 0; y < opts.height - 1; y++) {
-          var pos = position();
-          // pos.y += y * cubeSize;
-          if (set(pos, BARK)) break;
-          if (y < opts.base) continue;
-          around.forEach(function (offset) {
-              if (!(rng() < 0.6)) return;
-              var x = offset[0] * cubeSize;
-              var z = offset[1] * cubeSize;
-              pos.x += x; pos.z += z;
-              set(pos, LEAVES);
-              pos.x -= x; pos.z -= z;
-          });
-      }
-      
-      var pos = position();
-      pos.y = y;
-      // pos.y += y * cubeSize;
-      set(pos, LEAVES);
-
-      function set(pos, value) {
-        // console.log('tree set', {pos, value});
-        var idx = getIndex(pos.x, pos.y, pos.z, chunkSize);
-        chunk[idx] = value;
-          /* var ex = voxels.voxelAtPosition([pos.x,pos.y,pos.z]);
-          if (ex) true;
-          voxels.voxelAtPosition([pos.x,pos.y,pos.z], value);
-          var c = voxels.chunkAtPosition([pos.x,pos.y,pos.z]);
-          var key = c.join('|');
-          if (!updated[key] && voxels.chunks[key]) {
-              updated[key] = voxels.chunks[key];
-          } */
-      }
-      
-      /* return Object.keys(updated).forEach(function (key) {
-        return updated[key];
-      }); */
     }
 
-    return chunk
+    function land(x, y, z) {
+      set(x, y, z, GRASS);
+    }
+
+    function tree(x, y, z) {
+      var treeNoiseN = treeNoise.in2D(x, z);
+      if (treeNoiseN >= (1 - TREE_RATE)) {
+        var treeHeightNoiseN = sliceNoise(treeNoiseN, TREE_RATE, 1);
+
+        var height = TREE_MIN_HEIGHT + (treeHeightNoiseN * (TREE_MAX_HEIGHT - TREE_MIN_HEIGHT));
+        var base = height * TREE_BASE_RATIO;
+
+        function position() {
+          return { x: x, y: y, z: z };
+        }
+
+        for (var i = 0; i < height; i++) {
+          var pos = position();
+          pos.y = y + i;
+          setMaybe(pos.x, pos.y, pos.z, BARK);
+
+          if (i >= base) {
+            for (var j = -TREE_LEAF_SIZE; j < TREE_LEAF_SIZE; j++) {
+              pos.x = x + j;
+              for (var k = -TREE_LEAF_SIZE; k < TREE_LEAF_SIZE; k++) {
+                if (j === 0 && k === 0) continue;
+                pos.z = z + k;
+                var treeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
+                var treeLeafDistance = sqrt(j * j + k * k);
+                var treeLeafProbability = TREE_LEAF_RATE - ((treeLeafDistance - 1) / (TREE_LEAF_SIZE - 1)) * TREE_LEAF_RATE;
+                if (treeLeafN < treeLeafProbability) {
+                  setMaybe(pos.x, pos.y, pos.z, LEAVES);
+                }
+              }
+            }
+          }
+        }
+        
+        var pos = position();
+        pos.y = y + i;
+        setMaybe(pos.x, pos.y, pos.z, LEAVES);
+      }
+    }
+
+    function mines(x, y, z) {
+      for (var i = startY; i < y; i++) {
+        set(x, i, z, OBSIDIAN);
+      }
+    }
+
+    function pointsInside(fn) {
+      for (var x = startX; x < endX; x++) {
+        for (var z = startZ; z < endZ; z++) {
+          fn(x, z);
+        }
+      }
+    }
+
+    function getIndex(x, y, z) {
+      var xidx = abs((width + x % width) % width);
+      var yidx = abs((width + y % width) % width);
+      var zidx = abs((width + z % width) % width);
+      var idx = xidx + yidx * width + zidx * width * width;
+      return idx;
+    }
+
+    function set(x, y, z, value) {
+      var idx = getIndex(x, y, z);
+      chunk[idx] = value;
+    }
+
+    function isInside(x, y, z) {
+      return x >= startX && x < endX &&
+        y >= startY && y < endY &&
+        z >= startZ && z < endZ;
+    }
+
+    function setMaybe(x, y, z, value) {
+      if (isInside(x, y, z)) {
+        var idx = getIndex(x, y, z);
+        chunk[idx] = value;
+      }
+    }
+
+    function sliceNoise(n, min, max) {
+      return (n - min) / (max - min)
+    }
+
+    return chunk;
   }
-}
-
-function getIndex(x, y, z, width) {
-  var xidx = abs((width + x % width) % width)
-  var yidx = abs((width + y % width) % width)
-  var zidx = abs((width + z % width) % width)
-  var idx = xidx + yidx * width + zidx * width * width
-  return idx;
-}
-
-function pointsInside(startX, startY, width, func) {
-  for (var x = startX; x < startX + width; x++)
-    for (var y = startY; y < startY + width; y++)
-      func(x, y)
 }

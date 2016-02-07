@@ -30,7 +30,7 @@ class Crosshair extends React.Component {
 
 export default class Voxels extends React.Component {
   componentDidMount() {
-    const chunkSize = 16;
+    const chunkSize = 32;
     const chunkDistance = 2;
 
     const game = voxelEngine({
