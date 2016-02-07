@@ -10,7 +10,6 @@ var FastSimplexNoise = require('fast-simplex-noise');
 
 var resources = require('../../resources/index');
 var BLOCKS = resources.BLOCKS.BLOCKS;
-console.log('got blocks', {BLOCKS, MATERIALS: resources.BLOCKS.MATERIALS}, BLOCKS['grass_top']);
 
 var TERRAIN_FLOOR = 0;
 var TERRAIN_CEILING = 20; // minecraft's limit
@@ -101,7 +100,7 @@ module.exports = function(opts) {
     }
 
     function land(x, y, z) {
-      set(x, y, z, BLOCKS['grass_top']);
+      set(x, y, z, BLOCKS['grass_top_plains']);
     }
 
     function tree(x, y, z) {
@@ -152,7 +151,7 @@ module.exports = function(opts) {
                 var idx = getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
                 return !!leafSets[idx];
               })) {
-                setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak']);
+                setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
               }
             });
           }
@@ -162,7 +161,7 @@ module.exports = function(opts) {
         pos.y = y + i;
         var tipTreeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
         if (tipTreeLeafN < TREE_LEAF_RATE) {
-          setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak']);
+          setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
         }
       }
     }

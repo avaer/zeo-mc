@@ -1,41 +1,34 @@
 var fs = require('fs');
 
-var main = [
+var mainTextures = [
   "bedrock",
   "lava_flow",
   "lava_still",
   "obsidian",
   "stone",
   "dirt",
-  "grass_side",
-  "grass_side_overlay",
-  "grass_side_snowed",
-  "grass_top",
-  "log_acacia",
-  "log_acacia_top",
-  "log_big_oak",
-  "log_big_oak_top",
-  "log_birch",
-  "log_birch_top",
-  "log_jungle",
-  "log_jungle_top",
-  "log_oak",
-  "log_oak_top",
-  "log_spruce",
-  "log_spruce_top",
-  "leaves_acacia",
-  "leaves_big_oak",
-  "leaves_birch",
-  "leaves_jungle",
-  "leaves_oak",
-  "leaves_spruce",
+  /grass/,
+  /log/,
+  /leaves/,
 ];
 var files = fs.readdirSync('../img/textures/').filter(function(file) {
   return /\.png$/.test(file) && !/player/.test(file);
 }).map(function(file) {
   return file.replace(/\.png$/, '');
 }).sort(function(a, b) {
-  var d = +!!~main.indexOf(b) - +!!~main.indexOf(a);
+  function mainTexturesMatch(t) {
+    return mainTextures.some(function(mainTexture) {
+      if (typeof mainTexture === 'string') {
+        return t === mainTexture;
+      } else if (mainTexture instanceof RegExp) {
+        return mainTexture.test(t);
+      } else {
+        return false;
+      }
+    });
+  }
+
+  var d = +mainTexturesMatch(b) - +mainTexturesMatch(a);
   if (d !== 0) {
     return d;
   } else {
