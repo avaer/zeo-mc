@@ -5,6 +5,7 @@ import voxel from 'voxel';
 import voxelEngine from 'voxel-engine';
 import voxelPerlinTerrain from '../lib/voxel-perlin-terrain/index';
 import voxelSky from '../lib/voxel-sky/index';
+import voxelClouds from 'voxel-clouds';
 import voxelHighlight from 'voxel-highlight';
 import voxelPlayer from 'voxel-player';
 import voxelWalk from 'voxel-walk';
@@ -67,31 +68,40 @@ export default class Voxels extends React.Component {
 
     const sky = voxelSky({
       game,
-      time: 0,
+      time: 1200,
       // size: 32,
       // color: new THREE.Color(0, 0, 0),
-      speed: 0.2
-    });
-
-    const createPlayer = voxelPlayer(game);
-    const avatar = createPlayer('api/img/textures/player.png')
-    avatar.position.set(0, 16, 0)
-    avatar.yaw.position.set(2, 14, 4)
-    avatar.possess()
-
-    const target = game.controls.target();
-    game.on('tick', function(dt) {
-      voxelWalk.render(target.playerSkin)
-      var vx = Math.abs(target.velocity.x)
-      var vz = Math.abs(target.velocity.z)
-      if (vx > 0.001 || vz > 0.001) voxelWalk.stopWalking()
-      else voxelWalk.startWalking()
-
-      // sky(dt)
+      speed: 0.01
     });
     game.setInterval(function() {
       sky(15);
     }, 15);
+
+    const avatar = voxelPlayer(game)('api/img/textures/player.png');
+    avatar.position.set(0, 20, 0);
+    avatar.yaw.position.set(2, 14, 4);
+    avatar.possess();
+    game.on('tick', function(dt) {
+      voxelWalk.render(avatar.playerSkin);
+
+      const vx = Math.abs(avatar.velocity.x);
+      const vz = Math.abs(avatar.velocity.z);
+      if (vx > 0.001 || vz > 0.001) {
+        voxelWalk.stopWalking();
+      } else {
+        voxelWalk.startWalking();
+      }
+    });
+
+    const clouds = voxelClouds({
+      game,
+      // size: 32,
+      // color: new THREE.Color(0, 0, 0),
+      speed: 0.01
+    });
+    game.on('tick', function(dt) {
+      clouds.tick(dt);
+    });
 
     const highlight = voxelHighlight(game, {
       distance: chunkSize,
