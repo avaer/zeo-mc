@@ -10,6 +10,7 @@ import voxelPlayer from 'voxel-player';
 import voxelWalk from 'voxel-walk';
 import voxelHighlight from 'voxel-highlight';
 import voxelDebris from '../lib/voxel-debris/index';
+import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
 import {CHUNK_SIZE, CHUNK_DISTANCE} from '../constants/index';
@@ -46,13 +47,9 @@ export default class Voxels extends React.Component {
       lightsDisabled: true
     });
 
-    const generator = voxelTerrain({
-      seed: 'lol',
-      chunkSize: CHUNK_SIZE
-    });
     game.voxels.on('missingChunk', function(position) {
       console.log('missingChunk', position);
-      const chunk = generator(position);
+      const chunk = voxelAsync.generateSync(position);
       game.showChunk(chunk);
     });
 
@@ -115,19 +112,7 @@ export default class Voxels extends React.Component {
     });
 
     // game.mesher = voxel.meshers.greedy;
-    const transgreedyMesher = voxel.meshers.transgreedy;
-    const transparentTypes = (() => {
-      const result = {};
-      BLOCKS.TRANSPARENT.forEach(t => {
-        const index = BLOCKS.BLOCKS[t];
-        result[index] = true;
-      });
-      return result;
-    })();
-    const mesherExtraData = {transparentTypes};
-    game.mesher = function(voxels, dims) {
-      return transgreedyMesher(voxels, dims, mesherExtraData);
-    };
+    game.mesher = voxelAsync.mesher;
 
     window.game = game;
     window.voxel = voxel;
