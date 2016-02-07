@@ -23,8 +23,23 @@ var TREE_RATE = 0.1;
 var TREE_MIN_HEIGHT = 4;
 var TREE_MAX_HEIGHT = 14;
 var TREE_BASE_RATIO = 0.3;
-var TREE_LEAF_RATE = 0.6;
-var TREE_LEAF_SIZE = 4;
+var TREE_LEAF_RATE = 0.5;
+var TREE_LEAF_SIZE = 2;
+
+var DIRECTIONS = (function() {
+  var result = [];
+  for (var x = -1; x <= 1; x++) {
+    for (var y = -1; y <= 1; y++) {
+      for (var z = -1; z <= 1; z++) {
+        var numMatches = +(x === y) + +(y === z) + +(x === z);
+        if (numMatches === 1) {
+          result.push({ x: x, y: y, z: z });
+        }
+      }
+    }
+  }
+  return result;
+})();
 
 module.exports = function(opts) {
   opts = opts || {};
@@ -92,31 +107,54 @@ module.exports = function(opts) {
           return { x: x, y: y, z: z };
         }
 
+        function leafPoints(fn) {
+          for (var j = -TREE_LEAF_SIZE; j <= TREE_LEAF_SIZE; j++) {
+            for (var k = -TREE_LEAF_SIZE; k <= TREE_LEAF_SIZE; k++) {
+              if (j === 0 && k === 0) continue;
+              fn(j, k);
+            }
+          }
+        }
+
         for (var i = 0; i < height; i++) {
           var pos = position();
           pos.y = y + i;
           setMaybe(pos.x, pos.y, pos.z, BARK);
 
           if (i >= base) {
-            for (var j = -TREE_LEAF_SIZE; j < TREE_LEAF_SIZE; j++) {
+            var leafSets = {};
+            leafPoints(function(j, k) {
               pos.x = x + j;
-              for (var k = -TREE_LEAF_SIZE; k < TREE_LEAF_SIZE; k++) {
-                if (j === 0 && k === 0) continue;
-                pos.z = z + k;
-                var treeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
-                var treeLeafDistance = sqrt(j * j + k * k);
-                var treeLeafProbability = TREE_LEAF_RATE - ((treeLeafDistance - 1) / (TREE_LEAF_SIZE - 1)) * TREE_LEAF_RATE;
-                if (treeLeafN < treeLeafProbability) {
-                  setMaybe(pos.x, pos.y, pos.z, LEAVES);
-                }
+              pos.z = z + k;
+
+              var treeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
+              var treeLeafDistance = sqrt(j * j + k * k);
+              var treeLeafProbability = TREE_LEAF_RATE - ((treeLeafDistance - 1) / (TREE_LEAF_SIZE - 1)) * TREE_LEAF_RATE;
+              if (treeLeafN < treeLeafProbability) {
+                var idx = getIndex(pos.x, pos.y, pos.z);
+                leafSets[idx] = true;
               }
-            }
+            });
+            leafPoints(function(j, k) {
+              pos.x = x + j;
+              pos.z = z + k;
+
+              if (DIRECTIONS.some(function(d) {
+                var idx = getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
+                return !!leafSets[idx];
+              })) {
+                setMaybe(pos.x, pos.y, pos.z, LEAVES);
+              }
+            });
           }
         }
         
         var pos = position();
         pos.y = y + i;
-        setMaybe(pos.x, pos.y, pos.z, LEAVES);
+        var tipTreeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
+        if (tipTreeLeafN < TREE_LEAF_RATE) {
+          setMaybe(pos.x, pos.y, pos.z, LEAVES);
+        }
       }
     }
 
@@ -140,6 +178,11 @@ module.exports = function(opts) {
       var zidx = abs((width + z % width) % width);
       var idx = xidx + yidx * width + zidx * width * width;
       return idx;
+    }
+
+    function get(x, y, z) {
+      var idx = getIndex(x, y, z);
+      return chunk[idx];
     }
 
     function set(x, y, z, value) {
