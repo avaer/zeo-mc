@@ -3,7 +3,7 @@ import ReactDom from 'react-dom';
 import {is} from 'immutable';
 import voxel from 'voxel';
 import voxelEngine from 'voxel-engine';
-import voxelPerlinTerrain from '../lib/voxel-perlin-terrain/index';
+import voxelTerrain from '../lib/voxel-terrain/index';
 import voxelSky from '../lib/voxel-sky/index';
 import voxelClouds from 'voxel-clouds';
 import voxelPlayer from 'voxel-player';
@@ -12,6 +12,7 @@ import voxelHighlight from 'voxel-highlight';
 import voxelDebris from '../lib/voxel-debris/index';
 
 import * as inputUtils from '../utils/input/index';
+import {CHUNK_SIZE, CHUNK_DISTANCE} from '../constants/index';
 import {BLOCKS} from '../resources/index';
 
 class Crosshair extends React.Component {
@@ -32,35 +33,27 @@ class Crosshair extends React.Component {
 
 export default class Voxels extends React.Component {
   componentDidMount() {
-    const chunkSize = 32;
-    const chunkDistance = 2;
 
     const game = voxelEngine({
       // generate: voxelPerlinTerrain({scaleFactor:10}),
-      // generate: voxelSimplexTerrain({seed: 'lol', scaleFactor: 10, chunkDistance: chunkDistance}),
+      // generate: voxelSimplexTerrain({seed: 'lol', scaleFactor: 10, chunkDistance: CHUNK_DISTANCE}),
       generateChunks: false,
       texturePath: './api/img/textures/',
       // texturePath: name => '/api/img/textures/' + name + '.png',
       materials: BLOCKS.MATERIALS,
-      chunkSize,
-      chunkDistance,
+      chunkSize: CHUNK_SIZE,
+      chunkDistance: CHUNK_DISTANCE,
       lightsDisabled: true
     });
 
-    const generator = voxelPerlinTerrain({
-      seed: 'lol'
+    const generator = voxelTerrain({
+      seed: 'lol',
+      chunkSize: CHUNK_SIZE
     });
     game.voxels.on('missingChunk', function(position) {
       console.log('missingChunk', position);
-      const voxels = generator(position, chunkSize)
-      const chunk = {
-        position,
-        dims: [chunkSize, chunkSize, chunkSize],
-        voxels
-      };
-      // console.log('load chunk', chunk);
-      game.showChunk(chunk)
-      // game.addChunkToNextUpdate(chunk);
+      const chunk = generator(position);
+      game.showChunk(chunk);
     });
 
     const sky = voxelSky({
@@ -101,7 +94,7 @@ export default class Voxels extends React.Component {
     });
 
     const highlight = voxelHighlight(game, {
-      distance: chunkSize,
+      distance: CHUNK_SIZE,
       color: 0xFF0000
     });
 
@@ -115,7 +108,7 @@ export default class Voxels extends React.Component {
     $(game.view.element).on('mousedown', function() {
       const cp = game.cameraPosition();
       const cv = game.cameraVector();
-      const pos = game.raycastVoxels(cp, cv, chunkSize).voxel;
+      const pos = game.raycastVoxels(cp, cv, CHUNK_SIZE).voxel;
       if (pos) {
         voxelDebrisExplode(pos);
       }

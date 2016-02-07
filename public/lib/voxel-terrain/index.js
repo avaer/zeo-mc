@@ -46,6 +46,7 @@ var DIRECTIONS = (function() {
 
 module.exports = function(opts) {
   opts = opts || {};
+  var chunkSize = opts.chunkSize || 32;
   var rng = new Alea(opts.seed);
   var terrainNoise = new FastSimplexNoise({
     min: TERRAIN_FLOOR,
@@ -76,16 +77,16 @@ module.exports = function(opts) {
     random: rng
   });
 
-  return function generateChunk(position, width) {
-    var startX = position[0] * width;
-    var startY = position[1] * width;
-    var startZ = position[2] * width;
+  return function generateChunk(position) {
+    var startX = position[0] * chunkSize;
+    var startY = position[1] * chunkSize;
+    var startZ = position[2] * chunkSize;
 
-    var endX = startX + width;
-    var endY = startY + width;
-    var endZ = startZ + width;
+    var endX = startX + chunkSize;
+    var endY = startY + chunkSize;
+    var endZ = startZ + chunkSize;
 
-    var chunk = new Int8Array(width * width * width);
+    var voxels = new Int8Array(chunkSize * chunkSize * chunkSize);
     pointsInside(point);
 
     function point(x, z) {
@@ -205,21 +206,21 @@ module.exports = function(opts) {
     }
 
     function getIndex(x, y, z) {
-      var xidx = abs((width + x % width) % width);
-      var yidx = abs((width + y % width) % width);
-      var zidx = abs((width + z % width) % width);
-      var idx = xidx + yidx * width + zidx * width * width;
+      var xidx = abs((chunkSize + x % chunkSize) % chunkSize);
+      var yidx = abs((chunkSize + y % chunkSize) % chunkSize);
+      var zidx = abs((chunkSize + z % chunkSize) % chunkSize);
+      var idx = xidx + yidx * chunkSize + zidx * chunkSize * chunkSize;
       return idx;
     }
 
     function get(x, y, z) {
       var idx = getIndex(x, y, z);
-      return chunk[idx];
+      return voxels[idx];
     }
 
     function set(x, y, z, value) {
       var idx = getIndex(x, y, z);
-      chunk[idx] = value;
+      voxels[idx] = value;
     }
 
     function isInside(x, y, z) {
@@ -231,7 +232,7 @@ module.exports = function(opts) {
     function setMaybe(x, y, z, value) {
       if (isInside(x, y, z)) {
         var idx = getIndex(x, y, z);
-        chunk[idx] = value;
+        voxels[idx] = value;
       }
     }
 
@@ -239,6 +240,10 @@ module.exports = function(opts) {
       return (n - min) / (max - min)
     }
 
-    return chunk;
+    return {
+      position: position,
+      dims: [chunkSize, chunkSize, chunkSize],
+      voxels: voxels,
+    };
   }
 }
