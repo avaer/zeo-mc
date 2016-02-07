@@ -10,7 +10,7 @@ var FastSimplexNoise = require('fast-simplex-noise');
 
 var resources = require('../../resources/index');
 var BLOCKS = resources.BLOCKS.BLOCKS;
-// console.log('got blocks', {BLOCKS, MATERIALS: resources.BLOCKS.MATERIALS}, BLOCKS['grass_top']);
+console.log('got blocks', {BLOCKS, MATERIALS: resources.BLOCKS.MATERIALS}, BLOCKS['grass_top']);
 
 var TERRAIN_FLOOR = 0;
 var TERRAIN_CEILING = 20; // minecraft's limit

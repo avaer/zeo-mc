@@ -79,7 +79,7 @@ export default class Voxels extends React.Component {
     }, 15);
 
     const avatar = voxelPlayer(game)('api/img/textures/player.png');
-    avatar.position.set(0, 20, 0);
+    avatar.position.set(0, 32, 0);
     avatar.yaw.position.set(2, 14, 4);
     avatar.possess();
     game.on('tick', function(dt) {
