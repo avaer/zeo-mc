@@ -39,7 +39,7 @@ export default class Voxels extends React.Component {
       generateChunks: false,
       //
       texturePath: './api/img/textures/',
-      materials: ['obsidian', ['grass', 'dirt', 'grass_dirt'], 'leaves_opaque', 'tree_side'],
+      materials: ['bedrock', 'lava', 'obsidian', 'stone', 'dirt', ['grass', 'dirt', 'grass_dirt'], 'leaves_opaque', 'tree_side'],
       // cubeSize: 25,
       chunkSize,
       chunkDistance,

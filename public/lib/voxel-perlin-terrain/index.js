@@ -8,16 +8,25 @@ var Alea = require('alea');
 var noise = require('perlin').noise;
 var FastSimplexNoise = require('fast-simplex-noise');
 
-var OBSIDIAN = 1;
-var GRASS = 2;
-var LEAVES = 3;
-var BARK = 4;
+var BEDROCK = 1;
+var LAVA = 2;
+var OBSIDIAN = 3;
+var STONE = 4;
+var DIRT = 5;
+var GRASS = 6;
+var LEAVES = 7;
+var BARK = 8;
 
 var TERRAIN_FLOOR = 0;
 var TERRAIN_CEILING = 20; // minecraft's limit
 var TERRAIN_FREQUENCY = 1;
 var TERRAIN_OCTAVES = 8;
 var TERRAIN_DIVISOR = 80;
+
+var DIRT_BEDROCK_THRESHOLD = -128;
+var DIRT_CORE_THRESHOLD = -100;
+var DIRT_MANTLE_THRESHOLD = -80;
+var DIRT_CRUST_THRESHOLD = -10;
 
 var TREE_RATE = 0.1;
 var TREE_MIN_HEIGHT = 4;
@@ -43,29 +52,34 @@ var DIRECTIONS = (function() {
 
 module.exports = function(opts) {
   opts = opts || {};
-  var terrainRng = new Alea(opts.seed + '-terrain');
+  var rng = new Alea(opts.seed);
   var terrainNoise = new FastSimplexNoise({
     min: TERRAIN_FLOOR,
     max: TERRAIN_CEILING,
     frequency: TERRAIN_FREQUENCY,
     octaves: TERRAIN_OCTAVES,
-    random: terrainRng
+    random: rng
   });
-  var treeRng = new Alea(opts.seed + '-tree');
   var treeNoise = new FastSimplexNoise({
     min: 0,
     max: 1,
     frequency: 1,
     octaves: 2,
-    random: treeRng
+    random: rng
   });
-  var treeLeafRng = new Alea(opts.seed + '-leaf');
   var treeLeafNoise = new FastSimplexNoise({
     min: 0,
     max: 1,
     frequency: 0.5,
     octaves: 1,
-    random: treeLeafRng
+    random: rng
+  });
+  var crustNoise = new FastSimplexNoise({
+    min: DIRT_BEDROCK_THRESHOLD,
+    max: 0,
+    frequency: 0.5,
+    octaves: 6,
+    random: rng
   });
 
   return function generateChunk(position, width) {
@@ -85,9 +99,9 @@ module.exports = function(opts) {
       if (y === TERRAIN_FLOOR || (y >= startY && y < endY)) {
         land(x, y, z);
         tree(x, y, z);
-        mines(x, y, z);
-      } else {
-        mines(x, width, z);
+        dirt(x, y, z);
+      } else if (startY < 0) {
+        dirt(x, endY, z);
       }
     }
 
@@ -158,10 +172,34 @@ module.exports = function(opts) {
       }
     }
 
-    function mines(x, y, z) {
-      for (var i = startY; i < y; i++) {
-        set(x, i, z, OBSIDIAN);
+    function dirt(x, h, z) {
+      crust(x, h, z);
+      caves(x, h, z);
+    }
+
+    function crust(x, h, z) {
+      var crustNoiseN = terrainNoise.in2D(x, z);
+      for (var y = startY; y < h; y++) {
+        var material = (function() {
+          if (y <= DIRT_BEDROCK_THRESHOLD || crustNoiseN < DIRT_BEDROCK_THRESHOLD) {
+            return BEDROCK;
+          } else if (crustNoiseN < DIRT_CORE_THRESHOLD) {
+            return LAVA;
+          } else if (crustNoiseN < DIRT_MANTLE_THRESHOLD) {
+            return OBSIDIAN;
+          } else if (crustNoiseN < DIRT_CRUST_THRESHOLD) {
+            return STONE;
+          } else {
+            return DIRT;
+          }
+        })();
+
+        set(x, y, z, material);
       }
+    }
+
+    function caves(x, h, z) {
+      // XXX
     }
 
     function pointsInside(fn) {
