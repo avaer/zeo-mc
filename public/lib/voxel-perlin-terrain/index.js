@@ -1,44 +1,74 @@
-var noise = require('perlin').noise
+var min = Math.min;
+var abs = Math.abs;
+var floor = function(n) {
+  return ~~n;
+};
+
+var Alea = require('alea');
+var noise = require('perlin').noise;
+var FastSimplexNoise = require('fast-simplex-noise');
 
 var OBSIDIAN = 1;
 var GRASS = 2;
 var LEAVES = 3;
 var BARK = 4;
 
-module.exports = function(seed, floor, ceiling, divisor) {
-  floor = floor || 0
-  ceiling = ceiling || 20 // minecraft's limit
-  divisor = divisor || 50
-  noise.seed(seed)
+var TERRAIN_FLOOR = 0;
+var TERRAIN_CEILING = 20; // minecraft's limit
+var TERRAIN_FREQUENCY = 1;
+var TERRAIN_OCTAVES = 8;
+var TERRAIN_DIVISOR = 80;
+
+module.exports = function(opts) {
+  opts = opts || {};
+  var rng = new Alea(opts.seed);
+  var noise = new FastSimplexNoise({
+    min: TERRAIN_FLOOR,
+    max: TERRAIN_CEILING,
+    frequency: TERRAIN_FREQUENCY,
+    octaves: TERRAIN_OCTAVES,
+    random: rng
+  });
+
   return function generateChunk(position, width) {
-    var startX = position[0] * width
-    var startY = position[1] * width
-    var startZ = position[2] * width
-    var chunk = new Int8Array(width * width * width)
+    var startX = position[0] * width;
+    var startY = position[1] * width;
+    var startZ = position[2] * width;
+
+    var endX = startX + width;
+    var endY = startY + width;
+    var endZ = startZ + width;
+
+    var chunk = new Int8Array(width * width * width);
     pointsInside(startX, startZ, width, function(x, z) {
-      var n = noise.simplex2(x / divisor , z / divisor)
-      var y = ~~scale(n, -1, 1, floor, ceiling)
-      if (y === floor || startY < y && y < startY + width) {
+      // var n = noise.simplex2(x / divisor, z / divisor);
+      // var y = ~~scale(n, -1, 1, floor, ceiling);
+      var y = floor(noise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
+      /* if (y > startY + width) {
+        console.log('got y', {y, limit: startY + width});
+        y = startY + width - 1;
+      } */
+      if (y === TERRAIN_FLOOR || (y >= startY && y < endY)) {
         // floor
         var idx = getIndex(x, y, z, width);
-        chunk[idx] = GRASS
+        chunk[idx] = GRASS;
 
-        if (Math.random() < 0.01) {
+        // trees
+        if (rng() < 0.01) {
           tree(x, y, z);
         }
 
         // mines
-        for (var i = 0; i < y; i++) {
+        for (var i = startY; i < y; i++) {
           var idx = getIndex(x, i, z, width);
-          chunk[idx] = OBSIDIAN
+          chunk[idx] = OBSIDIAN;
         }
       }
     });
 
-    // trees
     function tree(x, y, z) {
       var opts = {};
-      if (!opts.height) opts.height = Math.random() * 16 + 4;
+      if (!opts.height) opts.height = rng() * 16 + 4;
       if (opts.base === undefined) opts.base = opts.height / 3;
 
       var chunkSize = width;
@@ -78,7 +108,7 @@ module.exports = function(seed, floor, ceiling, divisor) {
           if (set(pos, BARK)) break;
           if (y < opts.base) continue;
           around.forEach(function (offset) {
-              if (!(Math.random() < 0.6)) return;
+              if (!(rng() < 0.6)) return;
               var x = offset[0] * cubeSize;
               var z = offset[1] * cubeSize;
               pos.x += x; pos.z += z;
@@ -115,7 +145,6 @@ module.exports = function(seed, floor, ceiling, divisor) {
   }
 }
 
-var abs = Math.abs;
 function getIndex(x, y, z, width) {
   var xidx = abs((width + x % width) % width)
   var yidx = abs((width + y % width) % width)
@@ -128,36 +157,4 @@ function pointsInside(startX, startY, width, func) {
   for (var x = startX; x < startX + width; x++)
     for (var y = startY; y < startY + width; y++)
       func(x, y)
-}
-
-function scale( x, fromLow, fromHigh, toLow, toHigh ) {
-  return ( x - fromLow ) * ( toHigh - toLow ) / ( fromHigh - fromLow ) + toLow
-}
-
-function randomChunk (bounds) {
-    var x = Math.random() * (bounds.x.max - bounds.x.min) + bounds.x.min;
-    var y = Math.random() * (bounds.y.max - bounds.y.min) + bounds.y.min;
-    var z = Math.random() * (bounds.z.max - bounds.z.min) + bounds.z.min;
-    return [ x, y, z ].map(Math.floor).join('|');
-}
-
-function boundingChunks (chunks) {
-    return Object.keys(chunks).reduce(function (acc, key) {
-        var s = key.split('|');
-        if (acc.x.min === undefined) acc.x.min = s[0]
-        if (acc.x.max === undefined) acc.x.max = s[0]
-        if (acc.y.min === undefined) acc.y.min = s[1]
-        if (acc.y.max === undefined) acc.y.max = s[1]
-        if (acc.z.min === undefined) acc.z.min = s[2]
-        if (acc.z.max === undefined) acc.z.max = s[2]
-        
-        acc.x.min = Math.min(acc.x.min, s[0]);
-        acc.x.max = Math.max(acc.x.max, s[0]);
-        acc.y.min = Math.min(acc.y.min, s[1]);
-        acc.y.max = Math.max(acc.y.max, s[1]);
-        acc.z.min = Math.min(acc.z.min, s[2]);
-        acc.z.max = Math.max(acc.z.max, s[2]);
-        
-        return acc;
-    }, { x: {}, y: {}, z: {} });
 }

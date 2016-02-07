@@ -49,15 +49,17 @@ export default class Voxels extends React.Component {
       lightsDisabled: true
     });
 
-    const generator = voxelPerlinTerrain('foo', 0, chunkSize, 100);
-    game.voxels.on('missingChunk', function(p) {
-      console.log('missingChunk', p);
-      const voxels = generator(p, chunkSize)
+    const generator = voxelPerlinTerrain({
+      seed: 'lol'
+    });
+    game.voxels.on('missingChunk', function(position) {
+      console.log('missingChunk', position);
+      const voxels = generator(position, chunkSize)
       const chunk = {
-        position: p,
+        position,
         dims: [chunkSize, chunkSize, chunkSize],
-        voxels: voxels
-      }
+        voxels
+      };
       // console.log('load chunk', chunk);
       game.showChunk(chunk)
       // game.addChunkToNextUpdate(chunk);
