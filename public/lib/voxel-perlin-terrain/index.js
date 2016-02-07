@@ -8,14 +8,9 @@ var Alea = require('alea');
 var noise = require('perlin').noise;
 var FastSimplexNoise = require('fast-simplex-noise');
 
-var BEDROCK = 1;
-var LAVA = 2;
-var OBSIDIAN = 3;
-var STONE = 4;
-var DIRT = 5;
-var GRASS = 6;
-var LEAVES = 7;
-var BARK = 8;
+var resources = require('../../resources/index');
+var BLOCKS = resources.BLOCKS.BLOCKS;
+// console.log('got blocks', {BLOCKS, MATERIALS: resources.BLOCKS.MATERIALS}, BLOCKS['grass_top']);
 
 var TERRAIN_FLOOR = 0;
 var TERRAIN_CEILING = 20; // minecraft's limit
@@ -106,7 +101,7 @@ module.exports = function(opts) {
     }
 
     function land(x, y, z) {
-      set(x, y, z, GRASS);
+      set(x, y, z, BLOCKS['grass_top']);
     }
 
     function tree(x, y, z) {
@@ -133,7 +128,7 @@ module.exports = function(opts) {
         for (var i = 0; i < height; i++) {
           var pos = position();
           pos.y = y + i;
-          setMaybe(pos.x, pos.y, pos.z, BARK);
+          setMaybe(pos.x, pos.y, pos.z, BLOCKS['log_big_oak']);
 
           if (i >= base) {
             var leafSets = {};
@@ -157,7 +152,7 @@ module.exports = function(opts) {
                 var idx = getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
                 return !!leafSets[idx];
               })) {
-                setMaybe(pos.x, pos.y, pos.z, LEAVES);
+                setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak']);
               }
             });
           }
@@ -167,7 +162,7 @@ module.exports = function(opts) {
         pos.y = y + i;
         var tipTreeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
         if (tipTreeLeafN < TREE_LEAF_RATE) {
-          setMaybe(pos.x, pos.y, pos.z, LEAVES);
+          setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak']);
         }
       }
     }
@@ -182,15 +177,15 @@ module.exports = function(opts) {
       for (var y = startY; y < h; y++) {
         var material = (function() {
           if (y <= DIRT_BEDROCK_THRESHOLD || crustNoiseN < DIRT_BEDROCK_THRESHOLD) {
-            return BEDROCK;
+            return BLOCKS['bedrock'];
           } else if (crustNoiseN < DIRT_CORE_THRESHOLD) {
-            return LAVA;
+            return BLOCKS['lava_still'];
           } else if (crustNoiseN < DIRT_MANTLE_THRESHOLD) {
-            return OBSIDIAN;
+            return BLOCKS['obsidian'];
           } else if (crustNoiseN < DIRT_CRUST_THRESHOLD) {
-            return STONE;
+            return BLOCKS['stone'];
           } else {
-            return DIRT;
+            return BLOCKS['dirt'];
           }
         })();
 

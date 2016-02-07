@@ -12,6 +12,7 @@ import voxelHighlight from 'voxel-highlight';
 import voxelDebris from '../lib/voxel-debris/index';
 
 import * as inputUtils from '../utils/input/index';
+import {BLOCKS} from '../resources/index';
 
 class Crosshair extends React.Component {
   render() {
@@ -40,11 +41,10 @@ export default class Voxels extends React.Component {
       generateChunks: false,
       //
       texturePath: './api/img/textures/',
-      materials: ['bedrock', 'lava', 'obsidian', 'stone', 'dirt', ['grass', 'dirt', 'grass_dirt'], 'leaves_opaque', 'tree_side'],
+      materials: BLOCKS.MATERIALS,
       // cubeSize: 25,
       chunkSize,
       chunkDistance,
-      // materials: ['grass', 'obsidian', 'dirt', 'whitewool', 'crate', 'brick'],
       // worldOrigin: [0, 0, 0],
       // mesher: voxel.meshers.culled,
       //

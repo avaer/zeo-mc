@@ -1,5 +1,3 @@
-import {TOOLS} from '../../constants/index';
-
 export const KEYS = {
   W: 87,
   S: 83,
@@ -32,14 +30,6 @@ export const MOUSE_BUTTONS = {
   RIGHT: 2
 };
 export const MOUSE_BUTTON_NAMES = Object.keys(MOUSE_BUTTONS);
-
-export const TOOL_KEYS = {
-  [KEYS[1]]: TOOLS.MAGNIFYING_GLASS,
-  [KEYS[2]]: TOOLS.PENCIL,
-  [KEYS[3]]: TOOLS.WRENCH,
-  [KEYS[4]]: TOOLS.ERASER,
-  [KEYS[5]]: TOOLS.PAINTBRUSH
-};
 
 export function getDownKeys(keys) {
   const result = {};

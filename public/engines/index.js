@@ -6,7 +6,7 @@ import Point from '../records/point/index';
 import Vector from '../records/vector/index';
 import Node from '../records/node/index';
 
-import {FRAME_RATE, UI_MODES, TOOLS} from '../constants/index';
+import {FRAME_RATE, UI_MODES} from '../constants/index';
 import * as inputUtils from '../utils/input/index';
 
 const MOVE_PER_FRAME = 0.005 * FRAME_RATE;
@@ -170,7 +170,7 @@ export default class Engines {
   }
 
   listenKeyboard() {
-    const $window = $(window);
+    /* const $window = $(window);
     $window.on('keydown', e => {
       const {which} = e;
       this.updateState('window', oldState => oldState.setIn([ 'keys', String(which) ], true));
@@ -183,7 +183,7 @@ export default class Engines {
     $window.on('keyup', e => {
       const {which} = e;
       this.updateState('window', oldState => oldState.setIn([ 'keys', String(which) ], false));
-    });
+    }); */
   }
 
   listenMouse() {
@@ -211,7 +211,7 @@ export default class Engines {
   }
 
   listenFrame() {
-    let lastFrameTime = new Date();
+    /* let lastFrameTime = new Date();
 
     const handleFrames = framesPassed => {
       const updateUi = ({mode, oldValue, pressedKeys, pressedMouseButtons, tool}) => {
@@ -422,7 +422,7 @@ export default class Engines {
       setTimeout(frame, 1000 / FRAME_RATE);
     };
 
-    waitForFrame();
+    waitForFrame(); */
   }
 
   hoverCoords(coords) {
