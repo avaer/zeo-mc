@@ -9,7 +9,7 @@ import voxelClouds from 'voxel-clouds';
 import voxelPlayer from 'voxel-player';
 import voxelWalk from 'voxel-walk';
 import voxelHighlight from 'voxel-highlight';
-import voxelDebris from 'voxel-debris';
+import voxelDebris from '../lib/voxel-debris/index';
 
 import * as inputUtils from '../utils/input/index';
 
