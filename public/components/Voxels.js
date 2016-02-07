@@ -39,15 +39,11 @@ export default class Voxels extends React.Component {
       // generate: voxelPerlinTerrain({scaleFactor:10}),
       // generate: voxelSimplexTerrain({seed: 'lol', scaleFactor: 10, chunkDistance: chunkDistance}),
       generateChunks: false,
-      //
       texturePath: './api/img/textures/',
+      // texturePath: name => '/api/img/textures/' + name + '.png',
       materials: BLOCKS.MATERIALS,
-      // cubeSize: 25,
       chunkSize,
       chunkDistance,
-      // worldOrigin: [0, 0, 0],
-      // mesher: voxel.meshers.culled,
-      //
       lightsDisabled: true
     });
 
@@ -126,6 +122,19 @@ export default class Voxels extends React.Component {
     });
 
     // game.mesher = voxel.meshers.greedy;
+    const transgreedyMesher = voxel.meshers.transgreedy;
+    const transparentTypes = (() => {
+      const result = {};
+      BLOCKS.TRANSPARENT.forEach(t => {
+        const index = BLOCKS.BLOCKS[t];
+        result[index] = true;
+      });
+      return result;
+    })();
+    const mesherExtraData = {transparentTypes};
+    game.mesher = function(voxels, dims) {
+      return transgreedyMesher(voxels, dims, mesherExtraData);
+    };
 
     window.game = game;
     window.voxel = voxel;

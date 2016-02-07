@@ -33,3 +33,8 @@ export const MATERIALS = (() => {
   }
   return result;
 })();
+
+export const TRANSPARENT = [
+  'leaves_big_oak_plains',
+  'log_big_oak'
+];
