@@ -6,9 +6,10 @@ import voxelEngine from 'voxel-engine';
 import voxelPerlinTerrain from '../lib/voxel-perlin-terrain/index';
 import voxelSky from '../lib/voxel-sky/index';
 import voxelClouds from 'voxel-clouds';
-import voxelHighlight from 'voxel-highlight';
 import voxelPlayer from 'voxel-player';
 import voxelWalk from 'voxel-walk';
+import voxelHighlight from 'voxel-highlight';
+import voxelDebris from 'voxel-debris';
 
 import * as inputUtils from '../utils/input/index';
 
@@ -68,7 +69,7 @@ export default class Voxels extends React.Component {
 
     const sky = voxelSky({
       game,
-      time: 1200,
+      time: 800,
       // size: 32,
       // color: new THREE.Color(0, 0, 0),
       speed: 0.01
@@ -106,6 +107,22 @@ export default class Voxels extends React.Component {
     const highlight = voxelHighlight(game, {
       distance: chunkSize,
       color: 0xFF0000
+    });
+
+    const voxelDebrisExplode = voxelDebris(game, {
+      power: 1,
+      expire: {
+        start: 1 * 1000,
+        end: 3 * 1000
+      }
+    });
+    $(game.view.element).on('mousedown', function() {
+      const cp = game.cameraPosition();
+      const cv = game.cameraVector();
+      const pos = game.raycastVoxels(cp, cv, chunkSize).voxel;
+      if (pos) {
+        voxelDebrisExplode(pos);
+      }
     });
 
     // game.mesher = voxel.meshers.greedy;
