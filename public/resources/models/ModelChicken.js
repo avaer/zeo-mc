@@ -1,5 +1,9 @@
-export default class ModelChicken {
+import ModelBase from './ModelBase';
+
+export default class ModelChicken extends ModelBase {
   constructor() {
+    super();
+
     this.texture = 'chicken';
     this.meshes = [
       {

@@ -1,5 +1,9 @@
-export default class ModelQuadruped {
+import ModelBase from './ModelBase';
+
+export default class ModelQuadruped extends ModelBase {
   constructor() {
+    super();
+
     this.texture = null;
     this.meshes = [
       {

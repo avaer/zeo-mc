@@ -1,5 +1,9 @@
-export default class ModelOcelot {
+import ModelBase from './ModelBase';
+
+export default class ModelOcelot extends ModelBase {
   constructor() {
+    super();
+
     this.texture = 'cat/ocelot';
     this.meshes = [
       {

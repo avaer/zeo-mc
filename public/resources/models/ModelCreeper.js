@@ -1,5 +1,9 @@
-export default class ModelCreeper {
+import ModelBase from './ModelBase';
+
+export default class ModelCreeper extends ModelBase {
   constructor() {
+    super();
+
     this.texture = 'creeper/creeper';
     this.meshes = [
       {

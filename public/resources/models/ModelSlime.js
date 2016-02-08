@@ -1,5 +1,9 @@
-export default class ModelSlime {
+import ModelBase from './ModelBase';
+
+export default class ModelSlime extends ModelBase {
   constructor() {
+    super();
+
     this.texture = 'slime/slime';
     this.meshes = [
       {

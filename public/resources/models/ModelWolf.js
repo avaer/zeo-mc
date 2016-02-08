@@ -1,4 +1,6 @@
-export default class ModelWolf {
+import ModelBase from './ModelBase';
+
+export default class ModelWolf extends ModelBase {
   constructor() {
     super();
 
