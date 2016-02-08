@@ -61,7 +61,7 @@ export default class Voxels extends React.Component {
         // generate: voxelSimplexTerrain({seed: 'lol', scaleFactor: 10, chunkDistance: CHUNK_DISTANCE}),
         generateChunks: false,
         mesher: voxelAsync.mesher,
-        texturePath: './api/img/textures/',
+        texturePath: './api/img/textures/blocks/',
         // texturePath: name => '/api/img/textures/' + name + '.png',
         materials: BLOCKS.MATERIALS,
         chunkSize: CHUNK_SIZE,
