@@ -4,7 +4,7 @@ export default class ModelPig extends ModelQuadruped {
   constructor() {
     super();
 
-    this.texture = 'pig';
+    this.texture = 'entity/pig';
     this.meshes = this.meshes.concat([
       {
         name: 'nose',
@@ -14,6 +14,9 @@ export default class ModelPig extends ModelQuadruped {
     ]);
   }
 }
+
+// XXX
+// var m; game.scene.remove(m); m = MODELS.pig(game); game.scene.add(m); m.position.set(-20, 10, 10); b = m.children[1]; b.rotation.x = Math.PI / 2; b.position.z = 10;
 
 /* package net.minecraft.src;
 

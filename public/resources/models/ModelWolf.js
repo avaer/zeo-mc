@@ -4,8 +4,8 @@ export default class ModelWolf extends ModelBase {
   constructor() {
     super();
 
-    this.texture = 'wolf/wolf';
-    this.meshes = this.meshes.concat([
+    this.texture = 'entity/wolf/wolf';
+    this.meshes = [
       {
         name: 'wolfHeadMain',
         children: [
@@ -66,7 +66,7 @@ export default class ModelWolf extends ModelBase {
         uv: [9, 18],
         position: [[-1, 0, -1], [2, 8, 2]]
       },
-    ]);
+    ];
   }
 }
 
@@ -76,28 +76,28 @@ import org.lwjgl.opengl.GL11;
 
 public class ModelWolf extends ModelBase
 {
-    /** main box for the wolf head */
+    /** main box for the wolf head
     public ModelRenderer wolfHeadMain;
 
-    /** The wolf's body */
+    /** The wolf's body
     public ModelRenderer wolfBody;
 
-    /** Wolf'se first leg */
+    /** Wolf'se first leg
     public ModelRenderer wolfLeg1;
 
-    /** Wolf's second leg */
+    /** Wolf's second leg
     public ModelRenderer wolfLeg2;
 
-    /** Wolf's third leg */
+    /** Wolf's third leg
     public ModelRenderer wolfLeg3;
 
-    /** Wolf's fourth leg */
+    /** Wolf's fourth leg
     public ModelRenderer wolfLeg4;
 
-    /** The wolf's tail */
+    /** The wolf's tail
     ModelRenderer wolfTail;
 
-    /** The wolf's mane */
+    /** The wolf's mane
     ModelRenderer wolfMane;
 
     public ModelWolf()
@@ -135,7 +135,6 @@ public class ModelWolf extends ModelBase
 
     /**
      * Sets the models various rotation angles then renders the model.
-     */
     public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)
     {
         super.render(par1Entity, par2, par3, par4, par5, par6, par7);
@@ -176,7 +175,6 @@ public class ModelWolf extends ModelBase
     /**
      * Used for easily adding entity-dependent animations. The second and third float params here are the same second
      * and third as in the setRotationAngles method.
-     */
     public void setLivingAnimations(EntityLiving par1EntityLiving, float par2, float par3, float par4)
     {
         EntityWolf entitywolf = (EntityWolf)par1EntityLiving;
@@ -239,7 +237,6 @@ public class ModelWolf extends ModelBase
 
     /**
      * Sets the models various rotation angles.
-     */
     public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6)
     {
         super.setRotationAngles(par1, par2, par3, par4, par5, par6);

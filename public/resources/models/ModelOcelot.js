@@ -4,7 +4,7 @@ export default class ModelOcelot extends ModelBase {
   constructor() {
     super();
 
-    this.texture = 'cat/ocelot';
+    this.texture = 'entity/cat/ocelot';
     this.meshes = [
       {
         name: 'head',
@@ -125,7 +125,6 @@ public class ModelOcelot extends ModelBase
 
     /**
      * Sets the models various rotation angles then renders the model.
-     */
     public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)
     {
         setRotationAngles(par2, par3, par4, par5, par6, par7);
@@ -165,7 +164,6 @@ public class ModelOcelot extends ModelBase
 
     /**
      * Sets the models various rotation angles.
-     */
     public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6)
     {
         field_48220_g.rotateAngleX = par5 / (180F / (float)Math.PI);
@@ -205,7 +203,6 @@ public class ModelOcelot extends ModelBase
     /**
      * Used for easily adding entity-dependent animations. The second and third float params here are the same second
      * and third as in the setRotationAngles method.
-     */
     public void setLivingAnimations(EntityLiving par1EntityLiving, float par2, float par3, float par4)
     {
         EntityOcelot entityocelot = (EntityOcelot)par1EntityLiving;

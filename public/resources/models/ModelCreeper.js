@@ -4,7 +4,7 @@ export default class ModelCreeper extends ModelBase {
   constructor() {
     super();
 
-    this.texture = 'creeper/creeper';
+    this.texture = 'entity/creeper/creeper';
     this.meshes = [
       {
         name: 'head',
@@ -90,7 +90,6 @@ public class ModelCreeper extends ModelBase
 
     /**
      * Sets the models various rotation angles then renders the model.
-     */
     public void render(Entity par1Entity, float par2, float par3, float par4, float par5, float par6, float par7)
     {
         setRotationAngles(par2, par3, par4, par5, par6, par7);
@@ -104,7 +103,6 @@ public class ModelCreeper extends ModelBase
 
     /**
      * Sets the models various rotation angles.
-     */
     public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6)
     {
         head.rotateAngleY = par4 / (180F / (float)Math.PI);

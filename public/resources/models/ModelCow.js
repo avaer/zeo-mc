@@ -2,7 +2,9 @@ import ModelQuadruped from './ModelQuadruped';
 
 export default class ModelCow extends ModelQuadruped {
   constructor() {
-    this.texture = 'cow/cow';
+    super();
+
+    this.texture = 'entity/cow/cow';
     this.meshes = this.meshes.map(mesh => {
       if (mesh.name === 'head') {
         return {

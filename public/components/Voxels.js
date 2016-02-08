@@ -14,7 +14,9 @@ import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
 import {CHUNK_SIZE, CHUNK_DISTANCE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
-import {BLOCKS} from '../resources/index';
+import {BLOCKS, MODELS} from '../resources/index';
+
+window.MODELS = MODELS;
 
 const INITIAL_CHUNK_POSITIONS = (() => {
   const result = [];
