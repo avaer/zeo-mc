@@ -5,15 +5,20 @@ var glob = require('glob');
 
 module.exports = {
   devtool: 'eval',
-  entry: [
-    'webpack-dev-server/client?http://HOSTNAME:PORT',
-    'webpack/hot/only-dev-server'
-  ].concat(glob.sync('./public/include/*/index.js')).concat([
-    './public/index'
-  ]),
+  entry: {
+    'bundle': [
+      'webpack-dev-server/client?http://HOSTNAME:PORT',
+      'webpack/hot/only-dev-server'
+    ].concat(
+      glob.sync('./public/include/*/index.js')
+    ).concat([
+      './public/index'
+    ]),
+    'voxel-worker': ['./public/lib/voxel-worker/index']
+  },
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'bundle.js',
+    filename: '[name].js',
     publicPath: '/static/'
   },
   plugins: [

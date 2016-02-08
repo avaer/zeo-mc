@@ -21,11 +21,15 @@ u.parallel(cb => {
 
   const boundWebpackConfig = (() => {
     const result = u.shallow(webpackConfig);
-    result.entry = result.entry.map(entry => entry.replace(/HOSTNAME/, c.hostname).replace(/PORT/, c.port));
+    const entry = result.entry;
+    for (var k in entry) {
+      entry[k] = entry[k].map(subentry => subentry.replace(/HOSTNAME/, c.hostname).replace(/PORT/, c.port));
+    }
     return result;
   })();
 
-  const webpackDevServer = new WebpackDevServer(webpack(boundWebpackConfig), {
+  const wp = webpack(boundWebpackConfig);
+  const webpackDevServer = new WebpackDevServer(wp, {
     publicPath: boundWebpackConfig.output.publicPath,
     hot: true,
     historyApiFallback: true
