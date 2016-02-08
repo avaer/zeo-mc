@@ -77,31 +77,22 @@ Sky.prototype.createLights = function() {
 };
 
 Sky.prototype.color = function(start, end, dt) {
-  var self = this;
-  // if (self._colorInterval) self._colorInterval();
-  // var i = 0;
-  // var start = self._color.clone().getHSL();
-  // var color = self._color.clone().getHSL();
-  // self._colorInterval = tic.interval(function() {
-    // var dt = i / time;
-    // start = new game.THREE.Color(start);
-    // end = new game.THREE.Color(end);
-    start = new game.THREE.Color(start);
-    end = new game.THREE.Color(end);
-    var color = new game.THREE.Color();
-    ['r','g','b'].forEach(function(p) { color[p] = start[p] + (end[p] - start[p]) * dt; });
-    self._color.setRGB(color.r, color.g, color.b);
+  start = new game.THREE.Color(start);
+  end = new game.THREE.Color(end);
 
-    // console.log('outer', end, time, dt, color);
+  var color = new game.THREE.Color();
+  color.r = start.r + (end.r - start.r) * dt;
+  color.g = start.g + (end.g - start.g) * dt;
+  color.b = start.b + (end.b - start.b) * dt;
 
-    self.outer.material.materials.forEach(function(mat) {
-      mat.color.setRGB(color.r, color.g, color.b);
-    });
-    self.ambient.color.setRGB(color.r, color.g, color.b);
-    if (self.game.scene.fog) self.game.scene.fog.color.setRGB(color.r, color.g, color.b);
-    // if (dt === 1) self._colorInterval();
-    // i += self._speed;
-  // }, self._speed);
+  this._color.setRGB(color.r, color.g, color.b);
+  this.outer.material.materials.forEach(function(mat) {
+    mat.color.setRGB(color.r, color.g, color.b);
+  });
+  this.ambient.color.setRGB(color.r, color.g, color.b);
+  if (this.game.scene.fog) {
+    this.game.scene.fog.color.setRGB(color.r, color.g, color.b);
+  }
 };
 
 Sky.prototype.speed = function(speed) {
@@ -244,43 +235,44 @@ Sky.prototype.fn = function(time) {
   }
 
   // fade stars in and out
-  if (time >= 500 && time <= 600) {
-    this.paint(['top', 'left', 'right', 'front', 'back'], function() {
+  if (time < 600) {
+    this.paint(['top', 'left', 'right', 'front', 'back'], () => {
       this.material.transparent = true;
-      // var i = tic.interval(function(mat) {
-        this.material.opacity = 1 - ((time - 500) / (600 - 500));
-        // if (mat.opacity <= 0) i();
-      // }, 100, this.material);
+      this.material.opacity = 1;
     });
-  }
-  if (time >= 1800 && time <= 1900) {
-    this.paint(['top', 'left', 'right', 'front', 'back'], function() {
+  } else if (time >= 500 && time < 600) {
+    this.paint(['top', 'left', 'right', 'front', 'back'], () => {
       this.material.transparent = true;
-      // var i = tic.interval(function(mat) {
-        this.material.opacity = (time - 1800) / (1900 - 1800);
-        // if (mat.opacity >= 1) i();
-      // }, 100, this.material);
+      this.material.opacity = 1 - ((time - 500) / (600 - 500));
+    });
+  } else if (time >= 600 && time < 1800) {
+    this.paint(['top', 'left', 'right', 'front', 'back'], () => {
+      this.material.transparent = true;
+      this.material.opacity = 1;
+    });
+  } else if (time >= 1800 && time < 1900) {
+    this.paint(['top', 'left', 'right', 'front', 'back'], () => {
+      this.material.transparent = true;
+      this.material.opacity = (time - 1800) / (1900 - 1800);
+    });
+  } else {
+    this.paint(['top', 'left', 'right', 'front', 'back'], () => {
+      this.material.transparent = true;
+      this.material.opacity = 1;
     });
   }
 
   // turn on sunlight
-  if (time >= 400 && time <= 500) {
-    // (function(sunlight) {
-      // var i = tic.interval(function() {
-        this.sunlight.intensity = (time - 400) / (500 - 400);
-        // if (sunlight.intensity <= 1) i();
-      // }, 100);
-    // }(this.sunlight));
-  }
-
-  // turn off sunlight
-  if (time >= 1800 && time <= 1900) {
-    // (function(sunlight) {
-      // var i = tic.interval(function() {
-        // sunlight.intensity -= 0.1;
-        this.sunlight.intensity = 1 - ((time - 1800) / (1900 - 1800));
-      // }, 100);
-    // }(this.sunlight));
+  if (time < 400) {
+    this.sunlight.intensity = 0;
+  } else if (time >= 400 && time < 500) {
+    this.sunlight.intensity = (time - 400) / (500 - 400);
+  } else if (time >= 500 && time < 1800) {
+    this.sunlight.intensity = 1;
+  } else if (time >= 1800 && time < 1900) {
+    this.sunlight.intensity = 1 - ((time - 1800) / (1900 - 1800));
+  } else {
+    this.sunlight.intensity = 0;
   }
 
   // spin the sky 1 revolution per day
