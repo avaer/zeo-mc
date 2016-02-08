@@ -16,6 +16,19 @@ import * as inputUtils from '../utils/input/index';
 import {CHUNK_SIZE, CHUNK_DISTANCE, NUM_WORKERS} from '../constants/index';
 import {BLOCKS} from '../resources/index';
 
+const INITIAL_CHUNK_POSITIONS = (() => {
+  const result = [];
+  for (let x = -CHUNK_DISTANCE; x <= CHUNK_DISTANCE; x++) {
+    for (let y = -CHUNK_DISTANCE; y <= CHUNK_DISTANCE; y++) {
+      for (let z = -CHUNK_DISTANCE; z <= CHUNK_DISTANCE; z++) {
+        const position = [x, y, z];
+        result.push(position);
+      }
+    }
+  }
+  return result;
+})();
+
 class Crosshair extends React.Component {
   render() {
     const style = {
@@ -57,10 +70,26 @@ export default class Voxels extends React.Component {
       lightsDisabled: true
     });
 
-    game.voxels.on('missingChunk', function(position) {
-      console.log('missingChunk', position);
-      const chunk = voxelAsync.generateSync(position);
-      game.showChunk(chunk);
+    let doneChunks = 0;
+    for (let i = 0; i < INITIAL_CHUNK_POSITIONS.length; i++) {
+      const position = INITIAL_CHUNK_POSITIONS[i];
+      this.generateAsync(position, chunk => {
+        game.showChunk(chunk);
+
+        doneChunks++;
+        if (doneChunks >= INITIAL_CHUNK_POSITIONS.length) {
+          game.paused = false;
+        }
+      });
+    }
+
+    game.voxels.on('missingChunk', position => {
+      // console.log('missingChunk', position);
+      this.generateAsync(position, chunk => {
+        // console.log('genetatedChunk', position);
+
+        game.showChunk(chunk);
+      });
     });
 
     const sky = voxelSky({
@@ -140,7 +169,9 @@ export default class Voxels extends React.Component {
   }
 
   callWorker(method, args, cb) {
-    const worker = this._workers[this._workerIndex++];
+    const workerIndex = this._workerIndex;
+    const worker = this._workers[workerIndex];
+    this._workerIndex = (workerIndex + 1) % this._workers.length;
 
     worker.postMessage({method, args});
     worker.onmessage = resMsg => {
@@ -153,6 +184,17 @@ export default class Voxels extends React.Component {
         cb(null, error);
       }
     };
+  }
+
+  generateAsync(position, cb) {
+    // XXX pend-cache this
+    this.callWorker('generate', [position], (err, chunk) => {
+      if (!err) {
+        cb(chunk);
+      } else {
+        console.warn(err);
+      }
+    });
   }
 
   render() {
