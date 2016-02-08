@@ -18,6 +18,10 @@ var DIRT_CRUST_THRESHOLD = 40;
 var DIRT_FREQUENCY = 0.02;
 var DIRT_OCTAVES = 6;
 
+var CAVE_FREQUENCY = 0.03;
+var CAVE_OCTAVES = 10;
+var CAVE_RATE = 0.3;
+
 var TREE_RATE = 0.1;
 var TREE_MIN_HEIGHT = 4;
 var TREE_MAX_HEIGHT = 14;
@@ -103,6 +107,14 @@ function voxelTerrain(opts) {
     random: rng
   });
 
+  const caveNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: CAVE_FREQUENCY,
+    octaves: CAVE_OCTAVES,
+    random: rng
+  });
+
   return function generateChunk(position) {
     var startX = position[0] * chunkSize;
     var startY = position[1] * chunkSize;
@@ -127,75 +139,79 @@ function voxelTerrain(opts) {
     }
 
     function land(x, y, z) {
-      set(x, y, z, BLOCKS['grass_top_plains']);
+      if (!isCave(x, y, z)) {
+        set(x, y, z, BLOCKS['grass_top_plains']);
+      }
     }
 
     function tree(x, y, z) {
-      var treeNoiseN = treeNoise.in2D(x, z);
-      if (treeNoiseN >= (1 - TREE_RATE)) {
-        var treeHeightNoiseN = sliceNoise(treeNoiseN, TREE_RATE, 1);
+      if (!isCave(x, y, z)) {
+        var treeNoiseN = treeNoise.in2D(x, z);
+        if (treeNoiseN >= (1 - TREE_RATE)) {
+          var treeHeightNoiseN = sliceNoise(treeNoiseN, TREE_RATE, 1);
 
-        var height = TREE_MIN_HEIGHT + (treeHeightNoiseN * (TREE_MAX_HEIGHT - TREE_MIN_HEIGHT));
-        var base = height * TREE_BASE_RATIO;
+          var height = TREE_MIN_HEIGHT + (treeHeightNoiseN * (TREE_MAX_HEIGHT - TREE_MIN_HEIGHT));
+          var base = height * TREE_BASE_RATIO;
 
-        function position() {
-          return { x: x, y: y, z: z };
-        }
+          function position() {
+            return { x: x, y: y, z: z };
+          }
 
-        function leafPoints(fn) {
-          for (var j = -TREE_LEAF_SIZE; j <= TREE_LEAF_SIZE; j++) {
-            for (var k = -TREE_LEAF_SIZE; k <= TREE_LEAF_SIZE; k++) {
-              if (j === 0 && k === 0) continue;
-              fn(j, k);
+          function leafPoints(fn) {
+            for (var j = -TREE_LEAF_SIZE; j <= TREE_LEAF_SIZE; j++) {
+              for (var k = -TREE_LEAF_SIZE; k <= TREE_LEAF_SIZE; k++) {
+                if (j === 0 && k === 0) continue;
+                fn(j, k);
+              }
             }
           }
-        }
 
-        for (var i = 0; i < height; i++) {
+          for (var i = 0; i < height; i++) {
+            var pos = position();
+            pos.y = y + i;
+            setMaybe(pos.x, pos.y, pos.z, BLOCKS['log_big_oak']);
+
+            if (i >= base) {
+              var leafSets = {};
+              leafPoints(function(j, k) {
+                pos.x = x + j;
+                pos.z = z + k;
+
+                var treeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
+                var treeLeafDistance = sqrt(j * j + k * k);
+                var treeLeafProbability = TREE_LEAF_RATE - ((treeLeafDistance - 1) / (TREE_LEAF_SIZE - 1)) * TREE_LEAF_RATE;
+                if (treeLeafN < treeLeafProbability) {
+                  var idx = getIndex(pos.x, pos.y, pos.z);
+                  leafSets[idx] = true;
+                }
+              });
+              leafPoints(function(j, k) {
+                pos.x = x + j;
+                pos.z = z + k;
+
+                if (DIRECTIONS.some(function(d) {
+                  var idx = getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
+                  return !!leafSets[idx];
+                })) {
+                  setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
+                }
+              });
+            }
+          }
+          
           var pos = position();
           pos.y = y + i;
-          setMaybe(pos.x, pos.y, pos.z, BLOCKS['log_big_oak']);
-
-          if (i >= base) {
-            var leafSets = {};
-            leafPoints(function(j, k) {
-              pos.x = x + j;
-              pos.z = z + k;
-
-              var treeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
-              var treeLeafDistance = sqrt(j * j + k * k);
-              var treeLeafProbability = TREE_LEAF_RATE - ((treeLeafDistance - 1) / (TREE_LEAF_SIZE - 1)) * TREE_LEAF_RATE;
-              if (treeLeafN < treeLeafProbability) {
-                var idx = getIndex(pos.x, pos.y, pos.z);
-                leafSets[idx] = true;
-              }
-            });
-            leafPoints(function(j, k) {
-              pos.x = x + j;
-              pos.z = z + k;
-
-              if (DIRECTIONS.some(function(d) {
-                var idx = getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
-                return !!leafSets[idx];
-              })) {
-                setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
-              }
-            });
+          var tipTreeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
+          if (tipTreeLeafN < TREE_LEAF_RATE) {
+            setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
           }
-        }
-        
-        var pos = position();
-        pos.y = y + i;
-        var tipTreeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
-        if (tipTreeLeafN < TREE_LEAF_RATE) {
-          setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
         }
       }
     }
 
     function dirt(x, h, z) {
       crust(x, h, z);
-      caves(x, h, z);
+      // caves(x, h, z);
     }
 
     function crust(x, h, z) {
@@ -216,26 +232,29 @@ function voxelTerrain(opts) {
       const crustThreshold = DIRT_MANTLE_THRESHOLD + (crustBedrockNoiseN * (DIRT_CRUST_THRESHOLD - DIRT_MANTLE_THRESHOLD));
 
       for (var y = startY; y < h; y++) {
-        var material = (function() {
-          if (y < bedrockThreshold) {
-            return BLOCKS['bedrock'];
-          } else if (y < coreThreshold) {
-            return BLOCKS['lava_still'];
-          } else if (y < mantleThreshold) {
-            return BLOCKS['obsidian'];
-          } else if (y < crustThreshold) {
-            return BLOCKS['stone'];
-          } else {
-            return BLOCKS['dirt'];
-          }
-        })();
+        if (!isCave(x, y, z)) {
+          var material = (function() {
+            if (y < bedrockThreshold) {
+              return BLOCKS['bedrock'];
+            } else if (y < coreThreshold) {
+              return BLOCKS['lava_still'];
+            } else if (y < mantleThreshold) {
+              return BLOCKS['obsidian'];
+            } else if (y < crustThreshold) {
+              return BLOCKS['stone'];
+            } else {
+              return BLOCKS['dirt'];
+            }
+          })();
 
-        material && set(x, y, z, material);
+          set(x, y, z, material);
+        }
       }
     }
 
-    function caves(x, h, z) {
-      // XXX
+    function isCave(x, y, z) {
+      const caveNoiseN = caveNoise.in3D(x, y, z);
+      return caveNoiseN < CAVE_RATE;
     }
 
     function pointsInside(fn) {
