@@ -1,11 +1,4 @@
-var min = Math.min;
-var abs = Math.abs;
-var floor = Math.floor;
-var pow = Math.pow;
-var sqrt = Math.sqrt;
-
 var Alea = require('alea');
-var noise = require('perlin').noise;
 var FastSimplexNoise = require('fast-simplex-noise');
 
 var resources = require('../../resources/index');
@@ -44,7 +37,13 @@ var DIRECTIONS = (function() {
   return result;
 })();
 
-module.exports = function(opts) {
+var min = Math.min;
+var abs = Math.abs;
+var floor = Math.floor;
+var pow = Math.pow;
+var sqrt = Math.sqrt;
+
+function voxelTerrain(opts) {
   opts = opts || {};
   var chunkSize = opts.chunkSize || 32;
   var rng = new Alea(opts.seed);
@@ -246,4 +245,8 @@ module.exports = function(opts) {
       voxels: voxels,
     };
   }
+}
+
+if (module) {
+  module.exports = voxelTerrain;
 }
