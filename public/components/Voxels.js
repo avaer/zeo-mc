@@ -84,7 +84,7 @@ export default class Voxels extends React.Component {
 
       // game.camera.position.set(INITIAL_POSITION[0], INITIAL_POSITION[1], INITIAL_POSITION[2]);
 
-      avatar = voxelPlayer(game)('api/img/textures/player.png');
+      avatar = voxelPlayer(game)('api/img/textures/avatar/player.png');
       avatar.position.set(INITIAL_POSITION[0], INITIAL_POSITION[1], INITIAL_POSITION[2]);
       // avatar.yaw.position.set(2, 14, 4);
       avatar.possess();
