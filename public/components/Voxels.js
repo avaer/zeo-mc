@@ -49,6 +49,7 @@ export default class Voxels extends React.Component {
   componentWillMount() {
     this._workers = _makeWorkers();
     this._workerIndex = 0;
+    this._pendingGenerates = new Map();
   }
 
   componentDidMount() {
@@ -200,13 +201,25 @@ export default class Voxels extends React.Component {
   }
 
   generateAsync(position, cb) {
-    this.callWorker('generate', [position], (err, chunk) => {
-      if (!err) {
-        cb(chunk);
-      } else {
-        console.warn(err);
-      }
-    });
+    const positionKey = _positionKey(position);
+    let cbs = this._pendingGenerates.get(positionKey);
+    if (!cbs) {
+      cbs = [];
+      this._pendingGenerates.set(positionKey, cbs)
+
+      this.callWorker('generate', [position], (err, chunk) => {
+        this._pendingGenerates.delete(positionKey);
+
+        if (!err) {
+          cbs.forEach(cb => {
+            cb(chunk);
+          });
+        } else {
+          console.warn(err);
+        }
+      });
+    }
+    cbs.push(cb);
   }
 
   render() {
@@ -228,4 +241,8 @@ function _makeWorkers() {
     workers.push(worker);
   }
   return workers;
+}
+
+function _positionKey(position) {
+  return position.join(',');
 }
