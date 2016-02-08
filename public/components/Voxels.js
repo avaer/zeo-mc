@@ -13,7 +13,7 @@ import voxelDebris from '../lib/voxel-debris/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
-import {CHUNK_SIZE, CHUNK_DISTANCE} from '../constants/index';
+import {CHUNK_SIZE, CHUNK_DISTANCE, NUM_WORKERS} from '../constants/index';
 import {BLOCKS} from '../resources/index';
 
 class Crosshair extends React.Component {
@@ -33,8 +33,18 @@ class Crosshair extends React.Component {
 }
 
 export default class Voxels extends React.Component {
-  componentDidMount() {
+  componentWillMount() {
+    this._workers = _makeWorkers();
+    this._workerIndex = 0;
 
+    this.callWorker('generate', [
+      [0, 0, 0]
+    ], (err, result) => {
+      console.log('got worker error result', {err, result});
+    });
+  }
+
+  componentDidMount() {
     const game = voxelEngine({
       // generate: voxelPerlinTerrain({scaleFactor:10}),
       // generate: voxelSimplexTerrain({seed: 'lol', scaleFactor: 10, chunkDistance: CHUNK_DISTANCE}),
@@ -129,6 +139,22 @@ export default class Voxels extends React.Component {
     return $(ReactDom.findDOMNode(this));
   }
 
+  callWorker(method, args, cb) {
+    const worker = this._workers[this._workerIndex++];
+
+    worker.postMessage({method, args});
+    worker.onmessage = resMsg => {
+      const {data: res} = resMsg;
+      const {error} = res;
+      if (!error) {
+        const {result} = res;
+        cb(null, result);
+      } else {
+        cb(null, error);
+      }
+    };
+  }
+
   render() {
     return (
       <div>
@@ -136,4 +162,16 @@ export default class Voxels extends React.Component {
       </div>
     );
   }
+}
+
+function _makeWorkers() {
+  const workers = [];
+  for (let i = 0; i < NUM_WORKERS; i++) {
+    const worker = new Worker('/static/voxel-worker.js');
+    worker.onerror, err => {
+      console.warn('worker error', err);
+    };
+    workers.push(worker);
+  }
+  return workers;
 }
