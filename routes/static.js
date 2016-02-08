@@ -3,11 +3,11 @@ const url = require('url');
 
 const st = require('st');
 
-const stImg = st({
+const stJs = st({
   path: path.join(__dirname, '..', 'public', 'js'),
   url: '/js'
 });
-stImg.url = '/js/:path*';
+stJs.url = '/js/:path*';
 const stImg = st({
   path: path.join(__dirname, '..', 'public', 'img'),
   url: '/img'
