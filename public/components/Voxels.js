@@ -187,17 +187,7 @@ export default class Voxels extends React.Component {
     const worker = this._workers[workerIndex];
     this._workerIndex = (workerIndex + 1) % this._workers.length;
 
-    worker.postMessage({method, args});
-    worker.onmessage = resMsg => {
-      const {data: res} = resMsg;
-      const {error} = res;
-      if (!error) {
-        const {result} = res;
-        cb(null, result);
-      } else {
-        cb(null, error);
-      }
-    };
+    worker.call(method, args, cb);
   }
 
   generateAsync(position, cb) {
@@ -234,11 +224,34 @@ export default class Voxels extends React.Component {
 function _makeWorkers() {
   const workers = [];
   for (let i = 0; i < NUM_WORKERS; i++) {
-    const worker = new Worker('/static/voxel-worker.js');
-    worker.onerror, err => {
-      console.warn('worker error', err);
-    };
-    workers.push(worker);
+    (() => {
+      const worker = new Worker('/static/voxel-worker.js');
+      worker.call = (method, args, cb) => {
+        const type = 'request';
+        worker.postMessage({type, method, args});
+        cbs.push(cb);
+      };
+      const cbs = [];
+      worker.onmessage = resMsg => {
+        const {data: res} = resMsg;
+        const {type} = res;
+        if (type === 'response') {
+          const cb = cbs.shift();
+
+          const {error} = res;
+          if (!error) {
+            const {result} = res;
+            cb(null, result);
+          } else {
+            cb(null, error);
+          }
+        }
+      };
+      worker.onerror, err => {
+        console.warn('worker error', err);
+      };
+      workers.push(worker);
+    })();
   }
   return workers;
 }

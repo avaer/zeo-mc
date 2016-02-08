@@ -2,7 +2,9 @@ import * as voxelAsync from '../voxel-async/index';
 
 onmessage = reqMsg => {
   function done(error, result) {
+    const type = 'response';
     const res = {
+      type,
       error,
       result
     };
@@ -11,11 +13,14 @@ onmessage = reqMsg => {
 
   _tryCatch(() => {
     const {data: req} = reqMsg;
-    const {method, args} = req;
+    const {type} = req;
+    if (type === 'request') {
+      const {method, args} = req;
 
-    switch (method) {
-      case 'generate': return generate(args[0] || null);
-      default: throw new Error('ENOENT');
+      switch (method) {
+        case 'generate': return generate(args[0] || null);
+        default: throw new Error('ENOENT');
+      }
     }
  }, done);
 };
