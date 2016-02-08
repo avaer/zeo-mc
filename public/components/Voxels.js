@@ -28,13 +28,6 @@ const INITIAL_CHUNK_POSITIONS = (() => {
   }
   return result;
 })();
-const INITIAL_CHUNK_POSITION_KEYS = (() => {
-  const result = {};
-  INITIAL_CHUNK_POSITIONS.forEach(position => {
-    result[_positionKey(position)] = true;
-  });
-  return result;
-})();
 
 class Crosshair extends React.Component {
   render() {
@@ -144,14 +137,12 @@ export default class Voxels extends React.Component {
       game.paused = false;
 
       game.voxels.on('missingChunk', position => {
-        if (!INITIAL_CHUNK_POSITION_KEYS[_positionKey(position)]) {
-          console.log('missingChunk', position);
-          this.generateAsync(position, chunk => {
-            console.log('genetatedChunk', position);
+        console.log('missingChunk', position);
+        this.generateAsync(position, chunk => {
+          console.log('genetatedChunk', position);
 
-            game.showChunk(chunk);
-          });
-        }
+          game.showChunk(chunk);
+        });
       });
 
       avatar.subjectTo(GRAVITY);
@@ -237,8 +228,4 @@ function _makeWorkers() {
     workers.push(worker);
   }
   return workers;
-}
-
-function _positionKey(position) {
-  return position.join(',');
 }
