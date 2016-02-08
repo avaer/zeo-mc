@@ -10,10 +10,13 @@ var TERRAIN_FREQUENCY = 1;
 var TERRAIN_OCTAVES = 8;
 var TERRAIN_DIVISOR = 80;
 
-var DIRT_BEDROCK_THRESHOLD = -128;
-var DIRT_CORE_THRESHOLD = -100;
-var DIRT_MANTLE_THRESHOLD = -80;
-var DIRT_CRUST_THRESHOLD = -10;
+var DIRT_BOTTOM_THRESHOLD = -255;
+var DIRT_BEDROCK_THRESHOLD = -250;
+var DIRT_CORE_THRESHOLD = -200;
+var DIRT_MANTLE_THRESHOLD = -20;
+var DIRT_CRUST_THRESHOLD = 40;
+var DIRT_FREQUENCY = 0.02;
+var DIRT_OCTAVES = 6;
 
 var TREE_RATE = 0.1;
 var TREE_MIN_HEIGHT = 4;
@@ -24,10 +27,10 @@ var TREE_LEAF_SIZE = 2;
 
 var DIRECTIONS = (function() {
   var result = [];
-  for (var x = -1; x <= 1; x++) {
-    for (var y = -1; y <= 1; y++) {
-      for (var z = -1; z <= 1; z++) {
-        var numMatches = +(x === y) + +(y === z) + +(x === z);
+  for (let x = -1; x <= 1; x++) {
+    for (let y = -1; y <= 1; y++) {
+      for (let z = -1; z <= 1; z++) {
+        const numMatches = +(x === y) + +(y === z) + +(x === z);
         if (numMatches === 1) {
           result.push({ x: x, y: y, z: z });
         }
@@ -37,42 +40,66 @@ var DIRECTIONS = (function() {
   return result;
 })();
 
-var min = Math.min;
-var abs = Math.abs;
-var floor = Math.floor;
-var pow = Math.pow;
-var sqrt = Math.sqrt;
+const min = Math.min;
+const abs = Math.abs;
+const floor = Math.floor;
+const pow = Math.pow;
+const sqrt = Math.sqrt;
 
 function voxelTerrain(opts) {
   opts = opts || {};
-  var chunkSize = opts.chunkSize || 32;
-  var rng = new Alea(opts.seed);
-  var terrainNoise = new FastSimplexNoise({
+  const chunkSize = opts.chunkSize || 32;
+
+  const rng = new Alea(opts.seed);
+  const terrainNoise = new FastSimplexNoise({
     min: TERRAIN_FLOOR,
     max: TERRAIN_CEILING,
     frequency: TERRAIN_FREQUENCY,
     octaves: TERRAIN_OCTAVES,
     random: rng
   });
-  var treeNoise = new FastSimplexNoise({
+
+  const treeNoise = new FastSimplexNoise({
     min: 0,
     max: 1,
     frequency: 1,
     octaves: 2,
     random: rng
   });
-  var treeLeafNoise = new FastSimplexNoise({
+  const treeLeafNoise = new FastSimplexNoise({
     min: 0,
     max: 1,
     frequency: 0.5,
     octaves: 1,
     random: rng
   });
-  var crustNoise = new FastSimplexNoise({
-    min: DIRT_BEDROCK_THRESHOLD,
-    max: 0,
-    frequency: 0.5,
-    octaves: 6,
+
+  const crustBedrockNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: DIRT_FREQUENCY,
+    octaves: DIRT_OCTAVES,
+    random: rng
+  });
+  const crustCoreNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: DIRT_FREQUENCY,
+    octaves: DIRT_OCTAVES,
+    random: rng
+  });
+  const crustMantleNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: DIRT_FREQUENCY,
+    octaves: DIRT_OCTAVES,
+    random: rng
+  });
+  const crustCrustNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: DIRT_FREQUENCY,
+    octaves: DIRT_OCTAVES,
     random: rng
   });
 
@@ -172,23 +199,38 @@ function voxelTerrain(opts) {
     }
 
     function crust(x, h, z) {
-      var crustNoiseN = terrainNoise.in2D(x, z);
+      let crustBedrockNoiseN = crustBedrockNoise.in2D(x, z);
+      let crustCoreNoiseN = crustCoreNoise.in2D(x, z);
+      let crustMantleNoiseN = crustMantleNoise.in2D(x, z);
+      let crustCrustNoiseN = crustCrustNoise.in2D(x, z);
+
+      const totalNoiseN = crustBedrockNoiseN + crustCoreNoiseN + crustMantleNoiseN + crustCrustNoiseN;
+      crustBedrockNoiseN /= totalNoiseN;
+      crustCoreNoiseN /= totalNoiseN;
+      crustMantleNoiseN /= totalNoiseN;
+      crustCrustNoiseN /= totalNoiseN;
+
+      const bedrockThreshold = DIRT_BOTTOM_THRESHOLD + (crustBedrockNoiseN * (DIRT_BEDROCK_THRESHOLD - DIRT_BOTTOM_THRESHOLD));
+      const coreThreshold = DIRT_BEDROCK_THRESHOLD + (crustBedrockNoiseN * (DIRT_CORE_THRESHOLD - DIRT_BEDROCK_THRESHOLD));
+      const mantleThreshold = DIRT_CORE_THRESHOLD + (crustBedrockNoiseN * (DIRT_MANTLE_THRESHOLD - DIRT_CORE_THRESHOLD));
+      const crustThreshold = DIRT_MANTLE_THRESHOLD + (crustBedrockNoiseN * (DIRT_CRUST_THRESHOLD - DIRT_MANTLE_THRESHOLD));
+
       for (var y = startY; y < h; y++) {
         var material = (function() {
-          if (y <= DIRT_BEDROCK_THRESHOLD || crustNoiseN < DIRT_BEDROCK_THRESHOLD) {
+          if (y < bedrockThreshold) {
             return BLOCKS['bedrock'];
-          } else if (crustNoiseN < DIRT_CORE_THRESHOLD) {
+          } else if (y < coreThreshold) {
             return BLOCKS['lava_still'];
-          } else if (crustNoiseN < DIRT_MANTLE_THRESHOLD) {
+          } else if (y < mantleThreshold) {
             return BLOCKS['obsidian'];
-          } else if (crustNoiseN < DIRT_CRUST_THRESHOLD) {
+          } else if (y < crustThreshold) {
             return BLOCKS['stone'];
           } else {
             return BLOCKS['dirt'];
           }
         })();
 
-        set(x, y, z, material);
+        material && set(x, y, z, material);
       }
     }
 
