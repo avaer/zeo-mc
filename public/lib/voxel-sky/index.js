@@ -248,7 +248,7 @@ Sky.prototype.fn = function(time) {
   } else if (time >= 600 && time < 1800) {
     this.paint(['top', 'left', 'right', 'front', 'back'], () => {
       this.material.transparent = true;
-      this.material.opacity = 1;
+      this.material.opacity = 0;
     });
   } else if (time >= 1800 && time < 1900) {
     this.paint(['top', 'left', 'right', 'front', 'back'], () => {
