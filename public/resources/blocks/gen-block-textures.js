@@ -11,7 +11,7 @@ var mainTextures = [
   /log/,
   /leaves/,
 ];
-var files = fs.readdirSync('../img/textures/').filter(function(file) {
+var files = fs.readdirSync('../../img/textures/').filter(function(file) {
   return /\.png$/.test(file) && !/player/.test(file);
 }).map(function(file) {
   return file.replace(/\.png$/, '');
