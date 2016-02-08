@@ -232,7 +232,7 @@ function voxelTerrain(opts) {
       const crustThreshold = DIRT_MANTLE_THRESHOLD + (crustBedrockNoiseN * (DIRT_CRUST_THRESHOLD - DIRT_MANTLE_THRESHOLD));
 
       for (var y = startY; y < h; y++) {
-        if (!isCave(x, y, z)) {
+        if (y < coreThreshold || !isCave(x, y, z)) {
           var material = (function() {
             if (y < bedrockThreshold) {
               return BLOCKS['bedrock'];
