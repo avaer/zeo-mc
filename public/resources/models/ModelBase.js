@@ -118,7 +118,8 @@ function _getMaterial(game, textureName, uv) {
       const submaterial = new game.THREE.MeshBasicMaterial({
         map: texture,
         side: game.THREE.BackSide,
-        // transparent: true
+        // side: game.THREE.DoubleSide,
+        transparent: true
       });
       materials.push(submaterial);
     }

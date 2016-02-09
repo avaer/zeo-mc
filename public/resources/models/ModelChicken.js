@@ -12,7 +12,14 @@ export default class ModelChicken extends ModelBase {
     this.meshes = [
       {
         name: 'head',
-        uv: [0, 0],
+        uv: [
+          [0, 3, 3, 9],
+          [7, 3, 10, 9],
+          [3, 0, 7, 3],
+          [3, 0, 7, 3],
+          [10, 3, 14, 9],
+          [3, 3, 7, 9],
+        ],
         position: [-2, -6, -2],
         dimensions: [4, 6, 3],
         rotationPoint: [0, -1 + byte0, -4],
@@ -20,7 +27,14 @@ export default class ModelChicken extends ModelBase {
       },
       {
         name: 'bill',
-        uv: [14, 0],
+        uv: [
+          [14, 2, 16, 4],
+          [20, 2, 22, 4],
+          [20, 0, 24, 2],
+          [16, 0, 20, 2],
+          [22, 2, 26, 4],
+          [16, 2, 20, 4],
+        ],
         position: [-2, -4, -4],
         dimensions: [4, 2, 2],
         rotationPoint: [0, -1 + byte0, -4],
@@ -28,7 +42,14 @@ export default class ModelChicken extends ModelBase {
       },
       {
         name: 'chin',
-        uv: [14, 4],
+        uv: [
+          [14, 6, 16, 8],
+          [20, 6, 22, 8],
+          [16, 4, 20, 6],
+          [16, 4, 20, 6],
+          [16, 6, 20, 8],
+          [16, 6, 20, 8],
+        ],
         position: [-1, -2, -3],
         dimensions: [2, 2, 2],
         rotationPoint: [0, -1 + byte0, -4],
@@ -36,7 +57,14 @@ export default class ModelChicken extends ModelBase {
       },
       {
         name: 'body',
-        uv: [0, 9],
+        uv: [
+          [0, 15, 6, 23],
+          [18, 15, 24, 23],
+          [6, 9, 12, 15],
+          [12, 9, 18, 15],
+          [6, 15, 12, 23],
+          [12, 15, 18, 23],
+        ],
         position: [-3, -4, -3],
         dimensions: [6, 8, 6],
         rotationPoint: [0, 0 + byte0, 0],
@@ -44,7 +72,14 @@ export default class ModelChicken extends ModelBase {
       },
       {
         name: 'rightLeg',
-        uv: [26, 0],
+        uv: [
+          [32, 0, 33, 1],
+          [32, 0, 33, 1],
+          [32, 0, 35, 3],
+          [32, 0, 33, 1],
+          [35, 3, 38, 8],
+          [32, 0, 33, 1],
+        ],
         position: [-1, 0.0, -3],
         dimensions: [3, 5, 3],
         rotationPoint: [-2, 3 + byte0, 1],
@@ -52,7 +87,14 @@ export default class ModelChicken extends ModelBase {
       },
       {
         name: 'leftLeg',
-        uv: [26, 0],
+        uv: [
+          [32, 0, 33, 1],
+          [32, 0, 33, 1],
+          [32, 0, 35, 3],
+          [32, 0, 33, 1],
+          [35, 3, 38, 8],
+          [32, 0, 33, 1],
+        ],
         position: [-1, 0, -3],
         dimensions: [3, 5, 3],
         rotationPoint: [1, 3 + byte0, 1],
@@ -60,7 +102,14 @@ export default class ModelChicken extends ModelBase {
       },
       {
         name: 'rightWing',
-        uv: [24, 13],
+        uv: [
+          [24, 19, 31, 23],
+          [24, 19, 31, 23],
+          [30, 13, 32, 19],
+          [30, 13, 32, 19],
+          [30, 13, 32, 19],
+          [30, 13, 32, 19],
+        ],
         position: [0, 0, -3],
         dimensions: [1, 4, 6],
         rotationPoint: [-4, -3 + byte0, 0],
@@ -68,7 +117,14 @@ export default class ModelChicken extends ModelBase {
       },
       {
         name: 'leftWing',
-        uv: [24, 13],
+        uv: [
+          [24, 19, 31, 23],
+          [24, 19, 31, 23],
+          [30, 13, 32, 19],
+          [30, 13, 32, 19],
+          [30, 13, 32, 19],
+          [30, 13, 32, 19],
+        ],
         position: [-1, 0, -3],
         dimensions: [1, 4, 6],
         rotationPoint: [4, -3 + byte0, 0],
