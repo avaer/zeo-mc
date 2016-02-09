@@ -1,7 +1,7 @@
 import ModelBase from './ModelBase';
 
 export default class ModelQuadruped extends ModelBase {
-  constructor() {
+  constructor([p1, p2] = [0, 1], [s1, s2] = [0, 1]) {
     super();
 
     this.texture = null;
@@ -9,32 +9,55 @@ export default class ModelQuadruped extends ModelBase {
       {
         name: 'head',
         uv: [0, 0],
-        position: [[-4, -4, -8], [8, 8, 8]]
+        position: [-4, -4, -8],
+        dimensions: [8, 8, 8],
+        scale: p2,
+        rotationPoint: [0, 18 - p1, -6]
       },
       {
         name: 'body',
         uv: [28, 8],
-        position: [[-5, -10, -7], [10, 16, 8]]
+        position: [-5, -10, -7],
+        dimensions: [10, 16, 8],
+        scale: p2,
+        rotationPoint: [0, 17 - p1, 2],
+        rotation: [Math.PI / 2, 0, 0]
       },
       {
         name: 'leg1',
         uv: [0, 16],
-        position: [[-2, 0, -2], [4, 0, 4]]
+        position: [-2, 0, -2],
+        dimensions: [4, p1, 4],
+        scale: p2,
+        rotationPoint: [-3, 24 - p1, 7],
+        rotation: [Math.cos(s1 * 0.6662) * 1.4 * s2, 0, 0]
       },
       {
         name: 'leg2',
         uv: [0, 16],
-        position: [[-2, 0, -2], [4, 0, 4]]
+        position: [-2, 0, -2],
+        dimensions: [4, p1, 4],
+        scale: p2,
+        rotationPoint: [3, 24 - p1, 7],
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2, 0, 0]
       },
       {
         name: 'leg3',
         uv: [0, 16],
-        position: [[-2, 0, -2], [4, 0, 4]]
+        position: [-2, 0, -2],
+        dimensions: [4, p1, 4],
+        scale: p2,
+        rotationPoint: [-3, 24 - p1, -5],
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2, 0, 0]
       },
       {
         name: 'leg4',
         uv: [0, 16],
-        position: [[-2, 0, -2], [4, 0, 4]]
+        position: [-2, 0, -2],
+        dimensions: [4, p1, 4],
+        scale: p2,
+        rotationPoint: [3, 24 - p1, -5],
+        rotation: [Math.cos(s1 * 0.6662) * 1.4 * s2, 0, 0]
       },
     ];
   }

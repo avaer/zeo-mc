@@ -15,36 +15,56 @@ export default class ModelBase {
   }
 }
 ModelBase.make = Model => {
-  const model = new Model();
-  return game => model.getMesh(game);
+  return (game, p = [], s = []) => {
+    const model = new Model(p, s);
+    return model.getMesh(game);
+  };
 };
 
 function _makeObject(game, meshes, material) {
   const object = new game.THREE.Object3D();
   (function recurse(object, meshes) {
     meshes.forEach(mesh => {
-      const {children} = mesh;
-      if (!children) {
-        const {uv, position} = mesh;
-        const [startPosition, dimensions] = position;
+      let {position, dimensions, rotationPoint} = mesh;
+      if (position && dimensions && rotationPoint) {
+        const {uv = [0,0], scale = 1, rotation = [0,0,0]} = mesh;
+        position = [position[0], -position[1], position[2]];
+        dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
+        rotationPoint = [rotationPoint[0], -rotationPoint[1], rotationPoint[2]];
 
-        const width = dimensions[0];
-        const height = dimensions[1];
-        const depth = dimensions[2];
+        const geometry = new game.THREE.CubeGeometry(dimensions[0], dimensions[1], dimensions[2]);
 
-        const geometry = new game.THREE.CubeGeometry(width, height, depth);
-
-        const subobject = new game.THREE.Mesh(geometry, material);
-        subobject.position.set(
-          startPosition[0] + (width / 2),
-          -startPosition[1] - (height / 2),
-          startPosition[2] + (depth / 2)
+        const submesh = new game.THREE.Mesh(geometry, material);
+        submesh.position.set(
+          (position[0] + (dimensions[0] / 2)) /* - (rotationPoint[0] / 2) */,
+          (position[1] + (dimensions[1] / 2)) /* + (rotationPoint[1] / 2) */,
+          (position[2] + (dimensions[2] / 2)) /* - (rotationPoint[2] / 2) */,
         );
-        object.add(subobject);
-      } else {
-        const subobject = new game.THREE.Object3D();
-        object.add(subobject);
-        recurse(subobject, children);
+        const subobject1 = new game.THREE.Object3D();
+        subobject1.position.set(
+          rotationPoint[0],
+          rotationPoint[1],
+          rotationPoint[2],
+        );
+
+        const subobject2 = new game.THREE.Object3D();
+        subobject1.add(subobject2);
+        subobject2.add(submesh);
+        /* subobject2.position.set(
+          rotationPoint[0] / 2,
+          -rotationPoint[1] / 2,
+          rotationPoint[2] / 2,
+        ); */
+        subobject2.rotation.set(-rotation[0], -rotation[1], -rotation[2]);
+
+        object.add(subobject1);
+
+        const {children} = mesh;
+        if (children) {
+          const childrenobject = new game.THREE.Object3D();
+          object.add(childrenobject);
+          recurse(childrenobject, children);
+        }
       }
     });
   })(object, meshes);
@@ -53,7 +73,7 @@ function _makeObject(game, meshes, material) {
 }
 
 function _makeMaterial(game, texture) {
-  const material = new game.THREE.MeshPhongMaterial({ color: 0x808080 });
+  const material = new game.THREE.MeshLambertMaterial({ color: 0xFF0000, wireframe: true });
 
   /* _loadTexture('/api/img/textures/' + texture + '.png', img => {
     material.map = new game.THREE.Texture(img);

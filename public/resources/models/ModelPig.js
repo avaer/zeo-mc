@@ -1,22 +1,31 @@
 import ModelQuadruped from './ModelQuadruped';
 
 export default class ModelPig extends ModelQuadruped {
-  constructor() {
-    super();
+  constructor([p1], s) {
+    super([6, p1], s);
 
     this.texture = 'entity/pig';
-    this.meshes = this.meshes.concat([
-      {
-        name: 'nose',
-        uv: [16, 16],
-        position: [[-2, 0, -9], [4, 3, 1]]
+    this.meshes = this.meshes.map(mesh => {
+      if (mesh.name === 'head') {
+        mesh.children = mesh.children || [];
+        mesh.children.push({
+          name: 'nose',
+          uv: [16, 16],
+          position: [-2, 0, -9],
+          dimensions: [4, 3, 1],
+          rotationPoint: mesh.rotationPoint,
+          scale: p1
+        });
+        return mesh;
+      } else {
+        return mesh;
       }
-    ]);
+    });
   }
 }
 
 // XXX
-// var m; game.scene.remove(m); m = MODELS.pig(game); game.scene.add(m); m.position.set(-20, 10, 10); b = m.children[1]; b.rotation.x = Math.PI / 2; b.position.z = 10;
+// var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.pig(game, [2], [i, 1]); game.scene.add(m); m.position.set(-20, 11, 10); }; setInterval(() => {go(i += 0.1)}, 100);
 
 /* package net.minecraft.src;
 
