@@ -4,7 +4,7 @@ export default class ModelPig extends ModelQuadruped {
   constructor([p1 = 0] = [], s = []) {
     super([6, p1], s);
 
-    this.texture = 'entity/pig';
+    this.texture = 'entity/pig/pig';
     this.meshes = this.meshes.map(mesh => {
       if (mesh.name === 'head') {
         mesh.children = mesh.children || [];
