@@ -30,22 +30,12 @@ function _makeObject(game, texture, meshes) {
   const object = new game.THREE.Object3D();
   (function recurse(object, meshes) {
     meshes.forEach(mesh => {
-      let {position, dimensions, rotationPoint, uv} = mesh;
+      let {position, dimensions, rotationPoint, uv, children} = mesh;
       if (position && dimensions && rotationPoint && uv) {
-        const {scale = 1, rotation = [0,0,0]} = mesh;
-        position = [position[0], -position[1], position[2]];
-        dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
+        const {rotation = [0,0,0]} = mesh;
         rotationPoint = [rotationPoint[0], -rotationPoint[1], rotationPoint[2]];
 
-        const geometry = new game.THREE.CubeGeometry(dimensions[0], dimensions[1], dimensions[2]);
-        geometry.faceVertexUvs = _getFaceVertexUvs(game);
-
-        const submesh = new game.THREE.Mesh(geometry, _getMaterial(game, texture, uv));
-        submesh.position.set(
-          (position[0] + (dimensions[0] / 2)),
-          (position[1] + (dimensions[1] / 2)),
-          (position[2] + (dimensions[2] / 2)),
-        );
+        const submesh = _makeMesh(game, position, dimensions, texture, uv);
 
         const subobject1 = new game.THREE.Object3D();
         subobject1.position.set(
@@ -61,17 +51,60 @@ function _makeObject(game, texture, meshes) {
 
         object.add(subobject1);
 
-        const {children} = mesh;
         if (children) {
-          const childrenobject = new game.THREE.Object3D();
-          object.add(childrenobject);
-          recurse(childrenobject, children);
+          recurse(object, children);
         }
+      } else if (position && dimensions && uv) {
+        const submesh = _makeMesh(game, position, dimensions, texture, uv);
+
+        object.add(submesh);
+
+        if (children) {
+          recurse(object, children);
+        }
+      } else if (rotationPoint && children) {
+        const {rotation = [0,0,0]} = mesh;
+        rotationPoint = [rotationPoint[0], -rotationPoint[1], rotationPoint[2]];
+
+        const subobject1 = new game.THREE.Object3D();
+        subobject1.position.set( // XXX
+          rotationPoint[0],
+          rotationPoint[1],
+          rotationPoint[2],
+        );
+
+        const subobject2 = new game.THREE.Object3D();
+        subobject1.add(subobject2);
+        subobject2.rotation.set(-rotation[0], -rotation[1], -rotation[2]);
+
+        object.add(subobject1);
+
+        recurse(subobject2, children);
+      } else if (children) {
+        const childrenobject = new game.THREE.Object3D();
+        object.add(childrenobject);
+        recurse(childrenobject, children);
       }
     });
   })(object, meshes);
   object.scale.set(0.1, 0.1, 0.1);
   return object;
+}
+
+function _makeMesh(game, position, dimensions, texture, uv) {
+  position = [position[0], -position[1], position[2]];
+  dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
+
+  const geometry = new game.THREE.CubeGeometry(dimensions[0], dimensions[1], dimensions[2]);
+  geometry.faceVertexUvs = _getFaceVertexUvs(game);
+
+  const mesh = new game.THREE.Mesh(geometry, _getMaterial(game, texture, uv));
+  mesh.position.set(
+    (position[0] + (dimensions[0] / 2)),
+    (position[1] + (dimensions[1] / 2)),
+    (position[2] + (dimensions[2] / 2)),
+  );
+  return mesh;
 }
 
 function _normalizeUv(uv) {

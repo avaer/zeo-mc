@@ -1,74 +1,173 @@
 import ModelBase from './ModelBase';
 
 export default class ModelOcelot extends ModelBase {
-  constructor() {
+  constructor([], [s1 = 0, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
     super();
 
     this.texture = 'entity/cat/ocelot';
     this.meshes = [
       {
         name: 'head',
+        rotationPoint: [0, 15, -9],
+        rotation: [s5 / (180 / Math.PI), s4 / (180 / Math.PI), 0],
         children: [
           {
             name: 'main',
-            uv: [0, 0],
-            position: [[-2.5, -2, -3], [5, 4, 5]]
+            uv: [[0, 0, 5, 5]],
+            position: [-2.5, -2, -3],
+            dimensions: [5, 4, 5]
           },
           {
             name: 'nose',
-            uv: [0, 24],
-            position: [[-1.5, 0, -4], [3, 2, 2]]
+            uv: [
+              [0, 26, 2, 28],
+              [5, 26, 7, 28],
+              [5, 24, 8, 26],
+              [2, 24, 5, 26],
+              [2, 26, 5, 28],
+              [2, 26, 5, 28],
+            ],
+            position: [-1.5, 0, -4],
+            dimensions: [3, 2, 2]
           },
           {
             name: 'ear1',
-            uv: [0, 10],
-            position: [[-2, -3, 0], [1, 1, 2]]
+            uv: [
+              [0, 12, 2, 13],
+              [4, 12, 6, 13],
+              [2, 12, 3, 13],
+              [3, 12, 4, 13],
+              [2, 10, 3, 12],
+              [3, 10, 4, 12],
+            ],
+            position: [-2, -3, 0],
+            dimensions: [1, 1, 2]
           },
           {
             name: 'ear2',
-            uv: [6, 10],
-            position: [[1.0, -3, 0], [1, 1, 2]]
+            uv: [
+              [6, 12, 8, 13],
+              [10, 12, 12, 13],
+              [8, 12, 9, 13],
+              [9, 12, 10, 13],
+              [8, 10, 9, 12],
+              [9, 10, 10, 12],
+            ],
+            position: [1, -3, 0],
+            dimensions: [1, 1, 2]
           }
         ]
       },
       {
-        name: 'field_48226_n',
-        uv: [20, 10],
-        position: [[-2, 3, -8], [4, 16, 6, 0]]
+        name: 'body',
+        uv: [
+          [20, 6, 26, 22],
+          [34, 6, 40, 22],
+          [26, 0, 30, 6], // back
+          [30, 6, 34, 22],
+          [30, 0, 34, 6], // top
+          [26, 6, 30, 22], // bottom
+        ],
+        position: [-2, 3, -8],
+        dimensions: [4, 16, 6, 0],
+        rotationPoint: [0, 12, -10],
+        rotation: [Math.PI / 2, 0, 0]
       },
       {
-        name: 'field_48222_e',
-        uv: [0, 15],
-        position: [[-0.5, 0.0, 0.0], [1, 8, 1]]
+        name: 'leg1',
+        uv: [
+          [8, 15, 10, 21],
+          [14, 15, 16, 21],
+          [10, 13, 12, 15],
+          [12, 14, 14, 15],
+          [10, 15, 12, 21],
+          [12, 15, 14, 21],
+        ],
+        position: [-1, 0, 1],
+        dimensions: [2, 6, 2],
+        rotationPoint: [1.1, 18, 5],
+        rotation: [Math.cos(s1 * 0.6662) * 1 * s2, 0, 0]
       },
       {
-        name: 'field_48219_f',
-        uv: [4, 15],
-        position: [[0.5, 0.0, 0.0], [1, 8, 1]]
+        name: 'leg2',
+        uv: [
+          [8, 15, 10, 21],
+          [14, 15, 16, 21],
+          [10, 13, 12, 15],
+          [12, 14, 14, 15],
+          [10, 15, 12, 21],
+          [12, 15, 14, 21],
+        ],
+        position: [-1, 0, 1],
+        dimensions: [2, 6, 2],
+        rotationPoint: [-1, 18, 5],
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1 * s2, 0, 0]
       },
       {
-        name: 'field_48225_a',
-        uv: [8, 13],
-        position: [[-1, 0, 1.0], [2, 6, 2]]
+        name: 'leg3',
+        uv: [
+          [40, 2, 42, 12],
+          [46, 2, 48, 12],
+          [42, 2, 44, 2],
+          [44, 2, 46, 2],
+          [42, 2, 44, 12],
+          [44, 2, 46, 12],
+        ],
+        position: [-1, 0, 0],
+        dimensions: [2, 10, 2],
+        rotationPoint: [1.2, 13.8, -5],
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1 * s2, 0, 0]
       },
       {
-        name: 'field_48223_b',
-        uv: [8, 13],
-        position: [[-1, 0, 1.0], [2, 6, 2]]
+        name: 'leg4',
+        uv: [
+          [40, 2, 42, 12],
+          [46, 2, 48, 12],
+          [42, 2, 44, 2],
+          [44, 2, 46, 2],
+          [42, 2, 44, 12],
+          [44, 2, 46, 12],
+        ],
+        position: [-1, 0, 0],
+        dimensions: [2, 10, 2],
+        rotationPoint: [-1.2, 13.8, -5],
+        rotation: [ Math.cos(s1 * 0.6662) * 1 * s2, 0, 0]
       },
       {
-        name: 'field_48224_c',
-        uv: [40, 0],
-        position: [[-1, 0, 0], [2, 10, 2]]
+        name: 'tail1',
+        uv: [
+          [0, 16, 1, 24],
+          [3, 16, 4, 24],
+          [1, 16, 2, 24],
+          [2, 16, 3, 24],
+          [1, 15, 2, 16],
+          [2, 16, 3, 16],
+        ],
+        position: [-0.5, 0, 0],
+        dimensions: [1, 8, 1],
+        rotationPoint: [0, 15, 8]
       },
       {
-        name: 'field_48221_d',
-        uv: [40, 0],
-        position: [[-1, 0, 0], [2, 10, 2]]
+        name: 'tail2',
+        uv: [
+          [4, 16, 5, 24],
+          [7, 16, 8, 24],
+          [5, 16, 6, 24],
+          [6, 16, 7, 24],
+          [5, 15, 6, 16],
+          [6, 16, 7, 16],
+        ],
+        position: [0.5, 0.0, 0.0],
+        dimensions: [1, 8, 1],
+        rotationPoint: [0, 20, 14],
+        rotation: 1.727876 + (Math.PI / 4) * Math.cos(s1) * s2
       },
     ]
   }
 }
+
+// XXX
+// var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.ocelot(game, [], [i, 1]); game.scene.add(m); m.position.set(-20, 11, 10); }; setInterval(() => {go(i += 0.1)}, 100);
 
 /* package net.minecraft.src;
 
@@ -169,35 +268,15 @@ public class ModelOcelot extends ModelBase
         field_48220_g.rotateAngleX = par5 / (180F / (float)Math.PI);
         field_48220_g.rotateAngleY = par4 / (180F / (float)Math.PI);
 
-        if (field_48227_o != 3)
-        {
+
             field_48226_n.rotateAngleX = ((float)Math.PI / 2F);
 
-            if (field_48227_o == 2)
-            {
-                field_48225_a.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 1.0F * par2;
-                field_48223_b.rotateAngleX = MathHelper.cos(par1 * 0.6662F + 0.3F) * 1.0F * par2;
-                field_48224_c.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float)Math.PI + 0.3F) * 1.0F * par2;
-                field_48221_d.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float)Math.PI) * 1.0F * par2;
-                field_48219_f.rotateAngleX = 1.727876F + ((float)Math.PI / 10F) * MathHelper.cos(par1) * par2;
-            }
-            else
-            {
                 field_48225_a.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 1.0F * par2;
                 field_48223_b.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float)Math.PI) * 1.0F * par2;
                 field_48224_c.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float)Math.PI) * 1.0F * par2;
                 field_48221_d.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 1.0F * par2;
 
-                if (field_48227_o == 1)
-                {
                     field_48219_f.rotateAngleX = 1.727876F + ((float)Math.PI / 4F) * MathHelper.cos(par1) * par2;
-                }
-                else
-                {
-                    field_48219_f.rotateAngleX = 1.727876F + 0.4712389F * MathHelper.cos(par1) * par2;
-                }
-            }
-        }
     }
 
     /**

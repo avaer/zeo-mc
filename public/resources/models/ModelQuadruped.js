@@ -1,7 +1,7 @@
 import ModelBase from './ModelBase';
 
 export default class ModelQuadruped extends ModelBase {
-  constructor([p1, p2] = [0, 1], [s1, s2] = [0, 1]) {
+  constructor([p1 = 0, p2 = 1] = [], [s1 = 0, s2 = 1] = []) {
     super();
 
     this.texture = null;
