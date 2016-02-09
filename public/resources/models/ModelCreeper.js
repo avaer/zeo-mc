@@ -1,49 +1,107 @@
 import ModelBase from './ModelBase';
 
 export default class ModelCreeper extends ModelBase {
-  constructor() {
+  constructor([], [s1 = 0, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
     super();
+
+    const i = 4;
 
     this.texture = 'entity/creeper/creeper';
     this.meshes = [
       {
         name: 'head',
-        uv: [0, 0],
-        position: [[-4, -8, -4], [8, 8, 8]]
+        uv: [[0, 0, 8, 8]],
+        position: [-4, -8, -4],
+        dimensions: [8, 8, 8],
+        rotationPoint: [0, i, 0],
+        rotation: [s4 / (180 / Math.PI), s5 / (180 / Math.PI), 0]
       },
-      {
+      /* {
         name: 'field_1270_b',
         uv: [32, 0],
-        position: [[-4, -8, -4], [8, 8, 8]]
-      },
+        position: [-4, -8, -4],
+        dimensions: [8, 8, 8]
+      }, */
       {
         name: 'body',
-        uv: [16, 16],
-        position: [[-4, 0, -2], [8, 12, 4]]
+        uv: [
+          [16, 20, 20, 32],
+          [36, 20, 40, 32],
+          [20, 16, 28, 20],
+          [28, 16, 36, 20],
+          [20, 16, 26, 32],
+          [26, 20, 32, 32],
+        ],
+        position: [-4, 0, -2],
+        dimensions: [8, 12, 4],
+        rotationPoint: [0, i, 0]
       },
       {
         name: 'leg1',
-        uv: [0, 16],
-        position: [[-2, 0, -2], [4, 6, 4]]
+        uv: [
+          [0, 20, 4, 26],
+          [12, 20, 16, 26],
+          [8, 16, 12, 20],
+          [4, 16, 8, 20],
+          [8, 20, 12, 26],
+          [4, 20, 8, 26],
+        ],
+        position: [-2, 0, -2],
+        dimensions: [4, 6, 4],
+        rotationPoint: [-2, 12 + i, 4],
+        rotation: [Math.cos(s1 * 0.6662) * 1.4 * s2, 0, 0]
       },
       {
         name: 'leg2',
-        uv: [0, 16],
-        position: [[-2, 0, -2], [4, 6, 4]]
+        uv: [
+          [0, 20, 4, 26],
+          [12, 20, 16, 26],
+          [8, 16, 12, 20],
+          [4, 16, 8, 20],
+          [8, 20, 12, 26],
+          [4, 20, 8, 26],
+        ],
+        position: [-2, 0, -2],
+        dimensions: [4, 6, 4],
+        rotationPoint: [2, 12 + i, 4],
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2, 0, 0]
       },
       {
         name: 'leg3',
-        uv: [0, 16],
-        position: [[-2, 0, -2], [4, 6, 4]]
+        uv: [
+          [0, 20, 4, 26],
+          [12, 20, 16, 26],
+          [8, 16, 12, 20],
+          [4, 16, 8, 20],
+          [8, 20, 12, 26],
+          [4, 20, 8, 26],
+        ],
+        position: [-2, 0, -2],
+        dimensions: [4, 6, 4],
+        rotationPoint: [-2, 12 + i, -4],
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2, 0, 0]
       },
       {
         name: 'leg4',
-        uv: [0, 16],
-        position: [[-2, 0, -2], [4, 6, 4]]
+        uv: [
+          [0, 20, 4, 26],
+          [12, 20, 16, 26],
+          [8, 16, 12, 20],
+          [4, 16, 8, 20],
+          [8, 20, 12, 26],
+          [4, 20, 8, 26],
+        ],
+        position: [-2, 0, -2],
+        dimensions: [4, 6, 4],
+        rotationPoint: [2, 12 + i, -4],
+        rotation: [Math.cos(s1 * 0.6662) * 1.4 * s2, 0, 0]
       },
     ];
   }
 }
+
+// XXX
+// var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.creeper(game, [], [i, 1]); game.scene.add(m); m.position.set(-20, 11, 10); }; setInterval(() => {go(i += 0.1)}, 100);
 
 /* package net.minecraft.src;
 
