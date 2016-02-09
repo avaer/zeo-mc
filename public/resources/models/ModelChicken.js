@@ -1,54 +1,85 @@
 import ModelBase from './ModelBase';
 
 export default class ModelChicken extends ModelBase {
-  constructor() {
+  constructor([], [s1 = 0, s2 = 1, s3 = 0, s4 = 0, s5 = 0] = []) {
     super();
+
+    // const byte0 = 16;
+    const byte0 = 0;
+    const headRotation = [0,0,0];//[-(s5 / (180 / Math.PI)), s4 / (180 / Math.PI), 0];
 
     this.texture = 'entity/chicken';
     this.meshes = [
       {
         name: 'head',
         uv: [0, 0],
-        position: [[-2, -6, -2], [4, 6, 3, 0]]
+        position: [-2, -6, -2],
+        dimensions: [4, 6, 3],
+        rotationPoint: [0, -1 + byte0, -4],
+        rotation: headRotation
       },
       {
         name: 'bill',
         uv: [14, 0],
-        position: [[-2, -4, -4], [4, 2, 2, 0]]
+        position: [-2, -4, -4],
+        dimensions: [4, 2, 2],
+        rotationPoint: [0, -1 + byte0, -4],
+        rotation: headRotation
       },
       {
         name: 'chin',
         uv: [14, 4],
-        position: [[-1, -2, -3], [2, 2, 2]]
+        position: [-1, -2, -3],
+        dimensions: [2, 2, 2],
+        rotationPoint: [0, -1 + byte0, -4],
+        rotation: headRotation
       },
       {
         name: 'body',
         uv: [0, 9],
-        position: [[-3, -4, -3], [6, 8, 6]]
+        position: [-3, -4, -3],
+        dimensions: [6, 8, 6],
+        rotationPoint: [0, 0 + byte0, 0],
+        rotation: [Math.PI / 2, 0, 0]
       },
       {
         name: 'rightLeg',
         uv: [26, 0],
-        position: [[-1, 0.0, -3], [3, 5, 3]]
+        position: [-1, 0.0, -3],
+        dimensions: [3, 5, 3],
+        rotationPoint: [-2, 3 + byte0, 1],
+        rotation: [Math.cos(s1 * 0.6662) * 1.4 * s2, 0, 0]
       },
       {
         name: 'leftLeg',
         uv: [26, 0],
-        position: [[-1, 0.0, -3], [3, 5, 3]]
+        position: [-1, 0, -3],
+        dimensions: [3, 5, 3],
+        rotationPoint: [1, 3 + byte0, 1],
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2, 0, 0]
       },
       {
         name: 'rightWing',
         uv: [24, 13],
-        position: [[0, 0, -3], [1, 4, 6]]
+        position: [0, 0, -3],
+        dimensions: [1, 4, 6],
+        rotationPoint: [-4, -3 + byte0, 0],
+        rotation: [s3, 0, 0]
       },
       {
         name: 'leftWing',
         uv: [24, 13],
-        position: [[-1, 0, -3], [1, 4, 6]]
+        position: [-1, 0, -3],
+        dimensions: [1, 4, 6],
+        rotationPoint: [4, -3 + byte0, 0],
+        rotation: [s3, 0, 0]
       },
     ]
   }
 }
+
+// XXX
+// var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.chicken(game, [], [i, 1]); game.scene.add(m); m.position.set(-20, 11, 10); }; setInterval(() => {go(i += 0.1)}, 100);
 
 /* package net.minecraft.src;
 

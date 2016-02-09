@@ -1,7 +1,7 @@
 import ModelQuadruped from './ModelQuadruped';
 
 export default class ModelPig extends ModelQuadruped {
-  constructor([p1], s) {
+  constructor([p1 = 0] = [], s = []) {
     super([6, p1], s);
 
     this.texture = 'entity/pig';

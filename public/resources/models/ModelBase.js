@@ -36,9 +36,9 @@ function _makeObject(game, meshes, material) {
 
         const submesh = new game.THREE.Mesh(geometry, material);
         submesh.position.set(
-          (position[0] + (dimensions[0] / 2)) /* - (rotationPoint[0] / 2) */,
-          (position[1] + (dimensions[1] / 2)) /* + (rotationPoint[1] / 2) */,
-          (position[2] + (dimensions[2] / 2)) /* - (rotationPoint[2] / 2) */,
+          (position[0] + (dimensions[0] / 2)),
+          (position[1] + (dimensions[1] / 2)),
+          (position[2] + (dimensions[2] / 2)),
         );
         const subobject1 = new game.THREE.Object3D();
         subobject1.position.set(
