@@ -11,7 +11,7 @@ export default class ModelPig extends ModelQuadruped {
         mesh.children.push({
           name: 'nose',
           // uv: [16, 16],
-          uv: [17 - 4, 17 - 4, 17 + (4*3), 17 + 4],
+          uv: [17 - 4, 17 - 4, 17 + (4*3), 17 + (4*1), 64, 32],
           position: [-2, 0, -9],
           dimensions: [4, 3, 1],
           rotationPoint: mesh.rotationPoint,
