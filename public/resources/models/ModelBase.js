@@ -110,19 +110,24 @@ geometry.faceVertexUvs[0][11] = [ wood[1], wood[2], wood[3] ]; */
 
 function _makeMaterial(game, textureName) {
   const materials = [];
-  const texture = _getTexture('/api/img/textures/' + textureName + '.png');
-  texture.magFilter = game.THREE.NearestFilter;
-  texture.minFilter = game.THREE.NearestFilter;
-  const submaterial = new game.THREE.MeshBasicMaterial({
-    // color: 0xFF0000,
-    map: texture,
-    side: game.THREE.BackSide
-  });
-  texture.ready(() => {
-    submaterial.needsUpdate = true;
-  });
-
   for (let i = 0; i < 6; i++) {
+    const texture = _getTexture('/api/img/textures/' + textureName + '.png', i);
+    if (i === 5) {
+      texture.offset.x = -(0 / 32);
+      texture.offset.y = 32 / 64;
+      // console.log('texture scale', texture);
+      texture.repeat.x = 1 / 4;
+      texture.repeat.y = 3 / 4;
+      /* texture.repeat.x = 0.1;
+      texture.repeat.y = 0.1; */
+      /* texture.repeat.x = 1;
+      texture.repeat.y = 1; */
+    }
+    const submaterial = new game.THREE.MeshBasicMaterial({
+      // color: 0xFF0000,
+      map: texture,
+      side: game.THREE.BackSide
+    });
     materials.push(submaterial);
   }
   const material = new game.THREE.MeshFaceMaterial(materials);
@@ -144,26 +149,19 @@ function _makeMaterial(game, textureName) {
 }
 
 const textureCache = new Map();
-function _getTexture(url) {
-  const cachedTexture = textureCache.get(url);
+function _getTexture(url, i) {
+  const textureKey = url + i;
+
+  const cachedTexture = textureCache.get(textureKey);
   if (cachedTexture) {
     return cachedTexture;
   } else {
-    const texture = game.THREE.ImageUtils.loadTexture(url, null, () => {
-      loaded = true;
-      cbs.forEach(cb => {
-        cb();
-      });
-      cbs = [];
-    });
-    let loaded = false;
-    let cbs = [];
-    texture.ready = cb => {
-      if (!loaded) {
-        cbs.push(cb);
-      }
-    };
-    textureCache.set(url, texture);
+    const texture = game.THREE.ImageUtils.loadTexture(url);
+    texture.magFilter = game.THREE.NearestFilter;
+    texture.minFilter = game.THREE.NearestFilter;
+
+    textureCache.set(textureKey, texture);
+
     return texture;
   }
 }
