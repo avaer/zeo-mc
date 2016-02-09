@@ -27,8 +27,6 @@ function _makeObject(game, meshes, material) {
   const object = new game.THREE.Object3D();
   (function recurse(object, meshes) {
     meshes.forEach(mesh => {
-      if (mesh.name === 'body') return;
-
       let {position, dimensions, rotationPoint} = mesh;
       if (position && dimensions && rotationPoint) {
         const {uv = [0,0], scale = 1, rotation = [0,0,0]} = mesh;
@@ -38,12 +36,13 @@ function _makeObject(game, meshes, material) {
 
         const geometry = new game.THREE.CubeGeometry(dimensions[0], dimensions[1], dimensions[2]);
 
-var left = [new game.THREE.Vector2(0, .666), new game.THREE.Vector2(.5, .666), new game.THREE.Vector2(.5, 1), new game.THREE.Vector2(0, 1)];
-var right = [new game.THREE.Vector2(.5, .666), new game.THREE.Vector2(1, .666), new game.THREE.Vector2(1, 1), new game.THREE.Vector2(.5, 1)];
-var bottom = [new game.THREE.Vector2(0, .333), new game.THREE.Vector2(.5, .333), new game.THREE.Vector2(.5, .666), new game.THREE.Vector2(0, .666)];
-var top = [new game.THREE.Vector2(.5, .333), new game.THREE.Vector2(1, .333), new game.THREE.Vector2(1, .666), new game.THREE.Vector2(.5, .666)];
-var back = [new game.THREE.Vector2(0, 0), new game.THREE.Vector2(.5, 0), new game.THREE.Vector2(.5, .333), new game.THREE.Vector2(0, .333)];
-var front = [new game.THREE.Vector2(.5, 0), new game.THREE.Vector2(1, 0), new game.THREE.Vector2(1, .333), new game.THREE.Vector2(.5, .333)];
+var left = [new game.THREE.Vector2(.5, .666), new game.THREE.Vector2(.5, 1), new game.THREE.Vector2(0, 1), new game.THREE.Vector2(0, .666)].reverse();
+var right = [new game.THREE.Vector2(1, .666), new game.THREE.Vector2(1, 1), new game.THREE.Vector2(.5, 1), new game.THREE.Vector2(.5, .666)].reverse();
+var bottom = [new game.THREE.Vector2(.5, .666), new game.THREE.Vector2(0, .666), new game.THREE.Vector2(0, .333), new game.THREE.Vector2(.5, .333)].reverse();
+var top = [new game.THREE.Vector2(.5, .666), new game.THREE.Vector2(.5, .333), new game.THREE.Vector2(1, .333), new game.THREE.Vector2(1, .666)].reverse();
+// var back = [new game.THREE.Vector2(0, 0), new game.THREE.Vector2(.5, 0), new game.THREE.Vector2(.5, .333), new game.THREE.Vector2(0, .333)].reverse();
+var back = [new game.THREE.Vector2(1, 0), new game.THREE.Vector2(1, .333), new game.THREE.Vector2(.5, .333), new game.THREE.Vector2(.5, 0)].reverse();
+var front = [new game.THREE.Vector2(1, 0), new game.THREE.Vector2(1, .333), new game.THREE.Vector2(.5, .333), new game.THREE.Vector2(.5, 0)].reverse();
 if (woo) {
 woo = false;
 console.log('got geo', geometry);
@@ -117,16 +116,22 @@ function _makeMaterial(game, textureName) {
 
     const scaleX = -0.5;
     const scaleY = 4;
-    if (i === 0) {
+    if (i === 0) { // left
       texture.offset.x = (0 / 32) * scaleX;
       texture.offset.y = (0 / 64) * scaleY;
-    } else if (i === 1) {
+    } else if (i === 1) { // right
       texture.offset.x = -(8 / 32) * scaleX;
       texture.offset.y = (0 / 64) * scaleY;
-    } else if (i === 4) {
-      texture.offset.x = -(0 / 32) * scaleX;
-      texture.offset.y = (0 / 64) * scaleY;
-    } else if (i === 5) {
+    } else if (i === 2) { // bottom
+      texture.offset.x = -(16 / 32) * scaleX;
+      texture.offset.y = (8 / 64) * scaleY;
+    } else if (i === 3) { // top
+      texture.offset.x = (0 / 32) * scaleX;
+      texture.offset.y = (8 / 64) * scaleY;
+    } else if (i === 4) { // back
+      texture.offset.x = -(16 / 32) * scaleX;
+      texture.offset.y = (8 / 64) * scaleY;
+    } else if (i === 5) { // front
       texture.offset.x = -(0 / 32);
       texture.offset.y = 32 / 64;
     }
