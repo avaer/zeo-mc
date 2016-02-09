@@ -7,11 +7,18 @@ export default class ModelPig extends ModelQuadruped {
     this.texture = 'entity/pig/pig';
     this.meshes = this.meshes.map(mesh => {
       if (mesh.name === 'head') {
+        // console.log('pig uv', [17 - 4, 17 - 4, 17 + (4*3), 17 + (4*1), 64, 32]);
         mesh.children = mesh.children || [];
         mesh.children.push({
           name: 'nose',
-          // uv: [16, 16],
-          uv: [17 - 4, 17 - 4, 17 + (4*3), 17 + (4*1), 64, 32],
+          uv: [
+            [16, 17, 17, 20],
+            [21, 17, 22, 20],
+            [21, 16, 25, 17],
+            [17, 16, 21, 17],
+            [17, 17, 21, 20],
+            [17, 17, 21, 20]
+          ],
           position: [-2, 0, -9],
           dimensions: [4, 3, 1],
           rotationPoint: mesh.rotationPoint,

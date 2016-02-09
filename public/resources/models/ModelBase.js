@@ -19,16 +19,8 @@ ModelBase.make = Model => {
 let faceVertexUvs = null;
 function _getFaceVertexUvs(game) {
   if (!faceVertexUvs) {
-    const left = [new game.THREE.Vector2(.5, .666), new game.THREE.Vector2(.5, 1), new game.THREE.Vector2(0, 1), new game.THREE.Vector2(0, .666)].reverse();
-    const right = [new game.THREE.Vector2(1.5, .666), new game.THREE.Vector2(1.5, 1), new game.THREE.Vector2(1, 1), new game.THREE.Vector2(1, .666)].reverse();
-    const bottom = [new game.THREE.Vector2(1.5, 1.333), new game.THREE.Vector2(1, 1.333), new game.THREE.Vector2(1, 1), new game.THREE.Vector2(1.5, 1)].reverse();
-    const top = [new game.THREE.Vector2(.5, 1.333), new game.THREE.Vector2(.5, 1), new game.THREE.Vector2(1, 1), new game.THREE.Vector2(1, 1.333)].reverse();
-    const back = [new game.THREE.Vector2(2, .666), new game.THREE.Vector2(2, 1), new game.THREE.Vector2(1.5, 1), new game.THREE.Vector2(1.5, .666)].reverse();
-    const front = [new game.THREE.Vector2(1, .666), new game.THREE.Vector2(1, 1), new game.THREE.Vector2(.5, 1), new game.THREE.Vector2(.5, .666)].reverse();
-
-    faceVertexUvs = [
-      [left, right, bottom, top, back, front]
-    ];
+    const uv = [new game.THREE.Vector2(0, 0), new game.THREE.Vector2(0, 1), new game.THREE.Vector2(1, 1), new game.THREE.Vector2(1, 0)];
+    faceVertexUvs = [[uv, uv, uv, uv, uv, uv]];
   }
 
   return faceVertexUvs;
@@ -82,20 +74,51 @@ function _makeObject(game, texture, meshes) {
   return object;
 }
 
+function _normalizeUv(uv) {
+  if (uv.length === 1) {
+    uv = uv[0];
+
+    const width = uv[2] - uv[0];
+    const height = uv[3] - uv[1];
+
+    function makeCoords(x, y) {
+      return [
+        uv[0] + (x * width),
+        uv[1] + (y * height),
+        uv[0] + ((x + 1) * width),
+        uv[1] + ((y + 1) * height),
+      ];
+    }
+
+    return [
+      makeCoords(0, 1),
+      makeCoords(2, 1),
+      makeCoords(2, 0),
+      makeCoords(1, 0),
+      makeCoords(3, 1),
+      makeCoords(1, 1),
+    ];
+  } else {
+    return uv;
+  }
+}
+
 const materialCache = new Map();
 function _getMaterial(game, textureName, uv) {
-  const materialKey = textureName + '-' + uv.join(',');
+  uv = _normalizeUv(uv);
+  const materialKey = textureName + '-' + uv.map(uv => uv.join(','));
 
   const cachedMaterial = materialCache.get(materialKey);
   if (cachedMaterial) {
     return cachedMaterial;
   } else {
     const materials = [];
-    const texture = _getTexture('/api/img/textures/' + textureName + '.png', uv);
     for (let i = 0; i < 6; i++) {
+      const texture = _getTexture('/api/img/textures/' + textureName + '.png', uv[i]);
       const submaterial = new game.THREE.MeshBasicMaterial({
         map: texture,
-        side: game.THREE.BackSide
+        side: game.THREE.BackSide,
+        // transparent: true
       });
       materials.push(submaterial);
     }
@@ -115,13 +138,17 @@ function _getTexture(url, uv) {
   if (cachedTexture) {
     return cachedTexture;
   } else {
-    const texture = game.THREE.ImageUtils.loadTexture(url);
-
-    texture.offset.x = uv[0];
-    texture.offset.y = uv[1];
-
-    texture.repeat.x = (1 / 2) * ((uv[2] - uv[0]) / uv[4]);
-    texture.repeat.y = (3 / 2) * ((uv[3] - uv[1]) / uv[5]);
+    // const texture = game.THREE.ImageUtils.loadTexture(url);
+    const img = new Image();
+    img.src = url;
+    const texture = new game.THREE.Texture();
+    img.onload = () => {
+      const croppedImage = _cropImage(img, uv);
+      croppedImage.onload = () => {
+        texture.image = croppedImage;
+        texture.needsUpdate = true;
+      };
+    };
 
     texture.magFilter = game.THREE.NearestFilter;
     texture.minFilter = game.THREE.NearestFilter;
@@ -130,4 +157,20 @@ function _getTexture(url, uv) {
 
     return texture;
   }
+}
+
+function _cropImage(img, uv) {
+  const width = uv[2] - uv[0];
+  const height = uv[3] - uv[1];
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  context.drawImage(img, uv[0], uv[1], width, height, 0, 0, width, height);
+  const dataUrl = canvas.toDataURL();
+
+  const newImg = new Image();
+  newImg.src = dataUrl;
+  return newImg;
 }

@@ -8,7 +8,7 @@ export default class ModelQuadruped extends ModelBase {
     this.meshes = [
       {
         name: 'head',
-        uv: [0, 0, 32, 16, 64, 32],
+        uv: [[0, 0, 8, 8]],
         position: [-4, -4, -8],
         dimensions: [8, 8, 8],
         scale: p2,
@@ -16,7 +16,14 @@ export default class ModelQuadruped extends ModelBase {
       },
       {
         name: 'body',
-        uv: [28, 8, 64, 32, 64, 32],
+        uv: [
+          [28, 16, 36, 32],
+          [46, 16, 56, 32],
+          [46, 8, 56, 16],
+          [56, 16, 64, 32],
+          [36, 8, 46, 16],
+          [36, 16, 46, 32],
+        ],
         position: [-5, -10, -7],
         dimensions: [10, 16, 8],
         scale: p2,
@@ -25,7 +32,7 @@ export default class ModelQuadruped extends ModelBase {
       },
       {
         name: 'leg1',
-        uv: [0, 16, 16, 26, 64, 32],
+        uv: [[0, 16, 4, 20]],
         position: [-2, 0, -2],
         dimensions: [4, p1, 4],
         scale: p2,
@@ -34,7 +41,7 @@ export default class ModelQuadruped extends ModelBase {
       },
       {
         name: 'leg2',
-        uv: [0, 16, 16, 26, 64, 32],
+        uv: [[0, 16, 4, 20]],
         position: [-2, 0, -2],
         dimensions: [4, p1, 4],
         scale: p2,
@@ -43,7 +50,7 @@ export default class ModelQuadruped extends ModelBase {
       },
       {
         name: 'leg3',
-        uv: [0, 16, 16, 26, 64, 32],
+        uv: [[0, 16, 4, 20]],
         position: [-2, 0, -2],
         dimensions: [4, p1, 4],
         scale: p2,
@@ -52,7 +59,7 @@ export default class ModelQuadruped extends ModelBase {
       },
       {
         name: 'leg4',
-        uv: [0, 16, 16, 26, 64, 32],
+        uv: [[0, 16, 4, 20]],
         position: [-2, 0, -2],
         dimensions: [4, p1, 4],
         scale: p2,
