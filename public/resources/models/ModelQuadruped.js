@@ -1,7 +1,7 @@
 import ModelBase from './ModelBase';
 
 export default class ModelQuadruped extends ModelBase {
-  constructor([p1 = 0, p2 = 1] = [], [s1 = 0, s2 = 1] = []) {
+  constructor([p1 = 0, p2 = 1] = [], [s1 = 0, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
     super();
 
     this.texture = null;
@@ -12,7 +12,8 @@ export default class ModelQuadruped extends ModelBase {
         position: [-4, -4, -8],
         dimensions: [8, 8, 8],
         scale: p2,
-        rotationPoint: [0, 18 - p1, -6]
+        rotationPoint: [0, 18 - p1, -6],
+        rotation: [s5 / (180 / Math.PI), s4 / (180 / Math.PI), 0]
       },
       {
         name: 'body',
