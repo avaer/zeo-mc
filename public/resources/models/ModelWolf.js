@@ -16,25 +16,53 @@ export default class ModelWolf extends ModelBase {
         children: [
           {
             name: 'main',
-            uv: [16, 16], // XXX
+            uv: [
+              [0, 4, 4, 10],
+              [10, 4, 14, 10],
+              [10, 0, 16, 4],
+              [4, 0, 10, 4],
+              [14, 4, 20, 10],
+              [4, 4, 10, 10],
+            ],
             position: [-3, -3, -2],
             dimensions: [6, 6, 4]
           },
           {
             name: 'ear1',
-            uv: [16, 14],
+            uv: [
+              [16, 15, 17, 17],
+              [19, 15, 20, 17],
+              [19, 14, 21, 15],
+              [17, 14, 19, 15],
+              [20, 15, 22, 17],
+              [17, 15, 19, 17],
+            ],
             position: [-3, -5, 0],
             dimensions: [2, 2, 1]
           },
           {
             name: 'ear2',
-            uv: [16, 14],
+            uv: [
+              [16, 15, 17, 17],
+              [19, 15, 20, 17],
+              [19, 14, 21, 15],
+              [17, 14, 19, 15],
+              [20, 15, 22, 17],
+              [17, 15, 19, 17],
+            ],
             position: [1, -5, 0],
             dimensions: [2, 2, 1]
           },
           {
             name: 'snout',
-            uv: [0, 10],
+            uv: [
+              [0, 14, 4, 17],
+              [7, 14, 11, 17],
+              [7, 10, 10, 14],
+              [4, 10, 7, 14],
+              [11, 14, 15, 17],
+              [5, 14, 7, 17],
+            ],
             position: [-1.5, 0, -5],
             dimensions: [3, 3, 4]
           },
@@ -42,7 +70,14 @@ export default class ModelWolf extends ModelBase {
       },
       {
         name: 'wolfBody',
-        uv: [18, 14],
+        uv: [
+          [18, 20, 24, 29],
+          [29, 20, 35, 29],
+          [30, 14, 36, 20], // back
+          [30, 14, 36, 20],
+          [35, 20, 42, 29],
+          [23, 20, 30, 29],
+        ],
         position: [-4, -2, -3],
         dimensions: [6, 9, 6],
         rotationPoint: [0, 14, 2],
@@ -50,7 +85,14 @@ export default class ModelWolf extends ModelBase {
       },
       {
         name: 'wolfMane',
-        uv: [21, 0],
+        uv: [
+          [21, 7, 28, 13],
+          [36, 7, 43, 13],
+          [36, 0, 44, 7], // top
+          [28, 0, 36, 7],
+          [28, 7, 36, 13],
+          [43, 7, 51, 13],
+        ],
         position: [-4, -3, -3],
         dimensions: [8, 6, 7],
         // rotationPoint: [-1, 14, 2]
@@ -59,7 +101,14 @@ export default class ModelWolf extends ModelBase {
       },
       {
         name: 'wolfLeg1',
-        uv: [0, 18],
+        uv: [
+          [0, 20, 2, 28],
+          [4, 20, 6, 28],
+          [6, 20, 8, 28],
+          [2, 20, 4, 28],
+          [4, 18, 6, 20],
+          [2, 18, 4, 20],
+        ],
         position: [-1, 0, -1],
         dimensions: [2, 8, 2],
         rotationPoint: [-2.5, 16, 7],
@@ -67,15 +116,29 @@ export default class ModelWolf extends ModelBase {
       },
       {
         name: 'wolfLeg2',
-        uv: [0, 18],
+        uv: [
+          [0, 20, 2, 28],
+          [4, 20, 6, 28],
+          [6, 20, 8, 28],
+          [2, 20, 4, 28],
+          [4, 18, 6, 20],
+          [2, 18, 4, 20],
+        ],
         position: [-1, 0, -1],
         dimensions: [2, 8, 2],
         rotationPoint: [0.5, 16, 7],
-        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2]
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2, 0, 0]
       },
       {
         name: 'wolfLeg3',
-        uv: [0, 18],
+        uv: [
+          [0, 20, 2, 28],
+          [4, 20, 6, 28],
+          [6, 20, 8, 28],
+          [2, 20, 4, 28],
+          [4, 18, 6, 20],
+          [2, 18, 4, 20],
+        ],
         position: [-1, 0, -1],
         dimensions: [2, 8, 2],
         rotationPoint: [-2.5, 16, -4],
@@ -83,7 +146,14 @@ export default class ModelWolf extends ModelBase {
       },
       {
         name: 'wolfLeg4',
-        uv: [0, 18],
+        uv: [
+          [0, 20, 2, 28],
+          [4, 20, 6, 28],
+          [6, 20, 8, 28],
+          [2, 20, 4, 28],
+          [4, 18, 6, 20],
+          [2, 18, 4, 20],
+        ],
         position: [-1, 0, -1],
         dimensions: [2, 8, 2],
         rotationPoint: [0.5, 16, -4],
@@ -91,7 +161,14 @@ export default class ModelWolf extends ModelBase {
       },
       {
         name: 'wolfTail',
-        uv: [9, 18],
+        uv: [
+          [9, 20, 11, 28],
+          [13, 20, 15, 28],
+          [15, 20, 17, 28],
+          [11, 20, 13, 28],
+          [13, 18, 15, 20],
+          [11, 18, 13, 20],
+        ],
         position: [-1, 0, -1],
         dimensions: [2, 8, 2],
         rotationPoint: [-1, 12, 8],
