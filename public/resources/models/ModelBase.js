@@ -66,7 +66,7 @@ function _makeObject(game, texture, meshes) {
         const {rotation = [0, 0, 0]} = mesh;
 
         const submesh = _makePlaneMesh(game, position, dimensions, texture, offset);
-        submesh.rotation.set(-rotation[0], -rotation[1], -rotation[2]);
+        submesh.rotation.set(-rotation[0] + Math.PI, -rotation[1], -rotation[2]);
 
         object.add(submesh);
 
