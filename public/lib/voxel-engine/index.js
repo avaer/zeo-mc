@@ -1,5 +1,5 @@
 var voxel = require('voxel')
-var voxelMesh = require('voxel-mesh')
+var voxelMesh = require('../voxel-mesh/index')
 var ray = require('voxel-raycast')
 var texture = require('../voxel-texture-shader/index')
 var control = require('voxel-control')
