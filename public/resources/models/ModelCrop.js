@@ -10,11 +10,14 @@ function _stages(name, stages) {
 }
 
 const TEXTURES = [].concat(
-  _stages('carrots', 3),
-  _stages('nether_wart', 2),
-  _stages('potatoes', 3),
+  _stages('carrots', 3)
+).concat(
+  _stages('nether_wart', 2)
+).concat(
+  _stages('potatoes', 3)
+).concat(
   _stages('wheat', 7)
-]).map(textureName => 'blocks/' + textureName);
+).map(textureName => 'blocks/' + textureName);
 
 const SIZE = 10;
 

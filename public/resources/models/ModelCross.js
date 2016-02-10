@@ -9,7 +9,7 @@ function _biomes(name) {
   return result;
 }
 
-const TEXTURES = [].concat(
+const TEXTURES = [].concat([
   'deadbush'
 ]).concat(
   _biomes('fern')
@@ -26,13 +26,15 @@ const TEXTURES = [].concat(
   'flower_tulip_red',
   'flower_tulip_white'
 ]).concat(
-  _biomes('melon_stem_connected'),
+  _biomes('melon_stem_connected')
+).concat(
   _biomes('melon_stem_disconnected')
 ).concat([
   'mushroom_brown',
   'mushroom_red',
 ]).concat(
-  _biomes('pumpkin_stem_connected'),
+  _biomes('pumpkin_stem_connected')
+).concat(
   _biomes('pumpkin_stem_disconnected')
 ).concat([
   'sapling_acacia',

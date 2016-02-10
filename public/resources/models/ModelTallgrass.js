@@ -1,9 +1,9 @@
 import ModelBase from './ModelBase';
 import {BIOME_TEXTURES} from '../../constants/index';
 
-const TEXTURES = [].concat(
+const TEXTURES = [].concat([
   'reeds'
-).concat(
+]).concat(
   BIOME_TEXTURES.map(biomeTexture => 'tallgrass_' + biomeTexture)
 ).map(textureName => 'blocks/' + textureName);
 
