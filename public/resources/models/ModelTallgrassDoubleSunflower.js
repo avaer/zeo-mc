@@ -1,19 +1,27 @@
 import ModelTallgrassDouble from './ModelTallgrassDouble';
 
+const NAME ='tallgrassDoubleSunflower';
+
 const TEXTURES = [
-  'double_plant_sunflower_bottom',
-  'double_plant_sunflower_top',
-  'double_plant_sunflower_back',
-  'double_plant_sunflower_front',
-].map(textureName => 'blocks/' + textureName);
+  [
+    'double_plant_sunflower_bottom',
+    'double_plant_sunflower_top',
+    'double_plant_sunflower_back',
+    'double_plant_sunflower_front',
+  ]
+].map(textures => textures.map(textureName => 'blocks/' + textureName));
 
 const SIZE = 10;
 
 export default class ModelTallgrassDoubleSunflower extends ModelTallgrassDouble {
+  static NAME = NAME;
+  static TEXTURES = TEXTURES;
+
   constructor([p1 = Math.random()] = [], []) {
     super([], []);
 
-    this.textures = TEXTURES;
+    const textureIndex = 0;
+    this.textures = TEXTURES[textureIndex];
 
     const bottomOffset = [0, 0, 16, 16];
     const topOffset = [0, 6, 16, 16];

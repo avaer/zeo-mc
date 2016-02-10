@@ -3,6 +3,9 @@ var FastSimplexNoise = require('fast-simplex-noise');
 
 var resources = require('../../resources/index');
 var BLOCKS = resources.BLOCKS.BLOCKS;
+var VEGETATIONS = resources.MODELS.VEGETATIONS;
+var ENTITIES = resources.MODELS.ENTITIES;
+var WEATHERS = resources.MODELS.WEATHERS;
 
 var TERRAIN_FLOOR = 0;
 var TERRAIN_CEILING = 20; // minecraft's limit
@@ -21,6 +24,18 @@ var DIRT_OCTAVES = 6;
 var CAVE_FREQUENCY = 0.02;
 var CAVE_OCTAVES = 12;
 var CAVE_RATE = 0.3;
+
+var VEGETATION_FREQUENCY = 0.5;
+var VEGETATION_OCTAVES = 6;
+var VEGETATION_TYPE_FREQUENCY = 1;
+var VEGETATION_TYPE_OCTAVES = 2;
+var VEGETATION_RATE = 1 / 5;
+
+var ENTITY_FREQUENCY = 0.5;
+var ENTITY_OCTAVES = 6;
+var ENTITY_TYPE_FREQUENCY = 1;
+var ENTITY_TYPE_OCTAVES = 2;
+var ENTITY_RATE = 1 / 200;
 
 var TREE_RATE = 0.1;
 var TREE_MIN_HEIGHT = 4;
@@ -115,6 +130,36 @@ function voxelTerrain(opts) {
     random: rng
   });
 
+  const vegetationNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: VEGETATION_FREQUENCY,
+    octaves: VEGETATION_OCTAVES,
+    random: rng
+  });
+  const vegetationTypeNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: VEGETATION_TYPE_FREQUENCY,
+    octaves: VEGETATION_TYPE_OCTAVES,
+    random: rng
+  });
+
+  const entityNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: ENTITY_FREQUENCY,
+    octaves: ENTITY_OCTAVES,
+    random: rng
+  });
+  const entityTypeNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: ENTITY_TYPE_FREQUENCY,
+    octaves: ENTITY_TYPE_OCTAVES,
+    random: rng
+  });
+
   return function generateChunk(position) {
     var startX = position[0] * chunkSize;
     var startY = position[1] * chunkSize;
@@ -125,6 +170,8 @@ function voxelTerrain(opts) {
     var endZ = startZ + chunkSize;
 
     var voxels = new Int8Array(chunkSize * chunkSize * chunkSize);
+    var vegetations = new Int8Array(chunkSize * chunkSize * chunkSize);
+    var entities = new Int8Array(chunkSize * chunkSize * chunkSize);
     pointsInside(point);
 
     function point(x, z) {
@@ -133,6 +180,8 @@ function voxelTerrain(opts) {
         land(x, y, z);
         tree(x, y, z);
         dirt(x, y, z);
+        veg(x, y, z);
+        ent(x, y, z);
       } else if (startY < 0) {
         dirt(x, endY, z);
       }
@@ -140,7 +189,7 @@ function voxelTerrain(opts) {
 
     function land(x, y, z) {
       if (!isCave(x, y, z)) {
-        set(x, y, z, BLOCKS['grass_top_plains']);
+        setVoxel(x, y, z, BLOCKS['grass_top_plains']);
       }
     }
 
@@ -210,11 +259,6 @@ function voxelTerrain(opts) {
     }
 
     function dirt(x, h, z) {
-      crust(x, h, z);
-      // caves(x, h, z);
-    }
-
-    function crust(x, h, z) {
       let crustBedrockNoiseN = crustBedrockNoise.in2D(x, z);
       let crustCoreNoiseN = crustCoreNoise.in2D(x, z);
       let crustMantleNoiseN = crustMantleNoise.in2D(x, z);
@@ -247,7 +291,7 @@ function voxelTerrain(opts) {
             }
           })();
 
-          set(x, y, z, material);
+          setVoxel(x, y, z, material);
         }
       }
     }
@@ -255,6 +299,26 @@ function voxelTerrain(opts) {
     function isCave(x, y, z) {
       const caveNoiseN = caveNoise.in3D(x, y, z);
       return caveNoiseN < CAVE_RATE;
+    }
+
+    function veg(x, h, z) {
+      const y = h + 1;
+      const vegetationNoiseN = vegetationNoise.in2D(x, z);
+      if (vegetationNoiseN < VEGETATION_RATE) {
+        const vegetationTypeNoiseN = vegetationTypeNoise.in2D(x, z);
+        const vegetation = floor(vegetationTypeNoiseN * VEGETATIONS.length);
+        setVegetation(x, y, z, vegetation);
+      }
+    }
+
+    function ent(x, h, z) {
+      const y = h + 1;
+      const entityNoiseN = entityNoise.in2D(x, z);
+      if (entityNoiseN < ENTITY_RATE) {
+        const entityTypeNoiseN = entityTypeNoise.in2D(x, z);
+        const entity = floor(entityTypeNoiseN * ENTITIES.length);
+        setEntity(x, y, z, entity);
+      }
     }
 
     function pointsInside(fn) {
@@ -273,14 +337,24 @@ function voxelTerrain(opts) {
       return idx;
     }
 
-    function get(x, y, z) {
+    /* function getVoxel(x, y, z) {
       var idx = getIndex(x, y, z);
       return voxels[idx];
-    }
+    } */
 
-    function set(x, y, z, value) {
+    function setVoxel(x, y, z, value) {
       var idx = getIndex(x, y, z);
       voxels[idx] = value;
+    }
+
+    function setVegetation(x, y, z, value) {
+      var idx = getIndex(x, y, z);
+      vegetations[idx] = value;
+    }
+
+    function setEntity(x, y, z, value) {
+      var idx = getIndex(x, y, z);
+      entities[idx] = value;
     }
 
     function isInside(x, y, z) {

@@ -4,7 +4,11 @@ const MAX_POSITION = -20;
 const MIN_POSITION = 20;
 const FALL_FREQUENCY = 0.5;
 
+const NAME = 'rain';
+
 export default class ModelRain extends ModelBase {
+  static NAME = NAME;
+
   constructor([], [s1 = 0, s2 = 1] = []) {
     super([], [s1, s2]);
 

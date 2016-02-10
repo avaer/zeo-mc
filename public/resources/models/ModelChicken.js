@@ -1,6 +1,10 @@
 import ModelBase from './ModelBase';
 
+const NAME = 'chicken';
+
 export default class ModelChicken extends ModelBase {
+  static NAME = NAME;
+
   constructor([], [s1 = 0, s2 = 1, s3 = 0, s4 = 0, s5 = 0] = []) {
     super();
 

@@ -1,6 +1,10 @@
 import ModelBase from './ModelBase';
 
+const NAME = 'slime';
+
 export default class ModelSlime extends ModelBase { // XXX
+  static NAME = NAME;
+
   constructor() {
     super();
 

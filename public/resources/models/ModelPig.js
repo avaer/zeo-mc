@@ -1,6 +1,10 @@
 import ModelQuadruped from './ModelQuadruped';
 
+const NAME = 'pig';
+
 export default class ModelPig extends ModelQuadruped {
+  static NAME = NAME;
+
   constructor([p1 = 0] = [], s = []) {
     super([6, p1], s);
 

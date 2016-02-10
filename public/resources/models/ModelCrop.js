@@ -1,6 +1,8 @@
 import ModelBase from './ModelBase';
 import {BIOME_TEXTURES} from '../../constants/index';
 
+const NAME = 'crop';
+
 function _stages(name, stages) {
   const result = [];
   for (let i = 0; i <= stages; i++) {
@@ -22,6 +24,9 @@ const TEXTURES = [].concat(
 const SIZE = 10;
 
 export default class ModelCrop extends ModelBase {
+  static NAME = NAME;
+  static TEXTURES = TEXTURES;
+
   constructor([p1 = Math.random()] = [], []) {
     super([], []);
 

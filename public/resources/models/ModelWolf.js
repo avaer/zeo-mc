@@ -1,6 +1,10 @@
 import ModelBase from './ModelBase';
 
+const NAME = 'wolf';
+
 export default class ModelWolf extends ModelBase {
+  static NAME = NAME;
+
   constructor([], [s1 = 0, s2 = 1] = []) {
     super([], [s1, s2]);
 

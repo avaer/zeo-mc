@@ -1,6 +1,8 @@
 import ModelBase from './ModelBase';
 import {BIOME_TEXTURES} from '../../constants/index';
 
+const NAME = 'tallgrass';
+
 const TEXTURES = [].concat([
   'reeds'
 ]).concat(
@@ -10,6 +12,9 @@ const TEXTURES = [].concat([
 const SIZE = 10;
 
 export default class ModelTallgrass extends ModelBase {
+  static NAME = 'tallgrass';
+  static TEXTURES = TEXTURES;
+
   constructor([p1 = Math.random()] = [], []) {
     super([], []);
 
