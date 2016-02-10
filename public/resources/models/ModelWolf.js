@@ -1,74 +1,108 @@
 import ModelBase from './ModelBase';
 
 export default class ModelWolf extends ModelBase {
-  constructor() {
-    super();
+  constructor([], [s1 = 0, s2 = 1] = []) {
+    super([], [s1, s2]);
+
+    const f = 0;
+    const f1 = 13.5;
+    const wolfBodyRotation = [Math.PI / 2, 0, 0];
 
     this.texture = 'entity/wolf/wolf';
     this.meshes = [
       {
         name: 'wolfHeadMain',
+        rotationPoint: [-1, f1, -7],
         children: [
           {
             name: 'main',
-            uv: [16, 16],
-            position: [[-3, -3, -2], [6, 6, 4]]
+            uv: [16, 16], // XXX
+            position: [-3, -3, -2],
+            dimensions: [6, 6, 4]
           },
           {
-            name: 'misc1',
+            name: 'ear1',
             uv: [16, 14],
-            position: [[-3, -5, 0], [2, 2, 1]]
+            position: [-3, -5, 0],
+            dimensions: [2, 2, 1]
           },
           {
-            name: 'misc2',
+            name: 'ear2',
             uv: [16, 14],
-            position: [[1, -5, 0], [2, 2, 1]]
+            position: [1, -5, 0],
+            dimensions: [2, 2, 1]
           },
           {
-            name: 'misc3',
+            name: 'snout',
             uv: [0, 10],
-            position: [[-1.5, 0, -5], [3, 3, 4]]
+            position: [-1.5, 0, -5],
+            dimensions: [3, 3, 4]
           },
         ]
       },
       {
         name: 'wolfBody',
         uv: [18, 14],
-        position: [[-4, -2, -3], [6, 9, 6]]
+        position: [-4, -2, -3],
+        dimensions: [6, 9, 6],
+        rotationPoint: [0, 14, 2],
+        rotation: wolfBodyRotation
       },
       {
         name: 'wolfMane',
         uv: [21, 0],
-        position: [[-4, -3, -3], [8, 6, 7]]
+        position: [-4, -3, -3],
+        dimensions: [8, 6, 7],
+        // rotationPoint: [-1, 14, 2]
+        rotationPoint: [-1, 14, -3],
+        rotation: wolfBodyRotation
       },
       {
         name: 'wolfLeg1',
         uv: [0, 18],
-        position: [[-1, 0, -1], [2, 8, 2]]
+        position: [-1, 0, -1],
+        dimensions: [2, 8, 2],
+        rotationPoint: [-2.5, 16, 7],
+        rotation: [Math.cos(s1 * 0.6662) * 1.4 * s2, 0, 0]
       },
       {
         name: 'wolfLeg2',
         uv: [0, 18],
-        position: [[-1, 0, -1], [2, 8, 2]]
+        position: [-1, 0, -1],
+        dimensions: [2, 8, 2],
+        rotationPoint: [0.5, 16, 7],
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2]
       },
       {
         name: 'wolfLeg3',
         uv: [0, 18],
-        position: [[-1, 0, -1], [2, 8, 2]]
+        position: [-1, 0, -1],
+        dimensions: [2, 8, 2],
+        rotationPoint: [-2.5, 16, -4],
+        rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2, 0, 0]
       },
       {
         name: 'wolfLeg4',
         uv: [0, 18],
-        position: [[-1, 0, -1], [2, 8, 2]]
+        position: [-1, 0, -1],
+        dimensions: [2, 8, 2],
+        rotationPoint: [0.5, 16, -4],
+        rotation: [Math.cos(s1 * 0.6662) * 1.4 * s2, 0, 0]
       },
       {
         name: 'wolfTail',
         uv: [9, 18],
-        position: [[-1, 0, -1], [2, 8, 2]]
+        position: [-1, 0, -1],
+        dimensions: [2, 8, 2],
+        rotationPoint: [-1, 12, 8],
+        rotation: [0, Math.cos(s1 * 0.6662) * 1.4 * s2, 0]
       },
     ];
   }
 }
+
+// XXX
+// var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.wolf(game, [], [i, 1]); game.scene.add(m); m.position.set(-20, 10, 10); }; setInterval(() => {go(i += 0.1)}, 100);
 
 /* package net.minecraft.src;
 
@@ -179,60 +213,19 @@ public class ModelWolf extends ModelBase
     {
         EntityWolf entitywolf = (EntityWolf)par1EntityLiving;
 
-        if (entitywolf.isAngry())
-        {
-            wolfTail.rotateAngleY = 0.0F;
-        }
-        else
-        {
-            wolfTail.rotateAngleY = MathHelper.cos(par2 * 0.6662F) * 1.4F * par3;
-        }
 
-        if (entitywolf.func_48141_af())
-        {
-            wolfMane.setRotationPoint(-1F, 16F, -3F);
-            wolfMane.rotateAngleX = ((float)Math.PI * 2F / 5F);
-            wolfMane.rotateAngleY = 0.0F;
-            wolfBody.setRotationPoint(0.0F, 18F, 0.0F);
-            wolfBody.rotateAngleX = ((float)Math.PI / 4F);
-            wolfTail.setRotationPoint(-1F, 21F, 6F);
-            wolfLeg1.setRotationPoint(-2.5F, 22F, 2.0F);
-            wolfLeg1.rotateAngleX = ((float)Math.PI * 3F / 2F);
-            wolfLeg2.setRotationPoint(0.5F, 22F, 2.0F);
-            wolfLeg2.rotateAngleX = ((float)Math.PI * 3F / 2F);
-            wolfLeg3.rotateAngleX = 5.811947F;
-            wolfLeg3.setRotationPoint(-2.49F, 17F, -4F);
-            wolfLeg4.rotateAngleX = 5.811947F;
-            wolfLeg4.setRotationPoint(0.51F, 17F, -4F);
-        }
-        else
-        {
-            wolfBody.setRotationPoint(0.0F, 14F, 2.0F);
             wolfBody.rotateAngleX = ((float)Math.PI / 2F);
             wolfMane.setRotationPoint(-1F, 14F, -3F);
             wolfMane.rotateAngleX = wolfBody.rotateAngleX;
             wolfTail.setRotationPoint(-1F, 12F, 8F);
-            wolfLeg1.setRotationPoint(-2.5F, 16F, 7F);
-            wolfLeg2.setRotationPoint(0.5F, 16F, 7F);
-            wolfLeg3.setRotationPoint(-2.5F, 16F, -4F);
-            wolfLeg4.setRotationPoint(0.5F, 16F, -4F);
             wolfLeg1.rotateAngleX = MathHelper.cos(par2 * 0.6662F) * 1.4F * par3;
             wolfLeg2.rotateAngleX = MathHelper.cos(par2 * 0.6662F + (float)Math.PI) * 1.4F * par3;
             wolfLeg3.rotateAngleX = MathHelper.cos(par2 * 0.6662F + (float)Math.PI) * 1.4F * par3;
             wolfLeg4.rotateAngleX = MathHelper.cos(par2 * 0.6662F) * 1.4F * par3;
-        }
 
-        float f = entitywolf.getInterestedAngle(par4) + entitywolf.getShakeAngle(par4, 0.0F);
-        wolfHeadMain.rotateAngleZ = f;
-        wolfMane.rotateAngleZ = entitywolf.getShakeAngle(par4, -0.08F);
-        wolfBody.rotateAngleZ = entitywolf.getShakeAngle(par4, -0.16F);
+        wolfTail.rotateAngleY = MathHelper.cos(par2 * 0.6662F) * 1.4F * par3;
         wolfTail.rotateAngleZ = entitywolf.getShakeAngle(par4, -0.2F);
 
-        if (entitywolf.getWolfShaking())
-        {
-            float f1 = entitywolf.getEntityBrightness(par4) * entitywolf.getShadingWhileShaking(par4);
-            GL11.glColor3f(f1, f1, f1);
-        }
     }
 
     /**
