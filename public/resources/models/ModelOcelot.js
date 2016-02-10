@@ -4,7 +4,7 @@ export default class ModelOcelot extends ModelBase {
   constructor([], [s1 = 0, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
     super();
 
-    this.texture = 'entity/cat/ocelot';
+    this.textures = 'entity/cat/ocelot';
     this.meshes = [
       {
         name: 'head',

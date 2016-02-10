@@ -1,11 +1,11 @@
 export default class ModelBase {
   constructor() {
-    this.texture = null;
+    this.textures = null;
     this.meshes = null;
   }
 
   getMesh(game) {
-    return _makeObject(game, this.texture, this.meshes);
+    return _makeObject(game, this.textures, this.meshes);
   }
 }
 ModelBase.make = Model => {
@@ -26,7 +26,7 @@ function _getFaceVertexUvs(game) {
   return faceVertexUvs;
 }
 
-function _makeObject(game, texture, meshes) {
+function _makeObject(game, textures, meshes) {
   const object = new game.THREE.Object3D();
   (function recurse(object, meshes) {
     meshes.forEach(mesh => {
@@ -35,7 +35,7 @@ function _makeObject(game, texture, meshes) {
         const {rotation = [0, 0, 0]} = mesh;
         rotationPoint = [rotationPoint[0], -rotationPoint[1], rotationPoint[2]];
 
-        const submesh = _makeCubeMesh(game, position, dimensions, texture, uv);
+        const submesh = _makeCubeMesh(game, position, dimensions, textures, uv);
 
         const subobject1 = new game.THREE.Object3D();
         subobject1.position.set(
@@ -55,7 +55,7 @@ function _makeObject(game, texture, meshes) {
           recurse(object, children);
         }
       } else if (position && dimensions && uv) {
-        const submesh = _makeCubeMesh(game, position, dimensions, texture, uv);
+        const submesh = _makeCubeMesh(game, position, dimensions, textures, uv);
 
         object.add(submesh);
 
@@ -65,7 +65,7 @@ function _makeObject(game, texture, meshes) {
       } else if (position && dimensions && offset) {
         const {rotation = [0, 0, 0]} = mesh;
 
-        const submesh = _makePlaneMesh(game, position, dimensions, texture, offset);
+        const submesh = _makePlaneMesh(game, position, dimensions, textures, offset);
         submesh.rotation.set(-rotation[0] + Math.PI, -rotation[1], -rotation[2]);
 
         object.add(submesh);
@@ -102,13 +102,13 @@ function _makeObject(game, texture, meshes) {
   return object;
 }
 
-function _makeCubeMesh(game, position, dimensions, texture, uv) {
+function _makeCubeMesh(game, position, dimensions, textures, uv) {
   position = [position[0], -position[1], position[2]];
   dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
 
   const geometry = new game.THREE.CubeGeometry(dimensions[0], dimensions[1], dimensions[2]);
   geometry.faceVertexUvs = _getFaceVertexUvs(game);
-  const material = _getCubeMaterial(game, texture, uv);
+  const material = _getCubeMaterial(game, textures, uv);
   const mesh = new game.THREE.Mesh(geometry, material);
   mesh.position.set(
     (position[0] + (dimensions[0] / 2)),
@@ -118,12 +118,12 @@ function _makeCubeMesh(game, position, dimensions, texture, uv) {
   return mesh;
 }
 
-function _makePlaneMesh(game, position, dimensions, texture, offset) {
+function _makePlaneMesh(game, position, dimensions, textures, offset) {
   position = [position[0], -position[1], position[2]];
   dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
 
   const geometry = new game.THREE.PlaneGeometry(dimensions[0], dimensions[1]);
-  const material = _getPlaneMaterial(game, texture, offset);
+  const material = _getPlaneMaterial(game, textures, offset);
   const mesh = new game.THREE.Mesh(geometry, material);
   mesh.position.set(
     (position[0] + (dimensions[0] / 2)),

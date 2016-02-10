@@ -6,7 +6,7 @@ export default class ModelCreeper extends ModelBase {
 
     const i = 4;
 
-    this.texture = 'entity/creeper/creeper';
+    this.textures = 'entity/creeper/creeper';
     this.meshes = [
       {
         name: 'head',

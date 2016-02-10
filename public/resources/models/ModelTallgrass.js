@@ -9,7 +9,7 @@ export default class ModelTallgrass extends ModelBase {
     super([], []);
 
     const textureIndex = Math.floor(p1 * TEXTURES.length);
-    this.texture = TEXTURES[textureIndex];
+    this.textures = TEXTURES[textureIndex];
 
     const offset = [0, 0, 16, 16];
     const position = [0, 0, 0];

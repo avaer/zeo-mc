@@ -12,7 +12,7 @@ export default class ModelRain extends ModelBase {
     const position = [-5, positionOffset, 0];
     const dimensions = [10, 10, 0]
 
-    this.texture = 'environment/rain';
+    this.textures = 'environment/rain';
     this.meshes = [
       {
         name: 'rain1',
