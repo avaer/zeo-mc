@@ -16,8 +16,6 @@ import * as inputUtils from '../utils/input/index';
 import {CHUNK_SIZE, CHUNK_DISTANCE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
 import {BLOCKS, MODELS} from '../resources/index';
 
-window.MODELS = MODELS;
-
 const INITIAL_CHUNK_POSITIONS = (() => {
   const result = [];
   for (let x = -CHUNK_DISTANCE; x <= CHUNK_DISTANCE; x++) {
@@ -49,7 +47,13 @@ class Crosshair extends React.Component {
 
 export default class Voxels extends React.Component {
   componentWillMount() {
-    this._workers = _makeWorkers();
+    const {seed} = this.props;
+    const chunkSize = CHUNK_SIZE;
+    const voxelAsyncOpts = {seed, chunkSize};
+
+    voxelAsync.init(voxelAsyncOpts);
+
+    this._workers = _makeWorkers(voxelAsyncOpts);
     this._workerIndex = 0;
     this._pendingGenerates = new Map();
   }
@@ -223,7 +227,7 @@ export default class Voxels extends React.Component {
   }
 }
 
-function _makeWorkers() {
+function _makeWorkers(workerOpts) {
   const workers = [];
   for (let i = 0; i < NUM_WORKERS; i++) {
     (() => {
@@ -232,6 +236,15 @@ function _makeWorkers() {
         const type = 'request';
         worker.postMessage({type, method, args});
         cbs.push(cb);
+      };
+      worker.init = () => {
+        worker.call('init', [workerOpts], err => {
+          if (err) {
+            console.warn(err);
+          } else {
+            console.log('worker init ok', workerOpts);
+          }
+        });
       };
       const cbs = [];
       worker.onmessage = resMsg => {
@@ -245,13 +258,19 @@ function _makeWorkers() {
             const {result} = res;
             cb(null, result);
           } else {
-            cb(null, error);
+            cb(error);
           }
+        } else if (type === 'log') {
+          const {log} = res;
+          console.log(log);
         }
       };
       worker.onerror, err => {
         console.warn('worker error', err);
       };
+
+      worker.init();
+
       workers.push(worker);
     })();
   }

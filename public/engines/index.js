@@ -20,11 +20,13 @@ function _syncWindow(oldState) {
   const width = $window.width();
   const height = $window.height();
   const pixelRatio = window.devicePixelRatio;
+  const pathname = window.location.pathname;
 
   return oldState
     .set('width', width)
     .set('height', height)
-    .set('pixelRatio', pixelRatio);
+    .set('pixelRatio', pixelRatio)
+    .set('pathname', pathname);
 }
 
 function _connectToWorld(id) {

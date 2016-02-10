@@ -6,7 +6,7 @@ import Voxels from './Voxels';
 import Editor from './Editor';
 import Node from './Node';
 
-import {UI_MODES} from '../constants/index';
+import {DEFAULT_SEED, UI_MODES} from '../constants/index';
 
 export default class AppBody extends React.Component {
   render() {
@@ -14,7 +14,7 @@ export default class AppBody extends React.Component {
     const {ui: uiState, window: windowState, world: worldState} = stores;
 
     const {mode, value, oldValue} = uiState;
-    const {width, height, pixelRatio, mouse: {position: mousePosition, buttons: mouseButtons}} = windowState;
+    const {width, height, pixelRatio, pathname, mouse: {position: mousePosition, buttons: mouseButtons}} = windowState;
     const {position, rotation, velocity, tool, nodes, hoverCoords, hoverEndCoords} = worldState;
     const worldProps = {
       width,
@@ -37,7 +37,7 @@ export default class AppBody extends React.Component {
     };
 
     const voxelsProps = {
-      // XXX
+      seed: pathname.replace(/^\//, '') || DEFAULT_SEED
     };
 
     const editorProps = {
