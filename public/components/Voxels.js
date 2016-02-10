@@ -68,7 +68,8 @@ export default class Voxels extends React.Component {
         chunkSize: CHUNK_SIZE,
         chunkDistance: CHUNK_DISTANCE,
         lightsDisabled: true,
-        gravity: GRAVITY
+        gravity: GRAVITY,
+        statsDisabled: true
       });
       window.game = game;
       window.voxel = voxel;
