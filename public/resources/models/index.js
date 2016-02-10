@@ -1,0 +1,22 @@
+import ModelBase from './ModelBase';
+import ModelChest from './ModelChest';
+import ModelChicken from './ModelChicken';
+import ModelCow from './ModelCow';
+import ModelCreeper from './ModelCreeper';
+import ModelOcelot from './ModelOcelot';
+import ModelPig from './ModelPig';
+import ModelRain from './ModelRain';
+import ModelSlime from './ModelSlime';
+import ModelTallgrass from './ModelTallgrass';
+import ModelWolf from './ModelWolf';
+
+export const chest = ModelBase.make(ModelChest);
+export const chicken = ModelBase.make(ModelChicken);
+export const cow = ModelBase.make(ModelCow);
+export const creeper = ModelBase.make(ModelCreeper);
+export const ocelot = ModelBase.make(ModelOcelot);
+export const pig = ModelBase.make(ModelPig);
+export const rain = ModelBase.make(ModelRain);
+export const slime = ModelBase.make(ModelSlime);
+export const tallgrass = ModelBase.make(ModelTallgrass);
+export const wolf = ModelBase.make(ModelWolf);
