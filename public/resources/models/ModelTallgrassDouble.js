@@ -28,14 +28,14 @@ export default class ModelTallgrassDouble extends ModelBase {
 
     const offset = [0, 0, 16, 16];
     const bottomPosition = [0, 0, 0];
-    const topPosition = [0, 16, 0];
+    const topPosition = [0, -16, 0];
     const dimensions = [SIZE, SIZE, 0];
 
     this.meshes = [
       {
         name: 'tallgrassDoubleBottom1',
         offset: offset,
-        position: position,
+        position: bottomPosition,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 1 / 4, 0]
@@ -43,7 +43,7 @@ export default class ModelTallgrassDouble extends ModelBase {
       {
         name: 'tallgrassDoubleBottom2',
         offset: offset,
-        position: position,
+        position: bottomPosition,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 3 / 4, 0]
@@ -51,7 +51,7 @@ export default class ModelTallgrassDouble extends ModelBase {
       {
         name: 'tallgrassDoubleTop1',
         offset: offset,
-        position: position,
+        position: topPosition,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 1 / 4, 0]
@@ -59,7 +59,7 @@ export default class ModelTallgrassDouble extends ModelBase {
       {
         name: 'tallgrassDoubleTop2',
         offset: offset,
-        position: position,
+        position: topPosition,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 3 / 4, 0]
