@@ -30,12 +30,12 @@ function _makeObject(game, texture, meshes) {
   const object = new game.THREE.Object3D();
   (function recurse(object, meshes) {
     meshes.forEach(mesh => {
-      let {position, dimensions, rotationPoint, uv, children} = mesh;
+      let {position, dimensions, rotationPoint, uv, offset, children} = mesh;
       if (position && dimensions && rotationPoint && uv) {
-        const {rotation = [0,0,0]} = mesh;
+        const {rotation = [0, 0, 0]} = mesh;
         rotationPoint = [rotationPoint[0], -rotationPoint[1], rotationPoint[2]];
 
-        const submesh = _makeMesh(game, position, dimensions, texture, uv);
+        const submesh = _makeCubeMesh(game, position, dimensions, texture, uv);
 
         const subobject1 = new game.THREE.Object3D();
         subobject1.position.set(
@@ -55,7 +55,18 @@ function _makeObject(game, texture, meshes) {
           recurse(object, children);
         }
       } else if (position && dimensions && uv) {
-        const submesh = _makeMesh(game, position, dimensions, texture, uv);
+        const submesh = _makeCubeMesh(game, position, dimensions, texture, uv);
+
+        object.add(submesh);
+
+        if (children) {
+          recurse(object, children);
+        }
+      } else if (position && dimensions && offset) {
+        const {rotation = [0, 0, 0]} = mesh;
+
+        const submesh = _makePlaneMesh(game, position, dimensions, texture, offset);
+        submesh.rotation.set(-rotation[0], -rotation[1], -rotation[2]);
 
         object.add(submesh);
 
@@ -91,14 +102,29 @@ function _makeObject(game, texture, meshes) {
   return object;
 }
 
-function _makeMesh(game, position, dimensions, texture, uv) {
+function _makeCubeMesh(game, position, dimensions, texture, uv) {
   position = [position[0], -position[1], position[2]];
   dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
 
   const geometry = new game.THREE.CubeGeometry(dimensions[0], dimensions[1], dimensions[2]);
   geometry.faceVertexUvs = _getFaceVertexUvs(game);
+  const material = _getCubeMaterial(game, texture, uv);
+  const mesh = new game.THREE.Mesh(geometry, material);
+  mesh.position.set(
+    (position[0] + (dimensions[0] / 2)),
+    (position[1] + (dimensions[1] / 2)),
+    (position[2] + (dimensions[2] / 2)),
+  );
+  return mesh;
+}
 
-  const mesh = new game.THREE.Mesh(geometry, _getMaterial(game, texture, uv));
+function _makePlaneMesh(game, position, dimensions, texture, offset) {
+  position = [position[0], -position[1], position[2]];
+  dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
+
+  const geometry = new game.THREE.PlaneGeometry(dimensions[0], dimensions[1]);
+  const material = _getPlaneMaterial(game, texture, offset);
+  const mesh = new game.THREE.Mesh(geometry, material);
   mesh.position.set(
     (position[0] + (dimensions[0] / 2)),
     (position[1] + (dimensions[1] / 2)),
@@ -136,12 +162,12 @@ function _normalizeUv(uv) {
   }
 }
 
-const materialCache = new Map();
-function _getMaterial(game, textureName, uv) {
+const cubeMaterialCache = new Map();
+function _getCubeMaterial(game, textureName, uv) {
   uv = _normalizeUv(uv);
   const materialKey = textureName + '-' + uv.map(uv => uv.join(','));
 
-  const cachedMaterial = materialCache.get(materialKey);
+  const cachedMaterial = cubeMaterialCache.get(materialKey);
   if (cachedMaterial) {
     return cachedMaterial;
   } else {
@@ -158,15 +184,36 @@ function _getMaterial(game, textureName, uv) {
     }
 
     const material = new game.THREE.MeshFaceMaterial(materials);
-    materialCache.set(materialKey, material);
+    cubeMaterialCache.set(materialKey, material);
+
+    return material;
+  }
+}
+
+const planeMaterialCache = new Map();
+function _getPlaneMaterial(game, textureName, offset) {
+  const materialKey = textureName + '-' + offset.join(',');
+
+  const cachedMaterial = planeMaterialCache.get(materialKey);
+  if (cachedMaterial) {
+    return cachedMaterial;
+  } else {
+    const texture = _getTexture('/api/img/textures/' + textureName + '.png', offset);
+    const material = new game.THREE.MeshBasicMaterial({
+      map: texture,
+      side: game.THREE.DoubleSide,
+      transparent: true
+    });
+
+    planeMaterialCache.set(materialKey, material);
 
     return material;
   }
 }
 
 const textureCache = new Map();
-function _getTexture(url, uv) {
-  const textureKey = url + '-' + uv.join(',');
+function _getTexture(url, offset) {
+  const textureKey = url + '-' + offset.join(',');
 
   const cachedTexture = textureCache.get(textureKey);
   if (cachedTexture) {
@@ -177,7 +224,7 @@ function _getTexture(url, uv) {
     img.src = url;
     const texture = new game.THREE.Texture();
     img.onload = () => {
-      const croppedImage = _cropImage(img, uv);
+      const croppedImage = _cropImage(img, offset);
       croppedImage.onload = () => {
         texture.image = croppedImage;
         texture.needsUpdate = true;
@@ -193,15 +240,17 @@ function _getTexture(url, uv) {
   }
 }
 
-function _cropImage(img, uv) {
-  const width = uv[2] - uv[0];
-  const height = uv[3] - uv[1];
+function _cropImage(img, offset) {
+  const startX = offset[0];
+  const startY = offset[1];
+  const width = offset[2] - offset[0];
+  const height = offset[3] - offset[1];
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const context = canvas.getContext('2d');
-  context.drawImage(img, uv[0], uv[1], width, height, 0, 0, width, height);
+  context.drawImage(img, startX, startY, width, height, 0, 0, width, height);
   const dataUrl = canvas.toDataURL();
 
   const newImg = new Image();
