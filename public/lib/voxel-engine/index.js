@@ -1,7 +1,7 @@
 var voxel = require('voxel')
 var voxelMesh = require('voxel-mesh')
 var ray = require('voxel-raycast')
-var texture = require('voxel-texture')
+var texture = require('../voxel-texture-shader/index')
 var control = require('voxel-control')
 var voxelView = require('voxel-view')
 var THREE = require('three')
@@ -97,7 +97,18 @@ function Game(opts) {
 
   this.materials = texture({
     game: this,
-    texturePath: opts.texturePath || './textures/',
+    artPacks: {
+      getTextureImage: (name, cb) => {
+        function done() {
+          cb(img);
+        }
+
+        const img = document.createElement('img');
+        img.onload = done;
+        img.onerror = done;
+        img.src = opts.texturePath(name);
+      }
+    },
     materialType: opts.materialType || THREE.MeshLambertMaterial,
     materialParams: opts.materialParams || {},
     materialFlatColor: opts.materialFlatColor === true
@@ -423,10 +434,10 @@ Game.prototype.collideTerrain = function(other, bbox, vec, resting) {
 // # Three.js specific methods
 
 Game.prototype.addStats = function() {
-  stats = new Stats()
-  stats.domElement.style.position  = 'absolute'
-  stats.domElement.style.bottom  = '0px'
-  document.body.appendChild( stats.domElement )
+  this.stats = new Stats()
+  this.stats.domElement.style.position  = 'absolute'
+  this.stats.domElement.style.bottom  = '0px'
+  document.body.appendChild( this.stats.domElement )
 }
 
 Game.prototype.addLights = function(scene) {
@@ -696,7 +707,7 @@ Game.prototype.initializeRendering = function(opts) {
   })
   if (typeof stats !== 'undefined') {
     self.on('postrender', function() {
-      stats.update()
+      self.stats.update()
     })
   }
 }

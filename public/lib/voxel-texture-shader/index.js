@@ -55,6 +55,7 @@ function Texture(opts) {
       transparent: transparent,
       side: THREE.FrontSide,
       lights: [], // force lights refresh to setup uniforms, three.js WebGLRenderer line 4323
+      fog: true,
 
 
     // based on three.js/src/renderers/WebGLShaders.js lambert
@@ -593,7 +594,7 @@ Texture.prototype.sprite = function(name, w, h, cb) {
       ]);
     }, function() {
       self._afterLoading();
-      delete canvases;
+      canvases = [];
       self.materials = self.materials.concat(textures);
       cb(textures);
     });
