@@ -6,7 +6,7 @@ export default class ModelChicken extends ModelBase {
 
     // const byte0 = 16;
     const byte0 = 0;
-    const headRotation = [0,0,0];//[-(s5 / (180 / Math.PI)), s4 / (180 / Math.PI), 0];
+    const headRotation = [0, 0, 0];//[-(s5 / (180 / Math.PI)), s4 / (180 / Math.PI), 0];
 
     this.texture = 'entity/chicken';
     this.meshes = [
