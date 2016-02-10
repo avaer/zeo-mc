@@ -17,7 +17,7 @@ export default class ModelTallgrass extends ModelBase {
 
     this.meshes = [
       {
-        name: 'grass1',
+        name: 'tallgrass1',
         offset: offset,
         position: position,
         dimensions: dimensions,
@@ -25,7 +25,7 @@ export default class ModelTallgrass extends ModelBase {
         rotation: [0, Math.PI * 1 / 4, 0]
       },
       {
-        name: 'grass2',
+        name: 'tallgrass2',
         offset: offset,
         position: position,
         dimensions: dimensions,
