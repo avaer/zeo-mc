@@ -11,6 +11,7 @@ import ModelRain from './ModelRain';
 import ModelSlime from './ModelSlime';
 import ModelTallgrass from './ModelTallgrass';
 import ModelTallgrassDouble from './ModelTallgrassDouble';
+import ModelTallgrassDoubleSunflower from './ModelTallgrassDoubleSunflower';
 import ModelWolf from './ModelWolf';
 
 export const chest = ModelBase.make(ModelChest);
@@ -25,4 +26,5 @@ export const rain = ModelBase.make(ModelRain);
 export const slime = ModelBase.make(ModelSlime);
 export const tallgrass = ModelBase.make(ModelTallgrass);
 export const tallgrassDouble = ModelBase.make(ModelTallgrassDouble);
+export const tallgrassDoubleSunflower = ModelBase.make(ModelTallgrassDoubleSunflower);
 export const wolf = ModelBase.make(ModelWolf);

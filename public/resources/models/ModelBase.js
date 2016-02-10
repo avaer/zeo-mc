@@ -65,10 +65,10 @@ function _makeObject(game, textures, meshes) {
           recurse(object, children);
         }
       } else if (position && dimensions && offset) {
-        const {rotation = [0, 0, 0]} = mesh;
+        const {rotation = [0, 0, 0], oneSided = false} = mesh;
         const texture = _resolveTexture(textures, textureIndex);
 
-        const submesh = _makePlaneMesh(game, position, dimensions, texture, offset);
+        const submesh = _makePlaneMesh(game, position, dimensions, texture, offset, oneSided);
         submesh.rotation.set(-rotation[0] + Math.PI, -rotation[1], -rotation[2]);
 
         object.add(submesh);
@@ -132,13 +132,12 @@ function _makeCubeMesh(game, position, dimensions, texture, uv) {
   return mesh;
 }
 
-function _makePlaneMesh(game, position, dimensions, texture, offset) {
+function _makePlaneMesh(game, position, dimensions, texture, offset, oneSided) {
   position = [position[0], -position[1], position[2]];
   dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
-  !Array.isArray()
 
   const geometry = new game.THREE.PlaneGeometry(dimensions[0], dimensions[1]);
-  const material = _getPlaneMaterial(game, texture, offset);
+  const material = _getPlaneMaterial(game, texture, offset, oneSided);
   const mesh = new game.THREE.Mesh(geometry, material);
   mesh.position.set(
     (position[0] + (dimensions[0] / 2)),
@@ -206,7 +205,7 @@ function _getCubeMaterial(game, textureName, uv) {
 }
 
 const planeMaterialCache = new Map();
-function _getPlaneMaterial(game, textureName, offset) {
+function _getPlaneMaterial(game, textureName, offset, oneSided) {
   const materialKey = textureName + '-' + offset.join(',');
 
   const cachedMaterial = planeMaterialCache.get(materialKey);
@@ -216,7 +215,7 @@ function _getPlaneMaterial(game, textureName, offset) {
     const texture = _getTexture('/api/img/textures/' + textureName + '.png', offset);
     const material = new game.THREE.MeshBasicMaterial({
       map: texture,
-      side: game.THREE.DoubleSide,
+      side: oneSided ? game.THREE.BackSide : game.THREE.DoubleSide,
       transparent: true
     });
 
