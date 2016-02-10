@@ -1,21 +1,36 @@
 import ModelBase from './ModelBase';
 import {BIOME_TEXTURES} from '../../constants/index';
 
+function _doubleTexture(texture) {
+  return [texture, texture];
+}
+
+function _doublePlantName(plantName) {
+  return ['double_plant_' + plantName + '_bottom', 'double_plant_' + plantName + '_top'];
+}
+
+function _expandBiomes(plantNames) {
+  const result = [];
+  plantNames.forEach(plantNames => {
+    BIOME_TEXTURES.forEach(biomeTexture => {
+      const biomedPlantNames = plantNames.map(plantName => plantName + '_' + biomeTexture);
+      result.push(biomedPlantNames);
+    });
+  });
+  return result;
+}
+
 const TEXTURES = [].concat([
   'reeds'
-]).concat([
-  'fern',
-  'grass',
-  'paoneia',
+].map(_doubleTexture)).concat([
+  'paeonia',
   'rose',
   'syringa',
-].map(plantName => ['double_plant_' + plantName + '_bottom', 'double_plant_' + plantName + '_top'])).map(textures => {
-  if (!Array.isArray(textures)) {
-    textures = [textures];
-  }
-  textures = textures.map(textureName => 'blocks/' + textureName);
-  return textures;
-});
+].map(_doublePlantName)).concat(_expandBiomes([
+  'fern',
+  'grass',
+].map(_doublePlantName)))
+.map(textures => textures.map(textureName => 'blocks/' + textureName))
 
 const SIZE = 10;
 
@@ -28,7 +43,7 @@ export default class ModelTallgrassDouble extends ModelBase {
 
     const offset = [0, 0, 16, 16];
     const bottomPosition = [0, 0, 0];
-    const topPosition = [0, -16, 0];
+    const topPosition = [0, -SIZE, 0];
     const dimensions = [SIZE, SIZE, 0];
 
     this.meshes = [
@@ -38,7 +53,8 @@ export default class ModelTallgrassDouble extends ModelBase {
         position: bottomPosition,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
-        rotation: [0, Math.PI * 1 / 4, 0]
+        rotation: [0, Math.PI * 1 / 4, 0],
+        textureIndex: 0
       },
       {
         name: 'tallgrassDoubleBottom2',
@@ -46,7 +62,8 @@ export default class ModelTallgrassDouble extends ModelBase {
         position: bottomPosition,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
-        rotation: [0, Math.PI * 3 / 4, 0]
+        rotation: [0, Math.PI * 3 / 4, 0],
+        textureIndex: 0
       },
       {
         name: 'tallgrassDoubleTop1',
@@ -54,7 +71,8 @@ export default class ModelTallgrassDouble extends ModelBase {
         position: topPosition,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
-        rotation: [0, Math.PI * 1 / 4, 0]
+        rotation: [0, Math.PI * 1 / 4, 0],
+        textureIndex: 1
       },
       {
         name: 'tallgrassDoubleTop2',
@@ -62,7 +80,8 @@ export default class ModelTallgrassDouble extends ModelBase {
         position: topPosition,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
-        rotation: [0, Math.PI * 3 / 4, 0]
+        rotation: [0, Math.PI * 3 / 4, 0],
+        textureIndex: 1
       },
     ]
   }
