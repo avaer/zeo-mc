@@ -1,16 +1,20 @@
 import ModelBase from './ModelBase';
+import {BIOME_TEXTURES} from '../../constants/index';
 
+const TEXTURES = BIOME_TEXTURES.map(biomeTexture => 'tallgrass_' + biomeTexture);
 const SIZE = 10;
 
 export default class ModelTallgrass extends ModelBase {
-  constructor([], []) {
+  constructor([p1 = Math.random()] = [], []) {
     super([], []);
+
+    const textureIndex = Math.floor(p1 * TEXTURES.length);
+    this.texture = TEXTURES[textureIndex];
 
     const offset = [0, 0, 16, 16];
     const position = [0, 0, 0];
     const dimensions = [SIZE, SIZE, 0];
 
-    this.texture = 'blocks/tallgrass';
     this.meshes = [
       {
         name: 'grass1',
