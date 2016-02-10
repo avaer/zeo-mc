@@ -9,42 +9,47 @@ module.exports.Mesh = Mesh
 function Mesh(data, meshers, scaleFactor, three) {
   this.THREE = three || THREE
   this.data = data
-  var geometry = this.geometry = new this.THREE.Geometry()
-  this.scale = scaleFactor || new this.THREE.Vector3(10, 10, 10)
-  
-  var blocks = meshers.block( data.voxels, data.dims )
-  this.blocks = blocks
+  this.meshers = meshers;
+  this.scaleFactor = scaleFactor || new this.THREE.Vector3(10, 10, 10)
 
-  geometry.vertices.length = 0
-  geometry.faces.length = 0
+  this.initBlocks();
+}
 
-  for (var i = 0; i < blocks.vertices.length; ++i) {
-    var q = blocks.vertices[i]
-    geometry.vertices.push(new this.THREE.Vector3(q[0], q[1], q[2]))
+Mesh.prototype.initBlocks = function() {
+  this.blocks = this.meshers.block(this.data.voxels, this.data.dims)
+
+  this.geometry = new this.THREE.Geometry()
+
+  this.geometry.vertices.length = 0
+  this.geometry.faces.length = 0
+
+  for (var i = 0; i < this.blocks.vertices.length; ++i) {
+    var q = this.blocks.vertices[i]
+    this.geometry.vertices.push(new this.THREE.Vector3(q[0], q[1], q[2]))
   } 
   
-  for (var i = 0; i < blocks.faces.length; ++i) {
-    geometry.faceVertexUvs[0].push(this.faceVertexUv(i))
+  for (var i = 0; i < this.blocks.faces.length; ++i) {
+    this.geometry.faceVertexUvs[0].push(this.faceVertexUv(i))
     
-    var q = blocks.faces[i]
+    var q = this.blocks.faces[i]
     if (q.length === 5) {
       var f = new this.THREE.Face4(q[0], q[1], q[2], q[3])
       f.color = new this.THREE.Color(q[4])
-      geometry.faces.push(f)
+      this.geometry.faces.push(f)
     } else if (q.length == 4) {
       var f = new this.THREE.Face3(q[0], q[1], q[2])
       f.color = new this.THREE.Color(q[3])
-      geometry.faces.push(f)
+      this.geometry.faces.push(f)
     }
   }
   
-  geometry.computeFaceNormals()
+  this.geometry.computeFaceNormals()
 
   // compute vertex colors for ambient occlusion
   var light = new THREE.Color(0xffffff)
   var shadow = new THREE.Color(0x505050)
-  for (var i = 0; i < geometry.faces.length; ++i) {
-    var face = geometry.faces[i]
+  for (var i = 0; i < this.geometry.faces.length; ++i) {
+    var face = this.geometry.faces[i]
     // facing up
     if (face.normal.y === 1)       face.vertexColors = [light, light, light, light]
     // facing down
@@ -59,14 +64,13 @@ function Mesh(data, meshers, scaleFactor, three) {
     else                           face.vertexColors = [shadow, light, light, shadow]
   }
 
-  geometry.verticesNeedUpdate = true
-  geometry.elementsNeedUpdate = true
-  geometry.normalsNeedUpdate = true
+  this.geometry.verticesNeedUpdate = true
+  this.geometry.elementsNeedUpdate = true
+  this.geometry.normalsNeedUpdate = true
 
-  geometry.computeBoundingBox()
-  geometry.computeBoundingSphere()
-
-}
+  this.geometry.computeBoundingBox()
+  this.geometry.computeBoundingSphere()
+};
 
 Mesh.prototype.createWireMesh = function(hexColor) {    
   var wireMaterial = new this.THREE.MeshBasicMaterial({
@@ -74,7 +78,7 @@ Mesh.prototype.createWireMesh = function(hexColor) {
     wireframe : true
   })
   wireMesh = new THREE.Mesh(this.geometry, wireMaterial)
-  wireMesh.scale = this.scale
+  wireMesh.scale = this.scaleFactor
   wireMesh.doubleSided = true
   this.wireMesh = wireMesh
   return wireMesh
@@ -83,7 +87,7 @@ Mesh.prototype.createWireMesh = function(hexColor) {
 Mesh.prototype.createSurfaceMesh = function(material) {
   material = material || new this.THREE.MeshNormalMaterial()
   var surfaceMesh  = new this.THREE.Mesh( this.geometry, material )
-  surfaceMesh.scale = this.scale
+  surfaceMesh.scale = this.scaleFactor
   surfaceMesh.doubleSided = false
   this.surfaceMesh = surfaceMesh
   return surfaceMesh
