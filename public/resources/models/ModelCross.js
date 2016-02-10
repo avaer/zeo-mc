@@ -51,7 +51,7 @@ const TEXTURES = [].concat(
   'sapling_oak',
   'sapling_roofed_oak',
   'sapling_spruce'
-]);
+]).map(textureName => 'blocks/' + textureName);
 
 const SIZE = 10;
 
