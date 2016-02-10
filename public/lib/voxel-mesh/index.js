@@ -1,32 +1,32 @@
 var THREE = require('three')
 
-module.exports = function(data, mesher, scaleFactor, three) {
-  return new Mesh(data, mesher, scaleFactor, three)
+module.exports = function(data, meshers, scaleFactor, three) {
+  return new Mesh(data, meshers, scaleFactor, three)
 }
 
 module.exports.Mesh = Mesh
 
-function Mesh(data, mesher, scaleFactor, three) {
+function Mesh(data, meshers, scaleFactor, three) {
   this.THREE = three || THREE
   this.data = data
   var geometry = this.geometry = new this.THREE.Geometry()
   this.scale = scaleFactor || new this.THREE.Vector3(10, 10, 10)
   
-  var result = mesher( data.voxels, data.dims )
-  this.meshed = result
+  var blocks = meshers.block( data.voxels, data.dims )
+  this.blocks = blocks
 
   geometry.vertices.length = 0
   geometry.faces.length = 0
 
-  for (var i = 0; i < result.vertices.length; ++i) {
-    var q = result.vertices[i]
+  for (var i = 0; i < blocks.vertices.length; ++i) {
+    var q = blocks.vertices[i]
     geometry.vertices.push(new this.THREE.Vector3(q[0], q[1], q[2]))
   } 
   
-  for (var i = 0; i < result.faces.length; ++i) {
+  for (var i = 0; i < blocks.faces.length; ++i) {
     geometry.faceVertexUvs[0].push(this.faceVertexUv(i))
     
-    var q = result.faces[i]
+    var q = blocks.faces[i]
     if (q.length === 5) {
       var f = new this.THREE.Face4(q[0], q[1], q[2], q[3])
       f.color = new this.THREE.Color(q[4])
@@ -101,10 +101,10 @@ Mesh.prototype.setPosition = function(x, y, z) {
 
 Mesh.prototype.faceVertexUv = function(i) {
   var vs = [
-    this.meshed.vertices[i*4+0],
-    this.meshed.vertices[i*4+1],
-    this.meshed.vertices[i*4+2],
-    this.meshed.vertices[i*4+3]
+    this.blocks.vertices[i*4+0],
+    this.blocks.vertices[i*4+1],
+    this.blocks.vertices[i*4+2],
+    this.blocks.vertices[i*4+3]
   ]
   var spans = {
     x0: vs[0][0] - vs[1][0],

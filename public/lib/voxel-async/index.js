@@ -25,20 +25,32 @@ export function generateSync(position) {
   _ensureInitialized();
 
   const chunk = voxelTerrainGenerate(position);
-  chunk.dims._mesh = voxelMesherMesh(chunk.voxels, chunk.dims);
+  chunk.dims._cachedBlockMesh = voxelMesherMesh(chunk.voxels, chunk.dims);
   return chunk;
 }
 
-export function mesher(voxels, dims) {
+export function blockMesher(voxels, dims) {
   _ensureInitialized();
 
-  var cachedMesh = dims._mesh;
-  if (cachedMesh) {
-    dims._mesh = null;
-    return cachedMesh;
+  var cachedBlockMesh = dims._cachedBlockMesh;
+  if (cachedBlockMesh) {
+    dims._cachedBlockMesh = null;
+    return cachedBlockMesh;
   } else {
     return voxelMesherMesh(voxels, dims);
   }
+}
+
+export function vegetationMesher(vegetations) {
+  return vegetations;
+}
+
+export function entityMesher(entities) {
+  return entities;
+}
+
+export function weatherMesher(weathers) {
+  return weathers;
 }
 
 function _ensureInitialized() {
