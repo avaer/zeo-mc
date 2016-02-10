@@ -33,8 +33,10 @@ onmessage = reqMsg => {
       error,
       result
     };
-    postMessage(res);
+    postMessage(res, transfers);
   }
+
+  const transfers = [];
 
   _tryCatch(() => {
     const {data: req} = reqMsg;
@@ -43,8 +45,8 @@ onmessage = reqMsg => {
       const {method, args} = req;
 
       switch (method) {
-        case 'init': return init(args[0] || null);
-        case 'generate': return generate(args[0] || null);
+        case 'init': return init(args[0] || null, transfers);
+        case 'generate': return generate(args[0] || null, transfers);
         default: throw new Error('ENOENT');
       }
     }
@@ -55,8 +57,15 @@ function init(opts) {
   return voxelAsync.init(opts);
 }
 
-function generate(position) {
-  return voxelAsync.generateSync(position);
+function generate(position, transfers) {
+  const chunks = voxelAsync.generateSync(position);
+
+  const {voxels, vegetations, entities, weathers} = chunks;
+  [voxels, vegetations, entities, weathers].forEach(dataArray => {
+    transfers.push(dataArray.buffer);
+  });
+
+  return chunks;
 }
 
 function _tryCatch(fn, cb) {

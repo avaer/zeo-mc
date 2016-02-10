@@ -13,6 +13,9 @@ function Mesh(data, meshers, scaleFactor, three) {
   this.scaleFactor = scaleFactor || new this.THREE.Vector3(10, 10, 10)
 
   this.initBlocks();
+  this.initVegetations();
+  this.initEntities();
+  this.initWeathers();
 }
 
 Mesh.prototype.initBlocks = function() {
@@ -72,6 +75,21 @@ Mesh.prototype.initBlocks = function() {
   this.geometry.computeBoundingSphere()
 };
 
+Mesh.prototype.initVegetations = function() {
+  const {vegetations} = this.data;
+  // console.log('init vegetations', vegetations); // XXX
+};
+
+Mesh.prototype.initEntities = function() {
+  const {entities} = this.data;
+  // console.log('init entities', entities); // XXX
+};
+
+Mesh.prototype.initWeathers = function() {
+  const {weathers} = this.data;
+  // console.log('init weathers', weathers); // XXX
+};
+
 Mesh.prototype.createWireMesh = function(hexColor) {    
   var wireMaterial = new this.THREE.MeshBasicMaterial({
     color : hexColor || 0xffffff,
@@ -96,11 +114,13 @@ Mesh.prototype.createSurfaceMesh = function(material) {
 Mesh.prototype.addToScene = function(scene) {
   if (this.wireMesh) scene.add( this.wireMesh )
   if (this.surfaceMesh) scene.add( this.surfaceMesh )
+  if (this.vegetationMesh) scene.add( this.vegetationMesh )
 }
 
 Mesh.prototype.setPosition = function(x, y, z) {
   if (this.wireMesh) this.wireMesh.position = new this.THREE.Vector3(x, y, z)
   if (this.surfaceMesh) this.surfaceMesh.position = new this.THREE.Vector3(x, y, z)
+  if (this.vegetationMesh) this.vegetationMesh.position = new this.THREE.Vector3(x, y, z)
 }
 
 Mesh.prototype.faceVertexUv = function(i) {

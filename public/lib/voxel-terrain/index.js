@@ -172,6 +172,7 @@ function voxelTerrain(opts) {
     var voxels = new Int8Array(chunkSize * chunkSize * chunkSize);
     var vegetations = new Int8Array(chunkSize * chunkSize * chunkSize);
     var entities = new Int8Array(chunkSize * chunkSize * chunkSize);
+    var weathers = new Int8Array(chunkSize * chunkSize * chunkSize);
     pointsInside(point);
 
     function point(x, z) {
@@ -182,6 +183,7 @@ function voxelTerrain(opts) {
         dirt(x, y, z);
         veg(x, y, z);
         ent(x, y, z);
+        weath(x, y, z);
       } else if (startY < 0) {
         dirt(x, endY, z);
       }
@@ -321,6 +323,10 @@ function voxelTerrain(opts) {
       }
     }
 
+    function weath(x, h, z) {
+      // XXX
+    }
+
     function pointsInside(fn) {
       for (var x = startX; x < endX; x++) {
         for (var z = startZ; z < endZ; z++) {
@@ -357,6 +363,11 @@ function voxelTerrain(opts) {
       entities[idx] = value;
     }
 
+    function setWeather(x, y, z, value) {
+      var idx = getIndex(x, y, z);
+      weathers[idx] = value;
+    }
+
     function isInside(x, y, z) {
       return x >= startX && x < endX &&
         y >= startY && y < endY &&
@@ -374,10 +385,15 @@ function voxelTerrain(opts) {
       return (n - min) / (max - min)
     }
 
+    const dims = [chunkSize, chunkSize, chunkSize];
+
     return {
-      position: position,
-      dims: [chunkSize, chunkSize, chunkSize],
-      voxels: voxels,
+      position,
+      dims,
+      voxels,
+      vegetations,
+      entities,
+      weathers
     };
   }
 }
