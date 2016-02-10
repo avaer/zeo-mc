@@ -1,7 +1,12 @@
 import ModelBase from './ModelBase';
 import {BIOME_TEXTURES} from '../../constants/index';
 
-const TEXTURES = BIOME_TEXTURES.map(biomeTexture => 'blocks/tallgrass_' + biomeTexture);
+const TEXTURES = [].concat(
+  'reeds'
+).concat(
+  BIOME_TEXTURES.map(biomeTexture => 'tallgrass_' + biomeTexture)
+).map(textureName => 'blocks/' + textureName);
+
 const SIZE = 10;
 
 export default class ModelTallgrass extends ModelBase {

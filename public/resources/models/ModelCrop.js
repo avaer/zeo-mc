@@ -1,51 +1,24 @@
 import ModelBase from './ModelBase';
 import {BIOME_TEXTURES} from '../../constants/index';
 
-function _biomes(name) {
+function _stages(name, stages) {
   const result = [];
-  BIOME_TEXTURES.forEach(biomeTexture => {
-    result.push(name + '_' + biomeTexture);
-  });
+  for (let i = 0; i <= stages; i++) {
+    result.push(name + '_stage_' + i);
+  }
   return result;
 }
 
 const TEXTURES = [].concat(
-  'deadbush'
-]).concat(
-  _biomes('fern')
-).concat([
-  'flower_allium',
-  'flower_blue_orchid',
-  'flower_dandelion',
-  'flower_houstonia',
-  'flower_oxeye_daisy',
-  'flower_paeonia',
-  'flower_rose',
-  'flower_tulip_orange',
-  'flower_tulip_pink',
-  'flower_tulip_red',
-  'flower_tulip_white'
-]).concat(
-  _biomes('melon_stem_connected'),
-  _biomes('melon_stem_disconnected')
-).concat([
-  'mushroom_brown',
-  'mushroom_red',
-]).concat(
-  _biomes('pumpkin_stem_connected'),
-  _biomes('pumpkin_stem_disconnected')
-).concat([
-  'sapling_acacia',
-  'sapling_birch',
-  'sapling_jungle',
-  'sapling_oak',
-  'sapling_roofed_oak',
-  'sapling_spruce'
+  _stages('carrots', 3),
+  _stages('nether_wart', 2),
+  _stages('potatoes', 3),
+  _stages('wheat', 7)
 ]).map(textureName => 'blocks/' + textureName);
 
 const SIZE = 10;
 
-export default class ModelCross extends ModelBase {
+export default class ModelCrop extends ModelBase {
   constructor([p1 = Math.random()] = [], []) {
     super([], []);
 
@@ -78,4 +51,4 @@ export default class ModelCross extends ModelBase {
 }
 
 // XXX
-// var m; function go() {game.scene.remove(m); m = MODELS.cross(game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();
+// var m; function go() {game.scene.remove(m); m = MODELS.crop(game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();
