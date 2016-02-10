@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {is} from 'immutable';
 import voxel from 'voxel';
-import voxelEngine from 'voxel-engine';
+import voxelEngine from '../lib/voxel-engine/index';
 import voxelTerrain from '../lib/voxel-terrain/index';
 import voxelSky from '../lib/voxel-sky/index';
 import voxelClouds from 'voxel-clouds';

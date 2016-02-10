@@ -30,7 +30,7 @@
     "react-dom": "",
     "immutable": "",
     "voxel": "",
-    "voxel-engine": "",
+    "voxel-engine-kazmer": "",
     "voxel-clouds": "",
     "voxel-trajectory": "",
     "voxel-highlight": "",
@@ -38,6 +38,7 @@
     "voxel-walk": "",
     "alea": "",
     "fast-simplex-noise": "",
+    "funstance": "",
     "react-ace": "",
     "brace": "",
     "engine.io": "",
@@ -51,5 +52,6 @@
   },
   "devDependencies": {
     "should": ""
-  }
+  },
+  "license": "MIT"
 }
