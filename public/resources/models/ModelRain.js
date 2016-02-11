@@ -24,32 +24,32 @@ export default class ModelRain extends ModelBase {
         position: position,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
-        rotation: [0, Math.PI / 2 * 0, 0]
+        rotation: [0, Math.PI / 4 * 0, 0]
       },
-      {
+      /* {
         name: 'rain2',
         offset: [0, 0 + 64 * 1, 64, 0 + 64 * 2],
         position: position,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI / 4 * 1, 0]
-      },
+      }, */
       {
         name: 'rain3',
         offset: [0, 0 + 64 * 2, 64, 0 + 64 * 3],
         position: position,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
-        rotation: [0, Math.PI / 2 * 2, 0]
+        rotation: [0, Math.PI / 4 * 2, 0]
       },
-      {
+      /* {
         name: 'rain4',
         offset: [0, 0 + 64 * 3, 64, 0 + 64 * 4],
         position: position,
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
-        rotation: [0, Math.PI / 2 * 3, 0]
-      },
+        rotation: [0, Math.PI / 4 * 3, 0]
+      }, */
     ]
   }
 }

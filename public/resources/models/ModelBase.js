@@ -98,7 +98,7 @@ function _makeObject(game, textures, meshes) {
       }
     });
   })(child, meshes);
-  child.position.set(0.5, -1, 0.5);
+  child.position.set(0.5, -1, -0.5);
   child.scale.set(0.1, 0.1, 0.1);
 
   return root;
@@ -119,7 +119,7 @@ function _makeCubeMesh(game, position, dimensions, texture, uv) {
   position = [position[0], -position[1], position[2]];
   dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
 
-  const geometry = new game.THREE.CubeGeometry(dimensions[0], dimensions[1], dimensions[2]);
+  const geometry = _getCubeGeometry(dimensions[0], dimensions[1], dimensions[2]);
   geometry.faceVertexUvs = _getFaceVertexUvs(game);
   const material = _getCubeMaterial(game, texture, uv);
   const mesh = new game.THREE.Mesh(geometry, material);
@@ -135,7 +135,7 @@ function _makePlaneMesh(game, position, dimensions, texture, offset, oneSided) {
   position = [position[0], -position[1], position[2]];
   dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
 
-  const geometry = new game.THREE.PlaneGeometry(dimensions[0], dimensions[1]);
+  const geometry = _getPlaneGeometry(dimensions[0], dimensions[1]);
   const material = _getPlaneMaterial(game, texture, offset, oneSided);
   const mesh = new game.THREE.Mesh(geometry, material);
   mesh.position.set(
@@ -177,6 +177,20 @@ function _normalizeUv(uv) {
   }
 }
 
+const cubeGeometryCache = new Map();
+function _getCubeGeometry(x, y, z) {
+  const geometryKey = x + '-' + y + '-' + z;
+
+  const cachedGeometry = cubeGeometryCache.get(geometryKey);
+  if (cachedGeometry) {
+    return cachedGeometry;
+  } else {
+    const geometry = new game.THREE.CubeGeometry(x, y, z);
+    cubeGeometryCache.set(geometryKey, geometry);
+    return geometry;
+  }
+}
+
 const cubeMaterialCache = new Map();
 function _getCubeMaterial(game, textureName, uv) {
   uv = _normalizeUv(uv);
@@ -205,9 +219,23 @@ function _getCubeMaterial(game, textureName, uv) {
   }
 }
 
+const planeGeometryCache = new Map();
+function _getPlaneGeometry(x, y) {
+  const geometryKey = x + '-' + y;
+
+  const cachedGeometry = planeGeometryCache.get(geometryKey);
+  if (cachedGeometry) {
+    return cachedGeometry;
+  } else {
+    const geometry = new game.THREE.PlaneGeometry(x, y);
+    planeGeometryCache.set(geometryKey, geometry);
+    return geometry;
+  }
+}
+
 const planeMaterialCache = new Map();
 function _getPlaneMaterial(game, textureName, offset, oneSided) {
-  const materialKey = textureName + '-' + offset.join(',');
+  const materialKey = textureName + '-' + offset.join(',') + '-' + oneSided;
 
   const cachedMaterial = planeMaterialCache.get(materialKey);
   if (cachedMaterial) {
