@@ -74,6 +74,7 @@ export default class Voxels extends React.Component {
           entity: voxelAsync.entityMesher,
           weather: voxelAsync.weatherMesher
         },
+        modeler: (modelName, p, s) => MODELS.make(modelName, p, s, game),
         texturePath: name => './api/img/textures/blocks/' + name + '.png',
         materials: BLOCKS.MATERIALS,
         chunkSize: CHUNK_SIZE,

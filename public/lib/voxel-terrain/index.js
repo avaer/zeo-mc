@@ -329,7 +329,7 @@ function voxelTerrain(opts) {
       const vegetationNoiseN = vegetationNoise.in2D(x, z);
       if (vegetationNoiseN < VEGETATION_RATE) {
         const vegetationTypeNoiseN = vegetationTypeNoise.in2D(x, z);
-        const vegetation = floor(vegetationTypeNoiseN * VEGETATIONS.length);
+        const vegetation = floor(vegetationTypeNoiseN * VEGETATIONS.length) + 1;
         setVegetation(x, y, z, vegetation);
       }
     }
@@ -339,7 +339,7 @@ function voxelTerrain(opts) {
       const entityNoiseN = entityNoise.in2D(x, z);
       if (entityNoiseN < ENTITY_RATE) {
         const entityTypeNoiseN = entityTypeNoise.in2D(x, z);
-        const entity = floor(entityTypeNoiseN * ENTITIES.length);
+        const entity = floor(entityTypeNoiseN * ENTITIES.length) + 1;
         setEntity(x, y, z, entity);
       }
     }
@@ -349,7 +349,7 @@ function voxelTerrain(opts) {
       const weatherNoiseN = weatherNoise.in2D(x, z);
       if (weatherNoiseN < WEATHER_RATE) {
         const weatherTypeNoiseN = weatherTypeNoise.in2D(x, z);
-        const weather = floor(weatherTypeNoiseN * WEATHERS.length);
+        const weather = floor(weatherTypeNoiseN * WEATHERS.length) + 1;
         setWeather(x, y, z, weather);
       }
     }

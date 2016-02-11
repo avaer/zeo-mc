@@ -56,6 +56,7 @@ function Game(opts) {
   this.playerHeight = opts.playerHeight || 1.62
   this.meshType = opts.meshType || 'surfaceMesh'
   this.meshers = opts.meshers
+  this.modeler = opts.modeler
   this.materialType = opts.materialType || THREE.MeshLambertMaterial
   this.materialParams = opts.materialParams || {}
   this.items = []
@@ -557,7 +558,7 @@ Game.prototype.showChunk = function(chunk) {
   var oldMesh = this.voxels.meshes[chunkIndex];
 
   var scale = new THREE.Vector3(1, 1, 1)
-  var newMesh = voxelMesh(chunk, this.meshers, scale, this.THREE)
+  var newMesh = voxelMesh(chunk, this.meshers, this.modeler, scale, this.THREE)
   var bounds = this.voxels.getBounds.apply(this.voxels, chunk.position)
 
   this.voxels.chunks[chunkIndex] = chunk

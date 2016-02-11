@@ -1,16 +1,15 @@
-var THREE = require('three')
-
-module.exports = function(data, meshers, scaleFactor, three) {
-  return new Mesh(data, meshers, scaleFactor, three)
+module.exports = function(data, meshers, modeler, scaleFactor, three) {
+  return new Mesh(data, meshers, modeler, scaleFactor, three)
 }
 
 module.exports.Mesh = Mesh
 
-function Mesh(data, meshers, scaleFactor, three) {
-  this.THREE = three || THREE
+function Mesh(data, meshers, modeler, scaleFactor, three) {
   this.data = data
   this.meshers = meshers;
-  this.scaleFactor = scaleFactor || new this.THREE.Vector3(10, 10, 10)
+  this.modeler = modeler;
+  this.scaleFactor = scaleFactor
+  this.THREE = three
 
   this.initBlocks();
   this.initVegetations();
@@ -19,7 +18,9 @@ function Mesh(data, meshers, scaleFactor, three) {
 }
 
 Mesh.prototype.initBlocks = function() {
-  this.blocks = this.meshers.block(this.data.voxels, this.data.dims)
+  const blockMesher = this.meshers.block
+
+  this.blocks = blockMesher(this.data.voxels, this.data.dims)
 
   this.geometry = new this.THREE.Geometry()
 
@@ -75,6 +76,10 @@ Mesh.prototype.initBlocks = function() {
   this.geometry.computeBoundingSphere()
 };
 
+function _getIndex(x, y, z, dims) {
+  return x + (y * dims[0]) + (z * dims[0] * dims[1]);
+}
+
 Mesh.prototype.initVegetations = function() {
   const {vegetations} = this.data;
   // console.log('init vegetations', vegetations); // XXX
@@ -86,8 +91,20 @@ Mesh.prototype.initEntities = function() {
 };
 
 Mesh.prototype.initWeathers = function() {
-  const {weathers} = this.data;
-  // console.log('init weathers', weathers); // XXX
+  const {data: {weathers, dims}, meshers: {weather: weatherMesher}, modeler} = this;
+
+  this.weatherMesh = new this.THREE.Object3D();
+  const weatherMeshes = weatherMesher(weathers, dims);
+  for (let i = 0; i < weatherMeshes.length; i++) {
+    const weatherMesh = weatherMeshes[i];
+    const {position, spec: {model, p, s}} = weatherMesh;
+
+    console.log('got weather', position, model); // XXX
+
+    const mesh = modeler(model, p, s);
+    mesh.position.set(position[0], position[1], position[2]);
+    this.weatherMesh.add(mesh);
+  }
 };
 
 Mesh.prototype.createWireMesh = function(hexColor) {    
@@ -115,18 +132,24 @@ Mesh.prototype.addToScene = function(scene) {
   if (this.wireMesh) scene.add( this.wireMesh )
   if (this.surfaceMesh) scene.add( this.surfaceMesh )
   if (this.vegetationMesh) scene.add( this.vegetationMesh )
+  if (this.entityMesh) scene.add( this.entityMesh )
+  if (this.weatherMesh) scene.add( this.weatherMesh )
 }
 
 Mesh.prototype.removeFromScene = function(scene) {
   if (this.wireMesh) scene.remove( this.wireMesh )
   if (this.surfaceMesh) scene.remove( this.surfaceMesh )
   if (this.vegetationMesh) scene.remove( this.vegetationMesh )
+  if (this.entityMesh) scene.remove( this.entityMesh )
+  if (this.weatherMesh) scene.remove( this.weatherMesh )
 }
 
 Mesh.prototype.setPosition = function(x, y, z) {
   if (this.wireMesh) this.wireMesh.position = new this.THREE.Vector3(x, y, z)
   if (this.surfaceMesh) this.surfaceMesh.position = new this.THREE.Vector3(x, y, z)
   if (this.vegetationMesh) this.vegetationMesh.position = new this.THREE.Vector3(x, y, z)
+  if (this.entityMesh) this.entityMesh.position = new this.THREE.Vector3(x, y, z)
+  if (this.weatherMesh) this.weatherMesh.position = new this.THREE.Vector3(x, y, z)
 }
 
 Mesh.prototype.faceVertexUv = function(i) {

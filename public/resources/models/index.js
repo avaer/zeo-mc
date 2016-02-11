@@ -76,7 +76,6 @@ export function make(modelName, p = [], s = [], game) {
   return model.getMesh(game);
 }
 
-
 // helpers
 
 function _makeModelMap(models) {
@@ -95,7 +94,8 @@ function _makeVegetationSpecs(models) {
     TEXTURES.forEach((texture, i) => {
       const spec = {
         model: NAME,
-        p: [i]
+        p: [i],
+        s: []
       };
       result.push(spec);
     });
@@ -108,7 +108,8 @@ function _makeEntitySpecs(models) {
     const {NAME} = model;
     const spec = {
       model: NAME,
-      p: []
+      p: [],
+      s: []
     };
     return spec;
   });
@@ -119,7 +120,8 @@ function _makeWeatherSpecs(models) {
     const {NAME} = model;
     const spec = {
       model: NAME,
-      p: []
+      p: [],
+      s: []
     };
     return spec;
   });
