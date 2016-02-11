@@ -145,15 +145,17 @@ function _normalizeUv(uv) {
   if (uv.length === 1) {
     uv = uv[0];
 
+    const startX = uv[0];
+    const startY = uv[1];
     const width = uv[2] - uv[0];
     const height = uv[3] - uv[1];
 
     function makeCoords(x, y) {
       return [
-        uv[0] + (x * width),
-        uv[1] + (y * height),
-        uv[0] + ((x + 1) * width),
-        uv[1] + ((y + 1) * height),
+        startX + (x * width),
+        startY + (y * height),
+        startX + ((x + 1) * width),
+        startY + ((y + 1) * height),
       ];
     }
 

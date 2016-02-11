@@ -37,6 +37,12 @@ var ENTITY_TYPE_FREQUENCY = 1;
 var ENTITY_TYPE_OCTAVES = 2;
 var ENTITY_RATE = 1 / 200;
 
+var WEATHER_FREQUENCY = 1;
+var WEATHER_OCTAVES = 6;
+var WEATHER_TYPE_FREQUENCY = 1;
+var WEATHER_TYPE_OCTAVES = 2;
+var WEATHER_RATE = 0.2;
+
 var TREE_RATE = 0.1;
 var TREE_MIN_HEIGHT = 4;
 var TREE_MAX_HEIGHT = 14;
@@ -157,6 +163,21 @@ function voxelTerrain(opts) {
     max: 1,
     frequency: ENTITY_TYPE_FREQUENCY,
     octaves: ENTITY_TYPE_OCTAVES,
+    random: rng
+  });
+
+  const weatherNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: WEATHER_FREQUENCY,
+    octaves: WEATHER_OCTAVES,
+    random: rng
+  });
+  const weatherTypeNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: WEATHER_TYPE_FREQUENCY,
+    octaves: WEATHER_TYPE_OCTAVES,
     random: rng
   });
 
@@ -324,7 +345,13 @@ function voxelTerrain(opts) {
     }
 
     function weath(x, h, z) {
-      // XXX
+      const y = h + 1;
+      const weatherNoiseN = weatherNoise.in2D(x, z);
+      if (weatherNoiseN < WEATHER_RATE) {
+        const weatherTypeNoiseN = weatherTypeNoise.in2D(x, z);
+        const weather = floor(weatherTypeNoiseN * WEATHERS.length);
+        setWeather(x, y, z, weather);
+      }
     }
 
     function pointsInside(fn) {

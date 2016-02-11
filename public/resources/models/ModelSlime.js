@@ -2,7 +2,7 @@ import ModelBase from './ModelBase';
 
 const NAME = 'slime';
 
-export default class ModelSlime extends ModelBase { // XXX
+export default class ModelSlime extends ModelBase {
   static NAME = NAME;
 
   constructor() {
@@ -15,34 +15,42 @@ export default class ModelSlime extends ModelBase { // XXX
         children: [
           {
             name: 'outer',
-            uv: [0, 0],
-            position: [[-4, 16, -4], [8, 8, 8]]
+            uv: [[0, 0, 8, 8]],
+            position: [-4, 16, -4],
+            dimensions: [8, 8, 8]
           },
           {
             name: 'inner',
-            uv: [0, 16],
-            position: [[-3, 17, -3], [6, 6, 6]]
+            uv: [[0, 16, 6, 22]],
+            position: [-3, 17, -3],
+            dimensions: [6, 6, 6]
           },
         ]
       },
       {
         name: 'slimeRightEye',
-        uv: [32, 0],
-        position: [[-3.25, 18, -3.5], [2, 2, 2]]
+        uv: [[32, 0, 34, 2]],
+        position: [-3.25, 18, -4.5],
+        dimensions: [2, 2, 2]
       },
       {
         name: 'slimeLeftEye',
-        uv: [32, 4],
-        position: [[1.25, 18, -3.5], [2, 2, 2]]
+        uv: [[32, 4, 34, 6]],
+        position: [1.25, 18, -4.5],
+        dimensions: [2, 2, 2]
       },
       {
         name: 'slimeMouth',
-        uv: [32, 8],
-        position: [[0, 21, -3.5], [1, 1, 1]]
+        uv: [[32, 8, 33, 9]],
+        position: [0, 21, -4.5],
+        dimensions: [1, 1, 1]
       },
     ];
   }
 }
+
+// XXX
+// var m; function go(i) {game.scene.remove(m); m = MODELS.make('slime', [], [], game); game.scene.add(m); m.position.set(-20, 11, 10); }; go();
 
 /* package net.minecraft.src;
 

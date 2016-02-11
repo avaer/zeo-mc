@@ -12,7 +12,7 @@ import ModelCow from './ModelCow';
 import ModelCreeper from './ModelCreeper';
 import ModelOcelot from './ModelOcelot';
 import ModelPig from './ModelPig';
-// import ModelSlime from './ModelSlime';
+import ModelSlime from './ModelSlime';
 import ModelWolf from './ModelWolf';
 
 import ModelRain from './ModelRain';
@@ -32,7 +32,7 @@ export const MODELS = _makeModelMap([
   ModelCreeper,
   ModelOcelot,
   ModelPig,
-  // ModelSlime,
+  ModelSlime,
   ModelWolf,
 
   ModelRain,
@@ -58,7 +58,7 @@ export const ENTITIES = _makeEntitySpecs([
   ModelOcelot,
   ModelPig,
   ModelRain,
-  // ModelSlime,
+  ModelSlime,
   ModelWolf,
 ]);
 
