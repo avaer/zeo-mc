@@ -117,6 +117,12 @@ Mesh.prototype.addToScene = function(scene) {
   if (this.vegetationMesh) scene.add( this.vegetationMesh )
 }
 
+Mesh.prototype.removeFromScene = function(scene) {
+  if (this.wireMesh) scene.remove( this.wireMesh )
+  if (this.surfaceMesh) scene.remove( this.surfaceMesh )
+  if (this.vegetationMesh) scene.remove( this.vegetationMesh )
+}
+
 Mesh.prototype.setPosition = function(x, y, z) {
   if (this.wireMesh) this.wireMesh.position = new this.THREE.Vector3(x, y, z)
   if (this.surfaceMesh) this.surfaceMesh.position = new this.THREE.Vector3(x, y, z)

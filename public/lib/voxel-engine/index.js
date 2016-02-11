@@ -565,24 +565,34 @@ Game.prototype.showAllChunks = function() {
 
 Game.prototype.showChunk = function(chunk) {
   var chunkIndex = chunk.position.join('|')
-  var bounds = this.voxels.getBounds.apply(this.voxels, chunk.position)
+
+  var oldMesh = this.voxels.meshes[chunkIndex];
+
   var scale = new THREE.Vector3(1, 1, 1)
-  var mesh = voxelMesh(chunk, this.meshers, scale, this.THREE)
+  var newMesh = voxelMesh(chunk, this.meshers, scale, this.THREE)
+  var bounds = this.voxels.getBounds.apply(this.voxels, chunk.position)
+
   this.voxels.chunks[chunkIndex] = chunk
-  if (this.voxels.meshes[chunkIndex]) {
-    if (this.voxels.meshes[chunkIndex].surfaceMesh) this.scene.remove(this.voxels.meshes[chunkIndex].surfaceMesh)
-    if (this.voxels.meshes[chunkIndex].wireMesh) this.scene.remove(this.voxels.meshes[chunkIndex].wireMesh)
+  this.voxels.meshes[chunkIndex] = newMesh
+
+
+  if (oldMesh) {
+    oldMesh.removeFromScene(this.scene);
   }
-  this.voxels.meshes[chunkIndex] = mesh
+
   if (this.isClient) {
-    if (this.meshType === 'wireMesh') mesh.createWireMesh()
-    else mesh.createSurfaceMesh(this.materials.material)
-    this.materials.paint(mesh)
+    if (this.meshType === 'wireMesh') {
+      newMesh.createWireMesh()
+    } else {
+      newMesh.createSurfaceMesh(this.materials.material)
+    }
+    this.materials.paint(newMesh)
   }
-  mesh.setPosition(bounds[0][0], bounds[0][1], bounds[0][2])
-  mesh.addToScene(this.scene)
+  newMesh.setPosition(bounds[0][0], bounds[0][1], bounds[0][2])
+  newMesh.addToScene(this.scene)
+
   this.emit('renderChunk', chunk)
-  return mesh
+  return newMesh
 }
 
 // # Debugging methods
