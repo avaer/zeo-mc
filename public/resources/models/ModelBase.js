@@ -21,7 +21,10 @@ function _getFaceVertexUvs(game) {
 }
 
 function _makeObject(game, textures, meshes) {
-  const object = new game.THREE.Object3D();
+  const root = new game.THREE.Object3D();
+
+  const child = new game.THREE.Object3D();
+  root.add(child);
   (function recurse(object, meshes) {
     meshes.forEach(mesh => {
       let {position, dimensions, rotationPoint, uv, offset, textureIndex, children} = mesh;
@@ -94,9 +97,11 @@ function _makeObject(game, textures, meshes) {
         recurse(childrenobject, children);
       }
     });
-  })(object, meshes);
-  object.scale.set(0.1, 0.1, 0.1);
-  return object;
+  })(child, meshes);
+  child.position.set(0.5, -1, 0.5);
+  child.scale.set(0.1, 0.1, 0.1);
+
+  return root;
 }
 
 function _resolveTexture(textures, textureIndex) {
@@ -212,7 +217,7 @@ function _getPlaneMaterial(game, textureName, offset, oneSided) {
     const material = new game.THREE.MeshBasicMaterial({
       map: texture,
       side: oneSided ? game.THREE.BackSide : game.THREE.DoubleSide,
-      transparent: true
+      // transparent: true // XXX
     });
 
     planeMaterialCache.set(materialKey, material);

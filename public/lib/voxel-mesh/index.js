@@ -99,8 +99,6 @@ Mesh.prototype.initWeathers = function() {
     const weatherMesh = weatherMeshes[i];
     const {position, spec: {model, p, s}} = weatherMesh;
 
-    console.log('got weather', position, model); // XXX
-
     const mesh = modeler(model, p, s);
     mesh.position.set(position[0], position[1], position[2]);
     this.weatherMesh.add(mesh);
