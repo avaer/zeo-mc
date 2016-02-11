@@ -16,6 +16,8 @@ import * as inputUtils from '../utils/input/index';
 import {CHUNK_SIZE, CHUNK_DISTANCE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
 import {BLOCKS, MODELS} from '../resources/index';
 
+window.MODELS = MODELS; // XXX remove this when we no longer need to support making models manually
+
 const INITIAL_CHUNK_POSITIONS = (() => {
   const result = [];
   for (let x = -CHUNK_DISTANCE; x <= CHUNK_DISTANCE; x++) {

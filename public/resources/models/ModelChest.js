@@ -61,7 +61,7 @@ export default class ModelChest extends ModelBase {
 }
 
 // XXX
-// var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.chest(game, [], [i, 1]); game.scene.add(m); m.position.set(-20, 10, 10); }; setInterval(() => {go(i += 0.1)}, 100);
+// var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.make('chest', [], [i, 1], game); game.scene.add(m); m.position.set(-20, 10, 10); }; setInterval(() => {go(i += 0.1)}, 100);
 
 /* package net.minecraft.src;
 

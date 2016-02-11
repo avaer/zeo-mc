@@ -59,4 +59,4 @@ export default class ModelCrop extends ModelBase {
 }
 
 // XXX
-// var m; function go() {game.scene.remove(m); m = MODELS.crop(game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();
+// var m; function go() {game.scene.remove(m); m = MODELS.make('crop', [], [], game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();

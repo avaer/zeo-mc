@@ -85,4 +85,4 @@ export default class ModelCross extends ModelBase {
 }
 
 // XXX
-// var m; function go() {game.scene.remove(m); m = MODELS.cross(game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();
+// var m; function go() {game.scene.remove(m); m = MODELS.make('cross', [], [], game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();

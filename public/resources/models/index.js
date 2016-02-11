@@ -17,13 +17,28 @@ import ModelWolf from './ModelWolf';
 
 import ModelRain from './ModelRain';
 
-// vegetations
+// models
 
-export const crop = ModelBase.make(ModelCrop);
-export const cross = ModelBase.make(ModelCross);
-export const tallgrass = ModelBase.make(ModelTallgrass);
-export const tallgrassDouble = ModelBase.make(ModelTallgrassDouble);
-export const tallgrassDoubleSunflower = ModelBase.make(ModelTallgrassDoubleSunflower);
+export const MODELS = _makeModelMap([
+  ModelCrop,
+  ModelCross,
+  ModelTallgrass,
+  ModelTallgrassDouble,
+  ModelTallgrassDoubleSunflower,
+
+  ModelChest,
+  ModelChicken,
+  ModelCow,
+  ModelCreeper,
+  ModelOcelot,
+  ModelPig,
+  // ModelSlime,
+  ModelWolf,
+
+  ModelRain,
+]);
+
+// vegetations
 
 export const VEGETATIONS = _makeVegetationSpecs([
   ModelCrop,
@@ -34,15 +49,6 @@ export const VEGETATIONS = _makeVegetationSpecs([
 ]);
 
 // entities
-
-export const chest = ModelBase.make(ModelChest);
-export const chicken = ModelBase.make(ModelChicken);
-export const cow = ModelBase.make(ModelCow);
-export const creeper = ModelBase.make(ModelCreeper);
-export const ocelot = ModelBase.make(ModelOcelot);
-export const pig = ModelBase.make(ModelPig);
-// export const slime = ModelBase.make(ModelSlime);
-export const wolf = ModelBase.make(ModelWolf);
 
 export const ENTITIES = _makeEntitySpecs([
   ModelChest,
@@ -58,13 +64,29 @@ export const ENTITIES = _makeEntitySpecs([
 
 // weathers
 
-export const rain = ModelBase.make(ModelRain);
-
 export const WEATHERS = _makeWeatherSpecs([
   ModelRain,
 ]);
 
+// api
+
+export function make(modelName, p = [], s = [], game) {
+  const Model = MODELS[modelName];
+  const model = new Model(p, s);
+  return model.getMesh(game);
+}
+
+
 // helpers
+
+function _makeModelMap(models) {
+  const result = {};
+  models.forEach(model => {
+    const {NAME} = model;
+    result[NAME] = model;
+  });
+  return result;
+}
 
 function _makeVegetationSpecs(models) {
   const result = [];
@@ -102,3 +124,4 @@ function _makeWeatherSpecs(models) {
     return spec;
   });
 }
+

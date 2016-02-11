@@ -8,12 +8,6 @@ export default class ModelBase {
     return _makeObject(game, this.textures, this.meshes);
   }
 }
-ModelBase.make = Model => {
-  return (game, p = [], s = []) => {
-    const model = new Model(p, s);
-    return model.getMesh(game);
-  };
-};
 
 
 let faceVertexUvs = null;

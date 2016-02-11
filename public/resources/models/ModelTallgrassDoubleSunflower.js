@@ -98,4 +98,4 @@ export default class ModelTallgrassDoubleSunflower extends ModelTallgrassDouble 
 }
 
 // XXX
-// var m; function go() {game.scene.remove(m); m = MODELS.tallgrassDoubleSunflower(game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();
+// var m; function go() {game.scene.remove(m); m = MODELS.make('tallgrassDoubleSunflower', [], [], game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();

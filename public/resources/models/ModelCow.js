@@ -99,7 +99,7 @@ export default class ModelCow extends ModelQuadruped {
 }
 
 // XXX
-// var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.cow(game, [], [i, 1]); game.scene.add(m); m.position.set(-20, 11, 10); }; setInterval(() => {go(i += 0.1)}, 100);
+// var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.make('cow', [], [i, 1], game); game.scene.add(m); m.position.set(-20, 11, 10); }; setInterval(() => {go(i += 0.1)}, 100);
 
 /* package net.minecraft.src;
 
