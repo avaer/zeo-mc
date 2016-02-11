@@ -31,7 +31,7 @@ View.prototype.createRenderer = function() {
     antialias: true
   })
   this.renderer.setSize(this.width, this.height)
-  this.renderer.setClearColorHex(this.skyColor, 1.0)
+  this.renderer.setClearColor(new THREE.Color(this.skyColor), 1.0)
   this.renderer.clear()
 }
 
