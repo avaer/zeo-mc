@@ -67,7 +67,7 @@ function Texture(opts) {
         THREE.UniformsLib[ "shadowmap" ],
 
         {
-          "ambient"  : { type: "c", value: new THREE.Color( 0xffffff ) },
+          "ambientLightColor"  : { type: "c", value: new THREE.Color( 0xffffff ) },
           "emissive" : { type: "c", value: new THREE.Color( 0x000000 ) },
           "wrapRGB"  : { type: "v3", value: new THREE.Vector3( 1, 1, 1 ) },
 
@@ -77,7 +77,7 @@ function Texture(opts) {
         }
 		] ),
 
-		vertexShader: [
+		vertexShader: global.vertexShader = [
 
 			"#define LAMBERT",
 
@@ -89,10 +89,13 @@ function Texture(opts) {
 
 			"#endif",
 
+			THREE.ShaderChunk[ "common" ],
+
 			THREE.ShaderChunk[ "map_pars_vertex" ],
+			THREE.ShaderChunk[ "lights_pars" ],
 			THREE.ShaderChunk[ "lightmap_pars_vertex" ],
 			THREE.ShaderChunk[ "envmap_pars_vertex" ],
-			THREE.ShaderChunk[ "lights_lambert_pars_vertex" ],
+			THREE.ShaderChunk[ "lights_standard_pars_vertex" ],
 			THREE.ShaderChunk[ "color_pars_vertex" ],
 			THREE.ShaderChunk[ "morphtarget_pars_vertex" ],
 			THREE.ShaderChunk[ "skinning_pars_vertex" ],
@@ -108,11 +111,14 @@ function Texture(opts) {
 				THREE.ShaderChunk[ "lightmap_vertex" ],
 				THREE.ShaderChunk[ "color_vertex" ],
 
+				THREE.ShaderChunk[ "beginnormal_vertex" ],
 				THREE.ShaderChunk[ "morphnormal_vertex" ],
 				THREE.ShaderChunk[ "skinbase_vertex" ],
 				THREE.ShaderChunk[ "skinnormal_vertex" ],
 				THREE.ShaderChunk[ "defaultnormal_vertex" ],
 
+				THREE.ShaderChunk[ "begin_vertex" ],
+				THREE.ShaderChunk[ "project_vertex" ],
 				THREE.ShaderChunk[ "morphtarget_vertex" ],
 				THREE.ShaderChunk[ "skinning_vertex" ],
 				THREE.ShaderChunk[ "default_vertex" ],
@@ -131,17 +137,20 @@ function Texture(opts) {
 
 		].join("\n"),
 
-		fragmentShader: [
+		fragmentShader: global.fragmentShader = [
 
 			"uniform float opacity;",
 
 			"varying vec3 vLightFront;",
+			"vec3 outgoingLight;",
 
 			"#ifdef DOUBLE_SIDED",
 
 				"varying vec3 vLightBack;",
 
 			"#endif",
+
+			THREE.ShaderChunk[ "common" ],
 
 			THREE.ShaderChunk[ "color_pars_fragment" ],
 			THREE.ShaderChunk[ "map_pars_fragment" ],
@@ -265,7 +274,7 @@ function Texture(opts) {
 
 				THREE.ShaderChunk[ "lightmap_fragment" ],
 				THREE.ShaderChunk[ "color_fragment" ],
-				THREE.ShaderChunk[ "envmap_fragment" ],
+				THREE.ShaderChunk[ "envmap_fragment" ], // XXX
 				THREE.ShaderChunk[ "shadowmap_fragment" ],
 
 				THREE.ShaderChunk[ "linear_to_gamma_fragment" ],

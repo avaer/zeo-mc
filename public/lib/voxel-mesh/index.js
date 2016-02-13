@@ -32,19 +32,27 @@ Mesh.prototype.initBlocks = function() {
     this.geometry.vertices.push(new this.THREE.Vector3(q[0], q[1], q[2]))
   } 
   
-  for (var i = 0; i < this.blocks.faces.length; ++i) {
-    this.geometry.faceVertexUvs[0].push(this.faceVertexUv(i))
-    
+  for (var i = 0; i < this.blocks.faces.length; i++) {
     var q = this.blocks.faces[i]
-    if (q.length === 5) {
-      var f = new this.THREE.Face4(q[0], q[1], q[2], q[3])
-      f.color = new this.THREE.Color(q[4])
-      this.geometry.faces.push(f)
-    } else if (q.length == 4) {
+    /* if (q.length === 5) {
+      throw new Error('fail');
+      // var f = new this.THREE.Face4(q[0], q[1], q[2], q[3]) // XXX
+      var f1 = new this.THREE.Face3(q[0], q[1], q[3])
+      f1.color = new this.THREE.Color(q[4])
+      this.geometry.faces.push(f1)
+      var f2 = new this.THREE.Face3(q[1], q[2], q[3])
+      f2.color = new this.THREE.Color(q[4])
+      this.geometry.faces.push(f1)
+    } else if (q.length == 4) { */
       var f = new this.THREE.Face3(q[0], q[1], q[2])
       f.color = new this.THREE.Color(q[3])
       this.geometry.faces.push(f)
-    }
+    // }
+  }
+  for (var i = 0, l = this.blocks.faces.length / 2; i < l; i++) {
+    var faceVertexUvs = this.faceVertexUv(i);
+    this.geometry.faceVertexUvs[0].push([faceVertexUvs[0], faceVertexUvs[1], faceVertexUvs[3]]);
+    this.geometry.faceVertexUvs[0].push([faceVertexUvs[1], faceVertexUvs[2], faceVertexUvs[3]]);
   }
   
   this.geometry.computeFaceNormals()
@@ -111,7 +119,7 @@ Mesh.prototype.createWireMesh = function(hexColor) {
     wireframe : true
   })
   wireMesh = new THREE.Mesh(this.geometry, wireMaterial)
-  wireMesh.scale = this.scaleFactor
+  wireMesh.scale.set(this.scaleFactor.x, this.scaleFactor.y, this.scaleFactor.z)
   wireMesh.doubleSided = true
   this.wireMesh = wireMesh
   return wireMesh
@@ -120,7 +128,7 @@ Mesh.prototype.createWireMesh = function(hexColor) {
 Mesh.prototype.createSurfaceMesh = function(material) {
   material = material || new this.THREE.MeshNormalMaterial()
   var surfaceMesh  = new this.THREE.Mesh( this.geometry, material )
-  surfaceMesh.scale = this.scaleFactor
+  surfaceMesh.scale.set(this.scaleFactor.x, this.scaleFactor.y, this.scaleFactor.z)
   surfaceMesh.doubleSided = false
   this.surfaceMesh = surfaceMesh
   return surfaceMesh
@@ -143,11 +151,11 @@ Mesh.prototype.removeFromScene = function(scene) {
 }
 
 Mesh.prototype.setPosition = function(x, y, z) {
-  if (this.wireMesh) this.wireMesh.position = new this.THREE.Vector3(x, y, z)
-  if (this.surfaceMesh) this.surfaceMesh.position = new this.THREE.Vector3(x, y, z)
-  if (this.vegetationMesh) this.vegetationMesh.position = new this.THREE.Vector3(x, y, z)
-  if (this.entityMesh) this.entityMesh.position = new this.THREE.Vector3(x, y, z)
-  if (this.weatherMesh) this.weatherMesh.position = new this.THREE.Vector3(x, y, z)
+  if (this.wireMesh) this.wireMesh.position.set(x, y, z)
+  if (this.surfaceMesh) this.surfaceMesh.position.set(x, y, z)
+  if (this.vegetationMesh) this.vegetationMesh.position.set(x, y, z)
+  if (this.entityMesh) this.entityMesh.position.set(x, y, z)
+  if (this.weatherMesh) this.weatherMesh.position.set(x, y, z)
 }
 
 Mesh.prototype.faceVertexUv = function(i) {
