@@ -10,14 +10,13 @@ function Highlighter(game, opts) {
   opts = opts || {}
   this.enabled = opts.enabled || function () { return true }
   var geometry = this.geometry = opts.geometry || new game.THREE.CubeGeometry(1, 1, 1)
-  var material = opts.material || new game.THREE.MeshBasicMaterial({
-    color: opts.color || 0x000000,
-    wireframe: true,
-    wireframeLinewidth: opts.wireframeLinewidth || 3,
-    transparent: true,
-    opacity: opts.wireframeOpacity || 0.5
-  })
-  this.mesh = new game.THREE.Mesh(geometry, material)
+  var material = opts.material || new game.THREE.MeshBasicMaterial()
+  const mesh = new game.THREE.Mesh(geometry, material)
+  const edges = new game.THREE.EdgesHelper(mesh, opts.color)
+  edges.matrixAutoUpdate = true;
+  edges.material.transparent = true;
+  edges.material.opacity = 0.75;
+  this.mesh = edges;
   this.distance = opts.distance || 10
   this.currVoxelPos // undefined when no voxel selected for highlight
   this.currVoxelAdj // undefined when no adjacent voxel selected for highlight
