@@ -49,7 +49,7 @@ Clouds.prototype.generate = function(size) {
     return Math.round(noise.in2D(x, z));
   });
 
-  var cloud = voxelMesh(data, {block: voxelAsync.blockMesher}, null, scale, game.THREE);
+  var cloud = voxelMesh(data, voxelAsync.meshers, null, scale, game.THREE);
   cloud.createSurfaceMesh(this.material);
   cloud.addToScene(game.scene);
 

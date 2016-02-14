@@ -110,6 +110,13 @@ export function weatherMesher(weathers, dims) {
   return result;
 }
 
+export const meshers = {
+  block: blockMesher,
+  vegetation: vegetationMesher,
+  entity: entityMesher,
+  weather: weatherMesher,
+};
+
 function _ensureInitialized() {
   if (voxelTerrainGenerate !== null && voxelMesherMesh !== null) {
     // nothing

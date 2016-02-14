@@ -68,12 +68,7 @@ export default class Voxels extends React.Component {
         // generate: voxelPerlinTerrain({scaleFactor:10}),
         // generate: voxelSimplexTerrain({seed: 'lol', scaleFactor: 10, chunkDistance: CHUNK_DISTANCE}),
         generateChunks: false,
-        meshers: {
-          block: voxelAsync.blockMesher,
-          vegetation: voxelAsync.vegetationMesher,
-          entity: voxelAsync.entityMesher,
-          weather: voxelAsync.weatherMesher
-        },
+        meshers: voxelAsync.meshers,
         modeler: (modelName, p, s) => MODELS.make(modelName, p, s, game),
         texturePath: name => './api/img/textures/blocks/' + name + '.png',
         materials: BLOCKS.MATERIALS,
@@ -250,7 +245,7 @@ function _makeWorkers(workerOpts) {
           if (err) {
             console.warn(err);
           } else {
-            console.log('worker init ok', workerOpts);
+            // nothing
           }
         });
       };
