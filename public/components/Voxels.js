@@ -8,7 +8,7 @@ import voxelSky from '../lib/voxel-sky/index';
 import voxelClouds from '../lib/voxel-clouds/index';
 import voxelPlayer from '../lib/voxel-player/index';
 import voxelWalk from '../lib/voxel-walk/index';
-import voxelHighlight from 'voxel-highlight';
+import voxelHighlight from '../lib/voxel-highlight/index';
 import voxelDebris from '../lib/voxel-debris/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 

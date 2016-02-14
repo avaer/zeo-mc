@@ -18,6 +18,43 @@ export function max(a, fn) {
   return result;
 }
 
+export function throttle(fn, timeout) {
+  let queued = false;
+  let lastCall = null;
+
+  return function invoke() {
+    function invokeImmediate(now) {
+      fn();
+      lastCall = now;
+    }
+
+    function invokeDeferred() {
+      queued = true;
+      const timeoutRemaining = timeout - timeSinceLastCall;
+      setTimeout(function() {
+        queued = false;
+        invoke();
+      }, timeoutRemaining);
+    }
+
+    if (queued) {
+      // nothing
+    } else {
+      const now = new Date();
+      if (lastCall === null) {
+        invokeImmediate(now);
+      } else {
+        const timeSinceLastCall = +now - +lastCall;
+        if (timeSinceLastCall >= timeout) {
+          invokeImmediate(now);
+        } else {
+          invokeDeferred();
+        }
+      }
+    }
+  };
+}
+
 export function makeGuid() {
   const b = new Uint8Array(8);
   crypto.getRandomValues(b);

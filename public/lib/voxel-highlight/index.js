@@ -1,6 +1,7 @@
 var inherits = require('inherits')
 var events = require('events')
-var _ = require('underscore')
+
+var u = require('../utils/js/index')
 
 module.exports = Highlighter
 
@@ -53,7 +54,7 @@ function Highlighter(game, opts) {
     if (position) self.mesh.position.set(position[0], position[1], position[2])
   })
 
-  game.on('tick', _.throttle(this.highlight.bind(this), opts.frequency || 100))
+  game.on('tick', u.throttle(this.highlight.bind(this), opts.frequency || 100))
   
   // anchors for multi-voxel selection
   this.selectStart
