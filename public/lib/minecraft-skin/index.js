@@ -129,19 +129,31 @@ Skin.prototype.getMaterial = function(img, transparent) {
 
 Skin.prototype.UVMap = function(mesh, face, x, y, w, h, rotateBy) {
   if (!rotateBy) rotateBy = 0;
-  var uvs = mesh.geometry.faceVertexUvs[0][face];
   var tileU = x;
   var tileV = y;
   var tileUvWidth = 1/64;
   var tileUvHeight = 1/32;
-  uvs[ (0 + rotateBy) % 4 ].x = (tileU * tileUvWidth)
-  uvs[ (0 + rotateBy) % 4 ].y = 1 - (tileV * tileUvHeight)
-  uvs[ (1 + rotateBy) % 4 ].x = (tileU * tileUvWidth)
-  uvs[ (1 + rotateBy) % 4 ].y = 1 - (tileV * tileUvHeight + h * tileUvHeight)
-  uvs[ (2 + rotateBy) % 4 ].x = (tileU * tileUvWidth + w * tileUvWidth)
-  uvs[ (2 + rotateBy) % 4 ].y = 1 - (tileV * tileUvHeight + h * tileUvHeight)
-  uvs[ (3 + rotateBy) % 4 ].x = (tileU * tileUvWidth + w * tileUvWidth)
-  uvs[ (3 + rotateBy) % 4 ].y = 1 - (tileV * tileUvHeight)
+
+  var vax = (tileU * tileUvWidth), vay = 1 - (tileV * tileUvHeight),
+  vbx = (tileU * tileUvWidth), vby = 1 - (tileV * tileUvHeight + h * tileUvHeight),
+  vcx = (tileU * tileUvWidth + w * tileUvWidth), vcy = 1 - (tileV * tileUvHeight + h * tileUvHeight),
+  vdx = (tileU * tileUvWidth + w * tileUvWidth), vdy = 1 - (tileV * tileUvHeight);
+
+  var face1Uvs = mesh.geometry.faceVertexUvs[0][face * 2];
+  face1Uvs[(0 + rotateBy) % 3].x = vax;
+  face1Uvs[(0 + rotateBy) % 3].y = vay;
+  face1Uvs[(1 + rotateBy) % 3].x = vbx;
+  face1Uvs[(1 + rotateBy) % 3].y = vby;
+  face1Uvs[(2 + rotateBy) % 3].x = vdx;
+  face1Uvs[(2 + rotateBy) % 3].y = vdy;
+
+  var face2Uvs = mesh.geometry.faceVertexUvs[0][face * 2 + 1];
+  face2Uvs[(0 + rotateBy) % 3].x = vbx;
+  face2Uvs[(0 + rotateBy) % 3].y = vby;
+  face2Uvs[(1 + rotateBy) % 3].x = vcx;
+  face2Uvs[(1 + rotateBy) % 3].y = vcy;
+  face2Uvs[(2 + rotateBy) % 3].x = vdx;
+  face2Uvs[(2 + rotateBy) % 3].y = vdy;
 }
 
 Skin.prototype.cubeFromPlanes = function (size, mat) {
@@ -229,7 +241,7 @@ Skin.prototype.createPlayerObject = function(scene) {
   var bodygeo = new THREE.CubeGeometry(4, 12, 8);
   var bodymesh = this.body = new THREE.Mesh(bodygeo, this.charMaterial);
   this.UVMap(bodymesh, 0, 20, 20, 8, 12);
-  this.UVMap(bodymesh, 1, 32, 20, 8, 12);
+  this.UVMap(bodymesh, 1, 32, 20, 8, 12, 0);
   this.UVMap(bodymesh, 2, 20, 16, 8, 4, 1);
   this.UVMap(bodymesh, 3, 28, 16, 8, 4, 3);
   this.UVMap(bodymesh, 4, 16, 20, 4, 12);
@@ -364,8 +376,7 @@ Skin.prototype.createPlayerObject = function(scene) {
 
   playerGroup.cameraOutside.position.z = 100
 
-  
   playerGroup.add(playerRotation);
-  playerGroup.scale = this.scale
+  playerGroup.scale.set(this.scale.x, this.scale.y, this.scale.z);
   return playerGroup
 }
