@@ -1,6 +1,11 @@
-var voxelMesh = require('voxel-mesh');
+var voxelMesh = require('../voxel-mesh/index');
+var voxelAsync = require('../lib/voxel-async/index');
 var voxel = require('voxel');
-var Perlin = require('perlin');
+var Alea = require('alea');
+var FastSimplexNoise = require('fast-simplex-noise');
+
+var constants = require('../constants/index');
+var DEFAULT_SEED = constants.DEFAULT_SEED;
 
 function Clouds(opts) {
   if (!(this instanceof Clouds)) return new Clouds(opts || {});
@@ -29,17 +34,22 @@ Clouds.prototype.generate = function(size) {
   size = size || 16;
   var scale = new game.THREE.Vector3(1, 1, 1);
 
-  var noise = new Int8Array(size * size);
+  var rng = new Alea(DEFAULT_SEED);
+  var noise = new FastSimplexNoise({
+    frequency: 0.05,
+    octaves: 10,
+    random: rng
+  });
   var perlin = new Perlin();
   perlin.generate([0, 0], [size, size], function(point, value) {
      noise[point[0] + point[1] * size] = Math.round(value);
   });
 
   var data = voxel.generate([0, 0, 0], [size, 1, size], function(x, y, z) {
-    return noise[x + z * size];
+    return Math.round(noise.in2D(x, z));
   });
 
-  var cloud = voxelMesh(data, voxel.meshers.greedy, scale, game.THREE);
+  var cloud = voxelMesh(data, {block: voxelAsync.blockMesher}, null, scale, game.THREE);
   cloud.createSurfaceMesh(this.material);
   cloud.addToScene(game.scene);
 
