@@ -1,4 +1,4 @@
-var skin = require('minecraft-skin');
+var skin = require('../minecraft-skin/index');
 
 module.exports = function (game) {
     var mountPoint;
