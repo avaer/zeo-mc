@@ -159,7 +159,7 @@ export default class Voxels extends React.Component {
 
       const highlight = voxelHighlight(game, {
         distance: CHUNK_SIZE,
-        color: 0xFF0000
+        color: 0xFFFFFF
       });
 
       const voxelDebrisExplode = voxelDebris(game, {
