@@ -6,7 +6,7 @@ const MULTI_BLOCK_TEXTURES = (() => {
   const result = {};
   [''].concat(BIOME_TEXTURES).forEach(biomeTexture => {
     const biomeSubkey = biomeTexture ? ('_' + biomeTexture) : '';
-    result['grass_' + biomeSubkey] = ['grass_top' + biomeSubkey, 'dirt', 'grass_top' +biomeSubkey];
+    result['grass_top' + biomeSubkey] = ['grass_top' + biomeSubkey, 'dirt', 'grass_side' +biomeSubkey];
   });
   TREE_TEXTURES.forEach(treeTexture => {
     result['log_' + treeTexture] = ['log_' + treeTexture + '_top', 'log_' + treeTexture + '_top', 'log_' + treeTexture];
