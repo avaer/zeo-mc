@@ -17,15 +17,15 @@ module.exports = function (game, opts) {
     }
     if (!opts.expire.start) opts.expire.start = 15 * 1000;
     if (!opts.expire.end) opts.expire.end = 30 * 1000;
-    if (!opts.power) opts.power = 1
+    if (!opts.power) opts.power = 1;
     
     game.on('collision', function (item) {
-        if (!item._debris) return;
-        if (opts.limit && opts.limit(item)) return;
-        
-        game.removeItem(item);
-        item._collected = true;
-        em.emit('collect', item);
+      if (!item._debris) return;
+      if (opts.limit && opts.limit(item)) return;
+
+      game.removeItem(item);
+      item._collected = true;
+      em.emit('collect', item);
     });
     
     var em = new EventEmitter;
@@ -35,47 +35,48 @@ module.exports = function (game, opts) {
         game.setBlock(pos, 0);
         
         for (var i = 0; i < opts.yield(value); i++) {
-            var item = createDebris(game, pos, value);
-            item.velocity = {
-                x: (Math.random() * 2 - 1) * 0.05 * opts.power,
-                y: (Math.random() * 2 - 1) * 0.05 * opts.power,
-                z: (Math.random() * 2 - 1) * 0.05 * opts.power
-            };
-            game.addItem(item);
+            var item = createDebris(game, pos, value, opts.power);
+            item = game.addItem(item);
             
-            var time = opts.expire.start + Math.random()
-                * (opts.expire.end - opts.expire.start);
-            
-            setTimeout(function (item) {
+            var time = opts.expire.start + Math.random() * (opts.expire.end - opts.expire.start);
+
+            (function(item) {
+              game.setTimeout(function() {
                 game.removeItem(item);
                 if (!item._collected) em.emit('expire', item);
-            }, time, item);
+              }, time);
+            })(item);
         }
     });
 }
 
-function createDebris (game, pos, value) {
-    var mesh = new game.THREE.Mesh(
-        new game.THREE.CubeGeometry(4, 4, 4),
-        game.material
-    );
-    mesh.geometry.faces.forEach(function (face) {
-        face.materialIndex = value - 1
-    });
-    mesh.translateX(pos.x);
-    mesh.translateY(pos.y);
-    mesh.translateZ(pos.z);
-    
-    return {
-        mesh: mesh,
-        size: 4,
-        collisionRadius: 22,
-        value: value,
-        _debris: true,
-        velocity: {
-            x: (Math.random() * 2 - 1) * 0.05,
-            y: (Math.random() * 2 - 1) * 0.05,
-            z: (Math.random() * 2 - 1) * 0.05
-        }
-    };
+function _getDebrisGeometry(game) {
+  const cubeGeometry = new game.THREE.CubeGeometry(1, 1, 1);
+  const bufferGeometry = new game.THREE.BufferGeometry().fromGeometry(cubeGeometry);
+  return bufferGeometry;
+}
+
+function createDebris(game, pos, value, power) {
+  const mesh = new game.THREE.Mesh(
+    _getDebrisGeometry(game),
+    game.materials.material
+  );
+  game.materials.paint(mesh, game.materials.materials[value - 1]);
+  mesh.scale.set(0.25, 0.25, 0.25);
+  mesh.translateX(pos[0]);
+  mesh.translateY(pos[1]);
+  mesh.translateZ(pos[2]);
+  
+  return {
+    mesh: mesh,
+    size: 1,
+    collisionRadius: 22,
+    value: value,
+    velocity: {
+      x: Math.random() * 0.02 * power,
+      y: 0,
+      z: Math.random() * 0.02 * power
+    },
+    _debris: true
+  };
 }
