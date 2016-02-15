@@ -119,9 +119,7 @@ function _makeWeatherSpecs(models) {
   return models.map(model => {
     const {NAME} = model;
     const spec = {
-      model: NAME,
-      p: [],
-      s: []
+      model: NAME
     };
     return spec;
   });

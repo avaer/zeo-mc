@@ -263,7 +263,6 @@ function _getTexture(url, offset) {
   if (cachedTexture) {
     return cachedTexture;
   } else {
-    // const texture = game.THREE.ImageUtils.loadTexture(url);
     const img = new Image();
     img.src = url;
     const texture = new game.THREE.Texture();

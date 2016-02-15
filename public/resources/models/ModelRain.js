@@ -9,12 +9,12 @@ const NAME = 'rain';
 export default class ModelRain extends ModelBase {
   static NAME = NAME;
 
-  constructor([], [s1 = 0, s2 = 1] = []) {
+  constructor([p1], [s1 = 0, s2 = 1] = []) {
     super([], [s1, s2]);
 
     const positionOffset = MAX_POSITION + (((s1 % FALL_FREQUENCY) / FALL_FREQUENCY) * (MIN_POSITION - MAX_POSITION));
     const position = [-5, positionOffset, 0];
-    const dimensions = [10, 10, 0]
+    const dimensions = [10, 10 * p1, 0]
 
     this.textures = 'environment/rain';
     this.meshes = [
