@@ -27,8 +27,8 @@ export const PLANES = VEGETATIONS.concat(WEATHERS);
 function _makeVegetationSpecs(models) {
   const result = [];
   models.forEach(model => {
-    const {NAME, TEXTURES} = model;
-    TEXTURES.forEach((texture, i) => {
+    const {NAME, MATERIALS} = model;
+    MATERIALS.forEach((materials, i) => {
       const spec = {
         model: NAME,
         p: [i],

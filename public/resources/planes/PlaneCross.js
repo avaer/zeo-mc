@@ -11,7 +11,7 @@ function _biomes(name) {
   return result;
 }
 
-const TEXTURES = [].concat([
+const MATERIALS = [].concat([
   'deadbush'
 ]).concat(
   _biomes('fern')
@@ -45,19 +45,19 @@ const TEXTURES = [].concat([
   'sapling_oak',
   'sapling_roofed_oak',
   'sapling_spruce'
-]).map(textureName => 'blocks/' + textureName);
+]);
 
 const SIZE = 10;
 
 export default class PlaneCross extends PlaneBase {
   static NAME = NAME;
-  static TEXTURES = TEXTURES;
+  static MATERIALS = MATERIALS;
 
   constructor([p1 = Math.random()] = [], []) {
     super([], []);
 
-    const textureIndex = Math.floor(p1 * TEXTURES.length);
-    this.textures = TEXTURES[textureIndex];
+    const materialIndex = Math.floor(p1 * MATERIALS.length);
+    this.materials = MATERIALS[materialIndex];
 
     const offset = [0, 0, 16, 16];
     const position = [0, 0, 0];

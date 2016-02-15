@@ -22,7 +22,7 @@ function _expandBiomes(plantNames) {
   return result;
 }
 
-const TEXTURES = [].concat([
+const MATERIALS = [].concat([
   'reeds'
 ].map(_doubleTexture)).concat([
   'paeonia',
@@ -31,20 +31,19 @@ const TEXTURES = [].concat([
 ].map(_doublePlantName)).concat(_expandBiomes([
   'fern',
   'grass',
-].map(_doublePlantName)))
-.map(textures => textures.map(textureName => 'blocks/' + textureName))
+].map(_doublePlantName)));
 
 const SIZE = 10;
 
 export default class PlaneTallgrassDouble extends PlaneBase {
   static NAME = NAME;
-  static TEXTURES = TEXTURES;
+  static MATERIALS = MATERIALS;
 
   constructor([p1 = Math.random()] = [], []) {
     super([], []);
 
-    const textureIndex = Math.floor(p1 * TEXTURES.length);
-    this.textures = TEXTURES[textureIndex];
+    const materialIndex = Math.floor(p1 * MATERIALS.length);
+    this.materials = MATERIALS[materialIndex];
 
     const offset = [0, 0, 16, 16];
     const bottomPosition = [0, 0, 0];

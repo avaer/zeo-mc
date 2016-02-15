@@ -1,6 +1,6 @@
 export default class PlaneBase {
   constructor() {
-    this.textures = null;
+    this.materials = null;
     this.meshes = null;
   }
 }

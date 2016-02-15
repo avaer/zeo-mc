@@ -11,7 +11,7 @@ function _stages(name, stages) {
   return result;
 }
 
-const TEXTURES = [].concat(
+const MATERIALS = [].concat(
   _stages('carrots', 3)
 ).concat(
   _stages('nether_wart', 2)
@@ -19,19 +19,19 @@ const TEXTURES = [].concat(
   _stages('potatoes', 3)
 ).concat(
   _stages('wheat', 7)
-).map(textureName => 'blocks/' + textureName);
+);
 
 const SIZE = 10;
 
 export default class PlaneCrop extends PlaneBase {
   static NAME = NAME;
-  static TEXTURES = TEXTURES;
+  static MATERIALS = MATERIALS;
 
   constructor([p1 = Math.random()] = [], []) {
     super([], []);
 
-    const textureIndex = Math.floor(p1 * TEXTURES.length);
-    this.textures = TEXTURES[textureIndex];
+    const materialIndex = Math.floor(p1 * MATERIALS.length);
+    this.materials = MATERIALS[materialIndex];
 
     const offset = [0, 0, 16, 16];
     const position = [0, 0, 0];

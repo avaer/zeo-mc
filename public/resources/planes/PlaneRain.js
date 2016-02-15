@@ -16,7 +16,7 @@ export default class PlaneRain extends PlaneBase {
     const position = [-5, positionOffset, 0];
     const dimensions = [10, 10 * p1, 0]
 
-    this.textures = 'environment/rain';
+    this.materials = 'rain';
     this.meshes = [
       {
         name: 'rain1',

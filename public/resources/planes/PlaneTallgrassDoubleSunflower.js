@@ -2,26 +2,26 @@ import PlaneTallgrassDouble from './PlaneTallgrassDouble';
 
 const NAME ='tallgrassDoubleSunflower';
 
-const TEXTURES = [
+const MATERIALS = [
   [
     'double_plant_sunflower_bottom',
     'double_plant_sunflower_top',
     'double_plant_sunflower_back',
     'double_plant_sunflower_front',
   ]
-].map(textures => textures.map(textureName => 'blocks/' + textureName));
+];
 
 const SIZE = 10;
 
 export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble {
   static NAME = NAME;
-  static TEXTURES = TEXTURES;
+  static MATERIALS = MATERIALS;
 
   constructor([p1 = Math.random()] = [], []) {
     super([], []);
 
-    const textureIndex = 0;
-    this.textures = TEXTURES[textureIndex];
+    const materialIndex = 0;
+    this.materials = MATERIALS[materialIndex];
 
     const bottomOffset = [0, 0, 16, 16];
     const topOffset = [0, 6, 16, 16];
