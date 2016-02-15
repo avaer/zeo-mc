@@ -30,20 +30,30 @@ var mainTextures = [
   /tallgrass/,
   /double_plant/
 ];
+var unmainTextures = [
+  /forest/,
+  /jungle/
+];
 var files = fs.readdirSync('../../img/textures/blocks/').filter(function(file) {
   return /\.png$/.test(file);
 }).map(function(file) {
   return file.replace(/\.png$/, '');
 }).sort(function(a, b) {
   function mainTexturesMatch(t) {
-    return mainTextures.some(function(mainTexture) {
-      if (typeof mainTexture === 'string') {
-        return t === mainTexture;
-      } else if (mainTexture instanceof RegExp) {
-        return mainTexture.test(t);
+    function textureMatch(texture, t) {
+      if (typeof texture === 'string') {
+        return t === texture;
+      } else if (texture instanceof RegExp) {
+        return texture.test(t);
       } else {
         return false;
       }
+    };
+
+    return mainTextures.some(function(texture) {
+      return textureMatch(texture, t);
+    }) && !unmainTextures.some(function(texture) {
+      return textureMatch(texture, t);
     });
   }
 
