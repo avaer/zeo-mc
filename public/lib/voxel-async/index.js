@@ -1,5 +1,5 @@
 import voxelTerrain from '../voxel-terrain/index';
-import voxelMesher from '../voxel-mesher/index';
+import voxelBlockMesher from '../voxel-block-mesher/index';
 
 import {BLOCKS, MODELS} from '../../resources/index';
 

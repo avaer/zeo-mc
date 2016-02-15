@@ -1,7 +1,8 @@
 const voxelAsync = require('../voxel-async/index');
 
 function voxelBlockRenderer(data, THREE) {
-  const blocks = voxelAsync.blockMesher(data.voxels, data.dims);
+  const {voxels, dims} = data;
+  const blocks = voxelAsync.blockMesher(voxels, dims);
 
   const geometry = (() => {
     function getFaceVertexUvs(i) {
