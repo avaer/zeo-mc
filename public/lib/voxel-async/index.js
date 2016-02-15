@@ -98,7 +98,14 @@ export function weatherMesher(weathers, dims) {
         const weather = weathers[idx];
         if (weather) {
           const position = [x, y, z];
-          const spec = MODELS.WEATHERS[weather - 1];
+          const modelSpec = MODELS.WEATHERS[weather - 1];
+          const {mode: modelName, static: modelStatic} = modelSpec;
+          const height = dims[1] - y;
+          const spec = {
+            model: modelName,
+            p: [height],
+            s: []
+          };
           const mesh = {position, spec};
           result.push(mesh);
         }

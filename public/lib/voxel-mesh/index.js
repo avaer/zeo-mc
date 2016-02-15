@@ -34,20 +34,11 @@ Mesh.prototype.initBlocks = function() {
   
   for (var i = 0; i < this.blocks.faces.length; i++) {
     var q = this.blocks.faces[i]
-    /* if (q.length === 5) {
-      throw new Error('fail');
-      // var f = new this.THREE.Face4(q[0], q[1], q[2], q[3]) // XXX
-      var f1 = new this.THREE.Face3(q[0], q[1], q[3])
-      f1.color = new this.THREE.Color(q[4])
-      this.geometry.faces.push(f1)
-      var f2 = new this.THREE.Face3(q[1], q[2], q[3])
-      f2.color = new this.THREE.Color(q[4])
-      this.geometry.faces.push(f1)
-    } else if (q.length == 4) { */
-      var f = new this.THREE.Face3(q[0], q[1], q[2])
-      f.color = new this.THREE.Color(q[3])
-      this.geometry.faces.push(f)
-    // }
+
+    var f = new this.THREE.Face3(q[0], q[1], q[2])
+    f.color = new this.THREE.Color(q[3])
+
+    this.geometry.faces.push(f)
   }
   for (var i = 0, l = this.blocks.faces.length / 2; i < l; i++) {
     var faceVertexUvs = this.faceVertexUv(i);
@@ -105,16 +96,9 @@ Mesh.prototype.initWeathers = function() {
   const {data: {weathers, dims}, meshers: {weather: weatherMesher}, modeler} = this;
 
   if (weathers) {
-    /* this.weatherMesh = new this.THREE.Object3D();
-    const weatherMeshes = weatherMesher(weathers, dims);
-    for (let i = 0; i < weatherMeshes.length; i++) {
-      const weatherMesh = weatherMeshes[i];
-      const {position, spec: {model, p, s}} = weatherMesh;
-
-      const mesh = modeler(model, p, s);
-      mesh.position.set(position[0], position[1], position[2]);
-      this.weatherMesh.add(mesh);
-    } */
+    /* const weatherMeshes = weatherMesher(weathers, dims);
+    const weatherMesh = modeler(weathers);
+    this.weatherMesh = weatherMesh; */
   }
 };
 
