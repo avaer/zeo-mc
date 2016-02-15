@@ -499,7 +499,7 @@ Game.prototype.removeFarChunks = function(playerPosition) {
     if (!chunk) return
     var chunkPosition = chunk.position
     if (mesh) {
-      mesh.removeFromScene(self.scene);
+      self.scene.remove(mesh);
     }
     self.voxels.chunks[chunkIndex] = null;
     self.emit('removeChunk', chunkPosition)
@@ -554,32 +554,31 @@ Game.prototype.showAllChunks = function() {
 }
 
 Game.prototype.showChunk = function(chunk) {
-  var chunkIndex = chunk.position.join('|')
+  const chunkIndex = chunk.position.join('|');
 
   // XXX hook in voxelPlaneRenderer here
 
-  var oldMesh = this.voxels.meshes[chunkIndex];
+  const oldMesh = this.voxels.meshes[chunkIndex];
 
-  var newMesh = voxelBlockRenderer(chunk, this.THREE)
-  var bounds = this.voxels.getBounds.apply(this.voxels, chunk.position)
+  const newMesh = (() => {
+    const mesh = voxelBlockRenderer(chunk, this.THREE);
 
-  this.voxels.chunks[chunkIndex] = chunk
-  this.voxels.meshes[chunkIndex] = newMesh
+    mesh.material = this.materials.material;
+    this.materials.paint(mesh);
+
+    const bounds = this.voxels.getBounds.apply(this.voxels, chunk.position);
+    mesh.position.set(bounds[0][0], bounds[0][1], bounds[0][2]);
+
+    return mesh;
+  })();
 
   if (oldMesh) {
-    oldMesh.removeFromScene(this.scene);
+    this.scene.remove(oldMesh);
   }
+  this.scene.add(newMesh);
 
-  if (this.isClient) {
-    if (this.meshType === 'wireMesh') {
-      newMesh.createWireMesh()
-    } else {
-      newMesh.createSurfaceMesh(this.materials.material)
-    }
-    this.materials.paint(newMesh)
-  }
-  newMesh.setPosition(bounds[0][0], bounds[0][1], bounds[0][2])
-  newMesh.addToScene(this.scene)
+  this.voxels.chunks[chunkIndex] = chunk;
+  this.voxels.meshes[chunkIndex] = newMesh;
 
   this.emit('renderChunk', chunk)
   return newMesh

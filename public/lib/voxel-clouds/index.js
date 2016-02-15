@@ -57,8 +57,9 @@ Clouds.prototype.generate = function(i) {
   });
 
   var cloud = voxelBlockRenderer(data, game.THREE);
-  cloud.createSurfaceMesh(this.material);
-  cloud.addToScene(game.scene);
+  cloud.material = this.material;
+
+  game.scene.add(cloud);
 
   this._position(cloud);
 
@@ -70,8 +71,8 @@ Clouds.prototype.tick = function(dt) {
   var self = this;
   var player = self.game.controls.target().avatar.position;
   self.clouds.forEach(function(cloud) {
-    cloud.surfaceMesh.position.z += self.speed * rand(1, 1.5);
-    if (distanceTo(cloud.surfaceMesh.position, player) > self.distance) {
+    cloud.position.z += self.speed * rand(1, 1.5);
+    if (distanceTo(cloud.position, player) > self.distance) {
       self._position(cloud);
     }
   });
@@ -82,7 +83,7 @@ Clouds.prototype._position = function(cloud) {
   var x = rand(player.x - this.distance, player.x + this.distance);
   var y = player.y + this.high + rand(0, this.high * 2);
   var z = rand(player.z - this.distance, player.z + this.distance);
-  cloud.setPosition(x, y, z);
+  cloud.position.set(x, y, z);
 };
 
 function rand(min, max) {
