@@ -507,10 +507,11 @@ Texture.prototype._afterLoading = function() {
     self.material.needsUpdate = true;
     //window.open(self.canvas.toDataURL());
     if (self._meshQueue.length > 0) {
-      self._meshQueue.forEach(function(queue, i) {
-        self.paint.apply(queue.self, queue.args);
-        delete self._meshQueue[i];
-      });
+      for (let i = 0; i < self._meshQueue.length; i++) {
+        const mesh = self._meshQueue[i];
+        self.paint(mesh);
+      }
+      self._meshQueue = [];
     }
   }
   self._powerof2(function() {
@@ -545,7 +546,7 @@ Texture.prototype.paint = function(mesh) {
 
   // if were loading put into queue
   if (self.loading > 0) {
-    self._meshQueue.push({self: self, args: arguments});
+    self._meshQueue.push(mesh);
     return false;
   }
 
