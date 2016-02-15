@@ -40,10 +40,6 @@ Clouds.prototype.generate = function(size) {
     octaves: 10,
     random: rng
   });
-  var perlin = new Perlin();
-  perlin.generate([0, 0], [size, size], function(point, value) {
-     noise[point[0] + point[1] * size] = Math.round(value);
-  });
 
   var data = voxel.generate([0, 0, 0], [size, 1, size], function(x, y, z) {
     return Math.round(noise.in2D(x, z));
