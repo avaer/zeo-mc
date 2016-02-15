@@ -2,6 +2,11 @@ var tic = require('tic')();
 var createAtlas = require('atlaspack');
 var isTransparent = require('opaque').transparent;
 var touchup = require('touchup');
+var voxelFakeAo = require('voxel-fakeao');
+
+var floor = Math.floor;
+var ceil = Math.ceil;
+var round = Math.round;
 
 module.exports = Texture;
 
@@ -24,7 +29,7 @@ function Texture(opts) {
   this.artPacks = opts.artPacks;
   if (!this.artPacks) throw new Error('voxel-texture-shader requires artPacks option');
   this.loading = 0;
-  this.ao = require('voxel-fakeao')(this.game);
+  this.ao = voxelFakeAo(this.game);
 
   var useFlatColors = opts.materialFlatColor === true;
   delete opts.materialFlatColor;
@@ -145,7 +150,6 @@ function Texture(opts) {
     ].join("\n"),
 
     fragmentShader: [
-
       "uniform vec3 diffuse;",
       "uniform vec3 emissive;",
       "uniform float opacity;",
@@ -270,6 +274,8 @@ function Texture(opts) {
             '                  tileUV, //Tile coordinate (as above)',
             '                  tileSize,',
             '                  tileMap);'].join('\n')
+            // 'vec2 texCoord = tileOffset + tileSize * fract(tileUV);',
+            // 'vec4 texelColor = texture2D(tileMap, texCoord);'].join('\n')
           : [
             // index tile at offset into texture atlas
             'vec2 texCoord = tileOffset + tileSize * fract(tileUV);',
@@ -543,71 +549,96 @@ Texture.prototype.paint = function(mesh, materials) {
     return false;
   }
 
-  var isVoxelMesh = (materials) ? false : true;
-  if (!isVoxelMesh) materials = self._expandName(materials);
+  const uvs = mesh.geometry.getAttribute('uv');
 
-  mesh.geometry.faces.forEach(function(face, i) {
-    if (mesh.geometry.faceVertexUvs[0].length < 1) return;
-
-    if (isVoxelMesh) {
-      var index = Math.floor(face.color.b*255 + face.color.g*255*255 + face.color.r*255*255*255);
-      materials = self.materials[index - 1];
-      if (!materials) materials = self.materials[0];
+  if (uvs) {
+    if (materials) {
+      materials = self._expandName(materials);
     }
 
-    // BACK, FRONT, TOP, BOTTOM, LEFT, RIGHT
-    var name = materials[0] || '';
-    if      (face.normal.z === 1)  name = materials[1] || '';
-    else if (face.normal.y === 1)  name = materials[2] || '';
-    else if (face.normal.y === -1) name = materials[3] || '';
-    else if (face.normal.x === -1) name = materials[4] || '';
-    else if (face.normal.x === 1)  name = materials[5] || '';
+    const numFaces = uvs.array.length / 2;
 
-    // if just a simple color
-    if (name.slice(0, 1) === '#') {
-      self.ao(face, name);
-      return;
+    for (let i = 0; i < numFaces; i++) {
+      const faceMaterials = (() => {
+        if (materials) {
+          return materials;
+        } else {
+          const colors = mesh.geometry.getAttribute('color');
+          const colorIndex = i * 3;
+          const materialIndex = floor(colors.array[colorIndex + 2] * 255 + colors.array[colorIndex + 1] * 255 * 255 + colors.array[colorIndex + 0] * 255 * 255 * 255);
+          const faceMaterials = self.materials[materialIndex - 1] || self.materials[0];
+          return faceMaterials;
+        }
+      })();
+
+      // BACK, FRONT, TOP, BOTTOM, LEFT, RIGHT
+      let faceMaterialName = faceMaterials[0] || '';
+      const normals = mesh.geometry.getAttribute('normal');
+      const normalIndex = i * 3;
+      if      (normals.array[normalIndex + 0] === 1)  faceMaterialName = faceMaterials[1] || ''; // z === 1
+      else if (normals.array[normalIndex + 1] === 1)  faceMaterialName = faceMaterials[2] || ''; // y === 1
+      else if (normals.array[normalIndex + 1] === -1) faceMaterialName = faceMaterials[3] || ''; // y === -1
+      else if (normals.array[normalIndex + 2] === -1) faceMaterialName = faceMaterials[4] || ''; // x === -1
+      else if (normals.array[normalIndex + 2] === 1)  faceMaterialName = faceMaterials[5] || ''; // x === 0
+
+      // if just a simple color
+      /* if (faceMaterialName.slice(0, 1) === '#') {
+        self.ao(face, faceMaterialName);
+        return;
+      } */
+
+      var atlasuv = self._atlasuv[faceMaterialName];
+      if (!atlasuv) {
+        throw new Error('no material index');
+      }
+
+      // If a transparent texture use transparent material
+      // face.materialIndex = (self.useTransparency && self.transparents.indexOf(faceMaterialName) !== -1) ? 1 : 0; // XXX
+      // mesh.geometry.groups[0].materialIndex = 1;
+      mesh.geometry.groups = [
+        {
+          start: 0,
+          count: uvs.array.length,
+          materialIndex: 0
+        }
+      ];
+      /* if (self.useTransparency && self.transparents.indexOf(faceMaterialName) !== -1) {
+        throw new Error('was transparent');
+      } */
+
+      // range of UV coordinates for this texture (see above diagram)
+      var topUV = atlasuv[0], rightUV = atlasuv[1], bottomUV = atlasuv[2], leftUV = atlasuv[3];
+
+      // pass texture start in UV coordinates
+
+      // WARNING: ugly hack ahead. because I don't know how to pass per-geometry uniforms
+      // to custom shaders using three.js (https://github.com/deathcap/voxel-texture-shader/issues/3),
+      // I'm (ab)using faceVertexUvs = the 'uv' attribute: it is the same for all coordinates,
+      // and the fractional part is the top-left UV, the whole part is the tile size.
+
+      var tileSizeX = bottomUV[0] - topUV[0];
+      var tileSizeY = topUV[1] - bottomUV[1];
+
+      // integer
+      var tileSizeIntX = tileSizeX * self.canvas.width;
+      var tileSizeIntY = tileSizeY * self.canvas.height;
+      // half because of four-tap repetition
+      tileSizeIntX /= 2;
+      tileSizeIntY /= 2;
+
+      var isInteger = function(n) { return round(n) === n; }; // Number.isInteger :(
+      if (!isInteger(tileSizeIntX) || !isInteger(tileSizeIntY)) {
+        throw new Error('voxel-texture-shader tile dimensions non-integer '+tileSizeIntX+','+tileSizeIntY);
+      }
+
+      // set all to top (+ encoded tileSize)
+      const uvIndex = i * 2;
+      uvs.array[uvIndex + 0] = tileSizeIntX + topUV[0];
+      uvs.array[uvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
     }
 
-    var atlasuv = self._atlasuv[name];
-    if (!atlasuv) return;
-
-    // If a transparent texture use transparent material
-    face.materialIndex = (self.useTransparency && self.transparents.indexOf(name) !== -1) ? 1 : 0;
-
-    // range of UV coordinates for this texture (see above diagram)
-    var topUV = atlasuv[0], rightUV = atlasuv[1], bottomUV = atlasuv[2], leftUV = atlasuv[3];
-
-    // pass texture start in UV coordinates
-
-    // WARNING: ugly hack ahead. because I don't know how to pass per-geometry uniforms
-    // to custom shaders using three.js (https://github.com/deathcap/voxel-texture-shader/issues/3),
-    // I'm (ab)using faceVertexUvs = the 'uv' attribute: it is the same for all coordinates,
-    // and the fractional part is the top-left UV, the whole part is the tile size.
-
-    var tileSizeX = bottomUV[0] - topUV[0];
-    var tileSizeY = topUV[1] - bottomUV[1];
-
-    // integer
-    var tileSizeIntX = tileSizeX * self.canvas.width;
-    var tileSizeIntY = tileSizeY * self.canvas.height;
-    // half because of four-tap repetition
-    tileSizeIntX /= 2;
-    tileSizeIntY /= 2;
-
-    var isInteger = function(n) { return Math.round(n) === n; }; // Number.isInteger :(
-    if (!isInteger(tileSizeIntX) || !isInteger(tileSizeIntY)) {
-      throw new Error('voxel-texture-shader tile dimensions non-integer '+tileSizeIntX+','+tileSizeIntY);
-    }
-
-    for (var j = 0; j < mesh.geometry.faceVertexUvs[0][i].length; j++) {
-      //mesh.geometry.faceVertexUvs[0][i][j].set(atlasuv[j][0], 1 - atlasuv[j][1]);
-
-      mesh.geometry.faceVertexUvs[0][i][j].set(tileSizeIntX + topUV[0], tileSizeIntY + (1.0 - topUV[1])); // set all to top (+ encoded tileSize)
-    }
-  });
-
-  mesh.geometry.uvsNeedUpdate = true;
+    mesh.geometry.uvsNeedUpdate = true;
+  }
 };
 
 Texture.prototype.sprite = function(name, w, h, cb) {
@@ -675,7 +706,7 @@ Texture.prototype.tick = function(dt) {
 function uvrot(coords, deg) {
   if (deg === 0) return coords;
   var c = [];
-  var i = (4 - Math.ceil(deg / 90)) % 4;
+  var i = (4 - ceil(deg / 90)) % 4;
   for (var j = 0; j < 4; j++) {
     c.push(coords[i]);
     if (i === 3) i = 0; else i++;
