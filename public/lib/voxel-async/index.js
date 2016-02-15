@@ -41,29 +41,6 @@ export function blockMesher(voxels, dims) {
   }
 }
 
-export function vegetationMesher(vegetations, dims) {
-  _ensureInitialized();
-
-  const result = [];
-  let idx = 0;
-  for (let z = 0; z < dims[2]; z++) {
-    for (let y = 0; y < dims[1]; y++) {
-      for (let x = 0; x < dims[0]; x++) {
-        const vegetation = vegetations[idx];
-        if (vegetation) {
-          const position = [x, y, z];
-          const spec = MODELS.VEGETATIONS[vegetation - 1];
-          const mesh = {position, spec};
-          result.push(mesh);
-        }
-
-        idx++;
-      }
-    }
-  }
-  return result;
-}
-
 export function entityMesher(entities, dims) {
   _ensureInitialized();
 
@@ -76,6 +53,29 @@ export function entityMesher(entities, dims) {
         if (entity) {
           const position = [x, y, z];
           const spec = MODELS.ENTITIES[entity - 1];
+          const mesh = {position, spec};
+          result.push(mesh);
+        }
+
+        idx++;
+      }
+    }
+  }
+  return result;
+}
+
+/* export function vegetationMesher(vegetations, dims) {
+  _ensureInitialized();
+
+  const result = [];
+  let idx = 0;
+  for (let z = 0; z < dims[2]; z++) {
+    for (let y = 0; y < dims[1]; y++) {
+      for (let x = 0; x < dims[0]; x++) {
+        const vegetation = vegetations[idx];
+        if (vegetation) {
+          const position = [x, y, z];
+          const spec = MODELS.VEGETATIONS[vegetation - 1];
           const mesh = {position, spec};
           result.push(mesh);
         }
@@ -115,6 +115,12 @@ export function weatherMesher(weathers, dims) {
     }
   }
   return result;
+} */
+
+export function planeMesher(planes, dims) {
+  _ensureInitialized();
+
+  // XXX implement this
 }
 
 function _ensureInitialized() {

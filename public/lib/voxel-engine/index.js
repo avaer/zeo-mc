@@ -1,5 +1,6 @@
 var voxel = require('voxel')
 var voxelBlockRenderer = require('../voxel-block-renderer/index')
+var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
 var ray = require('voxel-raycast')
 var texture = require('../voxel-texture-shader/index')
 var control = require('voxel-control')
@@ -555,6 +556,8 @@ Game.prototype.showAllChunks = function() {
 Game.prototype.showChunk = function(chunk) {
   var chunkIndex = chunk.position.join('|')
 
+  // XXX hook in voxelPlaneRenderer here
+
   var oldMesh = this.voxels.meshes[chunkIndex];
 
   var newMesh = voxelBlockRenderer(chunk, this.THREE)
@@ -562,7 +565,6 @@ Game.prototype.showChunk = function(chunk) {
 
   this.voxels.chunks[chunkIndex] = chunk
   this.voxels.meshes[chunkIndex] = newMesh
-
 
   if (oldMesh) {
     oldMesh.removeFromScene(this.scene);
