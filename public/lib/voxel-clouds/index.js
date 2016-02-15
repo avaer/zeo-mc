@@ -7,12 +7,16 @@ var FastSimplexNoise = require('fast-simplex-noise');
 var constants = require('../../constants/index');
 var DEFAULT_SEED = constants.DEFAULT_SEED;
 
+var round = Math.round;
+var random = Math.random;
+
 function Clouds(opts) {
   if (!(this instanceof Clouds)) return new Clouds(opts || {});
   if (opts.THREE) opts = {game:opts};
   this.game = opts.game;
   this.high = opts.high || 10;
   this.distance = opts.distance || 300;
+  this.size = opts.size || 16;
   this.many = opts.many || 100;
   this.speed = opts.speed || 0.01;
   this.material = opts.material || new this.game.THREE.MeshBasicMaterial({
@@ -23,26 +27,34 @@ function Clouds(opts) {
     opacity: 0.5,
   });
   this.clouds = [];
+  this.generator = (() => {
+    var rng = new Alea(DEFAULT_SEED);
+    var noise = new FastSimplexNoise({
+      min: 0,
+      max: 1,
+      frequency: 0.05,
+      octaves: 10,
+      random: rng
+    });
+    var offset = Number.MAX_SAFE_INTEGER / 2;
+
+    return (x, y, i) => {
+      return round(noise.in2D(x + (i * this.size) + offset, y + (i * this.size) + offset));
+    };
+  })();
   for (var i = 0; i < this.many; i++) {
-    this.generate();
+    this.generate(i);
   }
 }
 module.exports = Clouds;
 
-Clouds.prototype.generate = function(size) {
+Clouds.prototype.generate = function(i) {
   var game = this.game;
-  size = size || 16;
+  var size = this.size;
   var scale = new game.THREE.Vector3(1, 1, 1);
 
-  var rng = new Alea(DEFAULT_SEED);
-  var noise = new FastSimplexNoise({
-    frequency: 0.05,
-    octaves: 10,
-    random: rng
-  });
-
-  var data = voxel.generate([0, 0, 0], [size, 1, size], function(x, y, z) {
-    return Math.round(noise.in2D(x, z));
+  var data = voxel.generate([0, 0, 0], [size, 1, size], (x, y, z) => {
+    return this.generator(x, z, i);
   });
 
   var cloud = voxelMesh(data, voxelAsync.meshers, null, scale, game.THREE);

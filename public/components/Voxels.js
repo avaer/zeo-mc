@@ -114,7 +114,7 @@ export default class Voxels extends React.Component {
 
       const clouds = voxelClouds({
         game,
-        // size: 32,
+        size: 16,
         // color: new THREE.Color(0, 0, 0),
         speed: 0.01
       });
