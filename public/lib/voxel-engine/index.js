@@ -554,15 +554,26 @@ Game.prototype.showAllChunks = function() {
 Game.prototype.showChunk = function(chunk) {
   const chunkIndex = chunk.position.join('|');
 
-  // XXX hook in voxelPlaneRenderer here
-
   const oldMesh = this.voxels.meshes[chunkIndex];
 
   const newMesh = (() => {
-    const mesh = voxelBlockRenderer(chunk, this.THREE);
+    const mesh = new THREE.Object3D();
 
-    mesh.material = this.materials.material;
-    this.materials.paint(mesh);
+    const blockMesh = (() => {
+      const blockMesh = voxelBlockRenderer(chunk, this.THREE);
+      blockMesh.material = this.materials.material;
+      this.materials.paint(blockMesh);
+      return blockMesh;
+    })();
+    mesh.add(blockMesh);
+    // XXX hook in voxelPlaneRenderer here
+    /* const weatherMesh = (() => {
+      const weatherMesh = voxelBlockRenderer(chunk, this.THREE);
+      weatherMesh.material = this.materials.material;
+      this.materials.paint(weatherMesh);
+      return weatherMesh;
+    })();
+    mesh.add(weatherMesh); */
 
     const bounds = this.voxels.getBounds.apply(this.voxels, chunk.position);
     mesh.position.set(bounds[0][0], bounds[0][1], bounds[0][2]);

@@ -38,11 +38,7 @@ function voxelPlaneMesher(opts) {
         }
 
         const color = BLOCKS[plane.materials[planeMesh.materialIndex]];
-        for (let k = 0; k < geometry.faces.length; k++) {
-          const face = geometry.faces[j];
-          const {a, b, c} = face;
-          faces.push([a, b, c, color]);
-        }
+        faces.push(color);
       }
     }
 
