@@ -4,7 +4,7 @@ function voxelPlaneRenderer(data, THREE) {
   const {vegetations, weathers, dims} = data;
   const planes = voxelAsync.planeMesher({vegetations, weathers}, dims);
 
-  return new THEEE.Mesh(); // XXX
+  return new THREE.Mesh(); // XXX
 }
 
 // XXX trash the below

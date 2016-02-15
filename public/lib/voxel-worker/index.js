@@ -60,8 +60,8 @@ function init(opts) {
 function generate(position, transfers) {
   const chunks = voxelAsync.generateSync(position);
 
-  const {voxels, vegetations, entities, weathers} = chunks;
-  [voxels, vegetations, entities, weathers].forEach(dataArray => {
+  const {voxels} = chunks;
+  [voxels].forEach(dataArray => {
     transfers.push(dataArray.buffer);
   });
 

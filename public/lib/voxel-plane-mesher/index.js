@@ -1,7 +1,5 @@
 var THREE = require('three');
 
-var voxelTextureShader = require('../voxel-texture-shader/index');
-
 var blocks = require('../../resources/blocks/index');
 var BLOCKS = blocks.BLOCKS;
 
@@ -14,69 +12,42 @@ function voxelPlaneMesher(opts) {
     const vertices = [];
     const faces = [];
 
-    for (let x = 0; x < dims[0]; x++) {
-      for (let z = 0; z < dims[2]; z++) {
-        for (let y = 0; y < dims[1]; y++) {
-          const idx = _getIndex(x, y, z, dims);
-          /* const vegetation = vegetations[idx];
-          if (vegetation) {
-            const spec = VEGETATIONS[vegetation - 1];
-            const {plane: planeName, p, s} = spec;
-            const plane = planes.make(planeName, p, s);
-            planes.meshes.forEach(mesh => {
-              
-            });
-          } */
-          const weather = weathers[idx];
-          if (weather) {
-            const spec = WEATHERS[weather - 1];
-            const {plane: planeName} = spec;
-            const plane = planes.make(planeName);
+    for (let i = 0; i < weathers.length; i++) {
+      const weather = weathers[i];
+      const [x, y, z, value] = weather;
 
-            for (let i = 0; i < plane.meshes.length; i++) {
-              const planeMesh = plane.meshes[i];
-              const {position, dimensions, rotation} = planeMesh;
+      const spec = WEATHERS[value - 1];
+      const {plane: planeName} = spec;
 
-              const geometry = new THREE.PlaneGeometry(dimensions[0], dimensions[1]);
-              geometry.translate(dimensions[0], dimensions[1], 0);
-              geometry.translate(position[0], position[1], position[2]);
-              rotation[0] !== 0 && geometry.rotateX(rotation[0]);
-              rotation[1] !== 0 && geometry.rotateY(rotation[1]);
-              rotation[2] !== 0 && geometry.rotateZ(rotation[2]);
+      const plane = planes.make(planeName);
+      for (let j = 0; j < plane.meshes.length; j++) {
+        const planeMesh = plane.meshes[j];
+        const {position, dimensions, rotation} = planeMesh;
 
-              for (let j = 0; j < geometry.vertices.length; j++) {
-                const vertex = geometry.vertices[j];
-                const {x, y, z} = vertex;
-                vertices.push([x, y, z]);
-              }
+        const geometry = new THREE.PlaneGeometry(dimensions[0], dimensions[1]);
+        geometry.translate(dimensions[0], dimensions[1], 0);
+        geometry.translate(position[0], position[1], position[2]);
+        rotation[0] !== 0 && geometry.rotateX(rotation[0]);
+        rotation[1] !== 0 && geometry.rotateY(rotation[1]);
+        rotation[2] !== 0 && geometry.rotateZ(rotation[2]);
 
-              const color = BLOCKS[plane.materials[planeMesh.materialIndex]];
-              for (let j = 0; j < geometry.faces.length; j++) {
-                const face = geometry.faces[j];
-                const {a, b, c} = face;
-                faces.push([a, b, c, color]);
-              }
-            }
-          }
+        for (let k = 0; k < geometry.vertices.length; k++) {
+          const vertex = geometry.vertices[k];
+          const {x, y, z} = vertex;
+          vertices.push([x, y, z]);
+        }
+
+        const color = BLOCKS[plane.materials[planeMesh.materialIndex]];
+        for (let k = 0; k < geometry.faces.length; k++) {
+          const face = geometry.faces[j];
+          const {a, b, c} = face;
+          faces.push([a, b, c, color]);
         }
       }
     }
 
-    /* var vertex_count = vertices.length;
-    vertices.push([x[0],             x[1],             x[2]            ]);
-    vertices.push([x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ]);
-    vertices.push([x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]]);
-    vertices.push([x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]]);
-    var color = removeFlags(c);
-    faces.push([vertex_count, vertex_count+1, vertex_count+3, color]); // abd
-    faces.push([vertex_count+1, vertex_count+2, vertex_count+3, color]); // bcd */
-
     return {vertices, faces};
   };
-}
-
-function _getIndex(x, y, z, dims) {
-  return x + (y * dims[0]) + (z * dims[0] * dims[1]);
 }
 
 if (module) {
