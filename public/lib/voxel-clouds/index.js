@@ -1,10 +1,10 @@
 var voxelMesh = require('../voxel-mesh/index');
-var voxelAsync = require('../lib/voxel-async/index');
+var voxelAsync = require('../voxel-async/index');
 var voxel = require('voxel');
 var Alea = require('alea');
 var FastSimplexNoise = require('fast-simplex-noise');
 
-var constants = require('../constants/index');
+var constants = require('../../constants/index');
 var DEFAULT_SEED = constants.DEFAULT_SEED;
 
 function Clouds(opts) {

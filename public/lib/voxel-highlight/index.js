@@ -1,7 +1,7 @@
 var inherits = require('inherits')
 var events = require('events')
 
-var u = require('../utils/js/index')
+var u = require('../../utils/js/index')
 
 module.exports = Highlighter
 
