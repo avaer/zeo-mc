@@ -1,6 +1,7 @@
 var voxel = require('voxel')
 var voxelBlockRenderer = require('../voxel-block-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
+var voxelModelRenderer = require('../voxel-model-renderer/index')
 var ray = require('voxel-raycast')
 var texture = require('../voxel-texture-shader/index')
 var control = require('voxel-control')
@@ -566,13 +567,15 @@ Game.prototype.showChunk = function(chunk) {
       return blockMesh;
     })();
     mesh.add(blockMesh);
-    const weatherMesh = (() => {
-      const weatherMesh = voxelPlaneRenderer(chunk, this.THREE);
-      weatherMesh.material = this.materials.material;
-      this.materials.paint(weatherMesh);
-      return weatherMesh;
+    const planeMesh = (() => {
+      const planeMesh = voxelPlaneRenderer(chunk, this.THREE);
+      planeMesh.material = this.materials.material;
+      this.materials.paint(planeMesh);
+      return planeMesh;
     })();
-    mesh.add(weatherMesh);
+    mesh.add(planeMesh);
+    const modelMesh = voxelModelRenderer(chunk, this.THREE);
+    mesh.add(modelMesh);
 
     const bounds = this.voxels.getBounds.apply(this.voxels, chunk.position);
     mesh.position.set(bounds[0][0], bounds[0][1], bounds[0][2]);
