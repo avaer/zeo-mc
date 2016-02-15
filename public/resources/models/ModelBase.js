@@ -185,9 +185,10 @@ function _getCubeGeometry(x, y, z) {
   if (cachedGeometry) {
     return cachedGeometry;
   } else {
-    const geometry = new game.THREE.CubeGeometry(x, y, z);
-    cubeGeometryCache.set(geometryKey, geometry);
-    return geometry;
+    const cubeGeometry = new game.THREE.CubeGeometry(x, y, z);
+    const bufferGeometry = new game.THREE.BufferGeometry().fromGeometry(cubeGeometry);
+    cubeGeometryCache.set(geometryKey, bufferGeometry);
+    return bufferGeometry;
   }
 }
 
@@ -227,7 +228,7 @@ function _getPlaneGeometry(x, y) {
   if (cachedGeometry) {
     return cachedGeometry;
   } else {
-    const geometry = new game.THREE.PlaneGeometry(x, y);
+    const geometry = new game.THREE.PlaneBufferGeometry(x, y);
     planeGeometryCache.set(geometryKey, geometry);
     return geometry;
   }
