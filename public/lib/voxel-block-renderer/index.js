@@ -1,15 +1,14 @@
-module.exports = function(data, meshers, modeler, scaleFactor, three) {
-  return new Mesh(data, meshers, modeler, scaleFactor, three)
+module.exports = function(data, meshers, modeler, THREE) {
+  return new VoxelBlockRenderer(data, meshers, modeler, THREE);
 }
 
-module.exports.Mesh = Mesh
+module.exports.VoxelBlockRenderer = VoxelBlockRenderer;
 
-function Mesh(data, meshers, modeler, scaleFactor, three) {
+function VoxelBlockRenderer(data, meshers, modeler, THREE) {
   this.data = data
   this.meshers = meshers;
   this.modeler = modeler;
-  this.scaleFactor = scaleFactor
-  this.THREE = three
+  this.THREE = THREE;
 
   this.initBlocks();
   this.initVegetations();
@@ -17,7 +16,7 @@ function Mesh(data, meshers, modeler, scaleFactor, three) {
   this.initWeathers();
 }
 
-Mesh.prototype.initBlocks = function() {
+VoxelBlockRenderer.prototype.initBlocks = function() {
   const blockMesher = this.meshers.block
 
   this.blocks = blockMesher(this.data.voxels, this.data.dims)
@@ -82,17 +81,17 @@ function _getIndex(x, y, z, dims) {
   return x + (y * dims[0]) + (z * dims[0] * dims[1]);
 }
 
-Mesh.prototype.initVegetations = function() {
+VoxelBlockRenderer.prototype.initVegetations = function() {
   const {vegetations} = this.data;
   // console.log('init vegetations', vegetations); // XXX
 };
 
-Mesh.prototype.initEntities = function() {
+VoxelBlockRenderer.prototype.initEntities = function() {
   const {entities} = this.data;
   // console.log('init entities', entities); // XXX
 };
 
-Mesh.prototype.initWeathers = function() {
+VoxelBlockRenderer.prototype.initWeathers = function() {
   const {data: {weathers, dims}, meshers: {weather: weatherMesher}, modeler} = this;
 
   if (weathers) {
@@ -102,28 +101,26 @@ Mesh.prototype.initWeathers = function() {
   }
 };
 
-Mesh.prototype.createWireMesh = function(hexColor) {    
+VoxelBlockRenderer.prototype.createWireMesh = function(hexColor) {
   var wireMaterial = new this.THREE.MeshBasicMaterial({
     color : hexColor || 0xffffff,
     wireframe : true
   })
   wireMesh = new THREE.Mesh(this.geometry, wireMaterial)
-  wireMesh.scale.set(this.scaleFactor.x, this.scaleFactor.y, this.scaleFactor.z)
   wireMesh.doubleSided = true
   this.wireMesh = wireMesh
   return wireMesh
 }
 
-Mesh.prototype.createSurfaceMesh = function(material) {
+VoxelBlockRenderer.prototype.createSurfaceMesh = function(material) {
   material = material || new this.THREE.MeshNormalMaterial()
   var surfaceMesh  = new this.THREE.Mesh( this.geometry, material )
-  surfaceMesh.scale.set(this.scaleFactor.x, this.scaleFactor.y, this.scaleFactor.z)
   surfaceMesh.doubleSided = false
   this.surfaceMesh = surfaceMesh
   return surfaceMesh
 }
 
-Mesh.prototype.addToScene = function(scene) {
+VoxelBlockRenderer.prototype.addToScene = function(scene) {
   if (this.wireMesh) scene.add( this.wireMesh )
   if (this.surfaceMesh) scene.add( this.surfaceMesh )
   if (this.vegetationMesh) scene.add( this.vegetationMesh )
@@ -131,7 +128,7 @@ Mesh.prototype.addToScene = function(scene) {
   if (this.weatherMesh) scene.add( this.weatherMesh )
 }
 
-Mesh.prototype.removeFromScene = function(scene) {
+VoxelBlockRenderer.prototype.removeFromScene = function(scene) {
   if (this.wireMesh) scene.remove( this.wireMesh )
   if (this.surfaceMesh) scene.remove( this.surfaceMesh )
   if (this.vegetationMesh) scene.remove( this.vegetationMesh )
@@ -139,7 +136,7 @@ Mesh.prototype.removeFromScene = function(scene) {
   if (this.weatherMesh) scene.remove( this.weatherMesh )
 }
 
-Mesh.prototype.setPosition = function(x, y, z) {
+VoxelBlockRenderer.prototype.setPosition = function(x, y, z) {
   if (this.wireMesh) this.wireMesh.position.set(x, y, z)
   if (this.surfaceMesh) this.surfaceMesh.position.set(x, y, z)
   if (this.vegetationMesh) this.vegetationMesh.position.set(x, y, z)
@@ -147,7 +144,7 @@ Mesh.prototype.setPosition = function(x, y, z) {
   if (this.weatherMesh) this.weatherMesh.position.set(x, y, z)
 }
 
-Mesh.prototype.faceVertexUv = function(i) {
+VoxelBlockRenderer.prototype.faceVertexUv = function(i) {
   var vs = [
     this.blocks.vertices[i*4+0],
     this.blocks.vertices[i*4+1],

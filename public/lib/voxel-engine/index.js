@@ -1,5 +1,5 @@
 var voxel = require('voxel')
-var voxelMesh = require('../voxel-mesh/index')
+var voxelBlockRenderer = require('../voxel-block-renderer/index')
 var ray = require('voxel-raycast')
 var texture = require('../voxel-texture-shader/index')
 var control = require('voxel-control')
@@ -557,8 +557,7 @@ Game.prototype.showChunk = function(chunk) {
 
   var oldMesh = this.voxels.meshes[chunkIndex];
 
-  var scale = new THREE.Vector3(1, 1, 1)
-  var newMesh = voxelMesh(chunk, this.meshers, this.modeler, scale, this.THREE)
+  var newMesh = voxelBlockRenderer(chunk, this.meshers, this.modeler, this.THREE)
   var bounds = this.voxels.getBounds.apply(this.voxels, chunk.position)
 
   this.voxels.chunks[chunkIndex] = chunk

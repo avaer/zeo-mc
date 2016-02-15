@@ -1,4 +1,4 @@
-var voxelMesh = require('../voxel-mesh/index');
+var voxelBlockRenderer = require('../voxel-block-renderer/index');
 var voxelAsync = require('../voxel-async/index');
 var voxel = require('voxel');
 var Alea = require('alea');
@@ -51,13 +51,12 @@ module.exports = Clouds;
 Clouds.prototype.generate = function(i) {
   var game = this.game;
   var size = this.size;
-  var scale = new game.THREE.Vector3(1, 1, 1);
 
   var data = voxel.generate([0, 0, 0], [size, 1, size], (x, y, z) => {
     return this.generator(x, z, i);
   });
 
-  var cloud = voxelMesh(data, voxelAsync.meshers, null, scale, game.THREE);
+  var cloud = voxelBlockRenderer(data, voxelAsync.meshers, null, game.THREE);
   cloud.createSurfaceMesh(this.material);
   cloud.addToScene(game.scene);
 
