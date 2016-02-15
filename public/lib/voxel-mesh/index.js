@@ -76,12 +76,15 @@ Mesh.prototype.initBlocks = function() {
     else                           face.vertexColors = [shadow, light, light, shadow]
   }
 
-  this.geometry.verticesNeedUpdate = true
+  /* this.geometry.verticesNeedUpdate = true
   this.geometry.elementsNeedUpdate = true
   this.geometry.normalsNeedUpdate = true
 
   this.geometry.computeBoundingBox()
-  this.geometry.computeBoundingSphere()
+  this.geometry.computeBoundingSphere() */
+
+  const bufferGeometry = new this.THREE.BufferGeometry().fromGeometry(this.geometry); // XXX clean this up to instantiate BufferGeometry directly
+  this.geometry = bufferGeometry;
 };
 
 function _getIndex(x, y, z, dims) {
@@ -101,15 +104,17 @@ Mesh.prototype.initEntities = function() {
 Mesh.prototype.initWeathers = function() {
   const {data: {weathers, dims}, meshers: {weather: weatherMesher}, modeler} = this;
 
-  this.weatherMesh = new this.THREE.Object3D();
-  const weatherMeshes = weatherMesher(weathers, dims);
-  for (let i = 0; i < weatherMeshes.length; i++) {
-    const weatherMesh = weatherMeshes[i];
-    const {position, spec: {model, p, s}} = weatherMesh;
+  if (weathers) {
+    /* this.weatherMesh = new this.THREE.Object3D();
+    const weatherMeshes = weatherMesher(weathers, dims);
+    for (let i = 0; i < weatherMeshes.length; i++) {
+      const weatherMesh = weatherMeshes[i];
+      const {position, spec: {model, p, s}} = weatherMesh;
 
-    const mesh = modeler(model, p, s);
-    mesh.position.set(position[0], position[1], position[2]);
-    this.weatherMesh.add(mesh);
+      const mesh = modeler(model, p, s);
+      mesh.position.set(position[0], position[1], position[2]);
+      this.weatherMesh.add(mesh);
+    } */
   }
 };
 
