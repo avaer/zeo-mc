@@ -56,7 +56,7 @@ Clouds.prototype.generate = function(i) {
     return this.generator(x, z, i);
   });
 
-  var cloud = voxelBlockRenderer(data, voxelAsync.meshers, null, game.THREE);
+  var cloud = voxelBlockRenderer(data, game.THREE);
   cloud.createSurfaceMesh(this.material);
   cloud.addToScene(game.scene);
 

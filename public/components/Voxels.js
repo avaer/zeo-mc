@@ -68,8 +68,6 @@ export default class Voxels extends React.Component {
         // generate: voxelPerlinTerrain({scaleFactor:10}),
         // generate: voxelSimplexTerrain({seed: 'lol', scaleFactor: 10, chunkDistance: CHUNK_DISTANCE}),
         generateChunks: false,
-        meshers: voxelAsync.meshers,
-        modeler: (modelName, p, s) => MODELS.make(modelName, p, s, game),
         texturePath: name => './api/img/textures/blocks/' + name + '.png',
         materials: BLOCKS.MATERIALS,
         chunkSize: CHUNK_SIZE,
@@ -84,7 +82,6 @@ export default class Voxels extends React.Component {
       const sky = voxelSky({
         game,
         time: 800,
-        // color: new THREE.Color(0, 0, 0),
         speed: 0.01
       });
       game.setInterval(function() {

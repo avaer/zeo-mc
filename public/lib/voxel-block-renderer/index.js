@@ -1,25 +1,20 @@
-module.exports = function(data, meshers, modeler, THREE) {
-  return new VoxelBlockRenderer(data, meshers, modeler, THREE);
+var voxelAsync = require('../voxel-async/index');
+
+module.exports = function(data, THREE) {
+  return new VoxelBlockRenderer(data, THREE);
 }
 
 module.exports.VoxelBlockRenderer = VoxelBlockRenderer;
 
-function VoxelBlockRenderer(data, meshers, modeler, THREE) {
+function VoxelBlockRenderer(data, THREE) {
   this.data = data
-  this.meshers = meshers;
-  this.modeler = modeler;
   this.THREE = THREE;
 
   this.initBlocks();
-  this.initVegetations();
-  this.initEntities();
-  this.initWeathers();
 }
 
 VoxelBlockRenderer.prototype.initBlocks = function() {
-  const blockMesher = this.meshers.block
-
-  this.blocks = blockMesher(this.data.voxels, this.data.dims)
+  this.blocks = voxelAsync.blockMesher(this.data.voxels, this.data.dims)
 
   this.geometry = new this.THREE.Geometry()
 
@@ -81,26 +76,6 @@ function _getIndex(x, y, z, dims) {
   return x + (y * dims[0]) + (z * dims[0] * dims[1]);
 }
 
-VoxelBlockRenderer.prototype.initVegetations = function() {
-  const {vegetations} = this.data;
-  // console.log('init vegetations', vegetations); // XXX
-};
-
-VoxelBlockRenderer.prototype.initEntities = function() {
-  const {entities} = this.data;
-  // console.log('init entities', entities); // XXX
-};
-
-VoxelBlockRenderer.prototype.initWeathers = function() {
-  const {data: {weathers, dims}, meshers: {weather: weatherMesher}, modeler} = this;
-
-  if (weathers) {
-    /* const weatherMeshes = weatherMesher(weathers, dims);
-    const weatherMesh = modeler(weathers);
-    this.weatherMesh = weatherMesh; */
-  }
-};
-
 VoxelBlockRenderer.prototype.createWireMesh = function(hexColor) {
   var wireMaterial = new this.THREE.MeshBasicMaterial({
     color : hexColor || 0xffffff,
@@ -123,25 +98,16 @@ VoxelBlockRenderer.prototype.createSurfaceMesh = function(material) {
 VoxelBlockRenderer.prototype.addToScene = function(scene) {
   if (this.wireMesh) scene.add( this.wireMesh )
   if (this.surfaceMesh) scene.add( this.surfaceMesh )
-  if (this.vegetationMesh) scene.add( this.vegetationMesh )
-  if (this.entityMesh) scene.add( this.entityMesh )
-  if (this.weatherMesh) scene.add( this.weatherMesh )
 }
 
 VoxelBlockRenderer.prototype.removeFromScene = function(scene) {
   if (this.wireMesh) scene.remove( this.wireMesh )
   if (this.surfaceMesh) scene.remove( this.surfaceMesh )
-  if (this.vegetationMesh) scene.remove( this.vegetationMesh )
-  if (this.entityMesh) scene.remove( this.entityMesh )
-  if (this.weatherMesh) scene.remove( this.weatherMesh )
 }
 
 VoxelBlockRenderer.prototype.setPosition = function(x, y, z) {
   if (this.wireMesh) this.wireMesh.position.set(x, y, z)
   if (this.surfaceMesh) this.surfaceMesh.position.set(x, y, z)
-  if (this.vegetationMesh) this.vegetationMesh.position.set(x, y, z)
-  if (this.entityMesh) this.entityMesh.position.set(x, y, z)
-  if (this.weatherMesh) this.weatherMesh.position.set(x, y, z)
 }
 
 VoxelBlockRenderer.prototype.faceVertexUv = function(i) {

@@ -557,7 +557,7 @@ Game.prototype.showChunk = function(chunk) {
 
   var oldMesh = this.voxels.meshes[chunkIndex];
 
-  var newMesh = voxelBlockRenderer(chunk, this.meshers, this.modeler, this.THREE)
+  var newMesh = voxelBlockRenderer(chunk, this.THREE)
   var bounds = this.voxels.getBounds.apply(this.voxels, chunk.position)
 
   this.voxels.chunks[chunkIndex] = chunk
