@@ -1,5 +1,7 @@
 import PlaneBase from './PlaneBase';
 
+const SIZE = 1;
+
 const MAX_POSITION = -20;
 const MIN_POSITION = 20;
 const FALL_FREQUENCY = 0.5;
@@ -21,9 +23,9 @@ export default class PlaneRain extends PlaneBase {
   constructor([], [s1 = 0, s2 = 1] = []) {
     super([], [s1, s2]);
 
-    const positionOffset = MAX_POSITION + (((s1 % FALL_FREQUENCY) / FALL_FREQUENCY) * (MIN_POSITION - MAX_POSITION));
-    const position = [-5, positionOffset, 0];
-    const dimensions = [10, 10];
+    // const positionOffset = MAX_POSITION + (((s1 % FALL_FREQUENCY) / FALL_FREQUENCY) * (MIN_POSITION - MAX_POSITION));
+    const position = [0, 0, 0];
+    const dimensions = [SIZE, SIZE];
 
     const materialIndex = 0;
     this.materials = MATERIALS[0];

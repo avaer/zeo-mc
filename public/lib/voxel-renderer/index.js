@@ -147,12 +147,7 @@ function voxelRenderer(data, THREE) {
 
   const material = new THREE.MeshNormalMaterial();
 
-  const mesh = (() => {
-    const mesh  = new THREE.Mesh(geometry, material);
-    mesh.doubleSided = false;
-
-    return mesh;
-  })();
+  const mesh = new THREE.Mesh(geometry, material);
 
   return mesh;
 }

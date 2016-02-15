@@ -37,7 +37,8 @@ var ENTITY_TYPE_FREQUENCY = 1;
 var ENTITY_TYPE_OCTAVES = 2;
 var ENTITY_RATE = 1 / 200;
 
-var WEATHER_FREQUENCY = 0.02;
+// var WEATHER_FREQUENCY = 0.02;
+var WEATHER_FREQUENCY = 0.001;
 var WEATHER_OCTAVES = 2;
 var WEATHER_TYPE_FREQUENCY = 10;
 var WEATHER_TYPE_OCTAVES = 2;
@@ -204,7 +205,7 @@ function voxelTerrain(opts) {
         dirt(x, y, z);
         veg(x, y, z);
         ent(x, y, z);
-        weath(x, y, z);
+        !isCave(x,y,z) && weath(x, y, z);
       } else if (startY < 0) {
         dirt(x, endY, z);
       }
@@ -362,11 +363,15 @@ function voxelTerrain(opts) {
       }
     }
 
+    function snapCoordinate(n) {
+      return abs((chunkSize + n % chunkSize) % chunkSize);
+    }
+
     function getIndex(x, y, z) {
-      var xidx = abs((chunkSize + x % chunkSize) % chunkSize);
-      var yidx = abs((chunkSize + y % chunkSize) % chunkSize);
-      var zidx = abs((chunkSize + z % chunkSize) % chunkSize);
-      var idx = xidx + yidx * chunkSize + zidx * chunkSize * chunkSize;
+      x = snapCoordinate(x);
+      y = snapCoordinate(y);
+      z = snapCoordinate(z);
+      const idx = (x) + (y * chunkSize) + (z * chunkSize * chunkSize);
       return idx;
     }
 
@@ -376,14 +381,23 @@ function voxelTerrain(opts) {
     }
 
     function setVegetation(x, y, z, value) {
+      x = snapCoordinate(x);
+      y = snapCoordinate(y);
+      z = snapCoordinate(z);
       vegetations.push([x, y, z, value]);
     }
 
     function setWeather(x, y, z, value) {
+      x = snapCoordinate(x);
+      y = snapCoordinate(y);
+      z = snapCoordinate(z);
       weathers.push([x, y, z, value]);
     }
 
     function setEntity(x, y, z, value) {
+      x = snapCoordinate(x);
+      y = snapCoordinate(y);
+      z = snapCoordinate(z);
       entities.push([x, y, z, value]);
     }
 
