@@ -5,9 +5,18 @@ const MIN_POSITION = 20;
 const FALL_FREQUENCY = 0.5;
 
 const NAME = 'rain';
+const MATERIALS = [
+  [
+    'rain1',
+    'rain2',
+    'rain3',
+    'rain4'
+  ]
+];
 
 export default class PlaneRain extends PlaneBase {
   static NAME = NAME;
+  static MATERIALS = MATERIALS;
 
   constructor([p1], [s1 = 0, s2 = 1] = []) {
     super([], [s1, s2]);
@@ -16,7 +25,8 @@ export default class PlaneRain extends PlaneBase {
     const position = [-5, positionOffset, 0];
     const dimensions = [10, 10 * p1, 0]
 
-    this.materials = 'rain';
+    const materialIndex = 0;
+    this.materials = MATERIALS[0];
     this.meshes = [
       {
         name: 'rain1',
