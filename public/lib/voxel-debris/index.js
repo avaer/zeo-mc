@@ -1,7 +1,7 @@
 var funstance = require('funstance');
 var EventEmitter = require('events').EventEmitter;
 
-var floor = Math.floor;
+var voxelTextureShader = require('../voxel-texture-shader/index');
 
 module.exports = function (game, opts) {
     if (!opts) opts = {};
@@ -57,15 +57,11 @@ function _getDebrisGeometry(game, value) {
   const bufferGeometry = new game.THREE.BufferGeometry().fromGeometry(cubeGeometry);
 
   const colors = bufferGeometry.getAttribute('color');
-  const color = [
-    (floor(value / (255 * 255)) % 255) / 255,
-    (floor(value / 255) % 255) / 255,
-    (value % 255) / 255
-  ];
+  const colorArray = voxelTextureShader.colorValueToArray(value);
   for (let i = 0; i < colors.array.length; i += 3) {
-    colors.array[i + 0] = color[0];
-    colors.array[i + 1] = color[1];
-    colors.array[i + 2] = color[2];
+    colors.array[i + 0] = colorArray[0];
+    colors.array[i + 1] = colorArray[1];
+    colors.array[i + 2] = colorArray[2];
   }
 
   return bufferGeometry;

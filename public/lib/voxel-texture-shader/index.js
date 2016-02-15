@@ -540,7 +540,7 @@ Texture.prototype._powerof2 = function(done) {
   done();
 };
 
-Texture.prototype.paint = function(mesh, materials) {
+Texture.prototype.paint = function(mesh) {
   var self = this;
 
   // if were loading put into queue
@@ -552,10 +552,6 @@ Texture.prototype.paint = function(mesh, materials) {
   const uvs = mesh.geometry.getAttribute('uv');
 
   if (uvs) {
-    if (materials) {
-      materials = self._expandName(materials);
-    }
-
     const numFaces = uvs.array.length / 2;
 
     for (let i = 0; i < numFaces; i++) {
@@ -563,12 +559,9 @@ Texture.prototype.paint = function(mesh, materials) {
         const faceMaterials = (() => {
           const colors = mesh.geometry.getAttribute('color');
           const colorIndex = i * 3;
-          const materialIndex = floor(
-            colors.array[colorIndex + 0] * 255 * 255 * 255 +
-            colors.array[colorIndex + 1] * 255 * 255 +
-            colors.array[colorIndex + 2] * 255
-          );
-          const faceMaterials = self.materials[materialIndex - 1] || self.materials[0];
+          const colorArray = [colors.array[colorIndex + 0], colors.array[colorIndex + 1], colors.array[colorIndex + 2]]
+          const colorValue = Texture.colorArrayToValue(colorArray);
+          const faceMaterials = self.materials[colorValue - 1] || self.materials[0];
           return faceMaterials;
         })();
 
@@ -711,6 +704,22 @@ Texture.prototype.tick = function(dt) {
   tic.tick(dt);
 }; */
 
+Texture.colorArrayToValue = function(a) {
+  return floor(
+    a[0] * 255 * 255 * 255 +
+    a[1] * 255 * 255 +
+    a[2] * 255
+  );
+};
+
+Texture.colorValueToArray = function(v) {
+  return [
+    (floor(v / (255 * 255)) % 255) / 255,
+    (floor(v / 255) % 255) / 255,
+    (v % 255) / 255
+  ];
+};
+
 function uvrot(coords, deg) {
   if (deg === 0) return coords;
   var c = [];
@@ -736,5 +745,3 @@ function each(arr, it, done) {
     });
   });
 }
-
-
