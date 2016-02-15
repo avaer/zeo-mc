@@ -1,20 +1,14 @@
 var voxelAsync = require('../voxel-async/index');
 
-module.exports = function(data, THREE) {
-  return new VoxelPlaneRenderer(data, THREE);
+function voxelPlaneRenderer(data, THREE) {
+  const {vegetations, weathers, dims} = data;
+  const planes = voxelAsync.planeMesher({vegetations, weathers}, dims);
+
+  return new THEEE.Mesh(); // XXX
 }
 
-module.exports.VoxelPlaneRenderer = VoxelPlaneRenderer;
-
-function VoxelPlaneRenderer(data, THREE) {
-  this.data = data
-  this.THREE = THREE;
-
-  this.initPlanes();
-}
-
-VoxelPlaneRenderer.prototype.initBlocks = function() {
-  this.planes = voxelAsync.planeMesher(this.data.voxels, this.data.dims)
+// XXX trash the below
+voxelPlaneRenderer.prototype.initBlocks = function() {
 
   this.geometry = new this.THREE.Geometry()
 
@@ -73,7 +67,7 @@ VoxelPlaneRenderer.prototype.initBlocks = function() {
 };
 
 
-VoxelPlaneRenderer.prototype.initPlanes = function() {
+voxelPlaneRenderer.prototype.initPlanes = function() {
   const {data: {vegetations, weathers, dims}} = this;
 
   if (weathers) {
@@ -82,23 +76,7 @@ VoxelPlaneRenderer.prototype.initPlanes = function() {
     this.weatherMesh = weatherMesh; */
   }
 };
-
-VoxelPlaneRenderer.prototype.addToScene = function(scene) {
-  if (this.vegetationMesh) scene.add( this.vegetationMesh )
-  if (this.weatherMesh) scene.add( this.weatherMesh )
-}
-
-VoxelPlaneRenderer.prototype.removeFromScene = function(scene) {
-  if (this.vegetationMesh) scene.remove( this.vegetationMesh )
-  if (this.weatherMesh) scene.remove( this.weatherMesh )
-}
-
-VoxelPlaneRenderer.prototype.setPosition = function(x, y, z) {
-  if (this.vegetationMesh) this.vegetationMesh.position.set(x, y, z)
-  if (this.weatherMesh) this.weatherMesh.position.set(x, y, z)
-}
-
-VoxelPlaneRenderer.prototype.faceVertexUv = function(i) {
+voxelPlaneRenderer.prototype.faceVertexUv = function(i) {
   var vs = [
     this.blocks.vertices[i*4+0],
     this.blocks.vertices[i*4+1],
@@ -164,4 +142,5 @@ VoxelPlaneRenderer.prototype.faceVertexUv = function(i) {
     ]
   }
 }
-;
+
+module.exports = voxelPlaneRenderer;

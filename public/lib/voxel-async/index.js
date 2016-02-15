@@ -1,10 +1,12 @@
 import voxelTerrain from '../voxel-terrain/index';
 import voxelBlockMesher from '../voxel-block-mesher/index';
+import voxelPlaneMesher from '../voxel-plane-mesher/index';
 
 import {BLOCKS, MODELS} from '../../resources/index';
 
 let voxelTerrainGenerate = null;
 let voxelBlockMesherInstance = null;
+let voxelPlaneMesherInstance = null;
 
 export function init({seed, chunkSize}) {
   voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
@@ -19,6 +21,7 @@ export function init({seed, chunkSize}) {
   })();
   const mesherExtraData = {transparentTypes};
   voxelBlockMesherInstance = voxelBlockMesher({mesherExtraData});
+  voxelPlaneMesherInstance = voxelPlaneMesher();
 }
 
 export function generateSync(position) {
@@ -26,6 +29,7 @@ export function generateSync(position) {
 
   const chunk = voxelTerrainGenerate(position);
   chunk.dims._cachedBlockMesh = voxelBlockMesherInstance(chunk.voxels, chunk.dims);
+  chunk.dims._cachedPlaneMesh = voxelPlaneMesherInstance(chunk.voxels, chunk.dims);
   return chunk;
 }
 
@@ -117,14 +121,20 @@ export function weatherMesher(weathers, dims) {
   return result;
 } */
 
-export function planeMesher(planes, dims) {
+export function planeMesher(data, dims) {
   _ensureInitialized();
 
-  // XXX implement this
+  var cachedPlaneMesh = dims._cachedPlaneMesh;
+  if (cachedPlaneMesh) {
+    dims._cachedPlaneMesh = null;
+    return cachedPlaneMesh;
+  } else {
+    return voxelPlaneMesherInstance(data, dims);
+  }
 }
 
 function _ensureInitialized() {
-  if (voxelTerrainGenerate !== null && voxelBlockMesherInstance !== null) {
+  if (voxelTerrainGenerate !== null && voxelBlockMesherInstance !== null && voxelPlaneMesher !== null) {
     // nothing
   } else {
     throw new Error('voxel-async is not initialized');
