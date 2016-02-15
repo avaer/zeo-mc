@@ -1,4 +1,5 @@
 const voxelAsync = require('../voxel-async/index');
+const voxelTextureShader = require('../voxel-texture-shader/index');
 
 function voxelBlockRenderer(data, THREE) {
   const {voxels, dims} = data;
@@ -55,47 +56,91 @@ function voxelBlockRenderer(data, THREE) {
       }
       if ((size.z === 0 && spans.x0 < spans.x1) || (size.x === 0 && spans.y0 > spans.y1)) {
         return [
-          new THREE.Vector2(height, 0),
-          new THREE.Vector2(0, 0),
-          new THREE.Vector2(0, width),
-          new THREE.Vector2(height, width)
+          [height, 0],
+          [0, 0],
+          [0, width],
+          [height, width]
         ]
       } else {
         return [
-          new THREE.Vector2(0, 0),
-          new THREE.Vector2(0, height),
-          new THREE.Vector2(width, height),
-          new THREE.Vector2(width, 0)
+          [0, 0],
+          [0, height],
+          [width, height],
+          [width, 0]
         ]
       }
     }
 
-    const geometry = new THREE.Geometry();
+    const vertices = new Float32Array(blocks.faces.length * 6 * 3);
+    const uvs = new Float32Array(blocks.faces.length * 6 * 2);
+    const colors = new Float32Array(blocks.faces.length * 6 * 3);
 
-    geometry.vertices.length = 0;
-    geometry.faces.length = 0;
+    for (let i = 0, l = blocks.faces.length; i < l; i++) {
+      const faceVertices = [
+        blocks.vertices[i * 4 + 0],
+        blocks.vertices[i * 4 + 1],
+        blocks.vertices[i * 4 + 2],
+        blocks.vertices[i * 4 + 3]
+      ];
 
-    for (let i = 0; i < blocks.vertices.length; ++i) {
-      const q = blocks.vertices[i];
-      geometry.vertices.push(new THREE.Vector3(q[0], q[1], q[2]));
-    } 
-    
-    for (let i = 0; i < blocks.faces.length; i++) {
-      const q = blocks.faces[i];
+      // abd
+      vertices[i * 18 + 0] = faceVertices[0][0];
+      vertices[i * 18 + 1] = faceVertices[0][1];
+      vertices[i * 18 + 2] = faceVertices[0][2];
 
-      const f = new THREE.Face3(q[0], q[1], q[2]);
-      f.color = new THREE.Color(q[3]);
+      vertices[i * 18 + 3] = faceVertices[1][0];
+      vertices[i * 18 + 4] = faceVertices[1][1];
+      vertices[i * 18 + 5] = faceVertices[1][2];
 
-      geometry.faces.push(f);
+      vertices[i * 18 + 6] = faceVertices[3][0];
+      vertices[i * 18 + 7] = faceVertices[3][1];
+      vertices[i * 18 + 8] = faceVertices[3][2];
+
+      // bcd
+      vertices[i * 18 + 9] = faceVertices[1][0];
+      vertices[i * 18 + 10] = faceVertices[1][1];
+      vertices[i * 18 + 11] = faceVertices[1][2];
+
+      vertices[i * 18 + 12] = faceVertices[2][0];
+      vertices[i * 18 + 13] = faceVertices[2][1];
+      vertices[i * 18 + 14] = faceVertices[2][2];
+
+      vertices[i * 18 + 15] = faceVertices[3][0];
+      vertices[i * 18 + 16] = faceVertices[3][1];
+      vertices[i * 18 + 17] = faceVertices[3][2];
     }
-    for (let i = 0, l = blocks.faces.length / 2; i < l; i++) {
+
+    for (let i = 0, l = blocks.faces.length; i < l; i++) {
       const faceVertexUvs = getFaceVertexUvs(i);
-      geometry.faceVertexUvs[0].push([faceVertexUvs[0], faceVertexUvs[1], faceVertexUvs[3]]);
-      geometry.faceVertexUvs[0].push([faceVertexUvs[1], faceVertexUvs[2], faceVertexUvs[3]]);
+
+      uvs[i * 12 + 0] = faceVertexUvs[0][0];
+      uvs[i * 12 + 1] = faceVertexUvs[0][1];
+      uvs[i * 12 + 2] = faceVertexUvs[1][0];
+      uvs[i * 12 + 3] = faceVertexUvs[1][1];
+      uvs[i * 12 + 4] = faceVertexUvs[3][0];
+      uvs[i * 12 + 5] = faceVertexUvs[3][1];
+
+      uvs[i * 12 + 6] = faceVertexUvs[1][0];
+      uvs[i * 12 + 7] = faceVertexUvs[1][1];
+      uvs[i * 12 + 8] = faceVertexUvs[2][0];
+      uvs[i * 12 + 9] = faceVertexUvs[2][1];
+      uvs[i * 12 + 10] = faceVertexUvs[3][0];
+      uvs[i * 12 + 11] = faceVertexUvs[3][1];
+    }
+
+    for (let i = 0, l = blocks.faces.length; i < l; i++) {
+      const colorValue = blocks.faces[i];
+      const colorArray = voxelTextureShader.colorValueToArray(colorValue);
+
+      for (let j = 0; j < 6; j++) {
+        colors[i * 18 + j * 3 + 0] = colorArray[0];
+        colors[i * 18 + j * 3 + 1] = colorArray[1];
+        colors[i * 18 + j * 3 + 2] = colorArray[2];
+      }
     }
 
     // compute vertex colors for ambient occlusion
-    const light = new THREE.Color(0xffffff)
+    /* const light = new THREE.Color(0xffffff)
     const shadow = new THREE.Color(0x505050)
     for (let i = 0; i < geometry.faces.length; ++i) {
       let face = geometry.faces[i];
@@ -123,9 +168,9 @@ function voxelBlockRenderer(data, THREE) {
       else {
         face.vertexColors = [shadow, light, light, shadow];
       }
-    }
+    } */
 
-    geometry.computeFaceNormals();
+    // geometry.computeFaceNormals();
 
     /* geometry.verticesNeedUpdate = true
     geometry.elementsNeedUpdate = true
@@ -134,7 +179,14 @@ function voxelBlockRenderer(data, THREE) {
     geometry.computeBoundingBox()
     geometry.computeBoundingSphere() */
 
-    const bufferGeometry = new THREE.BufferGeometry().fromGeometry(geometry); // XXX clean this up to instantiate BufferGeometry directly
+    const bufferGeometry = new THREE.BufferGeometry();
+    // console.log('got buffer geo', bufferGeometry, blocks);
+    bufferGeometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    bufferGeometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+    bufferGeometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    bufferGeometry.computeVertexNormals();
+
     return bufferGeometry;
   })();
 

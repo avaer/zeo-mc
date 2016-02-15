@@ -145,8 +145,9 @@ var GreedyMesh = (function greedyLoader() {
                   vertices.push([x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]]);
                   vertices.push([x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]]);
                   var color = removeFlags(c);
-                  faces.push([vertex_count, vertex_count+1, vertex_count+3, color]); // abd
-                  faces.push([vertex_count+1, vertex_count+2, vertex_count+3, color]); // bcd
+                  faces.push(color);
+                  // faces.push([vertex_count, vertex_count+1, vertex_count+3, color]); // abd
+                  // faces.push([vertex_count+1, vertex_count+2, vertex_count+3, color]); // bcd
                 // } else {
                 //   var vertex_count = tVertices.length;
                 //   tVertices.push([x[0],             x[1],             x[2]            ]);
