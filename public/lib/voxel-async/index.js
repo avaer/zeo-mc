@@ -4,7 +4,7 @@ import voxelBlockMesher from '../voxel-block-mesher/index';
 import {BLOCKS, MODELS} from '../../resources/index';
 
 let voxelTerrainGenerate = null;
-let voxelMesherMesh = null;
+let voxelBlockMesherInstance = null;
 
 export function init({seed, chunkSize}) {
   voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
@@ -18,14 +18,14 @@ export function init({seed, chunkSize}) {
     return result;
   })();
   const mesherExtraData = {transparentTypes};
-  voxelMesherMesh = voxelMesher({mesherExtraData});
+  voxelBlockMesherInstance = voxelBlockMesher({mesherExtraData});
 }
 
 export function generateSync(position) {
   _ensureInitialized();
 
   const chunk = voxelTerrainGenerate(position);
-  chunk.dims._cachedBlockMesh = voxelMesherMesh(chunk.voxels, chunk.dims);
+  chunk.dims._cachedBlockMesh = voxelBlockMesherInstance(chunk.voxels, chunk.dims);
   return chunk;
 }
 
@@ -37,7 +37,7 @@ export function blockMesher(voxels, dims) {
     dims._cachedBlockMesh = null;
     return cachedBlockMesh;
   } else {
-    return voxelMesherMesh(voxels, dims);
+    return voxelBlockMesherInstance(voxels, dims);
   }
 }
 
@@ -124,7 +124,7 @@ export function planeMesher(planes, dims) {
 }
 
 function _ensureInitialized() {
-  if (voxelTerrainGenerate !== null && voxelMesherMesh !== null) {
+  if (voxelTerrainGenerate !== null && voxelBlockMesherInstance !== null) {
     // nothing
   } else {
     throw new Error('voxel-async is not initialized');
