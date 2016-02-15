@@ -1,7 +1,66 @@
+var THREE = require('three');
+
+var voxelTextureShader = require('../voxel-texture-shader/index');
+
+var blocks = require('../../resources/blocks/index');
+var BLOCKS = blocks.BLOCKS;
+
+var planes = require('../../resources/planes/index');
+var VEGETATIONS = planes.VEGETATIONS;
+var WEATHERS = planes.WEATHERS;
+
 function voxelPlaneMesher(opts) {
   return function({vegetations, weathers}, dims) {
     const vertices = [];
     const faces = [];
+
+    for (let x = 0; x < dims[0]; x++) {
+      for (let z = 0; z < dims[2]; z++) {
+        for (let y = 0; y < dims[1]; y++) {
+          const idx = _getIndex(x, y, z, dims);
+          /* const vegetation = vegetations[idx];
+          if (vegetation) {
+            const spec = VEGETATIONS[vegetation - 1];
+            const {plane: planeName, p, s} = spec;
+            const plane = planes.make(planeName, p, s);
+            planes.meshes.forEach(mesh => {
+              
+            });
+          } */
+          const weather = weathers[idx];
+          if (weather) {
+            const spec = WEATHERS[weather - 1];
+            const {plane: planeName} = spec;
+            const plane = planes.make(planeName);
+
+            for (let i = 0; i < plane.meshes.length; i++) {
+              const planeMesh = plane.meshes[i];
+              const {position, dimensions, rotation} = planeMesh;
+
+              const geometry = new THREE.PlaneGeometry(dimensions[0], dimensions[1]);
+              geometry.translate(dimensions[0], dimensions[1], 0);
+              geometry.translate(position[0], position[1], position[2]);
+              rotation[0] !== 0 && geometry.rotateX(rotation[0]);
+              rotation[1] !== 0 && geometry.rotateY(rotation[1]);
+              rotation[2] !== 0 && geometry.rotateZ(rotation[2]);
+
+              for (let j = 0; j < geometry.vertices.length; j++) {
+                const vertex = geometry.vertices[j];
+                const {x, y, z} = vertex;
+                vertices.push([x, y, z]);
+              }
+
+              const color = BLOCKS[plane.materials[planeMesh.materialIndex]];
+              for (let j = 0; j < geometry.faces.length; j++) {
+                const face = geometry.faces[j];
+                const {a, b, c} = face;
+                faces.push([a, b, c, color]);
+              }
+            }
+          }
+        }
+      }
+    }
 
     /* var vertex_count = vertices.length;
     vertices.push([x[0],             x[1],             x[2]            ]);
@@ -14,6 +73,10 @@ function voxelPlaneMesher(opts) {
 
     return {vertices, faces};
   };
+}
+
+function _getIndex(x, y, z, dims) {
+  return x + (y * dims[0]) + (z * dims[0] * dims[1]);
 }
 
 if (module) {

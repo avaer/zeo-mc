@@ -28,8 +28,9 @@ export function generateSync(position) {
   _ensureInitialized();
 
   const chunk = voxelTerrainGenerate(position);
-  chunk.dims._cachedBlockMesh = voxelBlockMesherInstance(chunk.voxels, chunk.dims);
-  chunk.dims._cachedPlaneMesh = voxelPlaneMesherInstance(chunk.voxels, chunk.dims);
+  const {voxels, vegetations, weathers, dims} = chunk;
+  chunk.dims._cachedBlockMesh = voxelBlockMesherInstance(voxels, dims);
+  chunk.dims._cachedPlaneMesh = voxelPlaneMesherInstance({vegetations, weathers}, dims);
   return chunk;
 }
 

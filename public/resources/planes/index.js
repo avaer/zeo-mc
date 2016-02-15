@@ -8,6 +8,15 @@ import PlaneRain from './PlaneRain';
 
 // planes
 
+export const PLANES = _makePlaneMap([
+  PlaneCrop,
+  PlaneCross,
+  PlaneTallgrass,
+  PlaneTallgrassDouble,
+  PlaneTallgrassDoubleSunflower,
+  PlaneRain,
+]);
+
 export const VEGETATIONS = _makeVegetationSpecs([
   PlaneCrop,
   PlaneCross,
@@ -20,17 +29,32 @@ export const WEATHERS = _makeWeatherSpecs([
   PlaneRain,
 ]);
 
-export const PLANES = VEGETATIONS.concat(WEATHERS);
+// api
+
+export function make(planeName, p = [], s = []) {
+  const Plane = PLANES[planeName];
+  const plane = new Plane(p, s);
+  return plane;
+}
 
 // helpers
 
-function _makeVegetationSpecs(models) {
+function _makePlaneMap(planes) {
+  const result = {};
+  planes.forEach(plane => {
+    const {NAME} = plane;
+    result[NAME] = plane;
+  });
+  return result;
+}
+
+function _makeVegetationSpecs(planes) {
   const result = [];
-  models.forEach(model => {
-    const {NAME, MATERIALS} = model;
+  planes.forEach(plane => {
+    const {NAME, MATERIALS} = plane;
     MATERIALS.forEach((materials, i) => {
       const spec = {
-        model: NAME,
+        plane: NAME,
         p: [i],
         s: []
       };
@@ -40,11 +64,11 @@ function _makeVegetationSpecs(models) {
   return result;
 }
 
-function _makeWeatherSpecs(models) {
-  return models.map(model => {
-    const {NAME} = model;
+function _makeWeatherSpecs(planes) {
+  return planes.map(plane => {
+    const {NAME} = plane;
     const spec = {
-      model: NAME
+      plane: NAME
     };
     return spec;
   });

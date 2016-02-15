@@ -14,9 +14,11 @@ import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
 import {CHUNK_SIZE, CHUNK_DISTANCE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
-import {BLOCKS, MODELS} from '../resources/index';
+import {BLOCKS, PLANES, MODELS} from '../resources/index';
 
-window.MODELS = MODELS; // XXX remove this when we no longer need to support making models manually
+window.BLOCKS = BLOCKS; // XXX remove this when we no longer need to support making models manually
+window.PLANES = PLANES;
+window.MODELS = MODELS;
 
 const INITIAL_CHUNK_POSITIONS = (() => {
   const result = [];
