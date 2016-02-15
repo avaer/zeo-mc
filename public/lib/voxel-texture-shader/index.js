@@ -1,4 +1,4 @@
-var tic = require('tic')();
+// var tic = require('tic')();
 var createAtlas = require('atlaspack');
 var isTransparent = require('opaque').transparent;
 var touchup = require('touchup');
@@ -683,7 +683,7 @@ Texture.prototype.sprite = function(name, w, h, cb) {
   return self;
 };
 
-Texture.prototype.animate = function(mesh, names, delay) {
+/* Texture.prototype.animate = function(mesh, names, delay) {
   var self = this;
   delay = delay || 1000;
   if (!Array.isArray(names) || names.length < 2) return false;
@@ -701,7 +701,7 @@ Texture.prototype.animate = function(mesh, names, delay) {
 
 Texture.prototype.tick = function(dt) {
   tic.tick(dt);
-};
+}; */
 
 function uvrot(coords, deg) {
   if (deg === 0) return coords;

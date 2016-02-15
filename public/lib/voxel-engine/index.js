@@ -640,7 +640,7 @@ Game.prototype.tick = function(delta) {
     this.items[i].tick(delta)
   }
   
-  if (this.materials) this.materials.tick(delta)
+  // if (this.materials) this.materials.tick(delta)
 
   if (this.pendingChunks.length) this.loadPendingChunks()
   if (Object.keys(this.chunksNeedsUpdate).length > 0) this.updateDirtyChunks()
