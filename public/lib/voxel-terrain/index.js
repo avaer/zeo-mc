@@ -3,9 +3,9 @@ var FastSimplexNoise = require('fast-simplex-noise');
 
 var resources = require('../../resources/index');
 var BLOCKS = resources.BLOCKS.BLOCKS;
-var VEGETATIONS = resources.MODELS.VEGETATIONS;
+var VEGETATIONS = resources.PLANES.VEGETATIONS;
+var WEATHERS = resources.PLANES.WEATHERS;
 var ENTITIES = resources.MODELS.ENTITIES;
-var WEATHERS = resources.MODELS.WEATHERS;
 
 var TERRAIN_FLOOR = 0;
 var TERRAIN_CEILING = 20; // minecraft's limit

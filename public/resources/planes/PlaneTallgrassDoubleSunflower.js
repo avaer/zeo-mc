@@ -1,4 +1,4 @@
-import ModelTallgrassDouble from './ModelTallgrassDouble';
+import PlaneTallgrassDouble from './PlaneTallgrassDouble';
 
 const NAME ='tallgrassDoubleSunflower';
 
@@ -13,7 +13,7 @@ const TEXTURES = [
 
 const SIZE = 10;
 
-export default class ModelTallgrassDoubleSunflower extends ModelTallgrassDouble {
+export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble {
   static NAME = NAME;
   static TEXTURES = TEXTURES;
 

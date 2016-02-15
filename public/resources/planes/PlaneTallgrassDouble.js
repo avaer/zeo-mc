@@ -1,4 +1,4 @@
-import ModelBase from './ModelBase';
+import PlaneBase from './PlaneBase';
 import {BIOME_TEXTURES} from '../../constants/index';
 
 const NAME = 'tallgrassDouble';
@@ -36,7 +36,7 @@ const TEXTURES = [].concat([
 
 const SIZE = 10;
 
-export default class ModelTallgrassDouble extends ModelBase {
+export default class PlaneTallgrassDouble extends PlaneBase {
   static NAME = NAME;
   static TEXTURES = TEXTURES;
 

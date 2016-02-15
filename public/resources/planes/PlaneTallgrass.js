@@ -1,30 +1,18 @@
-import ModelBase from './ModelBase';
+import PlaneBase from './PlaneBase';
 import {BIOME_TEXTURES} from '../../constants/index';
 
-const NAME = 'crop';
+const NAME = 'tallgrass';
 
-function _stages(name, stages) {
-  const result = [];
-  for (let i = 0; i <= stages; i++) {
-    result.push(name + '_stage_' + i);
-  }
-  return result;
-}
-
-const TEXTURES = [].concat(
-  _stages('carrots', 3)
-).concat(
-  _stages('nether_wart', 2)
-).concat(
-  _stages('potatoes', 3)
-).concat(
-  _stages('wheat', 7)
+const TEXTURES = [].concat([
+  'reeds'
+]).concat(
+  BIOME_TEXTURES.map(biomeTexture => 'tallgrass_' + biomeTexture)
 ).map(textureName => 'blocks/' + textureName);
 
 const SIZE = 10;
 
-export default class ModelCrop extends ModelBase {
-  static NAME = NAME;
+export default class PlaneTallgrass extends PlaneBase {
+  static NAME = 'tallgrass';
   static TEXTURES = TEXTURES;
 
   constructor([p1 = Math.random()] = [], []) {
@@ -39,7 +27,7 @@ export default class ModelCrop extends ModelBase {
 
     this.meshes = [
       {
-        name: 'cross1',
+        name: 'tallgrass1',
         offset: offset,
         position: position,
         dimensions: dimensions,
@@ -47,7 +35,7 @@ export default class ModelCrop extends ModelBase {
         rotation: [0, Math.PI * 1 / 4, 0]
       },
       {
-        name: 'cross2',
+        name: 'tallgrass2',
         offset: offset,
         position: position,
         dimensions: dimensions,
@@ -59,4 +47,4 @@ export default class ModelCrop extends ModelBase {
 }
 
 // XXX
-// var m; function go() {game.scene.remove(m); m = MODELS.make('crop', [], [], game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();
+// var m; function go() {game.scene.remove(m); m = MODELS.make('tallgrass', [], [], game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();

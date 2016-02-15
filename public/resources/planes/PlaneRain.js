@@ -1,4 +1,4 @@
-import ModelBase from './ModelBase';
+import PlaneBase from './PlaneBase';
 
 const MAX_POSITION = -20;
 const MIN_POSITION = 20;
@@ -6,7 +6,7 @@ const FALL_FREQUENCY = 0.5;
 
 const NAME = 'rain';
 
-export default class ModelRain extends ModelBase {
+export default class PlaneRain extends PlaneBase {
   static NAME = NAME;
 
   constructor([p1], [s1 = 0, s2 = 1] = []) {

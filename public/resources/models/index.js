@@ -1,11 +1,5 @@
 import ModelBase from './ModelBase';
 
-import ModelCrop from './ModelCrop';
-import ModelCross from './ModelCross';
-import ModelTallgrass from './ModelTallgrass';
-import ModelTallgrassDouble from './ModelTallgrassDouble';
-import ModelTallgrassDoubleSunflower from './ModelTallgrassDoubleSunflower';
-
 import ModelChest from './ModelChest';
 import ModelChicken from './ModelChicken';
 import ModelCow from './ModelCow';
@@ -15,17 +9,9 @@ import ModelPig from './ModelPig';
 import ModelSlime from './ModelSlime';
 import ModelWolf from './ModelWolf';
 
-import ModelRain from './ModelRain';
-
 // models
 
 export const MODELS = _makeModelMap([
-  ModelCrop,
-  ModelCross,
-  ModelTallgrass,
-  ModelTallgrassDouble,
-  ModelTallgrassDoubleSunflower,
-
   ModelChest,
   ModelChicken,
   ModelCow,
@@ -34,18 +20,6 @@ export const MODELS = _makeModelMap([
   ModelPig,
   ModelSlime,
   ModelWolf,
-
-  ModelRain,
-]);
-
-// vegetations
-
-export const VEGETATIONS = _makeVegetationSpecs([
-  ModelCrop,
-  ModelCross,
-  ModelTallgrass,
-  ModelTallgrassDouble,
-  ModelTallgrassDoubleSunflower,
 ]);
 
 // entities
@@ -57,15 +31,8 @@ export const ENTITIES = _makeEntitySpecs([
   ModelCreeper,
   ModelOcelot,
   ModelPig,
-  ModelRain,
   ModelSlime,
   ModelWolf,
-]);
-
-// weathers
-
-export const WEATHERS = _makeWeatherSpecs([
-  ModelRain,
 ]);
 
 // api
@@ -87,22 +54,6 @@ function _makeModelMap(models) {
   return result;
 }
 
-function _makeVegetationSpecs(models) {
-  const result = [];
-  models.forEach(model => {
-    const {NAME, TEXTURES} = model;
-    TEXTURES.forEach((texture, i) => {
-      const spec = {
-        model: NAME,
-        p: [i],
-        s: []
-      };
-      result.push(spec);
-    });
-  });
-  return result;
-}
-
 function _makeEntitySpecs(models) {
   return models.map(model => {
     const {NAME} = model;
@@ -114,14 +65,3 @@ function _makeEntitySpecs(models) {
     return spec;
   });
 }
-
-function _makeWeatherSpecs(models) {
-  return models.map(model => {
-    const {NAME} = model;
-    const spec = {
-      model: NAME
-    };
-    return spec;
-  });
-}
-
