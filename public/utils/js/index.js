@@ -28,13 +28,12 @@ export function throttle(fn, timeout) {
       lastCall = now;
     }
 
-    function invokeDeferred() {
+    function invokeDeferred(timeout) {
       queued = true;
-      const timeoutRemaining = timeout - timeSinceLastCall;
       setTimeout(function() {
         queued = false;
         invoke();
-      }, timeoutRemaining);
+      }, timeout);
     }
 
     if (queued) {
@@ -48,7 +47,8 @@ export function throttle(fn, timeout) {
         if (timeSinceLastCall >= timeout) {
           invokeImmediate(now);
         } else {
-          invokeDeferred();
+          const timeoutRemaining = timeout - timeSinceLastCall;
+          invokeDeferred(timeoutRemaining);
         }
       }
     }
