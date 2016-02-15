@@ -99,17 +99,15 @@ function Game(opts) {
 
   this.materials = texture({
     game: this,
-    artPacks: {
-      getTextureImage: (name, cb) => {
-        function done() {
-          cb(img);
-        }
-
-        const img = document.createElement('img');
-        img.onload = done;
-        img.onerror = done;
-        img.src = opts.texturePath(name);
+    getTextureImage: (name, cb) => {
+      function done() {
+        cb(img);
       }
+
+      const img = document.createElement('img');
+      img.onload = done;
+      img.onerror = done;
+      img.src = opts.texturePath(name);
     },
     materialType: opts.materialType || THREE.MeshLambertMaterial,
     materialParams: opts.materialParams || {},

@@ -26,8 +26,7 @@ function Texture(opts) {
   this.names = [];
   this.materials = [];
   this.transparents = [];
-  this.artPacks = opts.artPacks;
-  if (!this.artPacks) throw new Error('voxel-texture-shader requires artPacks option');
+  this.getTextureImage = opts.getTextureImage;
   this.loading = 0;
   this.ao = voxelFakeAo(this.game);
 
@@ -426,7 +425,7 @@ Texture.prototype.pack = function(name, done) {
     done();
   }
   if (typeof name === 'string') {
-    self.artPacks.getTextureImage(name, function(img) {
+    self.getTextureImage(name, function(img) {
 
       if (Array.isArray(img)) {
         // TODO: support animated textures, returned as array https://github.com/deathcap/voxel-texture-shader/issues/5
@@ -450,6 +449,7 @@ Texture.prototype.pack = function(name, done) {
       done();
     });
   } else {
+    throw new Error('fail to load');
     pack(name);
   }
   return self;
@@ -559,41 +559,49 @@ Texture.prototype.paint = function(mesh, materials) {
     const numFaces = uvs.array.length / 2;
 
     for (let i = 0; i < numFaces; i++) {
-      const faceMaterials = (() => {
-        if (materials) {
-          return materials;
-        } else {
+      const faceMaterial = (() => {
+        const faceMaterials = (() => {
           const colors = mesh.geometry.getAttribute('color');
           const colorIndex = i * 3;
-          const materialIndex = floor(colors.array[colorIndex + 2] * 255 + colors.array[colorIndex + 1] * 255 * 255 + colors.array[colorIndex + 0] * 255 * 255 * 255);
+          const materialIndex = floor(
+            colors.array[colorIndex + 0] * 255 * 255 * 255 +
+            colors.array[colorIndex + 1] * 255 * 255 +
+            colors.array[colorIndex + 2] * 255
+          );
           const faceMaterials = self.materials[materialIndex - 1] || self.materials[0];
           return faceMaterials;
-        }
+        })();
+
+        const faceMaterial = (() => {
+          // BACK, FRONT, TOP, BOTTOM, LEFT, RIGHT
+          let faceMaterial = faceMaterials[0] || '';
+          const normals = mesh.geometry.getAttribute('normal');
+          const normalIndex = i * 3;
+          if      (normals.array[normalIndex + 0] === 1)  faceMaterial = faceMaterials[1] || ''; // z === 1
+          else if (normals.array[normalIndex + 1] === 1)  faceMaterial = faceMaterials[2] || ''; // y === 1
+          else if (normals.array[normalIndex + 1] === -1) faceMaterial = faceMaterials[3] || ''; // y === -1
+          else if (normals.array[normalIndex + 2] === -1) faceMaterial = faceMaterials[4] || ''; // x === -1
+          else if (normals.array[normalIndex + 2] === 1)  faceMaterial = faceMaterials[5] || ''; // x === 0
+
+          return faceMaterial;
+        })();
+
+        return faceMaterial;
       })();
 
-      // BACK, FRONT, TOP, BOTTOM, LEFT, RIGHT
-      let faceMaterialName = faceMaterials[0] || '';
-      const normals = mesh.geometry.getAttribute('normal');
-      const normalIndex = i * 3;
-      if      (normals.array[normalIndex + 0] === 1)  faceMaterialName = faceMaterials[1] || ''; // z === 1
-      else if (normals.array[normalIndex + 1] === 1)  faceMaterialName = faceMaterials[2] || ''; // y === 1
-      else if (normals.array[normalIndex + 1] === -1) faceMaterialName = faceMaterials[3] || ''; // y === -1
-      else if (normals.array[normalIndex + 2] === -1) faceMaterialName = faceMaterials[4] || ''; // x === -1
-      else if (normals.array[normalIndex + 2] === 1)  faceMaterialName = faceMaterials[5] || ''; // x === 0
-
       // if just a simple color
-      /* if (faceMaterialName.slice(0, 1) === '#') {
-        self.ao(face, faceMaterialName);
+      /* if (faceMaterial.slice(0, 1) === '#') {
+        self.ao(face, faceMaterial);
         return;
       } */
 
-      var atlasuv = self._atlasuv[faceMaterialName];
+      var atlasuv = self._atlasuv[faceMaterial];
       if (!atlasuv) {
         throw new Error('no material index');
       }
 
       // If a transparent texture use transparent material
-      // face.materialIndex = (self.useTransparency && self.transparents.indexOf(faceMaterialName) !== -1) ? 1 : 0; // XXX
+      // face.materialIndex = (self.useTransparency && self.transparents.indexOf(faceMaterial) !== -1) ? 1 : 0; // XXX
       // mesh.geometry.groups[0].materialIndex = 1;
       mesh.geometry.groups = [
         {
@@ -602,7 +610,7 @@ Texture.prototype.paint = function(mesh, materials) {
           materialIndex: 0
         }
       ];
-      /* if (self.useTransparency && self.transparents.indexOf(faceMaterialName) !== -1) {
+      /* if (self.useTransparency && self.transparents.indexOf(faceMaterial) !== -1) {
         throw new Error('was transparent');
       } */
 

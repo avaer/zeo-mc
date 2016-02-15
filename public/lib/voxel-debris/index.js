@@ -1,6 +1,8 @@
 var funstance = require('funstance');
 var EventEmitter = require('events').EventEmitter;
 
+var floor = Math.floor;
+
 module.exports = function (game, opts) {
     if (!opts) opts = {};
     if (!opts.limit) opts.limit = function () { return false };
@@ -50,18 +52,31 @@ module.exports = function (game, opts) {
     });
 }
 
-function _getDebrisGeometry(game) {
+function _getDebrisGeometry(game, value) {
   const cubeGeometry = new game.THREE.CubeGeometry(1, 1, 1);
   const bufferGeometry = new game.THREE.BufferGeometry().fromGeometry(cubeGeometry);
+
+  const colors = bufferGeometry.getAttribute('color');
+  const color = [
+    (floor(value / (255 * 255)) % 255) / 255,
+    (floor(value / 255) % 255) / 255,
+    (value % 255) / 255
+  ];
+  for (let i = 0; i < colors.array.length; i += 3) {
+    colors.array[i + 0] = color[0];
+    colors.array[i + 1] = color[1];
+    colors.array[i + 2] = color[2];
+  }
+
   return bufferGeometry;
 }
 
 function createDebris(game, pos, value, power) {
   const mesh = new game.THREE.Mesh(
-    _getDebrisGeometry(game),
+    _getDebrisGeometry(game, value),
     game.materials.material
   );
-  game.materials.paint(mesh, game.materials.materials[value - 1]);
+  game.materials.paint(mesh);
   mesh.scale.set(0.25, 0.25, 0.25);
   mesh.translateX(pos[0]);
   mesh.translateY(pos[1]);
