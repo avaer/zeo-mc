@@ -164,7 +164,7 @@ export default class ModelOcelot extends ModelBase {
         position: [0.5, 0.0, 0.0],
         dimensions: [1, 8, 1],
         rotationPoint: [0, 20, 14],
-        rotation: 1.727876 + (Math.PI / 4) * Math.cos(s1) * s2
+        rotation: [1.727876 + (Math.PI / 4) * Math.cos(s1) * s2, 0, 0]
       },
     ]
   }
