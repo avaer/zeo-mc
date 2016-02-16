@@ -201,11 +201,13 @@ function voxelTerrain(opts) {
       var y = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
       if (y === TERRAIN_FLOOR || (y >= startY && y < endY)) {
         land(x, y, z);
-        tree(x, y, z);
         dirt(x, y, z);
-        veg(x, y, z);
-        ent(x, y, z);
-        !isCave(x,y,z) && weath(x, y, z);
+        if (!isCave(x,y,z)) {
+          tree(x, y, z);
+          veg(x, y, z);
+          ent(x, y, z);
+          weath(x, y, z);
+        }
       } else if (startY < 0) {
         dirt(x, endY, z);
       }
@@ -218,66 +220,64 @@ function voxelTerrain(opts) {
     }
 
     function tree(x, y, z) {
-      if (!isCave(x, y, z)) {
-        var treeNoiseN = treeNoise.in2D(x, z);
-        if (treeNoiseN >= (1 - TREE_RATE)) {
-          var treeHeightNoiseN = sliceNoise(treeNoiseN, TREE_RATE, 1);
+      var treeNoiseN = treeNoise.in2D(x, z);
+      if (treeNoiseN >= (1 - TREE_RATE)) {
+        var treeHeightNoiseN = sliceNoise(treeNoiseN, TREE_RATE, 1);
 
-          var height = TREE_MIN_HEIGHT + (treeHeightNoiseN * (TREE_MAX_HEIGHT - TREE_MIN_HEIGHT));
-          var base = height * TREE_BASE_RATIO;
+        var height = TREE_MIN_HEIGHT + (treeHeightNoiseN * (TREE_MAX_HEIGHT - TREE_MIN_HEIGHT));
+        var base = height * TREE_BASE_RATIO;
 
-          function position() {
-            return { x: x, y: y, z: z };
-          }
+        function position() {
+          return { x: x, y: y, z: z };
+        }
 
-          function leafPoints(fn) {
-            for (var j = -TREE_LEAF_SIZE; j <= TREE_LEAF_SIZE; j++) {
-              for (var k = -TREE_LEAF_SIZE; k <= TREE_LEAF_SIZE; k++) {
-                if (j === 0 && k === 0) continue;
-                fn(j, k);
-              }
+        function leafPoints(fn) {
+          for (var j = -TREE_LEAF_SIZE; j <= TREE_LEAF_SIZE; j++) {
+            for (var k = -TREE_LEAF_SIZE; k <= TREE_LEAF_SIZE; k++) {
+              if (j === 0 && k === 0) continue;
+              fn(j, k);
             }
           }
+        }
 
-          for (var i = 0; i < height; i++) {
-            var pos = position();
-            pos.y = y + i;
-            setMaybe(pos.x, pos.y, pos.z, BLOCKS['log_big_oak']);
-
-            if (i >= base) {
-              var leafSets = {};
-              leafPoints(function(j, k) {
-                pos.x = x + j;
-                pos.z = z + k;
-
-                var treeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
-                var treeLeafDistance = sqrt(j * j + k * k);
-                var treeLeafProbability = TREE_LEAF_RATE - ((treeLeafDistance - 1) / (TREE_LEAF_SIZE - 1)) * TREE_LEAF_RATE;
-                if (treeLeafN < treeLeafProbability) {
-                  var idx = getIndex(pos.x, pos.y, pos.z);
-                  leafSets[idx] = true;
-                }
-              });
-              leafPoints(function(j, k) {
-                pos.x = x + j;
-                pos.z = z + k;
-
-                if (DIRECTIONS.some(function(d) {
-                  var idx = getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
-                  return !!leafSets[idx];
-                })) {
-                  setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
-                }
-              });
-            }
-          }
-          
+        for (var i = 0; i < height; i++) {
           var pos = position();
           pos.y = y + i;
-          var tipTreeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
-          if (tipTreeLeafN < TREE_LEAF_RATE) {
-            setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
+          setMaybe(pos.x, pos.y, pos.z, BLOCKS['log_big_oak']);
+
+          if (i >= base) {
+            var leafSets = {};
+            leafPoints(function(j, k) {
+              pos.x = x + j;
+              pos.z = z + k;
+
+              var treeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
+              var treeLeafDistance = sqrt(j * j + k * k);
+              var treeLeafProbability = TREE_LEAF_RATE - ((treeLeafDistance - 1) / (TREE_LEAF_SIZE - 1)) * TREE_LEAF_RATE;
+              if (treeLeafN < treeLeafProbability) {
+                var idx = getIndex(pos.x, pos.y, pos.z);
+                leafSets[idx] = true;
+              }
+            });
+            leafPoints(function(j, k) {
+              pos.x = x + j;
+              pos.z = z + k;
+
+              if (DIRECTIONS.some(function(d) {
+                var idx = getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
+                return !!leafSets[idx];
+              })) {
+                setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
+              }
+            });
           }
+        }
+        
+        var pos = position();
+        pos.y = y + i;
+        var tipTreeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
+        if (tipTreeLeafN < TREE_LEAF_RATE) {
+          setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
         }
       }
     }
