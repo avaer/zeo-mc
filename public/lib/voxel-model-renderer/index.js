@@ -113,7 +113,11 @@ let faceVertexUvs = null;
 function _getFaceVertexUvs(THREE) {
   if (!faceVertexUvs) {
     const uv = [new THREE.Vector2(0, 0), new THREE.Vector2(0, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 0)];
-    faceVertexUvs = [[uv, uv, uv, uv, uv, uv]];
+    const uv1 = [uv[0], uv[1], uv[3]];
+    const uv2 = [uv[1], uv[2], uv[3]];
+    faceVertexUvs = [
+      [uv1, uv2, uv1, uv2, uv1, uv2, uv1, uv2, uv1, uv2, uv1, uv2]
+    ];
   }
 
   return faceVertexUvs;
@@ -135,7 +139,6 @@ function _makeCubeMesh(position, dimensions, texture, uv, THREE) {
   dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
 
   const geometry = _getCubeGeometry(dimensions[0], dimensions[1], dimensions[2], THREE);
-  geometry.faceVertexUvs = _getFaceVertexUvs(THREE);
   const material = _getCubeMaterial(texture, uv, THREE);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(
@@ -201,6 +204,7 @@ function _getCubeGeometry(x, y, z, THREE) {
     return cachedGeometry;
   } else {
     const cubeGeometry = new THREE.CubeGeometry(x, y, z);
+    cubeGeometry.faceVertexUvs = _getFaceVertexUvs(THREE);
     const bufferGeometry = new THREE.BufferGeometry().fromGeometry(cubeGeometry);
     cubeGeometryCache.set(geometryKey, bufferGeometry);
     return bufferGeometry;
