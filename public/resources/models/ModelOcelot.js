@@ -5,7 +5,7 @@ const NAME = 'ocelot';
 export default class ModelOcelot extends ModelBase {
   static NAME = NAME;
 
-  constructor([], [s1 = 0, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
+  constructor([], [s1 = Math.PI * 3 / 4, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
     super();
 
     this.textures = 'entity/cat/ocelot';

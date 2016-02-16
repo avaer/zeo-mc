@@ -1,5 +1,7 @@
 var voxelAsync = require('../voxel-async/index');
 
+const MODEL_SCALE = 1 / 16;
+
 function voxelModelRenderer(data, THREE) {
   const {entities, dims} = data;
   const models = voxelAsync.modelMesher(entities, dims);
@@ -14,7 +16,10 @@ function _makeObjects(models, THREE) {
 
     const {position, meshes, textures} = model;
     const subobject = _makeObject(meshes, textures, THREE);
-    subobject.position.set(position[0], position[1] + 3, position[2]);
+    const boundingBox = new THREE.Box3().setFromObject(subobject);
+    const minY = boundingBox.min.y;
+
+    subobject.position.set(position[0], position[1] - minY, position[2]);
 
     object.add(subobject);
   }
@@ -95,16 +100,16 @@ function _makeObject(meshes, textures, THREE) {
 
         recurse(subobject2, children);
       } else if (children) {
-        throw new Error('unhandled case');
-
-        /* const childrenobject = new THREE.Object3D();
+        const childrenobject = new THREE.Object3D();
         object.add(childrenobject);
-        recurse(childrenobject, children); */
+        recurse(childrenobject, children);
+      } else {
+        throw new Error('unhandled case');
       }
     });
   })(child, meshes);
-  child.position.set(0.5, -1, -0.5);
-  child.scale.set(0.1, 0.1, 0.1);
+  child.position.set(0.5, -1, 0.5);
+  child.scale.set(MODEL_SCALE, MODEL_SCALE, MODEL_SCALE);
 
   return root;
 }

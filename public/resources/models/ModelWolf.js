@@ -5,7 +5,7 @@ const NAME = 'wolf';
 export default class ModelWolf extends ModelBase {
   static NAME = NAME;
 
-  constructor([], [s1 = 0, s2 = 1] = []) {
+  constructor([], [s1 = Math.PI * 3 / 4, s2 = 1] = []) {
     super([], [s1, s2]);
 
     const f = 0;
