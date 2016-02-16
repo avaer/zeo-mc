@@ -5,7 +5,7 @@ const NAME = 'chest';
 export default class ModelChest extends ModelBase {
   static NAME = NAME;
 
-  constructor([], [s1 = 0, s2 = 1] = []) {
+  constructor([], [s1 = Math.PI * (2 + 1/4), s2 = 1] = []) {
     super([], [s1, s2]);
 
     const chestLidRotation = [(Math.PI * 1.75) - Math.sin(s1 * 0.6662) * (s2 * (Math.PI / 4)), 0, 0];

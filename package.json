@@ -33,6 +33,7 @@
 
     "voxel-trajectory": "",
 
+    "murmurhash-js": "",
     "alea": "",
     "fast-simplex-noise": "",
     "funstance": "~0.0.2",

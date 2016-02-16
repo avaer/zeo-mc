@@ -1,5 +1,6 @@
 var Alea = require('alea');
 var FastSimplexNoise = require('fast-simplex-noise');
+var FastUniformNoise = require('../fast-uniform-noise/index');
 
 var resources = require('../../resources/index');
 var BLOCKS = resources.BLOCKS.BLOCKS;
@@ -27,22 +28,21 @@ var CAVE_RATE = 0.3;
 
 var VEGETATION_FREQUENCY = 0.5;
 var VEGETATION_OCTAVES = 6;
-var VEGETATION_TYPE_FREQUENCY = 1;
-var VEGETATION_TYPE_OCTAVES = 2;
+var VEGETATION_TYPE_FREQUENCY = 1 / Math.pow(2, 5);
+var VEGETATION_TYPE_OCTAVES = 5;
 var VEGETATION_RATE = 1 / 5;
 
 var ENTITY_FREQUENCY = 0.05;
-var ENTITY_OCTAVES = 4;
-var ENTITY_TYPE_FREQUENCY = 0.1;
-var ENTITY_TYPE_OCTAVES = 4;
-var ENTITY_RATE = 0.135;
+var ENTITY_OCTAVES = 8;
+var ENTITY_TYPE_FREQUENCY = 1 / Math.pow(2, 5);
+var ENTITY_TYPE_OCTAVES = 5;
+var ENTITY_RATE = 0.15;
 
-// var WEATHER_FREQUENCY = 0.02;
 var WEATHER_FREQUENCY = 0.001;
 var WEATHER_OCTAVES = 2;
-var WEATHER_TYPE_FREQUENCY = 10;
-var WEATHER_TYPE_OCTAVES = 2;
-var WEATHER_RATE = 0.3;
+var WEATHER_TYPE_FREQUENCY = 1 / Math.pow(2, 5);
+var WEATHER_TYPE_OCTAVES = 5;
+var WEATHER_RATE = 0.1;
 
 var TREE_RATE = 0.1;
 var TREE_MIN_HEIGHT = 4;
@@ -144,7 +144,7 @@ function voxelTerrain(opts) {
     octaves: VEGETATION_OCTAVES,
     random: rng
   });
-  const vegetationTypeNoise = new FastSimplexNoise({
+  const vegetationTypeNoise = new FastUniformNoise({
     min: 0,
     max: 1,
     frequency: VEGETATION_TYPE_FREQUENCY,
@@ -159,7 +159,7 @@ function voxelTerrain(opts) {
     octaves: ENTITY_OCTAVES,
     random: rng
   });
-  const entityTypeNoise = new FastSimplexNoise({
+  const entityTypeNoise = new FastUniformNoise({
     min: 0,
     max: 1,
     frequency: ENTITY_TYPE_FREQUENCY,
@@ -174,7 +174,7 @@ function voxelTerrain(opts) {
     octaves: WEATHER_OCTAVES,
     random: rng
   });
-  const weatherTypeNoise = new FastSimplexNoise({
+  const weatherTypeNoise = new FastUniformNoise({
     min: 0,
     max: 1,
     frequency: WEATHER_TYPE_FREQUENCY,
