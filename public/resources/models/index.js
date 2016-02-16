@@ -40,7 +40,7 @@ export const ENTITIES = _makeEntitySpecs([
 export function make(modelName, p = [], s = [], game) {
   const Model = MODELS[modelName];
   const model = new Model(p, s);
-  return model.getMesh(game);
+  return model;
 }
 
 // helpers

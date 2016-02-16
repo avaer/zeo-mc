@@ -1,11 +1,11 @@
 var THREE = require('three');
 
-var blocks = require('../../resources/blocks/index');
-var BLOCKS = blocks.BLOCKS;
+var Blocks = require('../../resources/blocks/index');
+var BLOCKS = Blocks.BLOCKS;
 
-var planes = require('../../resources/planes/index');
-var VEGETATIONS = planes.VEGETATIONS;
-var WEATHERS = planes.WEATHERS;
+var Planes = require('../../resources/planes/index');
+var VEGETATIONS = Planes.VEGETATIONS;
+var WEATHERS = Planes.WEATHERS;
 
 function voxelPlaneMesher() {
   return function({vegetations, weathers}, dims) {
@@ -19,7 +19,7 @@ function voxelPlaneMesher() {
       const spec = WEATHERS[value - 1];
       const {plane: planeName} = spec;
 
-      const plane = planes.make(planeName);
+      const plane = Planes.make(planeName);
       for (let j = 0; j < plane.meshes.length; j++) {
         const planeMesh = plane.meshes[j];
         const {position, dimensions, rotation} = planeMesh;

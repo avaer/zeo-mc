@@ -1,25 +1,26 @@
-var models = require('../../resources/models/index');
-var MODELS = models.MODELS;
+var Models = require('../../resources/models/index');
+var ENTITIES = Models.ENTITIES;
 
 function voxelModelMesher() {
   return function(entities, dims) {
-    const vertices = [];
-    const faces = [];
+    const models = [];
 
     for (let i = 0; i < entities.length; i++) {
       const entity = entities[i];
       const [x, y, z, value] = entity;
 
-      const spec = MODELS[value - 1];
+      const spec = ENTITIES[value - 1];
       const {model: modelName, p, s} = spec;
+      const modelPrototype = Models.make(modelName, p, s);
 
-      const model = models.make(modelName, p, s);
-      for (let j = 0; j < model.meshes.length; j++) {
-        // XXX generate the mesh here
-      }
+      const position = [x, y, z];
+      const {meshes, textures} = modelPrototype;
+      const model = {position, meshes, textures};
+
+      models.push(model);
     }
 
-    return {vertices, faces};
+    return models;
   };
 }
 
