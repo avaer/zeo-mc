@@ -26,9 +26,9 @@ function voxelPlaneMesher() {
           const {position, dimensions, rotation} = planeMesh;
 
           const geometry = new THREE.PlaneGeometry(dimensions[0], dimensions[1]);
-          /* rotation[0] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationX(rotation[0])); // XXX re-add this once texturing works
+          rotation[0] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationX(rotation[0]));
           rotation[1] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationY(rotation[1]));
-          rotation[2] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(rotation[2])); */
+          rotation[2] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(rotation[2]));
           geometry.applyMatrix(new THREE.Matrix4().makeTranslation(
             (x + position[0]) + (dimensions[0] / 2),
             (y + position[1]) + (dimensions[1] / 2),

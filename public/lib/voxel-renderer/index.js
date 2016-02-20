@@ -1,4 +1,4 @@
-const voxelTextureShader = require('../voxel-texture-shader/index');
+const voxelBlockShader = require('../voxel-block-shader/index');
 
 function voxelRenderer(data, THREE) {
   const geometry = (() => {
@@ -126,7 +126,7 @@ function voxelRenderer(data, THREE) {
 
     for (let i = 0, l = data.faces.length; i < l; i++) {
       const colorValue = data.faces[i];
-      const colorArray = voxelTextureShader.colorValueToArray(colorValue);
+      const colorArray = voxelBlockShader.colorValueToArray(colorValue);
 
       for (let j = 0; j < 6; j++) {
         colors[i * 18 + j * 3 + 0] = colorArray[0];

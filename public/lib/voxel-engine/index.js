@@ -3,7 +3,8 @@ var voxelBlockRenderer = require('../voxel-block-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
 var voxelModelRenderer = require('../voxel-model-renderer/index')
 var ray = require('voxel-raycast')
-var texture = require('../voxel-texture-shader/index')
+var voxelBlockShader = require('../voxel-block-shader/index')
+var voxelPlaneShader = require('../voxel-plane-shader/index')
 var control = require('voxel-control')
 var voxelView = require('../voxel-view/index')
 var THREE = require('three')
@@ -98,30 +99,41 @@ function Game(opts) {
   // contains new chunks yet to be generated. Handled by game.loadPendingChunks
   this.pendingChunks = []
 
-  this.materials = texture({
-    game: this,
-    getTextureImage: (name, cb) => {
-      function done() {
-        cb(img);
-      }
+  function getTextureImage(name, cb) {
+    function done() {
+      cb(img);
+    }
 
-      const img = document.createElement('img');
-      img.onload = done;
-      img.onerror = done;
-      img.src = opts.texturePath(name);
-    },
+    const img = document.createElement('img');
+    img.onload = done;
+    img.onerror = done;
+    img.src = opts.texturePath(name);
+  }
+
+  this.blockShader = voxelBlockShader({
+    game: this,
+    getTextureImage,
     materialType: opts.materialType || THREE.MeshLambertMaterial,
     materialParams: opts.materialParams || {},
     materialFlatColor: opts.materialFlatColor === true
-  })
-
-  this.materialNames = opts.materials || [['grass', 'dirt', 'grass_dirt'], 'brick', 'dirt']
+  });
+  this.planeShader = voxelPlaneShader({
+    game: this,
+    getTextureImage,
+    materialType: opts.materialType || THREE.MeshLambertMaterial,
+    materialParams: opts.materialParams || {},
+    materialFlatColor: opts.materialFlatColor === true
+  });
   
   self.chunkRegion.on('change', function(newChunk) {
     self.removeFarChunks()
   })
 
-  if (this.isClient) this.materials.load(this.materialNames)
+  if (this.isClient) {
+    [this.blockShader, this.planeShader].forEach(shader => {
+      shader.load(opts.materials);
+    });
+  }
 
   if (this.generateChunks) this.handleChunkGeneration()
 
@@ -242,14 +254,14 @@ Game.prototype.canCreateBlock = function(pos) {
 }
 
 Game.prototype.createBlock = function(pos, val) {
-  if (typeof val === 'string') val = this.materials.find(val)
+  if (typeof val === 'string') val = this.blockShader.find(val)
   if (!this.canCreateBlock(pos)) return false
   this.setBlock(pos, val)
   return true
 }
 
 Game.prototype.setBlock = function(pos, val) {
-  if (typeof val === 'string') val = this.materials.find(val)
+  if (typeof val === 'string') val = this.blockShader.find(val)
   var old = this.voxels.voxelAtPosition(pos, val)
   var c = this.voxels.chunkAtPosition(pos)
   var chunk = this.voxels.chunks[c.join('|')]
@@ -562,15 +574,15 @@ Game.prototype.showChunk = function(chunk) {
 
     const blockMesh = (() => {
       const blockMesh = voxelBlockRenderer(chunk, this.THREE);
-      blockMesh.material = this.materials.material;
-      this.materials.paint(blockMesh);
+      blockMesh.material = this.blockShader.material;
+      this.blockShader.paint(blockMesh);
       return blockMesh;
     })();
     mesh.add(blockMesh);
     const planeMesh = (() => {
       const planeMesh = voxelPlaneRenderer(chunk, this.THREE);
-      planeMesh.material = this.materials.material;
-      this.materials.paint(planeMesh);
+      planeMesh.material = this.planeShader.material;
+      this.planeShader.paint(planeMesh);
       return planeMesh;
     })();
     mesh.add(planeMesh);
@@ -651,7 +663,8 @@ Game.prototype.tick = function(delta) {
     this.items[i].tick(delta)
   }
   
-  // if (this.materials) this.materials.tick(delta)
+  // if (this.blockShader) this.blockShader.tick(delta)
+  // if (this.planeShader) this.planeShader.tick(delta)
 
   if (this.pendingChunks.length) this.loadPendingChunks()
   if (Object.keys(this.chunksNeedsUpdate).length > 0) this.updateDirtyChunks()

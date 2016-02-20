@@ -458,15 +458,7 @@ Texture.prototype.pack = function(name, done) {
 };
 
 Texture.prototype.find = function(name) {
-  // if available, lookup registered block name
-  if (this.game.plugins) {
-    var registry = this.game.plugins.get('voxel-registry');
-    var index = registry.getBlockIndex(name);
-    if (index !== undefined)
-      return index;
-  }
-
-  // otherwise, lookup first material with any matching texture name
+  // lookup first material with any matching texture name
   var self = this;
   var type = 0;
   self.materials.forEach(function(mats, i) {
@@ -632,7 +624,7 @@ Texture.prototype.paint = function(mesh) {
 
       var isInteger = function(n) { return round(n) === n; }; // Number.isInteger :(
       if (!isInteger(tileSizeIntX) || !isInteger(tileSizeIntY)) {
-        throw new Error('voxel-texture-shader tile dimensions non-integer '+tileSizeIntX+','+tileSizeIntY);
+        throw new Error('voxel-plane-shader tile dimensions non-integer '+tileSizeIntX+','+tileSizeIntY);
       }
 
       // set all to top (+ encoded tileSize)
