@@ -280,6 +280,8 @@ function Texture(opts) {
             'vec2 texCoord = tileOffset + tileSize * fract(tileUV);',
             'vec4 texelColor = texture2D(tileMap, texCoord);'].join('\n')),
 
+        'if (texelColor.a < 0.5) discard;',
+
         'texelColor.xyz = inputToLinear(texelColor.xyz);',
 
         'diffuseColor *= texelColor;',
@@ -601,7 +603,7 @@ Texture.prototype.paint = function(mesh) {
         {
           start: 0,
           count: uvs.array.length,
-          materialIndex: 0
+          materialIndex: 1
         }
       ];
       /* if (self.useTransparency && self.transparents.indexOf(faceMaterial) !== -1) {
