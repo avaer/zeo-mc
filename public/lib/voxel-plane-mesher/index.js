@@ -12,38 +12,58 @@ function voxelPlaneMesher() {
     const vertices = [];
     const faces = [];
 
-    for (let i = 0; i < weathers.length; i++) {
-      const weather = weathers[i];
-      const [x, y, z, value] = weather;
+    function handlePlanes(planes, templates) {
+      for (let i = 0; i < planes.length; i++) {
+        const weather = planes[i];
+        const [x, y, z, value] = weather;
 
-      const spec = WEATHERS[value - 1];
-      const {plane: planeName} = spec;
+        const planeSpec = templates[value - 1];
+        const {plane: planeName, p, s} = planeSpec;
 
-      const plane = Planes.make(planeName);
-      for (let j = 0; j < plane.meshes.length; j++) {
-        const planeMesh = plane.meshes[j];
-        const {position, dimensions, rotation} = planeMesh;
+        const planeInstance = Planes.make(planeName, p, s);
+        for (let j = 0; j < planeInstance.meshes.length; j++) {
+          const planeMesh = planeInstance.meshes[j];
+          const {position, dimensions, rotation} = planeMesh;
 
-        const geometry = new THREE.PlaneGeometry(dimensions[0], dimensions[1]);
-        rotation[0] !== 0 && geometry.rotateX(rotation[0]);
-        rotation[1] !== 0 && geometry.rotateY(rotation[1]);
-        rotation[2] !== 0 && geometry.rotateZ(rotation[2]);
-        geometry.translate(
-          (x + position[0]) + dimensions[0] / 2,
-          (y + position[1]) + dimensions[1] / 2,
-          (z + position[2]) + dimensions[0] / 2
-        );
+          const geometry = new THREE.PlaneGeometry(dimensions[0], dimensions[1]);
+          /* rotation[0] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationX(rotation[0])); // XXX re-add this once texturing works
+          rotation[1] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationY(rotation[1]));
+          rotation[2] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(rotation[2])); */
+          geometry.applyMatrix(new THREE.Matrix4().makeTranslation(
+            (x + position[0]) + (dimensions[0] / 2),
+            (y + position[1]) + (dimensions[1] / 2),
+            (z + position[2]) + (dimensions[0] / 2)
+          ));
 
-        for (let k = 0, l = geometry.vertices.length; k < l; k++) {
-          const vertex = geometry.vertices[k];
-          const {x, y, z} = vertex;
-          vertices.push([x, y, z]);
+          // front side
+          const numGeometryVertices = geometry.vertices.length;
+          for (let k = 0; k < numGeometryVertices; k++) {
+            addVertex(k);
+          }
+          // back side
+          for (let k = numGeometryVertices - 1; k >= 0; k--) {
+            addVertex(k);
+          }
+          function addVertex(k) {
+            const vertex = geometry.vertices[k];
+            const {x, y, z} = vertex;
+            vertices.push([x, y, z]);
+          }
+
+          const materialIndex = planeMesh.materialIndex;
+          const material = typeof materialIndex === 'number' ? planeInstance.materials[materialIndex] : planeInstance.materials;
+          const color = BLOCKS[material];
+          addFace(color); // front side
+          addFace(color); // back side
+          function addFace(color) {
+            faces.push(color);
+          }
         }
-
-        const color = BLOCKS[plane.materials[planeMesh.materialIndex]];
-        faces.push(color);
       }
     }
+
+    handlePlanes(vegetations, VEGETATIONS);
+    handlePlanes(weathers, WEATHERS);
 
     return {vertices, faces};
   };

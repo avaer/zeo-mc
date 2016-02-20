@@ -9,16 +9,16 @@ const MATERIALS = [].concat([
   BIOME_TEXTURES.map(biomeTexture => 'tallgrass_' + biomeTexture)
 );
 
-const SIZE = 10;
+const SIZE = 1;
 
 export default class PlaneTallgrass extends PlaneBase {
   static NAME = 'tallgrass';
   static MATERIALS = MATERIALS;
 
-  constructor([p1 = Math.random()] = [], []) {
+  constructor([p1 = Math.floor(p1 * MATERIALS.length)] = [], []) {
     super([], []);
 
-    const materialIndex = Math.floor(p1 * MATERIALS.length);
+    const materialIndex = p1;
     this.materials = MATERIALS[materialIndex];
 
     const offset = [0, 0, 16, 16];

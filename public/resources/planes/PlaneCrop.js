@@ -21,16 +21,16 @@ const MATERIALS = [].concat(
   _stages('wheat', 7)
 );
 
-const SIZE = 10;
+const SIZE = 1;
 
 export default class PlaneCrop extends PlaneBase {
   static NAME = NAME;
   static MATERIALS = MATERIALS;
 
-  constructor([p1 = Math.random()] = [], []) {
+  constructor([p1 = Math.floor(p1 * MATERIALS.length)] = [], []) {
     super([], []);
 
-    const materialIndex = Math.floor(p1 * MATERIALS.length);
+    const materialIndex = p1;
     this.materials = MATERIALS[materialIndex];
 
     const offset = [0, 0, 16, 16];

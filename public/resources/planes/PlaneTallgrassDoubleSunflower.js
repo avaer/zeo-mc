@@ -11,13 +11,13 @@ const MATERIALS = [
   ]
 ];
 
-const SIZE = 10;
+const SIZE = 1;
 
 export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble {
   static NAME = NAME;
   static MATERIALS = MATERIALS;
 
-  constructor([p1 = Math.random()] = [], []) {
+  constructor([], []) {
     super([], []);
 
     const materialIndex = 0;
