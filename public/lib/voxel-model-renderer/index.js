@@ -228,11 +228,11 @@ function _getCubeMaterial(textureName, uv, THREE) {
     const materials = [];
     for (let i = 0; i < 6; i++) {
       const texture = _getTexture('/api/img/textures/' + textureName + '.png', uv[i], THREE);
-      const submaterial = new THREE.MeshBasicMaterial({
+      const submaterial = new THREE.MeshLambertMaterial({
         map: texture,
         side: THREE.BackSide,
-        // side: THREE.DoubleSide,
-        transparent: true
+        transparent: true,
+        fog: true
       });
       materials.push(submaterial);
     }
