@@ -1,67 +1,123 @@
 "use strict";
 
-const murmur = require('murmurhash-js');
+const Alea = require('alea');
+const FastSimplexNoise = require('fast-simplex-noise');
 
 const floor = Math.floor;
-const pow = Math.pow;
-const log = Math.log;
-const random = Math.random;
 
-const N32 = Math.pow(2, 32);
-function uniformHash(s) {
-  return murmur(s) / N32;
+const BUCKETS = 100;
+const SAMPLE_SCALE = 1e6;
+const SAMPLE_SIZE = 1e5;
+
+class Histogram {
+  constructor(opts) {
+    opts = opts || {};
+    const size = opts.buckets || BUCKETS;
+    const min = opts.min || 0;
+    const max = opts.max || 1;
+
+    this._buckets = (() => {
+      const buckets = Array(size);
+      for (let i = 0, l = buckets.length; i < l; i++) {
+        buckets[i] = 0;
+      }
+      return buckets;
+    })();
+    this._size = 0;
+    this._min = min;
+    this._max = max;
+  }
+
+  getBucket(v) {
+    return ((v - this._min) / (this._max - this._min)) * this._buckets.length;
+  }
+
+  getBucketIndex(v) {
+    return floor(this.getBucket(v));
+  }
+
+  getBucketResidual(v) {
+    return this.getBucket(v) % 1;
+  }
+
+  add(v) {
+    const bucketIndex = this.getBucketIndex(v);
+    this._buckets[bucketIndex]++;
+    this._size++;
+  }
+
+  size() {
+    return this._size;
+  }
+
+  total() {
+    let result = 0;
+    for (let i = 0, l = this._buckets.length; i < l; i++) {
+      const bucketValue = this._buckets[i];
+      result += bucketValue;
+    }
+    return result;
+  }
+
+  normalizedBuckets() {
+    const total = this.total();
+    const normalizedBuckets = this._buckets.map(bucketValue => bucketValue / total);
+    return normalizedBuckets;
+  }
+
+  normalizedBucketValue() {
+    return 1 / this._buckets.length;
+  }
+
+  makeScaler() {
+    const normalizedBuckets = this.normalizedBuckets();
+    const cumulativeNormalizedBuckets = (() => {
+      let acc = 0;
+      return normalizedBuckets.map(bucketValue => {
+        const result = acc;
+        acc += bucketValue;
+        return result;
+      });
+    })();
+    const cdf = v => {
+      const bucketIndex = this.getBucketIndex(v);
+      const left = cumulativeNormalizedBuckets[bucketIndex];
+      const right = (bucketIndex < (cumulativeNormalizedBuckets.length - 1)) ? cumulativeNormalizedBuckets[bucketIndex + 1] : 1;
+      const bucketResidual = this.getBucketResidual(v);
+      return left + (bucketResidual * (right - left));
+    };
+    return cdf;
+  }
 }
 
-function snapCoordinate(n, snap) {
-  return floor(n / snap);
+function makeNoiseScaler(noise, sampler, predicate, opts) {
+  const histogram = new Histogram(opts);
+  while (!predicate(histogram)) {
+    const x = sampler();
+    const y = sampler();
+    const v = noise.in2D(x, y);
+    histogram.add(v);
+  }
+  return histogram.makeScaler();
 }
 
 function FastUniformNoise(opts) {
   opts = opts || {};
+  opts.min = opts.min || 0;
+  opts.max = opts.max || 1;
+  opts.random = opts.random || new Alea('');
 
-  this._min = opts.min || 0;
-  this._max = opts.max || 1;
-  this._frequency = opts.frequency || (1 / pow(2, 5));
-  this._octaves = opts.octaves || 5;
-  this._random = opts.random || random;
+  this._noise = new FastSimplexNoise(opts);
 
-  this._seed = null;
+  const sampler = () => opts.random() * SAMPLE_SCALE;
+  const predicate = histogram => histogram.size() >= SAMPLE_SIZE;
+  this._scaler = makeNoiseScaler(this._noise, sampler, predicate, opts);
 }
 FastUniformNoise.prototype = {
-  getSeed() {
-    if (this._seed === null) {
-      this._seed = String(this._random());
-    }
-    return this._seed;
-  },
-
-  getNoise(x, y, snap) {
-    x = snapCoordinate(x, snap);
-    y = snapCoordinate(y, snap);
-    const seed = this.getSeed();
-    const xs = String(x);
-    const ys = String(y);
-    const s = seed + ':' + xs + ',' + ys;
-    const n = uniformHash(s);
-    return n;
-  },
-
   in2D: function(x, y) {
-    const scale = log(1 / this._frequency) / log(2);
-    x *= scale;
-    y *= scale;
-
-    let acc = 1;
-    for (let i = 0; i < this._octaves; i++) {
-      const snap = pow(2, this._octaves - i);
-      const n = this.getNoise(x, y, snap);
-      const newFactor = 1 / pow(2, i);
-      const oldFactor = 1 - newFactor;
-      acc = (acc * oldFactor) + (acc * n * newFactor);
-    }
-
-    const v = this._min + (acc * (this._max - this._min));
-    return v;
+    const v = this._noise.in2D(x, y);
+    const scaledV = this._scaler(v);
+    return scaledV;
   }
 };
 
