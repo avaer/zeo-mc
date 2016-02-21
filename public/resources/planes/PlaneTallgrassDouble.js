@@ -58,7 +58,7 @@ export default class PlaneTallgrassDouble extends PlaneBase {
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 1 / 4, 0],
-        textureIndex: 0
+        materialIndex: 0
       },
       {
         name: 'tallgrassDoubleBottom2',
@@ -67,7 +67,7 @@ export default class PlaneTallgrassDouble extends PlaneBase {
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 3 / 4, 0],
-        textureIndex: 0
+        materialIndex: 0
       },
       {
         name: 'tallgrassDoubleTop1',
@@ -76,7 +76,7 @@ export default class PlaneTallgrassDouble extends PlaneBase {
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 1 / 4, 0],
-        textureIndex: 1
+        materialIndex: 1
       },
       {
         name: 'tallgrassDoubleTop2',
@@ -85,7 +85,7 @@ export default class PlaneTallgrassDouble extends PlaneBase {
         dimensions: dimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 3 / 4, 0],
-        textureIndex: 1
+        materialIndex: 1
       },
     ]
   }

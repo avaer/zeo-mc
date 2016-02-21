@@ -42,7 +42,7 @@ export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble 
         dimensions: bottomDimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 1 / 4, 0],
-        textureIndex: 0
+        materialIndex: 0
       },
       {
         name: 'tallgrassDoubleSunflowerBottom2',
@@ -51,7 +51,7 @@ export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble 
         dimensions: bottomDimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 3 / 4, 0],
-        textureIndex: 0
+        materialIndex: 0
       },
       {
         name: 'tallgrassDoubleSunflowerTop1',
@@ -60,7 +60,7 @@ export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble 
         dimensions: topDimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 1 / 4, 0],
-        textureIndex: 1
+        materialIndex: 1
       },
       {
         name: 'tallgrassDoubleSunflowerTop2',
@@ -69,7 +69,7 @@ export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble 
         dimensions: topDimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI * 3 / 4, 0],
-        textureIndex: 1
+        materialIndex: 1
       },
       {
         name: 'tallgrassDoubleSunflowerTopBack',
@@ -79,7 +79,7 @@ export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble 
         dimensions: flowerDimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, Math.PI, 0],
-        textureIndex: 2,
+        materialIndex: 2,
         oneSided: true
       },
       {
@@ -90,7 +90,7 @@ export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble 
         dimensions: flowerDimensions,
         rotationPoint: [0, 0, 0],
         rotation: [0, 0, 0],
-        textureIndex: 3,
+        materialIndex: 3,
         oneSided: true
       },
     ]
