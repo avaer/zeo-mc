@@ -26,7 +26,7 @@ function voxelPlaneMesher() {
           const {position, dimensions, rotation} = planeMesh;
 
           const geometry = new THREE.PlaneGeometry(dimensions[0], dimensions[1]);
-          rotation[0] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationX(rotation[0]));
+          rotation[0] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationX(rotation[0])); // XXX re-add this once texturing works
           rotation[1] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationY(rotation[1]));
           rotation[2] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(rotation[2]));
           geometry.applyMatrix(new THREE.Matrix4().makeTranslation(
@@ -36,16 +36,21 @@ function voxelPlaneMesher() {
           ));
 
           // front side
-          const numGeometryVertices = geometry.vertices.length;
-          for (let k = 0; k < numGeometryVertices; k++) {
+          const geometryVertices = [
+            geometry.vertices[0],
+            geometry.vertices[2],
+            geometry.vertices[3],
+            geometry.vertices[1],
+          ];
+          for (let k = 0; k < geometryVertices.length; k++) {
             addVertex(k);
           }
           // back side
-          for (let k = numGeometryVertices - 1; k >= 0; k--) {
+          for (let k = geometryVertices.length - 1; k >= 0; k--) {
             addVertex(k);
           }
           function addVertex(k) {
-            const vertex = geometry.vertices[k];
+            const vertex = geometryVertices[k];
             const {x, y, z} = vertex;
             vertices.push([x, y, z]);
           }
