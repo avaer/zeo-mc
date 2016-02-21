@@ -454,12 +454,12 @@ Game.prototype.addStats = function() {
 }
 
 Game.prototype.addLights = function(scene) {
-  var ambientLight, directionalLight
-  ambientLight = new THREE.AmbientLight(0xcccccc)
-  scene.add(ambientLight)
-  var light	= new THREE.DirectionalLight( 0xffffff , 1)
-  light.position.set( 1, 1, 0.5 ).normalize()
-  scene.add( light )
+  const ambientLight = new THREE.AmbientLight(0xcccccc);
+  scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(1, 1, 0.5).normalize();
+  scene.add(directionalLight);
 }
 
 // # Chunk related methods
