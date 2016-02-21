@@ -2,6 +2,8 @@ import ModelBase from './ModelBase';
 
 const NAME = 'chest';
 
+const OFFSET = 8;
+
 export default class ModelChest extends ModelBase {
   static NAME = NAME;
 
@@ -22,7 +24,7 @@ export default class ModelChest extends ModelBase {
           [28, 14, 42, 19],
           [14, 14, 28, 19],
         ],
-        position: [0, -5, -14],
+        position: [0 - OFFSET, -5, -14 - OFFSET],
         dimensions: [14, 5, 14],
         rotationPoint: [1, 7, 15],
         rotation: chestLidRotation
@@ -37,7 +39,7 @@ export default class ModelChest extends ModelBase {
           [3, 0, 5, 1],
           [1, 0, 3, 1],
         ],
-        position: [-1, -2, -15],
+        position: [-1 - OFFSET, -2, -15 - OFFSET],
         dimensions: [2, 4, 1],
         rotationPoint: [8, 7, 15],
         rotation: chestLidRotation
@@ -52,7 +54,7 @@ export default class ModelChest extends ModelBase {
           [42, 33, 56, 43],
           [14, 33, 28, 43],
         ],
-        position: [0, 0, 0],
+        position: [0 - OFFSET, 0, 0 - OFFSET],
         dimensions: [14, 10, 14],
         rotationPoint: [1, 6, 1]
       },
