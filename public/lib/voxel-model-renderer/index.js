@@ -67,20 +67,6 @@ function _makeObject(meshes, textures, THREE) {
         if (children) {
           recurse(object, children);
         }
-      } else if (position && dimensions && offset) {
-        throw new Error('unhandled case');
-
-        /* const {rotation = [0, 0, 0], oneSided = false} = mesh;
-        const texture = _resolveTexture(textures, textureIndex);
-
-        const submesh = _makePlaneMesh(position, dimensions, texture, offset, oneSided, THREE);
-        submesh.rotation.set(-rotation[0] + Math.PI, -rotation[1], -rotation[2]);
-
-        object.add(submesh);
-
-        if (children) {
-          recurse(object, children);
-        } */
       } else if (rotationPoint && children) {
         const {rotation = [0,0,0]} = mesh;
         rotationPoint = [rotationPoint[0], -rotationPoint[1], rotationPoint[2]];
@@ -145,21 +131,6 @@ function _makeCubeMesh(position, dimensions, texture, uv, THREE) {
 
   const geometry = _getCubeGeometry(dimensions[0], dimensions[1], dimensions[2], THREE);
   const material = _getCubeMaterial(texture, uv, THREE);
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(
-    (position[0] + (dimensions[0] / 2)),
-    (position[1] + (dimensions[1] / 2)),
-    (position[2] + (dimensions[2] / 2)),
-  );
-  return mesh;
-}
-
-function _makePlaneMesh(position, dimensions, texture, offset, oneSided, THREE) {
-  position = [position[0], -position[1], position[2]];
-  dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
-
-  const geometry = _getPlaneGeometry(dimensions[0], dimensions[1], THREE);
-  const material = _getPlaneMaterial(texture, offset, oneSided, THREE);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(
     (position[0] + (dimensions[0] / 2)),
@@ -239,41 +210,6 @@ function _getCubeMaterial(textureName, uv, THREE) {
 
     const material = new THREE.MultiMaterial(materials);
     cubeMaterialCache.set(materialKey, material);
-
-    return material;
-  }
-}
-
-const planeGeometryCache = new Map();
-function _getPlaneGeometry(x, y, THREE) {
-  const geometryKey = x + '-' + y;
-
-  const cachedGeometry = planeGeometryCache.get(geometryKey);
-  if (cachedGeometry) {
-    return cachedGeometry;
-  } else {
-    const geometry = new THREE.PlaneBufferGeometry(x, y);
-    planeGeometryCache.set(geometryKey, geometry);
-    return geometry;
-  }
-}
-
-const planeMaterialCache = new Map();
-function _getPlaneMaterial(textureName, offset, oneSided, THREE) {
-  const materialKey = textureName + '-' + offset.join(',') + '-' + oneSided;
-
-  const cachedMaterial = planeMaterialCache.get(materialKey);
-  if (cachedMaterial) {
-    return cachedMaterial;
-  } else {
-    const texture = _getTexture('/api/img/textures/' + textureName + '.png', offset, THREE);
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      side: oneSided ? THREE.BackSide : THREE.DoubleSide,
-      // transparent: true // XXX
-    });
-
-    planeMaterialCache.set(materialKey, material);
 
     return material;
   }
