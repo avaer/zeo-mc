@@ -58,7 +58,6 @@ function voxelPlaneShader(opts) {
 
   this.material = (() => {
     const materialParams = {
-      ambient: 0xbbbbbb,
       transparent: true,
       side: THREE.FrontSide,
       lights: [], // force lights refresh to setup uniforms, three.js WebGLRenderer line 4323

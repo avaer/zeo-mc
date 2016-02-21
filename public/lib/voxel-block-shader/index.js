@@ -57,7 +57,6 @@ function voxelBlockShader(opts) {
 
   var getMaterialParams = function(transparent) {
     var materialParams = {
-      ambient: 0xbbbbbb,
       transparent: transparent,
       side: THREE.FrontSide,
       lights: [], // force lights refresh to setup uniforms, three.js WebGLRenderer line 4323

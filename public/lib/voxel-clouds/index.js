@@ -20,7 +20,6 @@ function Clouds(opts) {
   this.many = opts.many || 100;
   this.speed = opts.speed || 0.01;
   this.material = opts.material || new this.game.THREE.MeshBasicMaterial({
-    emissive: 0xffffff,
     shading: this.game.THREE.FlatShading,
     fog: false,
     transparent: true,
