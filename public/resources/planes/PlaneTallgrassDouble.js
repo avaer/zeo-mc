@@ -47,7 +47,7 @@ export default class PlaneTallgrassDouble extends PlaneBase {
 
     const offset = [0, 0, 16, 16];
     const bottomPosition = [0, 0, 0];
-    const topPosition = [0, -SIZE, 0];
+    const topPosition = [0, SIZE, 0];
     const dimensions = [SIZE, SIZE, 0];
 
     this.meshes = [

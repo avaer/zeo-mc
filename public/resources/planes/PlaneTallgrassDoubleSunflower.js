@@ -27,9 +27,9 @@ export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble 
     const topOffset = [0, 6, 16, 16];
     const flowerOffset = [4, 4, 12, 12];
     const bottomPosition = [0, 0, 0];
-    const topPosition = [0, -SIZE * ((16 - 6) / 16), 0];
-    const flowerBackPosition = [0, -SIZE - 3.7, 0];
-    const flowerFrontPosition = [0, -SIZE - 3.7, 0];
+    const topPosition = [0, SIZE * ((16 - 6) / 16), 0];
+    const flowerBackPosition = [0, SIZE - 3.7, 0];
+    const flowerFrontPosition = [0, SIZE - 3.7, 0];
     const bottomDimensions = [SIZE, SIZE, 0];
     const topDimensions = [SIZE, SIZE * ((16 - 6) / 16), 0];
     const flowerDimensions = [SIZE, SIZE, 0];
