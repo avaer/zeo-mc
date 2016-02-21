@@ -103,7 +103,7 @@ function _makeObject(meshes, textures, THREE) {
 let faceVertexUvs = null;
 function _getFaceVertexUvs(THREE) {
   if (!faceVertexUvs) {
-    const uv = [new THREE.Vector2(0, 0), new THREE.Vector2(0, 1), new THREE.Vector2(1, 1), new THREE.Vector2(1, 0)];
+    const uv = [new THREE.Vector2(1, 1), new THREE.Vector2(1, 0), new THREE.Vector2(0, 0), new THREE.Vector2(0, 1)];
     const uv1 = [uv[0], uv[1], uv[3]];
     const uv2 = [uv[1], uv[2], uv[3]];
     faceVertexUvs = [
@@ -127,14 +127,14 @@ function _resolveTexture(textures, textureIndex) {
 
 function _makeCubeMesh(position, dimensions, texture, uv, THREE) {
   position = [position[0], -position[1], position[2]];
-  dimensions = [dimensions[0], -dimensions[1], dimensions[2]];
+  dimensions = [dimensions[0], dimensions[1], dimensions[2]];
 
   const geometry = _getCubeGeometry(dimensions[0], dimensions[1], dimensions[2], THREE);
   const material = _getCubeMaterial(texture, uv, THREE);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(
     (position[0] + (dimensions[0] / 2)),
-    (position[1] + (dimensions[1] / 2)),
+    (position[1] + (-dimensions[1] / 2)),
     (position[2] + (dimensions[2] / 2)),
   );
   return mesh;
@@ -201,7 +201,7 @@ function _getCubeMaterial(textureName, uv, THREE) {
       const texture = _getTexture('/api/img/textures/' + textureName + '.png', uv[i], THREE);
       const submaterial = new THREE.MeshLambertMaterial({
         map: texture,
-        side: THREE.BackSide,
+        side: THREE.FrontSide,
         transparent: true,
         fog: true
       });
