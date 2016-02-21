@@ -9,6 +9,7 @@ var mainTextures = [
   'stone',
   'dirt',
   /grass/,
+  /water/,
   /log/,
   /leaves/,
 
