@@ -22,6 +22,17 @@ var DIRT_CRUST_THRESHOLD = 40;
 var DIRT_FREQUENCY = 0.02;
 var DIRT_OCTAVES = 6;
 
+var SEA_LEVEL = 10;
+
+var RIVER_FREQUENCY = 0.01;
+var RIVER_OCTAVES = 8;
+var RIVER_RATE = 0.3;
+var SHORE_RATE = 0.1;
+var SAND_RATE = 0.6; // XXX support multiple sands, including gravel
+var RIVER_TYPE_FREQUENCY = 0.0005;
+var RIVER_TYPE_OCTAVES = 2;
+var RIVER_SURFACE_MEDIAN_FACTOR = 0.7;
+
 var CAVE_FREQUENCY = 0.02;
 var CAVE_OCTAVES = 12;
 var CAVE_RATE = 0.3;
@@ -129,6 +140,22 @@ function voxelTerrain(opts) {
     random: rng
   });
 
+  const riverNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: RIVER_FREQUENCY,
+    octaves: RIVER_OCTAVES,
+    random: rng
+  });
+
+  const riverTypeNoise = new FastUniformNoise({
+    min: 0,
+    max: 1,
+    frequency: RIVER_TYPE_FREQUENCY,
+    octaves: RIVER_TYPE_OCTAVES,
+    random: rng
+  });
+
   const caveNoise = new FastSimplexNoise({
     min: 0,
     max: 1,
@@ -183,39 +210,136 @@ function voxelTerrain(opts) {
   });
 
   return function generateChunk(position) {
-    var startX = position[0] * chunkSize;
-    var startY = position[1] * chunkSize;
-    var startZ = position[2] * chunkSize;
+    const startX = position[0] * chunkSize;
+    const startY = position[1] * chunkSize;
+    const startZ = position[2] * chunkSize;
 
-    var endX = startX + chunkSize;
-    var endY = startY + chunkSize;
-    var endZ = startZ + chunkSize;
+    const endX = startX + chunkSize;
+    const endY = startY + chunkSize;
+    const endZ = startZ + chunkSize;
 
-    var voxels = new Int8Array(chunkSize * chunkSize * chunkSize);
-    var vegetations = [];
-    var weathers = [];
-    var entities = [];
-    pointsInside(point);
+    const voxels = new Int8Array(chunkSize * chunkSize * chunkSize);
+    const riverSurfaces = [];
+    const vegetations = [];
+    const weathers = [];
+    const entities = [];
 
-    function point(x, z) {
-      var y = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
-      if (y === TERRAIN_FLOOR || (y >= startY && y < endY)) {
-        land(x, y, z);
-        dirt(x, y, z);
-        if (!isCave(x,y,z)) {
-          tree(x, y, z);
-          veg(x, y, z);
-          ent(x, y, z);
-          weath(x, y, z);
+    forEachPointInside(genPoint);
+    postProcessPoints();
+
+    function forEachPointInside(fn) {      
+      for (let x = startX; x < endX; x++) {
+        for (let z = startZ; z < endZ; z++) {
+          fn(x, z);
         }
-      } else if (startY < 0) {
-        dirt(x, endY, z);
       }
     }
 
+    function genPoint(x, z) {
+      let h = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
+      if (h === TERRAIN_FLOOR || (h >= startY && h < endY)) {
+        land(x, h, z);
+        dirt(x, h, z);
+        riv(x, h, z);
+        if (!isRiverSurface(x, h, z) && !isCaveSurface(x, h, z)) {
+          tree(x, h, z);
+          veg(x, h, z);
+          ent(x, h, z);
+          weath(x, h, z);
+        }
+      } else if (startY < 0) {
+        h = endY;
+
+        dirt(x, h, z);
+        riv(x, h, z);
+      }
+    }
+
+    function postProcessPoints() {
+      postRiv();
+    }
+
     function land(x, y, z) {
-      if (!isCave(x, y, z)) {
+      if (!isRiverSurface(x, y, z) && !isCaveSurface(x, y, z)) {
         setVoxel(x, y, z, BLOCKS['grass_top_plains']);
+      }
+    }
+
+    function dirt(x, h, z) {
+      let crustBedrockNoiseN = crustBedrockNoise.in2D(x, z);
+      let crustCoreNoiseN = crustCoreNoise.in2D(x, z);
+      let crustMantleNoiseN = crustMantleNoise.in2D(x, z);
+      let crustCrustNoiseN = crustCrustNoise.in2D(x, z);
+
+      const totalNoiseN = crustBedrockNoiseN + crustCoreNoiseN + crustMantleNoiseN + crustCrustNoiseN;
+      crustBedrockNoiseN /= totalNoiseN;
+      crustCoreNoiseN /= totalNoiseN;
+      crustMantleNoiseN /= totalNoiseN;
+      crustCrustNoiseN /= totalNoiseN;
+
+      const bedrockThreshold = DIRT_BOTTOM_THRESHOLD + (crustBedrockNoiseN * (DIRT_BEDROCK_THRESHOLD - DIRT_BOTTOM_THRESHOLD));
+      const coreThreshold = DIRT_BEDROCK_THRESHOLD + (crustBedrockNoiseN * (DIRT_CORE_THRESHOLD - DIRT_BEDROCK_THRESHOLD));
+      const mantleThreshold = DIRT_CORE_THRESHOLD + (crustBedrockNoiseN * (DIRT_MANTLE_THRESHOLD - DIRT_CORE_THRESHOLD));
+      const crustThreshold = DIRT_MANTLE_THRESHOLD + (crustBedrockNoiseN * (DIRT_CRUST_THRESHOLD - DIRT_MANTLE_THRESHOLD));
+
+      for (let y = startY; y < h; y++) {
+        if (y < coreThreshold || !isCave(x, y, z)) {
+          const material = (() => {
+            if (y < bedrockThreshold) {
+              return BLOCKS['bedrock'];
+            } else if (y < coreThreshold) {
+              return BLOCKS['lava_still'];
+            } else if (y < mantleThreshold) {
+              return BLOCKS['obsidian'];
+            } else if (y < crustThreshold) {
+              return BLOCKS['stone'];
+            } else {
+              return BLOCKS['dirt'];
+            }
+          })();
+
+          setVoxel(x, y, z, material);
+        }
+      }
+    }
+
+    function riv(x, h, z) {
+      for (let y = startY; y <= h; y++) {
+        const riverNoiseN = getRiverNoise(x, y, z);
+
+        const material = (() => {
+          if (riverNoiseN < RIVER_RATE) {
+            return BLOCKS['water_still'];
+          } else if (riverNoiseN < (RIVER_RATE * (1 + SHORE_RATE))) {
+            const riverTypeNoiseN = riverTypeNoise.in2D(x, z);
+            if (riverTypeNoiseN < SAND_RATE) {
+              return BLOCKS['sand'];
+            } else {
+              return BLOCKS['red_sand'];
+            }
+          } else {
+            return null;
+          }
+        })();
+        if (material !== null) {
+          setVoxel(x, y, z, material);
+
+          if (y === h && material === BLOCKS['water_still'] && startY <= SEA_LEVEL && endY > SEA_LEVEL) {
+            riverSurfaces.push([x, h, z]);
+          }
+        }
+      }
+    }
+
+    function postRiv() {
+      const riverSurfacesMedian = riverSurfaces.map(riverSurface => riverSurface[1]).sort()[floor(riverSurfaces.length * RIVER_SURFACE_MEDIAN_FACTOR)];
+      for (let i = 0; i < riverSurfaces.length; i++) {
+        const riverSurface = riverSurfaces[i];
+        const [x, h, z] = riverSurface;
+        for (let y = h; y <= riverSurfacesMedian; y++) {
+          const river = BLOCKS['water_still'];
+          setVoxel(x, y, z, river);
+        }
       }
     }
 
@@ -282,49 +406,6 @@ function voxelTerrain(opts) {
       }
     }
 
-    function dirt(x, h, z) {
-      let crustBedrockNoiseN = crustBedrockNoise.in2D(x, z);
-      let crustCoreNoiseN = crustCoreNoise.in2D(x, z);
-      let crustMantleNoiseN = crustMantleNoise.in2D(x, z);
-      let crustCrustNoiseN = crustCrustNoise.in2D(x, z);
-
-      const totalNoiseN = crustBedrockNoiseN + crustCoreNoiseN + crustMantleNoiseN + crustCrustNoiseN;
-      crustBedrockNoiseN /= totalNoiseN;
-      crustCoreNoiseN /= totalNoiseN;
-      crustMantleNoiseN /= totalNoiseN;
-      crustCrustNoiseN /= totalNoiseN;
-
-      const bedrockThreshold = DIRT_BOTTOM_THRESHOLD + (crustBedrockNoiseN * (DIRT_BEDROCK_THRESHOLD - DIRT_BOTTOM_THRESHOLD));
-      const coreThreshold = DIRT_BEDROCK_THRESHOLD + (crustBedrockNoiseN * (DIRT_CORE_THRESHOLD - DIRT_BEDROCK_THRESHOLD));
-      const mantleThreshold = DIRT_CORE_THRESHOLD + (crustBedrockNoiseN * (DIRT_MANTLE_THRESHOLD - DIRT_CORE_THRESHOLD));
-      const crustThreshold = DIRT_MANTLE_THRESHOLD + (crustBedrockNoiseN * (DIRT_CRUST_THRESHOLD - DIRT_MANTLE_THRESHOLD));
-
-      for (var y = startY; y < h; y++) {
-        if (y < coreThreshold || !isCave(x, y, z)) {
-          var material = (function() {
-            if (y < bedrockThreshold) {
-              return BLOCKS['bedrock'];
-            } else if (y < coreThreshold) {
-              return BLOCKS['lava_still'];
-            } else if (y < mantleThreshold) {
-              return BLOCKS['obsidian'];
-            } else if (y < crustThreshold) {
-              return BLOCKS['stone'];
-            } else {
-              return BLOCKS['dirt'];
-            }
-          })();
-
-          setVoxel(x, y, z, material);
-        }
-      }
-    }
-
-    function isCave(x, y, z) {
-      const caveNoiseN = caveNoise.in3D(x, y, z);
-      return caveNoiseN < CAVE_RATE;
-    }
-
     function veg(x, h, z) {
       const y = h + 1;
       const vegetationNoiseN = vegetationNoise.in2D(x, z);
@@ -355,12 +436,30 @@ function voxelTerrain(opts) {
       }
     }
 
-    function pointsInside(fn) {
-      for (var x = startX; x < endX; x++) {
-        for (var z = startZ; z < endZ; z++) {
-          fn(x, z);
-        }
-      }
+    function getRiverNoise(x, y, z) {
+      const riverNoiseN2D = riverNoise.in2D(x, z);
+      const riverNoiseN3D = riverNoise.in3D(x, y, z);
+      const riverNoiseN = sqrt(Math.pow(riverNoiseN2D, 1.75) * Math.pow(riverNoiseN3D, 0.25));
+      return riverNoiseN;
+    }
+
+    function isRiver(x, y, z) {
+      const riverNoiseN = getRiverNoise(x, y, z);
+      return riverNoiseN < RIVER_RATE;
+    }
+    function isRiverSurface(x, h, z) {
+      /* if (startY <= SEA_LEVEL && endY > SEA_LEVEL) {
+        h = SEA_LEVEL;
+      } */
+      return isRiver(x, h, z);
+    }
+
+    function isCave(x, y, z) {
+      const caveNoiseN = caveNoise.in3D(x, y, z);
+      return caveNoiseN < CAVE_RATE;
+    }
+    function isCaveSurface(x, h, z) {
+      return isCave(x, h, z);
     }
 
     function snapCoordinate(n) {
