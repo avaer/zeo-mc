@@ -59,7 +59,7 @@ const RIVER_SAND_THRESHOLDS = (() => {
 })();
 
 const RIVER_HORIZONTAL_FACTOR = 0.55;
-const RIVER_SURFACE_MEDIAN_FACTOR = 0.6;
+const RIVER_SURFACE_MEDIAN_FACTOR = 0.5;
 
 const CAVE_FREQUENCY = 0.02;
 const CAVE_OCTAVES = 12;
@@ -372,11 +372,12 @@ function voxelTerrain(opts) {
     }
 
     function postRiv() {
-      const riverSurfacesMedian = riverSurfaces.map(riverSurface => riverSurface[1]).sort()[floor(riverSurfaces.length * RIVER_SURFACE_MEDIAN_FACTOR)];
+      // XXX coalesce this into pools and smooth individually for each
+      const riverSurfacesMedianHeight = riverSurfaces.map(riverSurface => riverSurface[1]).sort()[floor(riverSurfaces.length * RIVER_SURFACE_MEDIAN_FACTOR)];
       for (let i = 0; i < riverSurfaces.length; i++) {
         const riverSurface = riverSurfaces[i];
         const [x, h, z] = riverSurface;
-        for (let y = h; y <= riverSurfacesMedian; y++) {
+        for (let y = h; y <= riverSurfacesMedianHeight; y++) {
           const river = BLOCKS['water_still'];
           setVoxel(x, y, z, river);
         }
