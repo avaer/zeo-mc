@@ -1,68 +1,71 @@
-var Alea = require('alea');
-var FastSimplexNoise = require('fast-simplex-noise');
-var FastUniformNoise = require('../fast-uniform-noise/index');
+const Alea = require('alea');
+const FastSimplexNoise = require('fast-simplex-noise');
+const FastUniformNoise = require('../fast-uniform-noise/index');
 
-var resources = require('../../resources/index');
-var BLOCKS = resources.BLOCKS.BLOCKS;
-var VEGETATIONS = resources.PLANES.VEGETATIONS;
-var WEATHERS = resources.PLANES.WEATHERS;
-var ENTITIES = resources.MODELS.ENTITIES;
+const  resources = require('../../resources/index');
+const BLOCKS = resources.BLOCKS.BLOCKS;
+const VEGETATIONS = resources.PLANES.VEGETATIONS;
+const WEATHERS = resources.PLANES.WEATHERS;
+const ENTITIES = resources.MODELS.ENTITIES;
 
-var TERRAIN_FLOOR = 0;
-var TERRAIN_CEILING = 20; // minecraft's limit
-var TERRAIN_FREQUENCY = 1;
-var TERRAIN_OCTAVES = 8;
-var TERRAIN_DIVISOR = 80;
+const TERRAIN_FLOOR = 0;
+const TERRAIN_CEILING = 20; // minecraft's limit
+const TERRAIN_FREQUENCY = 1;
+const TERRAIN_OCTAVES = 8;
+const TERRAIN_DIVISOR = 80;
 
-var DIRT_BOTTOM_THRESHOLD = -255;
-var DIRT_BEDROCK_THRESHOLD = -250;
-var DIRT_CORE_THRESHOLD = -200;
-var DIRT_MANTLE_THRESHOLD = -20;
-var DIRT_CRUST_THRESHOLD = 40;
-var DIRT_FREQUENCY = 0.02;
-var DIRT_OCTAVES = 6;
+const DIRT_BOTTOM_THRESHOLD = -255;
+const DIRT_BEDROCK_THRESHOLD = -250;
+const DIRT_CORE_THRESHOLD = -200;
+const DIRT_MANTLE_THRESHOLD = -20;
+const DIRT_CRUST_THRESHOLD = 40;
+const DIRT_FREQUENCY = 0.02;
+const DIRT_OCTAVES = 6;
 
-var SEA_LEVEL = 10;
+const SEA_LEVEL = 10;
 
-var RIVER_FREQUENCY = 0.01;
-var RIVER_OCTAVES = 8;
-var RIVER_RATE = 0.3;
-var SHORE_RATE = 0.1;
-var SAND_RATE = 0.6; // XXX support multiple sands, including gravel
-var RIVER_TYPE_FREQUENCY = 0.0005;
-var RIVER_TYPE_OCTAVES = 2;
-var RIVER_SURFACE_MEDIAN_FACTOR = 0.7;
+const RIVER_FREQUENCY = 0.01;
+const RIVER_OCTAVES = 8;
+const RIVER_RATE = 0.3;
+const SHORE_RATE = 0.1;
 
-var CAVE_FREQUENCY = 0.02;
-var CAVE_OCTAVES = 12;
-var CAVE_RATE = 0.3;
+const RIVER_TYPE_FREQUENCY = 0.0005;
+const RIVER_TYPE_OCTAVES = 2;
 
-var VEGETATION_FREQUENCY = 0.1;
-var VEGETATION_OCTAVES = 10;
-var VEGETATION_TYPE_FREQUENCY = 0.0005;
-var VEGETATION_TYPE_OCTAVES = 2;
-var VEGETATION_RATE = 0.3;
+const SAND_RATE = 0.6; // XXX support multiple sands, including gravel
 
-var ENTITY_FREQUENCY = 0.05;
-var ENTITY_OCTAVES = 8;
-var ENTITY_TYPE_FREQUENCY = 0.05;
-var ENTITY_TYPE_OCTAVES = 2;
-var ENTITY_RATE = 0.16;
+const RIVER_SURFACE_MEDIAN_FACTOR = 0.7;
 
-var WEATHER_FREQUENCY = 0.001;
-var WEATHER_OCTAVES = 2;
-var WEATHER_TYPE_FREQUENCY = 0.02;
-var WEATHER_TYPE_OCTAVES = 2;
-var WEATHER_RATE = 0.3;
+const CAVE_FREQUENCY = 0.02;
+const CAVE_OCTAVES = 12;
+const CAVE_RATE = 0.3;
 
-var TREE_RATE = 0.1;
-var TREE_MIN_HEIGHT = 4;
-var TREE_MAX_HEIGHT = 14;
-var TREE_BASE_RATIO = 0.3;
-var TREE_LEAF_RATE = 0.5;
-var TREE_LEAF_SIZE = 2;
+const VEGETATION_FREQUENCY = 0.1;
+const VEGETATION_OCTAVES = 10;
+const VEGETATION_TYPE_FREQUENCY = 0.0005;
+const VEGETATION_TYPE_OCTAVES = 2;
+const VEGETATION_RATE = 0.3;
 
-var DIRECTIONS = (function() {
+const ENTITY_FREQUENCY = 0.05;
+const ENTITY_OCTAVES = 8;
+const ENTITY_TYPE_FREQUENCY = 0.05;
+const ENTITY_TYPE_OCTAVES = 2;
+const ENTITY_RATE = 0.16;
+
+const WEATHER_FREQUENCY = 0.001;
+const WEATHER_OCTAVES = 2;
+const WEATHER_TYPE_FREQUENCY = 0.02;
+const WEATHER_TYPE_OCTAVES = 2;
+const WEATHER_RATE = 0.3;
+
+const TREE_RATE = 0.1;
+const TREE_MIN_HEIGHT = 4;
+const TREE_MAX_HEIGHT = 14;
+const TREE_BASE_RATIO = 0.3;
+const TREE_LEAF_RATE = 0.5;
+const TREE_LEAF_SIZE = 2;
+
+const TREE_DIRECTIONS = (function() {
   var result = [];
   for (let x = -1; x <= 1; x++) {
     for (let y = -1; y <= 1; y++) {
@@ -387,7 +390,7 @@ function voxelTerrain(opts) {
               pos.x = x + j;
               pos.z = z + k;
 
-              if (DIRECTIONS.some(function(d) {
+              if (TREE_DIRECTIONS.some(function(d) {
                 var idx = getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
                 return !!leafSets[idx];
               })) {
@@ -448,9 +451,6 @@ function voxelTerrain(opts) {
       return riverNoiseN < RIVER_RATE;
     }
     function isRiverSurface(x, h, z) {
-      /* if (startY <= SEA_LEVEL && endY > SEA_LEVEL) {
-        h = SEA_LEVEL;
-      } */
       return isRiver(x, h, z);
     }
 
