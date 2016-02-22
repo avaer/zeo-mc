@@ -29,13 +29,14 @@ const RIVER_OCTAVES = 8;
 const RIVER_RATE = 0.3;
 const SHORE_RATE = 0.1;
 
-const RIVER_TYPE_FREQUENCY = 0.0005;
+const RIVER_TYPE_FREQUENCY = 0.0004;
 const RIVER_TYPE_OCTAVES = 2;
 
 const RIVER_SAND_RATES = {
-  'gravel': 0.7,
   'sand': 1,
-  'red_sand': 0.7
+  'gravel': 0.25,
+  'red_sand': 0.25,
+  'dirt': 0.25,
 };
 const RIVER_SAND_THRESHOLDS = (() => {
   const result = [];
@@ -57,6 +58,7 @@ const RIVER_SAND_THRESHOLDS = (() => {
   return result;
 })();
 
+const RIVER_HORIZONTAL_FACTOR = 0.55;
 const RIVER_SURFACE_MEDIAN_FACTOR = 0.6;
 
 const CAVE_FREQUENCY = 0.02;
@@ -477,7 +479,7 @@ function voxelTerrain(opts) {
     function getRiverNoise(x, y, z) {
       const riverNoiseN2D = riverNoise.in2D(x, z);
       const riverNoiseN3D = riverNoise.in3D(x, y, z);
-      const riverNoiseN = sqrt(Math.pow(riverNoiseN2D, 1.75) * Math.pow(riverNoiseN3D, 0.25));
+      const riverNoiseN = sqrt(pow(riverNoiseN2D, 2 * RIVER_HORIZONTAL_FACTOR) * pow(riverNoiseN3D, 2 * (1 - RIVER_HORIZONTAL_FACTOR)));
       return riverNoiseN;
     }
 
