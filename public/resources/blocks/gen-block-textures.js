@@ -10,7 +10,7 @@ var mainTextures = [
   'dirt',
   /grass/,
   /water/,
-  /^(?:red_)?sand$/,
+  /^(?:gravel|sand|red_sand)$/,
   /log/,
   /leaves/,
 
