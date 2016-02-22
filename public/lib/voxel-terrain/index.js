@@ -32,9 +32,32 @@ const SHORE_RATE = 0.1;
 const RIVER_TYPE_FREQUENCY = 0.0005;
 const RIVER_TYPE_OCTAVES = 2;
 
-const SAND_RATE = 0.6; // XXX support multiple sands, including gravel
+const RIVER_SAND_RATES = {
+  'gravel': 0.7,
+  'sand': 1,
+  'red_sand': 0.7
+};
+const RIVER_SAND_THRESHOLDS = (() => {
+  const result = [];
+  let total = 0;
+  for (let k in RIVER_SAND_RATES) {
+    const v = RIVER_SAND_RATES[k];
+    total += v;
+  }
+  let acc = 0;
+  for (let k in RIVER_SAND_RATES) {
+    const v = RIVER_SAND_RATES[k];
+    acc += v;
+    const threshold = {
+      name: k,
+      threshold: acc / total
+    };
+    result.push(threshold);
+  }
+  return result;
+})();
 
-const RIVER_SURFACE_MEDIAN_FACTOR = 0.7;
+const RIVER_SURFACE_MEDIAN_FACTOR = 0.6;
 
 const CAVE_FREQUENCY = 0.02;
 const CAVE_OCTAVES = 12;
@@ -315,10 +338,22 @@ function voxelTerrain(opts) {
             return BLOCKS['water_still'];
           } else if (riverNoiseN < (RIVER_RATE * (1 + SHORE_RATE))) {
             const riverTypeNoiseN = riverTypeNoise.in2D(x, z);
-            if (riverTypeNoiseN < SAND_RATE) {
-              return BLOCKS['sand'];
+            const riverThresholdName = (() => {
+              for (let i = 0; i < RIVER_SAND_THRESHOLDS.length; i++) {
+                const riverThreshold = RIVER_SAND_THRESHOLDS[i];
+                const {name, threshold} = riverThreshold;
+                if (riverTypeNoiseN < threshold) {
+                  return name;
+                }
+              }
+              return null;
+            })();
+            if (riverThresholdName !== null) {
+              return BLOCKS[riverThresholdName];
             } else {
-              return BLOCKS['red_sand'];
+              const lastRiverThreshold = RIVER_SAND_THRESHOLDS[RIVER_SAND_THRESHOLDS.length - 1];
+              const lastRiverThresholdName = lastRiverThreshold.name;
+              return BLOCKS[lastRiverThresholdName];
             }
           } else {
             return null;
