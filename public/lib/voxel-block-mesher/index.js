@@ -32,12 +32,19 @@ var GreedyMesh = (function greedyLoader() {
 
       var tVertices = [], tFaces = []
 
-      var transparentTypes = mesherExtraData ? (mesherExtraData.transparentTypes || {}) : {};
-      var getType = function(voxels, offset) {
-        var type = voxels[offset];
-        return type | (type in transparentTypes ? kTransparentMask : 0);
+      function getType(voxels, offset) {
+        const type = voxels[offset];
+        return type;
       }
-
+      const transparentTypes = mesherExtraData ? (mesherExtraData.transparentTypes || {}) : {};
+      function getTypeTransparency(type) {
+        return type in transparentTypes;
+      }
+      function getTypeTransparencyMask(type) {
+        const transparency = getTypeTransparency(type);
+        const transparencyMask = transparency ? kTransparentMask : 0;
+        return transparencyMask;
+      }
 
       //Sweep over 3-axes
       for(var d=0; d<3; ++d) {
@@ -73,8 +80,15 @@ var GreedyMesh = (function greedyLoader() {
           for(x[v] = 0; x[v] < dimsV; ++x[v]) {
             for(x[u] = 0; x[u] < dimsU; ++x[u], ++n) {
               // Modified to read through getType()
-              var a = xd >= 0      && getType(volume, x[0]      + dimsX * x[1]          + dimsXY * x[2]          )
-                , b = xd < dimsD-1 && getType(volume, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY)
+              let a = xd >= 0      && getType(volume, x[0]      + dimsX * x[1]          + dimsXY * x[2]          );
+              let b = xd < dimsD-1 && getType(volume, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY);
+
+              // transparent only at the interface of different materials
+              // XXX make this work across chunk boundaries
+              if (a !== b) {
+                a && (a = a | getTypeTransparencyMask(a));
+                b && (b = b | getTypeTransparencyMask(b));
+              }
 
               // both are transparent, add to both directions
               if (isTransparent(a) && isTransparent(b)) {
