@@ -8,8 +8,6 @@ export default class ModelChicken extends ModelBase {
   constructor([], [s1 = Math.PI * 3 / 4, s2 = 1, s3 = 0, s4 = 0, s5 = 0] = []) {
     super();
 
-    // const byte0 = 16;
-    const byte0 = 0;
     const headRotation = [0, 0, 0];//[-(s5 / (180 / Math.PI)), s4 / (180 / Math.PI), 0];
 
     this.textures = 'entity/chicken';
@@ -26,7 +24,7 @@ export default class ModelChicken extends ModelBase {
         ],
         position: [-2, -6, -2],
         dimensions: [4, 6, 3],
-        rotationPoint: [0, -1 + byte0, -4],
+        rotationPoint: [0, -1, -4],
         rotation: headRotation
       },
       {
@@ -41,7 +39,7 @@ export default class ModelChicken extends ModelBase {
         ],
         position: [-2, -4, -4],
         dimensions: [4, 2, 2],
-        rotationPoint: [0, -1 + byte0, -4],
+        rotationPoint: [0, -1, -4],
         rotation: headRotation
       },
       {
@@ -56,7 +54,7 @@ export default class ModelChicken extends ModelBase {
         ],
         position: [-1, -2, -3],
         dimensions: [2, 2, 2],
-        rotationPoint: [0, -1 + byte0, -4],
+        rotationPoint: [0, -1, -4],
         rotation: headRotation
       },
       {
@@ -71,7 +69,7 @@ export default class ModelChicken extends ModelBase {
         ],
         position: [-3, -4, -3],
         dimensions: [6, 8, 6],
-        rotationPoint: [0, 0 + byte0, 0],
+        rotationPoint: [0, 0, 0],
         rotation: [Math.PI / 2, 0, 0]
       },
       {
@@ -86,7 +84,7 @@ export default class ModelChicken extends ModelBase {
         ],
         position: [-1, 0.0, -3],
         dimensions: [3, 5, 3],
-        rotationPoint: [-2, 3 + byte0, 1],
+        rotationPoint: [-2, 3, 1],
         rotation: [Math.cos(s1 * 0.6662) * 1.4 * s2, 0, 0]
       },
       {
@@ -101,7 +99,7 @@ export default class ModelChicken extends ModelBase {
         ],
         position: [-1, 0, -3],
         dimensions: [3, 5, 3],
-        rotationPoint: [1, 3 + byte0, 1],
+        rotationPoint: [1, 3, 1],
         rotation: [Math.cos(s1 * 0.6662 + Math.PI) * 1.4 * s2, 0, 0]
       },
       {
@@ -116,7 +114,7 @@ export default class ModelChicken extends ModelBase {
         ],
         position: [0, 0, -3],
         dimensions: [1, 4, 6],
-        rotationPoint: [-4, -3 + byte0, 0],
+        rotationPoint: [-4, -3, 0],
         rotation: [s3, 0, 0]
       },
       {
@@ -131,7 +129,7 @@ export default class ModelChicken extends ModelBase {
         ],
         position: [-1, 0, -3],
         dimensions: [1, 4, 6],
-        rotationPoint: [4, -3 + byte0, 0],
+        rotationPoint: [4, -3, 0],
         rotation: [s3, 0, 0]
       },
     ]
