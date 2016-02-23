@@ -1,0 +1,24 @@
+{
+    "name"            : "pathfinding"
+  , "version"         : "0.4.2"
+  , "description"     : "Comprehensive pathfinding library for grid based games"
+  , "homepage"        : "https://github.com/schteppe/PathFinding3D.js"
+  , "keywords"        : ["algorithm", "game"]
+  , "main"            : "./index.js"
+  , "dependencies"    : {}
+  , "devDependencies" : {
+      "uglify-js"       : "2.3.6"
+    , "colors"          : "0.6.x"
+    , "browserify"      : "2.25.0"
+    , "mocha"           : "1.0.x"
+    , "should"          : "0.6.x"
+  }
+  , "repository"      : {
+      "type"          : "git"
+    , "url"           : "git://github.com/schteppe/PathFinding3D.js.git"
+  }
+  , "licenses"        : [{
+      "type"          :  "MIT"
+    , "url"           : "http://opensource.org/licenses/mit-license.php"
+  }]
+}
