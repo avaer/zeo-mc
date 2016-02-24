@@ -6,6 +6,8 @@ import PlaneTallgrassDoubleSunflower from './PlaneTallgrassDoubleSunflower';
 
 import PlaneRain from './PlaneRain';
 
+import PlaneFire from './PlaneFire';
+
 // planes
 
 export const PLANES = _makePlaneMap([
@@ -27,6 +29,10 @@ export const VEGETATIONS = _makeVegetationSpecs([
 
 export const WEATHERS = _makeWeatherSpecs([
   PlaneRain,
+]);
+
+export const EFFECTS = _makeEffectSpecs([
+  PlaneFire,
 ]);
 
 // api
@@ -65,6 +71,16 @@ function _makeVegetationSpecs(planes) {
 }
 
 function _makeWeatherSpecs(planes) {
+  return planes.map(plane => {
+    const {NAME} = plane;
+    const spec = {
+      plane: NAME
+    };
+    return spec;
+  });
+}
+
+function _makeEffectSpecs(planes) {
   return planes.map(plane => {
     const {NAME} = plane;
     const spec = {

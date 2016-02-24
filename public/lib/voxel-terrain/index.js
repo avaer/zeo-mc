@@ -6,6 +6,7 @@ const  resources = require('../../resources/index');
 const BLOCKS = resources.BLOCKS.BLOCKS;
 const VEGETATIONS = resources.PLANES.VEGETATIONS;
 const WEATHERS = resources.PLANES.WEATHERS;
+const EFFECTS = resources.PLANES.EFFECTS;
 const ENTITIES = resources.MODELS.ENTITIES;
 
 const TERRAIN_FLOOR = 0;
@@ -82,6 +83,12 @@ const WEATHER_OCTAVES = 2;
 const WEATHER_TYPE_FREQUENCY = 0.02;
 const WEATHER_TYPE_OCTAVES = 2;
 const WEATHER_RATE = 0.3;
+
+const EFFECT_FREQUENCY = 0.5;
+const EFFECT_OCTAVES = 8;
+const EFFECT_TYPE_FREQUENCY = 1;
+const EFFECT_TYPE_OCTAVES = 1;
+const EFFECT_RATE = 0.1;
 
 const TREE_RATE = 0.1;
 const TREE_MIN_HEIGHT = 4;
@@ -237,6 +244,21 @@ function voxelTerrain(opts) {
     random: rng
   });
 
+  const effectNoise = new FastSimplexNoise({
+    min: 0,
+    max: 1,
+    frequency: EFFECT_FREQUENCY,
+    octaves: EFFECT_OCTAVES,
+    random: rng
+  });
+  const effectTypeNoise = new FastUniformNoise({
+    min: 0,
+    max: 1,
+    frequency: EFFECT_TYPE_FREQUENCY,
+    octaves: EFFECT_TYPE_OCTAVES,
+    random: rng
+  });
+
   return function generateChunk(position) {
     const startX = position[0] * chunkSize;
     const startY = position[1] * chunkSize;
@@ -250,6 +272,7 @@ function voxelTerrain(opts) {
     const riverSurfaces = [];
     const vegetations = [];
     const weathers = [];
+    const effects = [];
     const entities = [];
 
     forEachPointInside(genPoint);
@@ -266,20 +289,21 @@ function voxelTerrain(opts) {
     function genPoint(x, z) {
       let h = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
       if (h === TERRAIN_FLOOR || (h >= startY && h < endY)) {
-        land(x, h, z);
-        dirt(x, h, z);
-        riv(x, h, z);
+        genLand(x, h, z);
+        genDirt(x, h, z);
+        genRivers(x, h, z);
         if (!isRiverSurface(x, h, z) && !isCaveSurface(x, h, z)) {
-          tree(x, h, z);
-          veg(x, h, z);
-          ent(x, h, z);
-          weath(x, h, z);
+          genTrees(x, h, z);
+          genVegetation(x, h, z);
+          genEntities(x, h, z);
+          genWeather(x, h, z);
+          genEffects(x, h, z);
         }
       } else if (startY < 0) {
         h = endY;
 
-        dirt(x, h, z);
-        riv(x, h, z);
+        genDirt(x, h, z);
+        genRivers(x, h, z);
       }
     }
 
@@ -287,13 +311,13 @@ function voxelTerrain(opts) {
       postRiv();
     }
 
-    function land(x, y, z) {
+    function genLand(x, y, z) {
       if (!isRiverSurface(x, y, z) && !isCaveSurface(x, y, z)) {
         setVoxel(x, y, z, BLOCKS['grass_top_plains']);
       }
     }
 
-    function dirt(x, h, z) {
+    function genDirt(x, h, z) {
       let crustBedrockNoiseN = crustBedrockNoise.in2D(x, z);
       let crustCoreNoiseN = crustCoreNoise.in2D(x, z);
       let crustMantleNoiseN = crustMantleNoise.in2D(x, z);
@@ -331,7 +355,7 @@ function voxelTerrain(opts) {
       }
     }
 
-    function riv(x, h, z) {
+    function genRivers(x, h, z) {
       for (let y = startY; y <= h; y++) {
         const riverNoiseN = getRiverNoise(x, y, z);
 
@@ -384,7 +408,7 @@ function voxelTerrain(opts) {
       }
     }
 
-    function tree(x, y, z) {
+    function genTrees(x, y, z) {
       var treeNoiseN = treeNoise.in2D(x, z);
       if (treeNoiseN >= (1 - TREE_RATE)) {
         var treeHeightNoiseN = sliceNoise(treeNoiseN, TREE_RATE, 1);
@@ -447,7 +471,7 @@ function voxelTerrain(opts) {
       }
     }
 
-    function veg(x, h, z) {
+    function genVegetation(x, h, z) {
       const y = h + 1;
       const vegetationNoiseN = vegetationNoise.in2D(x, z);
       if (vegetationNoiseN < VEGETATION_RATE) {
@@ -457,7 +481,7 @@ function voxelTerrain(opts) {
       }
     }
 
-    function ent(x, h, z) {
+    function genEntities(x, h, z) {
       const y = h + 1;
       const entityNoiseN = entityNoise.in2D(x, z);
       if (entityNoiseN < ENTITY_RATE) {
@@ -467,13 +491,23 @@ function voxelTerrain(opts) {
       }
     }
 
-    function weath(x, h, z) {
+    function genWeather(x, h, z) {
       const y = h + 1;
       const weatherNoiseN = weatherNoise.in2D(x, z);
       if (weatherNoiseN < WEATHER_RATE) {
         const weatherTypeNoiseN = weatherTypeNoise.in2D(x, z);
         const weather = floor(weatherTypeNoiseN * WEATHERS.length) + 1;
         setWeather(x, y, z, weather);
+      }
+    }
+
+    function genEffects(x, h, z) {
+      const y = h + 1;
+      const effectNoiseN = effectNoise.in2D(x, z);
+      if (effectNoiseN < EFFECT_RATE) {
+        const effectTypeNoiseN = effectTypeNoise.in2D(x, z);
+        const effect = floor(effectTypeNoiseN * EFFECTS.length) + 1;
+        setEffect(x, y, z, effect);
       }
     }
 
@@ -529,6 +563,13 @@ function voxelTerrain(opts) {
       y = snapCoordinate(y);
       z = snapCoordinate(z);
       weathers.push([x, y, z, value]);
+    }
+
+    function setEffect(x, y, z, value) {
+      x = snapCoordinate(x);
+      y = snapCoordinate(y);
+      z = snapCoordinate(z);
+      effects.push([x, y, z, value]);
     }
 
     function setEntity(x, y, z, value) {
