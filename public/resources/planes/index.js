@@ -16,7 +16,10 @@ export const PLANES = _makePlaneMap([
   PlaneTallgrass,
   PlaneTallgrassDouble,
   PlaneTallgrassDoubleSunflower,
+
   PlaneRain,
+
+  PlaneFire,
 ]);
 
 export const VEGETATIONS = _makeVegetationSpecs([

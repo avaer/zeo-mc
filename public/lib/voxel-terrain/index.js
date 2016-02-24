@@ -88,7 +88,7 @@ const EFFECT_FREQUENCY = 0.5;
 const EFFECT_OCTAVES = 8;
 const EFFECT_TYPE_FREQUENCY = 1;
 const EFFECT_TYPE_OCTAVES = 1;
-const EFFECT_RATE = 0.1;
+const EFFECT_RATE = 0.2;
 
 const TREE_RATE = 0.1;
 const TREE_MIN_HEIGHT = 4;
@@ -604,7 +604,8 @@ function voxelTerrain(opts) {
       voxels,
       vegetations,
       entities,
-      weathers
+      weathers,
+      effects,
     };
   }
 }
