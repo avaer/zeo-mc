@@ -16,7 +16,8 @@ function Highlighter(game, opts) {
   const edges = new game.THREE.EdgesHelper(mesh, opts.color)
   edges.matrixAutoUpdate = true;
   edges.material.transparent = true;
-  edges.material.opacity = 0.75;
+  edges.material.opacity = opts.opacity;
+  edges.material.linewidth = opts.linewidth;
   this.mesh = edges;
   this.distance = opts.distance || 10
   this.currVoxelPos // undefined when no voxel selected for highlight
