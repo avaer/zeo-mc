@@ -3,6 +3,7 @@ var voxelBlockRenderer = require('../voxel-block-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
 var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
+var voxelUtils = require('../voxel-utils/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
 var control = require('voxel-control')
@@ -64,6 +65,7 @@ function Game(opts) {
   this.materialParams = opts.materialParams || {}
   this.items = []
   this.voxels = voxel(this)
+  this.voxelUtils = voxelUtils({chunkSize: this.chunkSize})
   this.scene = new THREE.Scene()
   this.view = opts.view || new voxelView(THREE, {
     width: this.width,
@@ -274,6 +276,43 @@ Game.prototype.setBlock = function(pos, val) {
 Game.prototype.getBlock = function(pos) {
   pos = this.parseVectorArguments(arguments)
   return this.voxels.voxelAtPosition(pos)
+}
+
+Game.prototype.getIndex = function(position) {
+  return (position.x) + (position.y * this.chunkSize) + (position.z * this.chunkSize * this.chunkSize);
+}
+
+Game.prototype.getValue = function(position) {
+  position = this.parseVectorArguments(arguments);
+
+  const chunkPos = this.voxels.chunkAtPosition(position);
+  const chunk = this.voxels.chunks[chunkPos.join('|')];
+  if (chunk) {
+    const idx = this.voxelUtils.getIndex(position[0], position[1], position[2]);
+    const match = (() => {
+      let value;
+      if (value = chunk.voxels[idx]) {
+        const type = 'block';
+        return {type, value};
+      } else if (value = chunk.vegetations[idx]) {
+        const type = 'vegetation';
+        return {type, value};
+      } else if (value = chunk.effects[idx]) {
+        const type = 'effect';
+        return {type, value};
+      } else {
+        return null;
+      }
+    })();
+    if (match) {
+      const {type, value} = match;
+      return {position, type, value};
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
 }
 
 Game.prototype.blockPosition = function(pos) {
@@ -603,8 +642,8 @@ Game.prototype.showChunk = function(chunk) {
   this.voxels.chunks[chunkIndex] = chunk;
   this.voxels.meshes[chunkIndex] = newMesh;
 
-  this.emit('renderChunk', chunk)
-  return newMesh
+  this.emit('renderChunk', chunk);
+  return newMesh;
 }
 
 // # Debugging methods

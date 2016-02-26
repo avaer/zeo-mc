@@ -11,9 +11,9 @@ function voxelPlaneMesher() {
     const faces = [];
 
     function handlePlanes(planes, templates) {
-      for (let i = 0; i < planes.length; i++) {
-        const weather = planes[i];
-        const [x, y, z, value] = weather;
+      for (let i in planes) {
+        const plane = planes[i];
+        const [x, y, z, value] = plane;
 
         const planeSpec = templates[value - 1];
         const {plane: planeName, p, s} = planeSpec;
@@ -24,7 +24,7 @@ function voxelPlaneMesher() {
           const {position, dimensions, rotation} = planeMesh;
 
           const geometry = new THREE.PlaneGeometry(dimensions[0], dimensions[1]);
-          rotation[0] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationX(rotation[0])); // XXX re-add this once texturing works
+          rotation[0] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationX(rotation[0]));
           rotation[1] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationY(rotation[1]));
           rotation[2] !== 0 && geometry.applyMatrix(new THREE.Matrix4().makeRotationZ(rotation[2]));
           geometry.applyMatrix(new THREE.Matrix4().makeTranslation(

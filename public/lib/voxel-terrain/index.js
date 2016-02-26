@@ -1,8 +1,9 @@
-const Alea = require('alea');
-const FastSimplexNoise = require('fast-simplex-noise');
-const FastUniformNoise = require('../fast-uniform-noise/index');
+import Alea from 'alea';
+import FastSimplexNoise from 'fast-simplex-noise';
+import FastUniformNoise from '../fast-uniform-noise/index';
+import voxelUtils from '../voxel-utils/index';
 
-const  resources = require('../../resources/index');
+import * as resources from '../../resources/index';
 const BLOCKS = resources.BLOCKS.BLOCKS;
 const VEGETATIONS = resources.PLANES.VEGETATIONS;
 const WEATHERS = resources.PLANES.WEATHERS;
@@ -121,6 +122,7 @@ const sqrt = Math.sqrt;
 function voxelTerrain(opts) {
   opts = opts || {};
   const chunkSize = opts.chunkSize || 32;
+  const vu = voxelUtils({chunkSize});
 
   const rng = new Alea(opts.seed);
   const terrainNoise = new FastSimplexNoise({
@@ -269,11 +271,12 @@ function voxelTerrain(opts) {
     const endZ = startZ + chunkSize;
 
     const voxels = new Int8Array(chunkSize * chunkSize * chunkSize);
+    const vegetations = {};
+    const weathers = {};
+    const effects = {};
+    const entities = {};
+
     const riverSurfaces = [];
-    const vegetations = [];
-    const weathers = [];
-    const effects = [];
-    const entities = [];
 
     forEachPointInside(genPoint);
     postProcessPoints();
@@ -432,7 +435,7 @@ function voxelTerrain(opts) {
         for (var i = 0; i < height; i++) {
           var pos = position();
           pos.y = y + i;
-          setMaybe(pos.x, pos.y, pos.z, BLOCKS['log_big_oak']);
+          setVoxelInside(pos.x, pos.y, pos.z, BLOCKS['log_big_oak']);
 
           if (i >= base) {
             var leafSets = {};
@@ -444,7 +447,7 @@ function voxelTerrain(opts) {
               var treeLeafDistance = sqrt(j * j + k * k);
               var treeLeafProbability = TREE_LEAF_RATE - ((treeLeafDistance - 1) / (TREE_LEAF_SIZE - 1)) * TREE_LEAF_RATE;
               if (treeLeafN < treeLeafProbability) {
-                var idx = getIndex(pos.x, pos.y, pos.z);
+                var idx = vu.getIndex(pos.x, pos.y, pos.z);
                 leafSets[idx] = true;
               }
             });
@@ -453,10 +456,10 @@ function voxelTerrain(opts) {
               pos.z = z + k;
 
               if (TREE_DIRECTIONS.some(function(d) {
-                var idx = getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
+                var idx = vu.getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
                 return !!leafSets[idx];
               })) {
-                setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
+                setVoxelInside(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
               }
             });
           }
@@ -466,7 +469,7 @@ function voxelTerrain(opts) {
         pos.y = y + i;
         var tipTreeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
         if (tipTreeLeafN < TREE_LEAF_RATE) {
-          setMaybe(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
+          setVoxelInside(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
         }
       }
     }
@@ -534,49 +537,37 @@ function voxelTerrain(opts) {
       return isCave(x, h, z);
     }
 
-    function snapCoordinate(n) {
-      return abs((chunkSize + n % chunkSize) % chunkSize);
-    }
-
-    function getIndex(x, y, z) {
-      x = snapCoordinate(x);
-      y = snapCoordinate(y);
-      z = snapCoordinate(z);
-      const idx = (x) + (y * chunkSize) + (z * chunkSize * chunkSize);
-      return idx;
-    }
-
     function setVoxel(x, y, z, value) {
-      const idx = getIndex(x, y, z);
+      const idx = vu.getIndex(x, y, z);
       voxels[idx] = value;
     }
 
     function setVegetation(x, y, z, value) {
-      x = snapCoordinate(x);
-      y = snapCoordinate(y);
-      z = snapCoordinate(z);
-      vegetations.push([x, y, z, value]);
+      const idxSpec = vu.getIndexSpec(x, y, z);
+      const [,,,idx] = idxSpec;
+      [x, y, z] = idxSpec;
+      vegetations[idx] = [x, y, z, value];
     }
 
     function setWeather(x, y, z, value) {
-      x = snapCoordinate(x);
-      y = snapCoordinate(y);
-      z = snapCoordinate(z);
-      weathers.push([x, y, z, value]);
+      const idxSpec = vu.getIndexSpec(x, y, z);
+      const [,,,idx] = idxSpec;
+      [x, y, z] = idxSpec;
+      weathers[idx] = [x, y, z, value];
     }
 
     function setEffect(x, y, z, value) {
-      x = snapCoordinate(x);
-      y = snapCoordinate(y);
-      z = snapCoordinate(z);
-      effects.push([x, y, z, value]);
+      const idxSpec = vu.getIndexSpec(x, y, z);
+      const [,,,idx] = idxSpec;
+      [x, y, z] = idxSpec;
+      effects[idx] = [x, y, z, value];
     }
 
     function setEntity(x, y, z, value) {
-      x = snapCoordinate(x);
-      y = snapCoordinate(y);
-      z = snapCoordinate(z);
-      entities.push([x, y, z, value]);
+      const idxSpec = vu.getIndexSpec(x, y, z);
+      const [,,,idx] = idxSpec;
+      [x, y, z] = idxSpec;
+      entities[idx] = [x, y, z, value];
     }
 
     function isInside(x, y, z) {
@@ -585,9 +576,9 @@ function voxelTerrain(opts) {
         z >= startZ && z < endZ;
     }
 
-    function setMaybe(x, y, z, value) {
+    function setVoxelInside(x, y, z, value) {
       if (isInside(x, y, z)) {
-        var idx = getIndex(x, y, z);
+        var idx = vu.getIndex(x, y, z);
         voxels[idx] = value;
       }
     }

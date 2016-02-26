@@ -5,7 +5,7 @@ function voxelModelMesher() {
   return function(entities, dims) {
     const models = [];
 
-    for (let i = 0; i < entities.length; i++) {
+    for (let i in entities) {
       const entity = entities[i];
       const [x, y, z, value] = entity;
 
