@@ -225,7 +225,10 @@ Game.prototype.raycastVoxels = function(start, direction, maxDistance, epilson) 
   var hitPosition = [0, 0, 0]
   var cp = start || this.cameraPosition()
   var cv = direction || this.cameraVector()
-  var hitBlock = voxelRaycast((x, y, z) => this.getBlock(x, y, z), cp, cv, maxDistance || 10.0, hitPosition, hitNormal, epilson || this.epilson)
+  var hitBlock = voxelRaycast((x, y, z) => {
+    const result = this.getValue(x, y, z);
+    return result;
+  }, cp, cv, maxDistance || 10.0, hitPosition, hitNormal, epilson || this.epilson)
   if (hitBlock <= 0) return false
   var adjacentPosition = [0, 0, 0]
   var voxelPosition = this.voxelPosition(hitPosition)
@@ -278,26 +281,27 @@ Game.prototype.getBlock = function(pos) {
   return this.voxels.voxelAtPosition(pos)
 }
 
-Game.prototype.getIndex = function(position) {
+/* Game.prototype.getIndex = function(position) {
   return (position.x) + (position.y * this.chunkSize) + (position.z * this.chunkSize * this.chunkSize);
-}
+} */
 
 Game.prototype.getValue = function(position) {
   position = this.parseVectorArguments(arguments);
 
   const chunkPos = this.voxels.chunkAtPosition(position);
-  const chunk = this.voxels.chunks[chunkPos.join('|')];
+  const chunkIndex = chunkPos.join('|');
+  const chunk = this.voxels.chunks[chunkIndex];
   if (chunk) {
-    const idx = this.voxelUtils.getIndex(position[0], position[1], position[2]);
+    const index = this.voxelUtils.getIndex(position[0], position[1], position[2]);
     const match = (() => {
       let value;
-      if (value = chunk.voxels[idx]) {
+      if (value = chunk.voxels[index]) {
         const type = 'block';
         return {type, value};
-      } else if (value = chunk.vegetations[idx]) {
+      } else if (value = chunk.vegetations[index]) {
         const type = 'vegetation';
         return {type, value};
-      } else if (value = chunk.effects[idx]) {
+      } else if (value = chunk.effects[index]) {
         const type = 'effect';
         return {type, value};
       } else {
@@ -306,13 +310,26 @@ Game.prototype.getValue = function(position) {
     })();
     if (match) {
       const {type, value} = match;
-      return {position, type, value};
+      return {type, value, chunkIndex, index};
     } else {
       return null;
     }
   } else {
     return null;
   }
+}
+
+Game.prototype.deleteValue = function(value) {
+  const {type, chunkIndex, index} = value;
+  const chunk = this.voxels.chunks[chunkIndex];
+  if (type === 'block') {
+    chunk.voxels[index] = 0;
+  } else if (type === 'vegetation') {
+    chunk.vegetations[index] = null;
+  } else if (type === 'effect') {
+    chunk.effects[index] = null;
+  }
+  this.addChunkToNextUpdate(chunk);
 }
 
 Game.prototype.blockPosition = function(pos) {

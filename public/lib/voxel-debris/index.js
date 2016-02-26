@@ -7,11 +7,6 @@ module.exports = function (game, opts) {
     if (!opts) opts = {};
     if (!opts.limit) opts.limit = function () { return false };
     if (opts.yield === undefined) opts.yield = 4;
-    if (typeof opts.yield !== 'function') {
-        opts.yield = (function (y) {
-            return function () { return y };
-        })(opts.yield);
-    }
     
     if (!opts.expire) opts.expire = {};
     if (typeof opts.expire === 'number') {
@@ -32,23 +27,27 @@ module.exports = function (game, opts) {
     
     var em = new EventEmitter;
     return funstance(em, function (pos) {
-        var value = game.getBlock(pos);
-        if (value === 0) return;
-        game.setBlock(pos, 0);
-        
-        for (var i = 0; i < opts.yield(value); i++) {
-            var item = createDebris(game, pos, value, opts.power);
-            item = game.addItem(item);
-            
-            var time = opts.expire.start + Math.random() * (opts.expire.end - opts.expire.start);
+      var value = game.getValue(pos);
+      if (!value) return;
+      game.deleteValue(value);
+      
+      const {type} = value;
+      if (type === 'block') {
+        const {value: blockValue} = value;
+        for (let i = 0; i < opts.yield; i++) {
+          var item = createDebris(game, pos, blockValue, opts.power);
+          item = game.addItem(item);
+          
+          var time = opts.expire.start + Math.random() * (opts.expire.end - opts.expire.start);
 
-            (function(item) {
-              game.setTimeout(function() {
-                game.removeItem(item);
-                if (!item._collected) em.emit('expire', item);
-              }, time);
-            })(item);
+          (function(item) {
+            game.setTimeout(function() {
+              game.removeItem(item);
+              if (!item._collected) em.emit('expire', item);
+            }, time);
+          })(item);
         }
+      }
     });
 }
 
