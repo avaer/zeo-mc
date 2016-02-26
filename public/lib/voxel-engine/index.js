@@ -223,7 +223,7 @@ Game.prototype.raycastVoxels = function(start, direction, maxDistance, epilson) 
   var hitPosition = [0, 0, 0]
   var cp = start || this.cameraPosition()
   var cv = direction || this.cameraVector()
-  var hitBlock = voxelRaycast(this, cp, cv, maxDistance || 10.0, hitPosition, hitNormal, epilson || this.epilson)
+  var hitBlock = voxelRaycast((x, y, z) => this.getBlock(x, y, z), cp, cv, maxDistance || 10.0, hitPosition, hitNormal, epilson || this.epilson)
   if (hitBlock <= 0) return false
   var adjacentPosition = [0, 0, 0]
   var voxelPosition = this.voxelPosition(hitPosition)
