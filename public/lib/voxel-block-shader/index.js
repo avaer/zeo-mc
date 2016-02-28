@@ -1,4 +1,3 @@
-// var tic = require('tic')();
 var createAtlas = require('atlaspack');
 var isTransparent = require('opaque').transparent;
 var touchup = require('touchup');
@@ -10,19 +9,19 @@ var round = Math.round;
 
 module.exports = voxelBlockShader;
 
-function reconfigure(old) {
+/* function reconfigure(old) {
   var ret = module.exports(old.opts);
   ret.load(old.names);
 
   return ret;
-}
+} */
 
 function voxelBlockShader(opts) {
   if (!(this instanceof voxelBlockShader)) return new voxelBlockShader(opts || {});
   var self = this;
   this.game = opts.game;
   this.opts = opts;
-  this.names = [];
+  // this.names = [];
   this.materials = [];
   this.transparents = [];
   this.getTextureImage = opts.getTextureImage;
@@ -47,7 +46,7 @@ function voxelBlockShader(opts) {
   this.atlas = createAtlas(this.canvas);
   this.atlas.tilepad = opts.tilepad = opts.tilepad === undefined ? true : opts.tilepad;
   this._atlasuv = false;
-  this._atlaskey = false;
+  // this._atlaskey = false;
 
   const {THREE} = this.game;
 
@@ -348,12 +347,7 @@ function voxelBlockShader(opts) {
       vertexColors: THREE.VertexColors
     });
   } else {
-    var opaque = new THREE.ShaderMaterial(this.materialParams);
-    var transparent = new THREE.ShaderMaterial(this.materialTransparentParams);
-    this.material = new THREE.MeshFaceMaterial([
-      opaque,
-      transparent
-    ]);
+    this.material = new THREE.ShaderMaterial(this.materialTransparentParams);
   }
 
   // a place for meshes to wait while textures are loading
@@ -365,24 +359,24 @@ voxelBlockShader.prototype.reconfigure = function() {
 };
 
 voxelBlockShader.prototype.load = function(names, done) {
-  if (!names || names.length === 0) return;
-  this.names = this.names.concat(names); // save for reconfiguration
+  // if (!names || names.length === 0) return;
+  // this.names = this.names.concat(names); // save for reconfiguration
 
   var self = this;
-  if (!Array.isArray(names)) names = [names];
+  // if (!Array.isArray(names)) names = [names];
   done = done || function() {};
   this.loading++;
 
-  var materialSlice = names.map(self._expandName);
+  var materialSlice = names; // names.map(self._expandName);
   self.materials = self.materials.concat(materialSlice);
 
   // load onto the texture atlas
   var load = Object.create(null);
   materialSlice.forEach(function(mats) {
-    mats.forEach(function(mat) {
-      if (mat.slice(0, 1) === '#') return;
-      // todo: check if texture already exists
-      load[mat] = true;
+    mats.forEach(function(mats2) {
+      mats2.forEach(function(mat) {
+        load[mat] = true;
+      });
     });
   });
   if (Object.keys(load).length > 0) {
@@ -404,7 +398,12 @@ voxelBlockShader.prototype.getTransparentVoxelTypes = function() {
 
     var anyTransparent = false;
     for (var j = 0; j < materialSlice.length; j += 1) {
-      anyTransparent |= this.transparents.indexOf(materialSlice[j]) !== -1;
+      var materialSubSlice = materialSlice[j];
+      for (var k = 0; k < materialSubSlice.length; k += 1) {
+        anyTransparent = this.transparents.indexOf(materialSubSlice[k]) !== -1;
+        if (anyTransparent) break;
+      }
+      if (anyTransparent) break;
     }
 
     if (anyTransparent)
@@ -455,7 +454,7 @@ voxelBlockShader.prototype.pack = function(name, done) {
   return self;
 };
 
-voxelBlockShader.prototype.find = function(name) {
+/* voxelBlockShader.prototype.find = function(name) {
   // lookup first material with any matching texture name
   var self = this;
   var type = 0;
@@ -469,11 +468,11 @@ voxelBlockShader.prototype.find = function(name) {
     if (type !== 0) return false;
   });
   return type;
-};
+}; */
 
-voxelBlockShader.prototype._expandName = function(name) {
-  if (name === null) return Array(6);
-  if (name.top) return [name.back, name.front, name.top, name.bottom, name.left, name.right];
+/* voxelBlockShader.prototype._expandName = function(name) {
+  // if (name === null) return Array(6);
+  // if (name.top) return [name.back, name.front, name.top, name.bottom, name.left, name.right];
   if (!Array.isArray(name)) name = [name];
   // load the 0 texture to all
   if (name.length === 1) name = [name[0],name[0],name[0],name[0],name[0],name[0]];
@@ -484,24 +483,24 @@ voxelBlockShader.prototype._expandName = function(name) {
   // 0 is top, 1 is bottom, 2 is front/back, 3 is left/right
   if (name.length === 4) name = [name[2],name[2],name[0],name[1],name[3],name[3]];
   return name;
-};
+}; */
 
 voxelBlockShader.prototype._afterLoading = function() {
   var self = this;
   function alldone() {
     self.loading--;
     self._atlasuv = self.atlas.uv(self.canvas.width, self.canvas.height);
-    self._atlaskey = Object.create(null);
+    /* self._atlaskey = Object.create(null);
     self.atlas.index().forEach(function(key) {
       self._atlaskey[key.name] = key;
-    });
+    }); */
     self.texture.needsUpdate = true;
     self.material.needsUpdate = true;
     //window.open(self.canvas.toDataURL());
     if (self._meshQueue.length > 0) {
       for (let i = 0; i < self._meshQueue.length; i++) {
-        const mesh = self._meshQueue[i];
-        self.paint(mesh);
+        const args = self._meshQueue[i];
+        self.paint(...args);
       }
       self._meshQueue = [];
     }
@@ -533,74 +532,58 @@ voxelBlockShader.prototype._powerof2 = function(done) {
   done();
 };
 
-voxelBlockShader.prototype.paint = function(mesh) {
-  var self = this;
+voxelBlockShader.prototype.getFaceMaterial = function(mesh, i, frame) {
+  const frameMaterials = (() => {
+    const colors = mesh.geometry.getAttribute('color');
+    const colorIndex = i * 3;
+    const colorArray = [colors.array[colorIndex + 0], colors.array[colorIndex + 1], colors.array[colorIndex + 2]]
+    const colorValue = voxelBlockShader.colorArrayToValue(colorArray);
+    const frameMaterials = this.materials[colorValue - 1] || this.materials[0];
+    return frameMaterials;
+  })();
 
+  const frameMaterial = frameMaterials[frame % frameMaterials.length];
+
+  const faceMaterial = (() => {
+    // BACK, FRONT, TOP, BOTTOM, LEFT, RIGHT
+    let faceMaterial = frameMaterial[0] || '';
+    const normals = mesh.geometry.getAttribute('normal');
+    const normalIndex = i * 3;
+    if      (normals.array[normalIndex + 0] === 1)  faceMaterial = frameMaterial[1] || ''; // z === 1
+    else if (normals.array[normalIndex + 1] === 1)  faceMaterial = frameMaterial[2] || ''; // y === 1
+    else if (normals.array[normalIndex + 1] === -1) faceMaterial = frameMaterial[3] || ''; // y === -1
+    else if (normals.array[normalIndex + 2] === -1) faceMaterial = frameMaterial[4] || ''; // x === -1
+    else if (normals.array[normalIndex + 2] === 1)  faceMaterial = frameMaterial[5] || ''; // x === 0
+
+    return faceMaterial;
+  })();
+
+  return faceMaterial;
+};
+
+voxelBlockShader.prototype.paint = function(mesh, frame) {
   // if were loading put into queue
-  if (self.loading > 0) {
-    self._meshQueue.push(mesh);
+  if (this.loading > 0) {
+    this._meshQueue.push([mesh, frame]);
     return false;
   }
 
-  const uvs = mesh.geometry.getAttribute('uv');
+  frame = frame || 0;
 
+  const uvs = mesh.geometry.getAttribute('uv');
   if (uvs) {
     const numVertices = uvs.array.length / 2;
     for (let i = 0; i < numVertices; i++) {
-      const faceMaterial = (() => {
-        const faceMaterials = (() => {
-          const colors = mesh.geometry.getAttribute('color');
-          const colorIndex = i * 3;
-          const colorArray = [colors.array[colorIndex + 0], colors.array[colorIndex + 1], colors.array[colorIndex + 2]]
-          const colorValue = voxelBlockShader.colorArrayToValue(colorArray);
-          const faceMaterials = self.materials[colorValue - 1] || self.materials[0];
-          return faceMaterials;
-        })();
+      const faceMaterial = this.getFaceMaterial(mesh, i, frame);
 
-        const faceMaterial = (() => {
-          // BACK, FRONT, TOP, BOTTOM, LEFT, RIGHT
-          let faceMaterial = faceMaterials[0] || '';
-          const normals = mesh.geometry.getAttribute('normal');
-          const normalIndex = i * 3;
-          if      (normals.array[normalIndex + 0] === 1)  faceMaterial = faceMaterials[1] || ''; // z === 1
-          else if (normals.array[normalIndex + 1] === 1)  faceMaterial = faceMaterials[2] || ''; // y === 1
-          else if (normals.array[normalIndex + 1] === -1) faceMaterial = faceMaterials[3] || ''; // y === -1
-          else if (normals.array[normalIndex + 2] === -1) faceMaterial = faceMaterials[4] || ''; // x === -1
-          else if (normals.array[normalIndex + 2] === 1)  faceMaterial = faceMaterials[5] || ''; // x === 0
-
-          return faceMaterial;
-        })();
-
-        return faceMaterial;
-      })();
-
-      // if just a simple color
-      /* if (faceMaterial.slice(0, 1) === '#') {
-        self.ao(face, faceMaterial);
-        return;
-      } */
-
-      var atlasuv = self._atlasuv[faceMaterial];
-      if (!atlasuv) {
+      var atlasuvs = this._atlasuv[faceMaterial];
+      if (!atlasuvs) {
+        console.log('failed to get frame material', {mesh, i, frame, materials: this.materials});
         throw new Error('no material index');
       }
 
-      // If a transparent texture use transparent material
-      // face.materialIndex = (self.useTransparency && self.transparents.indexOf(faceMaterial) !== -1) ? 1 : 0; // XXX
-      // mesh.geometry.groups[0].materialIndex = 1;
-      mesh.geometry.groups = [
-        {
-          start: 0,
-          count: uvs.array.length,
-          materialIndex: 1
-        }
-      ];
-      /* if (self.useTransparency && self.transparents.indexOf(faceMaterial) !== -1) {
-        throw new Error('was transparent');
-      } */
-
       // range of UV coordinates for this texture (see above diagram)
-      var topUV = atlasuv[0], rightUV = atlasuv[1], bottomUV = atlasuv[2], leftUV = atlasuv[3];
+      const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
 
       // pass texture start in UV coordinates
 
@@ -609,20 +592,12 @@ voxelBlockShader.prototype.paint = function(mesh) {
       // I'm (ab)using faceVertexUvs = the 'uv' attribute: it is the same for all coordinates,
       // and the fractional part is the top-left UV, the whole part is the tile size.
 
-      var tileSizeX = bottomUV[0] - topUV[0];
-      var tileSizeY = topUV[1] - bottomUV[1];
+      const tileSizeX = bottomUV[0] - topUV[0];
+      const tileSizeY = topUV[1] - bottomUV[1];
 
-      // integer
-      var tileSizeIntX = tileSizeX * self.canvas.width;
-      var tileSizeIntY = tileSizeY * self.canvas.height;
       // half because of four-tap repetition
-      tileSizeIntX /= 2;
-      tileSizeIntY /= 2;
-
-      var isInteger = function(n) { return round(n) === n; }; // Number.isInteger :(
-      if (!isInteger(tileSizeIntX) || !isInteger(tileSizeIntY)) {
-        throw new Error('voxel-block-shader tile dimensions non-integer '+tileSizeIntX+','+tileSizeIntY);
-      }
+      const tileSizeIntX = (tileSizeX * this.canvas.width) / 2;
+      const tileSizeIntY = (tileSizeY * this.canvas.height) / 2;
 
       // set all to top (+ encoded tileSize)
       const uvIndex = i * 2;
@@ -676,26 +651,6 @@ voxelBlockShader.prototype.sprite = function(name, w, h, cb) {
   return self;
 };
 
-/* voxelBlockShader.prototype.animate = function(mesh, names, delay) {
-  var self = this;
-  delay = delay || 1000;
-  if (!Array.isArray(names) || names.length < 2) return false;
-  var i = 0;
-  var mat = new this.THREE.ShaderMaterial(this.materialParams);
-  mat.map = this.texture;
-  mat.transparent = true;
-  mat.needsUpdate = true;
-  tic.interval(function() {
-    self.paint(mesh, names[i % names.length]);
-    i++;
-  }, delay);
-  return mat;
-};
-
-voxelBlockShader.prototype.tick = function(dt) {
-  tic.tick(dt);
-}; */
-
 voxelBlockShader.colorArrayToValue = function(a) {
   return floor(
     a[0] * 255 * 255 * 255 +
@@ -721,3 +676,5 @@ function each(arr, it, done) {
     });
   });
 }
+
+function _isInteger(n) { return round(n) === n; }; // Number.isInteger :(

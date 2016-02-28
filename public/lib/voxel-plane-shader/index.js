@@ -11,19 +11,19 @@ var round = Math.round;
 
 module.exports = voxelPlaneShader;
 
-function reconfigure(old) {
+/* function reconfigure(old) {
   var ret = module.exports(old.opts);
   ret.load(old.names);
 
   return ret;
-}
+} */
 
 function voxelPlaneShader(opts) {
   if (!(this instanceof voxelPlaneShader)) return new voxelPlaneShader(opts || {});
   var self = this;
   this.game = opts.game;
   this.opts = opts;
-  this.names = [];
+  // this.names = [];
   this.materials = [];
   this.transparents = [];
   this.getTextureImage = opts.getTextureImage;
@@ -236,29 +236,29 @@ function voxelPlaneShader(opts) {
   this._meshQueue = [];
 }
 
-voxelPlaneShader.prototype.reconfigure = function() {
+/* voxelPlaneShader.prototype.reconfigure = function() {
   return reconfigure(this);
-};
+}; */
 
 voxelPlaneShader.prototype.load = function(names, done) {
-  if (!names || names.length === 0) return;
-  this.names = this.names.concat(names); // save for reconfiguration
+  // if (!names || names.length === 0) return;
+  // this.names = this.names.concat(names); // save for reconfiguration
 
   var self = this;
-  if (!Array.isArray(names)) names = [names];
+  // if (!Array.isArray(names)) names = [names];
   done = done || function() {};
   this.loading++;
 
-  var materialSlice = names.map(self._expandName);
+  var materialSlice = names; // names.map(self._expandName);
   self.materials = self.materials.concat(materialSlice);
 
   // load onto the texture atlas
   var load = Object.create(null);
   materialSlice.forEach(function(mats) {
-    mats.forEach(function(mat) {
-      if (mat.slice(0, 1) === '#') return;
-      // todo: check if texture already exists
-      load[mat] = true;
+    mats.forEach(function(mats2) {
+      mats2.forEach(function(mat) {
+        load[mat] = true;
+      });
     });
   });
   if (Object.keys(load).length > 0) {
@@ -280,7 +280,12 @@ voxelPlaneShader.prototype.getTransparentVoxelTypes = function() {
 
     var anyTransparent = false;
     for (var j = 0; j < materialSlice.length; j += 1) {
-      anyTransparent |= this.transparents.indexOf(materialSlice[j]) !== -1;
+      var materialSubSlice = materialSlice[j];
+      for (var k = 0; k < materialSubSlice.length; k += 1) {
+        anyTransparent = this.transparents.indexOf(materialSubSlice[k]) !== -1;
+        if (anyTransparent) break;
+      }
+      if (anyTransparent) break;
     }
 
     if (anyTransparent)
@@ -335,7 +340,7 @@ voxelPlaneShader.prototype.pack = function(name, done) {
   return self;
 };
 
-voxelPlaneShader.prototype.find = function(name) {
+/* voxelPlaneShader.prototype.find = function(name) {
   // lookup first material with any matching texture name
   var self = this;
   var type = 0;
@@ -349,11 +354,11 @@ voxelPlaneShader.prototype.find = function(name) {
     if (type !== 0) return false;
   });
   return type;
-};
+}; */
 
-voxelPlaneShader.prototype._expandName = function(name) {
-  if (name === null) return Array(6);
-  if (name.top) return [name.back, name.front, name.top, name.bottom, name.left, name.right];
+/* voxelPlaneShader.prototype._expandName = function(name) {
+  // if (name === null) return Array(6);
+  // if (name.top) return [name.back, name.front, name.top, name.bottom, name.left, name.right];
   if (!Array.isArray(name)) name = [name];
   // load the 0 texture to all
   if (name.length === 1) name = [name[0],name[0],name[0],name[0],name[0],name[0]];
@@ -364,7 +369,7 @@ voxelPlaneShader.prototype._expandName = function(name) {
   // 0 is top, 1 is bottom, 2 is front/back, 3 is left/right
   if (name.length === 4) name = [name[2],name[2],name[0],name[1],name[3],name[3]];
   return name;
-};
+}; */
 
 voxelPlaneShader.prototype._afterLoading = function() {
   var self = this;
@@ -380,8 +385,8 @@ voxelPlaneShader.prototype._afterLoading = function() {
     //window.open(self.canvas.toDataURL());
     if (self._meshQueue.length > 0) {
       for (let i = 0; i < self._meshQueue.length; i++) {
-        const mesh = self._meshQueue[i];
-        self.paint(mesh);
+        const args = self._meshQueue[i];
+        self.paint(...args);
       }
       self._meshQueue = [];
     }
@@ -413,87 +418,53 @@ voxelPlaneShader.prototype._powerof2 = function(done) {
   done();
 };
 
-voxelPlaneShader.prototype.paint = function(mesh) {
+voxelPlaneShader.prototype.getFaceMaterial = function(mesh, i, frame) {
+  const frameMaterials = (() => {
+    const colors = mesh.geometry.getAttribute('color');
+    const colorIndex = i * 2 * 3 * 3;
+    const colorArray = [colors.array[colorIndex + 0], colors.array[colorIndex + 1], colors.array[colorIndex + 2]]
+    const colorValue = voxelBlockShader.colorArrayToValue(colorArray);
+    const frameMaterials = this.materials[colorValue - 1] || this.materials[0];
+    return frameMaterials;
+  })();
+
+  const frameMaterial = frameMaterials[frame % frameMaterials.length];
+
+if (!frameMaterial) {
+  console.log('failed to get frame material', {materials: this.materials, frameMaterials, frame, frameMaterial});
+}
+
+  const faceMaterial = frameMaterial[0] || '';
+
+  return faceMaterial;
+}
+
+voxelPlaneShader.prototype.paint = function(mesh, frame) {
   var self = this;
 
   // if were loading put into queue
   if (self.loading > 0) {
-    self._meshQueue.push(mesh);
+    self._meshQueue.push([mesh, frame]);
     return false;
   }
 
-  const uvs = mesh.geometry.getAttribute('uv');
+  frame = frame || 0;
 
+  const uvs = mesh.geometry.getAttribute('uv');
   if (uvs) {
     const numVertices = uvs.array.length / 2;
     const numTrigs = numVertices / 3;
     const numFaces = numTrigs / 2;
     for (let i = 0; i < numFaces; i++) {
-      const faceMaterial = (() => {
-        const faceMaterials = (() => {
-          const colors = mesh.geometry.getAttribute('color');
-          const colorIndex = i * 2 * 3 * 3;
-          const colorArray = [colors.array[colorIndex + 0], colors.array[colorIndex + 1], colors.array[colorIndex + 2]]
-          const colorValue = voxelBlockShader.colorArrayToValue(colorArray);
-          const faceMaterials = self.materials[colorValue - 1] || self.materials[0];
-          return faceMaterials;
-        })();
-        const faceMaterial = faceMaterials[0] || '';
-        return faceMaterial;
-      })();
+      const faceMaterial = this.getFaceMaterial(mesh, i, frame);
 
-      // if just a simple color
-      /* if (faceMaterial.slice(0, 1) === '#') {
-        self.ao(face, faceMaterial);
-        return;
-      } */
-
-      var atlasuv = self._atlasuv[faceMaterial];
-      if (!atlasuv) {
+      const atlasuvs = self._atlasuv[faceMaterial];
+      if (!atlasuvs) {
         throw new Error('no material index');
       }
 
-      // If a transparent texture use transparent material
-      // face.materialIndex = (self.useTransparency && self.transparents.indexOf(faceMaterial) !== -1) ? 1 : 0; // XXX
-      // mesh.geometry.groups[0].materialIndex = 1;
-      /* mesh.geometry.groups = [
-        {
-          start: 0,
-          count: uvs.array.length,
-          materialIndex: 0
-        }
-      ]; */
-      /* if (self.useTransparency && self.transparents.indexOf(faceMaterial) !== -1) {
-        throw new Error('was transparent');
-      } */
-
-      // pass texture start in UV coordinates
-
-      // WARNING: ugly hack ahead. because I don't know how to pass per-geometry uniforms
-      // to custom shaders using three.js (https://github.com/deathcap/voxel-texture-shader/issues/3),
-      // I'm (ab)using faceVertexUvs = the 'uv' attribute: it is the same for all coordinates,
-      // and the fractional part is the top-left UV, the whole part is the tile size.
-
-      /* var tileSizeX = bottomUV[0] - topUV[0];
-      var tileSizeY = topUV[1] - bottomUV[1];
-
-      // integer
-      var tileSizeIntX = tileSizeX * self.canvas.width;
-      var tileSizeIntY = tileSizeY * self.canvas.height;
-      // half because of four-tap repetition
-      tileSizeIntX /= 2;
-      tileSizeIntY /= 2;
-
-      var isInteger = function(n) { return round(n) === n; }; // Number.isInteger :(
-      if (!isInteger(tileSizeIntX) || !isInteger(tileSizeIntY)) {
-        throw new Error('voxel-plane-shader tile dimensions non-integer '+tileSizeIntX+','+tileSizeIntY);
-      } */
-
       // range of UV coordinates for this texture (see above diagram)
-      const topUV = atlasuv[0];
-      const rightUV = atlasuv[1];
-      const bottomUV = atlasuv[2];
-      const leftUV = atlasuv[3];
+      const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
 
       // set uvs
       const uvIndex = i * 2 * 3 * 2;
@@ -575,26 +546,6 @@ voxelPlaneShader.prototype.sprite = function(name, w, h, cb) {
   });
   return self;
 };
-
-/* voxelPlaneShader.prototype.animate = function(mesh, names, delay) {
-  var self = this;
-  delay = delay || 1000;
-  if (!Array.isArray(names) || names.length < 2) return false;
-  var i = 0;
-  var mat = new this.THREE.ShaderMaterial(this.materialParams);
-  mat.map = this.texture;
-  mat.transparent = true;
-  mat.needsUpdate = true;
-  tic.interval(function() {
-    self.paint(mesh, names[i % names.length]);
-    i++;
-  }, delay);
-  return mat;
-};
-
-voxelPlaneShader.prototype.tick = function(dt) {
-  tic.tick(dt);
-}; */
 
 function each(arr, it, done) {
   var count = 0;

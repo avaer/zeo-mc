@@ -27,6 +27,8 @@ var physical = require('voxel-physical')
 var pin = require('pin-it')
 var tic = require('tic')()
 
+var floor = Math.floor;
+
 module.exports = Game
 
 function Game(opts) {
@@ -49,6 +51,7 @@ function Game(opts) {
   this.arrayType = opts.arrayType || Uint8Array
   this.cubeSize = 1 // backwards compat
   this.chunkSize = opts.chunkSize || 32
+  this.tickRate = opts.tickRate || 200
   
   // chunkDistance and removeDistance should not be set to the same thing
   // as it causes lag when you go back and forth on a chunk boundary
@@ -159,12 +162,11 @@ inherits(Game, EventEmitter)
 // # External API
 
 Game.prototype.voxelPosition = function(gamePosition) {
-  var _ = Math.floor
   var p = gamePosition
   var v = []
-  v[0] = _(p[0])
-  v[1] = _(p[1])
-  v[2] = _(p[2])
+  v[0] = floor(p[0])
+  v[1] = floor(p[1])
+  v[2] = floor(p[2])
   return v
 }
 
@@ -635,6 +637,8 @@ Game.prototype.showChunk = function(chunk) {
       return blockMesh;
     })();
     mesh.add(blockMesh);
+    mesh.blockMesh = blockMesh;
+
     const planeMesh = (() => {
       const planeMesh = voxelPlaneRenderer(chunk, this.THREE);
       planeMesh.material = this.planeShader.material;
@@ -642,8 +646,11 @@ Game.prototype.showChunk = function(chunk) {
       return planeMesh;
     })();
     mesh.add(planeMesh);
+    mesh.planeMesh = planeMesh;
+
     const modelMesh = voxelModelRenderer(chunk, this.THREE);
     mesh.add(modelMesh);
+    mesh.modelMesh = modelMesh;
 
     const bounds = this.voxels.getBounds.apply(this.voxels, chunk.position);
     mesh.position.set(bounds[0][0], bounds[0][1], bounds[0][2]);
@@ -714,13 +721,20 @@ Game.prototype.onFire = function(state) {
 Game.prototype.setInterval = tic.interval.bind(tic)
 Game.prototype.setTimeout = tic.timeout.bind(tic)
 
-Game.prototype.tick = function(delta) {
+Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   for(var i = 0, len = this.items.length; i < len; ++i) {
     this.items[i].tick(delta)
   }
-  
-  // if (this.blockShader) this.blockShader.tick(delta)
-  // if (this.planeShader) this.planeShader.tick(delta)
+
+  const oldWorldTick = floor(oldWorldTime / this.tickRate);
+  const newWorldTick = floor(newWorldTime / this.tickRate);
+  if (newWorldTick !== oldWorldTick) {
+    for (let chunkIndex in this.voxels.meshes) {
+      const mesh = this.voxels.meshes[chunkIndex];
+      const {blockMesh, planeMesh} = mesh;
+      this.planeShader.paint(planeMesh, newWorldTick);
+    }
+  }
 
   if (this.pendingChunks.length) this.loadPendingChunks()
   if (Object.keys(this.chunksNeedsUpdate).length > 0) this.updateDirtyChunks()
@@ -739,22 +753,23 @@ Game.prototype.render = function(delta) {
 }
 
 Game.prototype.initializeTimer = function(rate) {
-  var self = this
-  var accum = 0
-  var now = 0
-  var last = null
-  var dt = 0
-  var wholeTick
-  
-  self.frameUpdated = true
-  self.interval = setInterval(timer, 0)
-  return self.interval
+  let self = this;
+  let accum = 0;
+  let now = 0;
+  let last = null;
+  let dt = 0;
+  let wholeTick;
+
+  self.worldTime = 0;
+  self.frameUpdated = true;
+  self.interval = setInterval(timer, 0);
+  return self.interval;
   
   function timer() {
     if (self.paused) {
-      last = Date.now()
-      accum = 0
-      return
+      last = Date.now();
+      accum = 0;
+      return;
     }
     now = Date.now()
     dt = now - (last || now)
@@ -765,10 +780,14 @@ Game.prototype.initializeTimer = function(rate) {
     if (wholeTick <= 0) return
     wholeTick *= rate
     
-    self.tick(wholeTick)
-    accum -= wholeTick
+    const oldWorldTime = self.worldTime;
+    const newWorldTime = self.worldTime + wholeTick;
+    self.worldTime = newWorldTime;
+
+    self.tick(wholeTick, oldWorldTime, newWorldTime);
+    accum -= wholeTick;
     
-    self.frameUpdated = true
+    self.frameUpdated = true;
   }
 }
 
