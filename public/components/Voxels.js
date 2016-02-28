@@ -160,7 +160,7 @@ export default class Voxels extends React.Component {
         distance: CHUNK_SIZE,
         color: 0x000000,
         opacity: 0.75,
-        linewidth: 2
+        linewidth: 1
       });
 
       const voxelDebrisExplode = voxelDebris(game, {
