@@ -430,10 +430,6 @@ voxelPlaneShader.prototype.getFaceMaterial = function(mesh, i, frame) {
 
   const frameMaterial = frameMaterials[frame % frameMaterials.length];
 
-if (!frameMaterial) {
-  console.log('failed to get frame material', {materials: this.materials, frameMaterials, frame, frameMaterial});
-}
-
   const faceMaterial = frameMaterial[0] || '';
 
   return faceMaterial;
@@ -501,7 +497,7 @@ voxelPlaneShader.prototype.paint = function(mesh, frame) {
       uvs.array[uvIndex + 11] = 1.0 - uvOrder[5][1];
     }
 
-    mesh.geometry.uvsNeedUpdate = true;
+    uvs.needsUpdate = true;
   }
 };
 

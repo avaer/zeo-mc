@@ -270,7 +270,7 @@ function voxelTerrain(opts) {
     const endY = startY + chunkSize;
     const endZ = startZ + chunkSize;
 
-    const voxels = new Int8Array(chunkSize * chunkSize * chunkSize);
+    const voxels = new Int16Array(chunkSize * chunkSize * chunkSize);
     const vegetations = {};
     const weathers = {};
     const effects = {};

@@ -3,16 +3,15 @@ var fs = require('fs');
 var mainTextures = [
   // blocks
   'bedrock',
-  'lava_flow',
-  'lava_still',
+  /lava/,
   'obsidian',
   'stone',
   'dirt',
   /grass/,
-  /water/,
   /^(?:gravel|sand|red_sand)$/,
   /log/,
   /leaves/,
+  /water/,
 
   // planes
   /carrots/,
@@ -30,7 +29,8 @@ var mainTextures = [
   /rain/,
   'reeds',
   /tallgrass/,
-  /double_plant/
+  /double_plant/,
+  /fire/,
 ];
 var unmainTextures = [
   /forest/,
@@ -40,7 +40,19 @@ var files = fs.readdirSync('../../img/textures/blocks/').filter(function(file) {
   return /\.png$/.test(file);
 }).map(function(file) {
   return file.replace(/\.png$/, '');
-}).sort(function(a, b) {
+})/* .filter(t => {
+  function textureMatch(texture) {
+    if (typeof texture === 'string') {
+      return t === texture;
+    } else if (texture instanceof RegExp) {
+      return texture.test(t);
+    } else {
+      return false;
+    }
+  };
+
+  return mainTextures.some(textureMatch) && !unmainTextures.some(textureMatch);
+});*/ /*.sort(function(a, b) {
   function mainTexturesMatch(t) {
     function textureMatch(texture, t) {
       if (typeof texture === 'string') {
@@ -65,7 +77,7 @@ var files = fs.readdirSync('../../img/textures/blocks/').filter(function(file) {
   } else {
     return a.localeCompare(b);
   }
-});
+}); */
 
 var result = {};
 var i = 1;

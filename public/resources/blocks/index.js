@@ -1,5 +1,7 @@
 import {BIOME_TEXTURES, TREE_TEXTURES} from '../../constants/index';
 
+const {floor} = Math;
+
 const BLOCK_TEXTURES = require('./block-textures');
 
 const MULTI_BLOCK_TEXTURES = (() => {
@@ -13,6 +15,56 @@ const MULTI_BLOCK_TEXTURES = (() => {
   });
   return result;
 })();
+
+const MULTI_FRAME_TEXTURES = {
+  'water_still': _range(0, 32),
+  'water_flow': _range(0, 32),
+  'lava_still': [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    18,
+    17,
+    16,
+    15,
+    14,
+    13,
+    12,
+    11,
+    10,
+    9,
+    8,
+    7,
+    6,
+    5,
+    4,
+    3,
+    2,
+    1
+  ],
+  'lava_flow': _range(0, 16),
+  'fire_layer_0': _range(0, 32),
+  'fire_layer_1': _range(0, 32),
+  'sea_lantern': _range(0, 5),
+  'prismarine_rough': _range(0, 4)
+};
 
 export const BLOCKS = (() => {
   const result = {};
@@ -32,8 +84,35 @@ export const MATERIALS = (() => {
     const index = BLOCK_TEXTURES[k] - 1;
     result[index] = [_expandNames(MULTI_BLOCK_TEXTURES[k])];
   }
+  for (let k in MULTI_FRAME_TEXTURES) {
+    const index = BLOCK_TEXTURES[k] - 1;
+    const frames = MULTI_FRAME_TEXTURES[k];
+    result[index] = _expandFrames(k, frames).map(_expandNames);
+  }
   return result;
 })();
+
+function _range(a, b) {
+  const l = b - a;
+  const result = Array(l);
+  for (let i = 0; i < l; i++) {
+    result[i] = a + i;
+  }
+  return result;
+}
+
+function _doubleRange(a, b) {
+  const result = [];
+  const l = b - a;
+  // const mid = floor(l / 2);
+  for (let i = 0; i < l; i++) {
+    result.push(a + i);
+  }
+  for (let i = l - 1; i > 0; i--) {
+    result.push(a + i);
+  }
+  return result;
+}
 
 function _expandNames(name) {
   // if (name === null) return Array(6);
@@ -51,6 +130,16 @@ function _expandNames(name) {
   else if (name.length === 4) name = [name[2],name[2],name[0],name[1],name[3],name[3]];
 
   return name;
+}
+
+function _expandFrames(name, frames) {
+  const result = [];
+  for (let i = 0; i < frames.length; i++) {
+    const frame = frames[i];
+    const frameName = name + '_' + frame;
+    result.push(frameName);
+  }
+  return result;
 }
 
 export const TRANSPARENT = [

@@ -51,7 +51,7 @@ function Game(opts) {
   this.arrayType = opts.arrayType || Uint8Array
   this.cubeSize = 1 // backwards compat
   this.chunkSize = opts.chunkSize || 32
-  this.tickRate = opts.tickRate || 200
+  this.tickRate = opts.tickRate || 5
   
   // chunkDistance and removeDistance should not be set to the same thing
   // as it causes lag when you go back and forth on a chunk boundary
@@ -726,12 +726,13 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
     this.items[i].tick(delta)
   }
 
-  const oldWorldTick = floor(oldWorldTime / this.tickRate);
-  const newWorldTick = floor(newWorldTime / this.tickRate);
+  const tickTime = 1000 / this.tickRate;
+  const oldWorldTick = floor(oldWorldTime / tickTime);
+  const newWorldTick = floor(newWorldTime / tickTime);
   if (newWorldTick !== oldWorldTick) {
     for (let chunkIndex in this.voxels.meshes) {
       const mesh = this.voxels.meshes[chunkIndex];
-      const {blockMesh, planeMesh} = mesh;
+      const {planeMesh} = mesh;
       this.planeShader.paint(planeMesh, newWorldTick);
     }
   }

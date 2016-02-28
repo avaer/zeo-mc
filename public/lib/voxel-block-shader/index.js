@@ -578,7 +578,6 @@ voxelBlockShader.prototype.paint = function(mesh, frame) {
 
       var atlasuvs = this._atlasuv[faceMaterial];
       if (!atlasuvs) {
-        console.log('failed to get frame material', {mesh, i, frame, materials: this.materials});
         throw new Error('no material index');
       }
 
@@ -605,7 +604,7 @@ voxelBlockShader.prototype.paint = function(mesh, frame) {
       uvs.array[uvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
     }
 
-    mesh.geometry.uvsNeedUpdate = true;
+    uvs.needsUpdate = true;
   }
 };
 
