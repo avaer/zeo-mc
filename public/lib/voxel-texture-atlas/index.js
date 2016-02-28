@@ -49,6 +49,10 @@ class VoxelTextureAtlas extends EventEmitter {
     return this._texture;
   }
 
+  getTexture() {
+    return this._texture;
+  }
+
   getFrameMaterials(value) {
     return this._materials[value - 1] || this._materials[0];
   }

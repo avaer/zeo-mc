@@ -129,19 +129,12 @@ function Game(opts) {
   });
   this.planeShader = voxelPlaneShader({
     game: this,
-    getTextureImage,
-    materialType: opts.materialType || THREE.MeshLambertMaterial,
-    materialParams: opts.materialParams || {},
-    materialFlatColor: opts.materialFlatColor === true
+    atlas: this.atlas
   });
   
   self.chunkRegion.on('change', function(newChunk) {
     self.removeFarChunks()
   })
-
-  if (this.isClient) {
-    this.planeShader.load(opts.materials);
-  }
 
   if (this.generateChunks) this.handleChunkGeneration()
 
