@@ -47,6 +47,15 @@ module.exports = function (game, opts) {
             }, time);
           })(item);
         }
+
+        const onTopPos = [pos[0], pos[1] + 1, pos[2]];
+        const onTopValue = game.getValue(onTopPos);
+        if (onTopValue) {
+          const {type: onTopType} = onTopValue;
+          if (onTopType === 'vegetation' || onTopType === 'effect') {
+            game.deleteValue(onTopValue);
+          }
+        }
       }
     });
 }
