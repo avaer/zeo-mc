@@ -52,6 +52,7 @@ function Game(opts) {
   this.cubeSize = 1 // backwards compat
   this.chunkSize = opts.chunkSize || 32
   this.tickRate = opts.tickRate || 5
+  this.tickTime = 1000 / this.tickRate;
   
   // chunkDistance and removeDistance should not be set to the same thing
   // as it causes lag when you go back and forth on a chunk boundary
@@ -630,10 +631,12 @@ Game.prototype.showChunk = function(chunk) {
   const newMesh = (() => {
     const mesh = new THREE.Object3D();
 
+    const worldTick = this.getWorldTick();
+
     const blockMesh = (() => {
       const blockMesh = voxelBlockRenderer(chunk, this.THREE);
       blockMesh.material = this.blockShader.material;
-      this.blockShader.paint(blockMesh);
+      this.blockShader.paint(blockMesh, worldTick);
       return blockMesh;
     })();
     mesh.add(blockMesh);
@@ -642,7 +645,7 @@ Game.prototype.showChunk = function(chunk) {
     const planeMesh = (() => {
       const planeMesh = voxelPlaneRenderer(chunk, this.THREE);
       planeMesh.material = this.planeShader.material;
-      this.planeShader.paint(planeMesh);
+      this.planeShader.paint(planeMesh, worldTick);
       return planeMesh;
     })();
     mesh.add(planeMesh);
@@ -726,9 +729,8 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
     this.items[i].tick(delta)
   }
 
-  const tickTime = 1000 / this.tickRate;
-  const oldWorldTick = floor(oldWorldTime / tickTime);
-  const newWorldTick = floor(newWorldTime / tickTime);
+  const oldWorldTick = this.getWorldTick(oldWorldTime);
+  const newWorldTick = this.getWorldTick(newWorldTime);
   if (newWorldTick !== oldWorldTick) {
     for (let chunkIndex in this.voxels.meshes) {
       const mesh = this.voxels.meshes[chunkIndex];
@@ -790,6 +792,13 @@ Game.prototype.initializeTimer = function(rate) {
     
     self.frameUpdated = true;
   }
+}
+
+Game.prototype.getWorldTick = function(worldTime) {
+  worldTime === undefined && ({worldTime} = this);
+
+  const worldTick = floor(worldTime / this.tickTime);
+  return worldTick;
 }
 
 Game.prototype.initializeRendering = function(opts) {
