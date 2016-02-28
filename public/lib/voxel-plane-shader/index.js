@@ -48,7 +48,7 @@ function voxelPlaneShader(opts) {
   this.atlas = createAtlas(this.canvas);
   this.atlas.tilepad = opts.tilepad = opts.tilepad === undefined ? true : opts.tilepad;
   this._atlasuv = false;
-  this._atlaskey = false;
+  // this._atlaskey = false;
 
   const {THREE} = this.game;
 
@@ -271,7 +271,7 @@ voxelPlaneShader.prototype.load = function(names, done) {
   }
 };
 
-voxelPlaneShader.prototype.getTransparentVoxelTypes = function() {
+/* voxelPlaneShader.prototype.getTransparentVoxelTypes = function() {
   var transparentMap = {};
 
   for (var i = 0; i < this.materials.length; i += 1) {
@@ -293,7 +293,7 @@ voxelPlaneShader.prototype.getTransparentVoxelTypes = function() {
   }
 
   return transparentMap;
-};
+}; */
 
 voxelPlaneShader.prototype.pack = function(name, done) {
   var self = this;
@@ -305,39 +305,23 @@ voxelPlaneShader.prototype.pack = function(name, done) {
     }
     done();
   }
-  if (typeof name === 'string') {
-    self.getTextureImage(name, function(img) {
-
-      if (Array.isArray(img)) {
-        // TODO: support animated textures, returned as array https://github.com/deathcap/voxel-texture-shader/issues/5
-        // but for now, only use the first frame
-        img = img[0];
-      }
-
-      if (isTransparent(img)) {
-        self.transparents.push(name);
-      }
-
-      img.id = name;
-      pack(img);
-      
-      /* // repeat 2x2 for mipmap padding 4-tap trick
-      // TODO: replace with atlaspack padding, but changed to 2x2: https://github.com/deathcap/atlaspack/tree/tilepadamount
-      var img2 = new Image();
-      img2.id = name;
-      img2.src = touchup.repeat(img, 2, 2);
-      img2.onload = function() {
-        pack(img2);
-      } */
-    }, function(err, img) {
-      console.error('Couldn\'t load URL [' + img.src + ']: ',err);
-      done();
-    });
-  } else {
-    throw new Error('fail to load');
-    pack(name);
-  }
-  return self;
+  self.getTextureImage(name, function(img) {
+    if (isTransparent(img)) {
+      self.transparents.push(name);
+    }
+    
+    // repeat 2x2 for mipmap padding 4-tap trick
+    // TODO: replace with atlaspack padding, but changed to 2x2: https://github.com/deathcap/atlaspack/tree/tilepadamount
+    var img2 = new Image();
+    img2.id = name;
+    img2.src = touchup.repeat(img, 2, 2);
+    img2.onload = function() {
+      pack(img2);
+    }
+  }, function(err, img) {
+    console.error('Couldn\'t load URL [' + img.src + ']: ',err);
+    done();
+  });
 };
 
 /* voxelPlaneShader.prototype.find = function(name) {
@@ -376,10 +360,10 @@ voxelPlaneShader.prototype._afterLoading = function() {
   function alldone() {
     self.loading--;
     self._atlasuv = self.atlas.uv(self.canvas.width, self.canvas.height);
-    self._atlaskey = Object.create(null);
+    /* self._atlaskey = Object.create(null);
     self.atlas.index().forEach(function(key) {
       self._atlaskey[key.name] = key;
-    });
+    }); */
     self.texture.needsUpdate = true;
     self.material.needsUpdate = true;
     //window.open(self.canvas.toDataURL());
@@ -458,9 +442,15 @@ voxelPlaneShader.prototype.paint = function(mesh, frame) {
       if (!atlasuvs) {
         throw new Error('no material index');
       }
+      const halfAtlasUvs = [
+        [atlasuvs[0][0], atlasuvs[0][1]],
+        [(atlasuvs[1][0] + atlasuvs[0][0])/2, atlasuvs[1][1]],
+        [(atlasuvs[2][0] + atlasuvs[0][0])/2, (atlasuvs[2][1] + atlasuvs[0][1])/2],
+        [atlasuvs[3][0], (atlasuvs[3][1] + atlasuvs[0][1])/2]
+      ];
 
       // range of UV coordinates for this texture (see above diagram)
-      const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
+      const [topUV, rightUV, bottomUV, leftUV] = halfAtlasUvs;
 
       // set uvs
       const uvIndex = i * 2 * 3 * 2;
@@ -501,7 +491,7 @@ voxelPlaneShader.prototype.paint = function(mesh, frame) {
   }
 };
 
-voxelPlaneShader.prototype.sprite = function(name, w, h, cb) {
+/* voxelPlaneShader.prototype.sprite = function(name, w, h, cb) {
   var self = this;
   if (typeof w === 'function') { cb = w; w = null; }
   if (typeof h === 'function') { cb = h; h = null; }
@@ -541,7 +531,7 @@ voxelPlaneShader.prototype.sprite = function(name, w, h, cb) {
     cb();
   });
   return self;
-};
+}; */
 
 function each(arr, it, done) {
   var count = 0;

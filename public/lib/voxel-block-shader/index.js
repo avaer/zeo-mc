@@ -389,7 +389,7 @@ voxelBlockShader.prototype.load = function(names, done) {
   }
 };
 
-voxelBlockShader.prototype.getTransparentVoxelTypes = function() {
+/* voxelBlockShader.prototype.getTransparentVoxelTypes = function() {
   var transparentMap = {};
 
   for (var i = 0; i < this.materials.length; i += 1) {
@@ -411,7 +411,7 @@ voxelBlockShader.prototype.getTransparentVoxelTypes = function() {
   }
 
   return transparentMap;
-};
+}; */
 
 voxelBlockShader.prototype.pack = function(name, done) {
   var self = this;
@@ -423,35 +423,29 @@ voxelBlockShader.prototype.pack = function(name, done) {
     }
     done();
   }
-  if (typeof name === 'string') {
-    self.getTextureImage(name, function(img) {
+  self.getTextureImage(name, function(img) {
 
-      if (Array.isArray(img)) {
-        // TODO: support animated textures, returned as array https://github.com/deathcap/voxel-texture-shader/issues/5
-        // but for now, only use the first frame
-        img = img[0];
-      }
+    if (Array.isArray(img)) {
+      // TODO: support animated textures, returned as array https://github.com/deathcap/voxel-texture-shader/issues/5
+      // but for now, only use the first frame
+      img = img[0];
+    }
 
-      if (isTransparent(img)) {
-        self.transparents.push(name);
-      }
-      // repeat 2x2 for mipmap padding 4-tap trick
-      // TODO: replace with atlaspack padding, but changed to 2x2: https://github.com/deathcap/atlaspack/tree/tilepadamount
-      var img2 = new Image();
-      img2.id = name;
-      img2.src = touchup.repeat(img, 2, 2);
-      img2.onload = function() {
-        pack(img2);
-      }
-    }, function(err, img) {
-      console.error('Couldn\'t load URL [' + img.src + ']: ',err);
-      done();
-    });
-  } else {
-    throw new Error('fail to load');
-    pack(name);
-  }
-  return self;
+    if (isTransparent(img)) {
+      self.transparents.push(name);
+    }
+    // repeat 2x2 for mipmap padding 4-tap trick
+    // TODO: replace with atlaspack padding, but changed to 2x2: https://github.com/deathcap/atlaspack/tree/tilepadamount
+    var img2 = new Image();
+    img2.id = name;
+    img2.src = touchup.repeat(img, 2, 2);
+    img2.onload = function() {
+      pack(img2);
+    }
+  }, function(err, img) {
+    console.error('Couldn\'t load URL [' + img.src + ']: ',err);
+    done();
+  });
 };
 
 /* voxelBlockShader.prototype.find = function(name) {
@@ -608,7 +602,7 @@ voxelBlockShader.prototype.paint = function(mesh, frame) {
   }
 };
 
-voxelBlockShader.prototype.sprite = function(name, w, h, cb) {
+/* voxelBlockShader.prototype.sprite = function(name, w, h, cb) {
   var self = this;
   if (typeof w === 'function') { cb = w; w = null; }
   if (typeof h === 'function') { cb = h; h = null; }
@@ -648,7 +642,7 @@ voxelBlockShader.prototype.sprite = function(name, w, h, cb) {
     cb();
   });
   return self;
-};
+}; */
 
 voxelBlockShader.colorArrayToValue = function(a) {
   return floor(
