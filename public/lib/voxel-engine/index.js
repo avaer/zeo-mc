@@ -4,6 +4,7 @@ var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
 var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
 var voxelUtils = require('../voxel-utils/index')
+var voxelTextureAtlas = require('../voxel-texture-atlas/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
 var control = require('voxel-control')
@@ -106,22 +107,25 @@ function Game(opts) {
   this.pendingChunks = []
 
   function getTextureImage(name, cb) {
-    function done() {
-      cb(img);
-    }
-
     const img = document.createElement('img');
-    img.onload = done;
-    img.onerror = done;
+    img.onload = () => {
+      cb(null, img);
+    };
+    img.onerror = err => {
+      cb(err);
+    };
     img.src = opts.texturePath(name);
   }
 
+  this.atlas = voxelTextureAtlas({
+    materials: opts.materials,
+    getTextureImage,
+    THREE
+  });
+
   this.blockShader = voxelBlockShader({
     game: this,
-    getTextureImage,
-    materialType: opts.materialType || THREE.MeshLambertMaterial,
-    materialParams: opts.materialParams || {},
-    materialFlatColor: opts.materialFlatColor === true
+    atlas: this.atlas
   });
   this.planeShader = voxelPlaneShader({
     game: this,
@@ -136,9 +140,7 @@ function Game(opts) {
   })
 
   if (this.isClient) {
-    [this.blockShader, this.planeShader].forEach(shader => {
-      shader.load(opts.materials);
-    });
+    this.planeShader.load(opts.materials);
   }
 
   if (this.generateChunks) this.handleChunkGeneration()

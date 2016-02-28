@@ -1,66 +1,37 @@
-var createAtlas = require('atlaspack');
-var isTransparent = require('opaque').transparent;
-var touchup = require('touchup');
-var voxelFakeAo = require('voxel-fakeao');
-
 var floor = Math.floor;
 var ceil = Math.ceil;
 var round = Math.round;
-
-module.exports = voxelBlockShader;
-
-/* function reconfigure(old) {
-  var ret = module.exports(old.opts);
-  ret.load(old.names);
-
-  return ret;
-} */
 
 function voxelBlockShader(opts) {
   if (!(this instanceof voxelBlockShader)) return new voxelBlockShader(opts || {});
   var self = this;
   this.game = opts.game;
-  this.opts = opts;
-  // this.names = [];
-  this.materials = [];
-  this.transparents = [];
-  this.getTextureImage = opts.getTextureImage;
-  this.loading = 0;
-  this.ao = voxelFakeAo(this.game);
+  this.atlas = opts.atlas;
 
-  var useFlatColors = opts.materialFlatColor === true;
-  delete opts.materialFlatColor;
+  this._loading = true;
+  this._meshQueue = [];
+  this.atlas.once('load', () => {
+    if (this._meshQueue.length > 0) {
+      for (let i = 0; i < this._meshQueue.length; i++) {
+        const args = this._meshQueue[i];
+        this.paint(...args);
+      }
+      this._meshQueue = [];
+    }
 
-  this.useFourTap = opts.useFourTap = opts.useFourTap === undefined ? true : opts.useFourTap;
-  this.useTransparency = opts.useTransparency = opts.useTransparency === undefined ? true : opts.useTransparency;
+    this.material.needsUpdate = true;
 
-  // create a canvas for the texture atlas
-  this.canvas = (typeof document !== 'undefined') ? document.createElement('canvas') : {};
-  this.canvas.width = opts.atlasWidth || 2048;
-  this.canvas.height = opts.atlasHeight || 2048;
-  var ctx = this.canvas.getContext('2d');
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-  // create core atlas and texture
-  this.atlas = createAtlas(this.canvas);
-  this.atlas.tilepad = opts.tilepad = opts.tilepad === undefined ? true : opts.tilepad;
-  this._atlasuv = false;
-  // this._atlaskey = false;
+    this._loading = false;
+  });
 
   const {THREE} = this.game;
 
-  this.texture = new THREE.Texture(this.canvas);
-  this.texture.magFilter = THREE.NearestFilter;
-  this.texture.minFilter = THREE.LinearMipMapLinearFilter;
-
-  var getMaterialParams = function(transparent) {
-    var materialParams = {
-      transparent: transparent,
+  const materialParams = (() => {
+    const materialParams = {
+      transparent: true,
       side: THREE.FrontSide,
       lights: [], // force lights refresh to setup uniforms, three.js WebGLRenderer line 4323
       fog: true,
-
 
     // based on three.js/src/renderers/WebGLShaders.js lambert
     uniforms: THREE.UniformsUtils.merge( [
@@ -78,7 +49,7 @@ function voxelBlockShader(opts) {
 
           // begin custom
           tileMap: {type: 't', value: null}, // textures not preserved by UniformsUtils.merge(); set below instead
-          atlasSize: {type: 'f', value: this.canvas.width} // atlas canvas width (= height) in pixels
+          atlasSize: {type: 'f', value: this.atlas.getTexture().image.width} // atlas canvas width (= height) in pixels
           // end custom
         }
     ] ),
@@ -267,18 +238,18 @@ function voxelBlockShader(opts) {
         '   vec2 tileSize = floor(vUv) / vec2(atlasSize, atlasSize);', // TODO: trunc? overloaded not found
 
         '',
-        (this.useFourTap // TODO: use glsl conditional compilation?
-          ? [
+        /* (this.useFourTap // TODO: use glsl conditional compilation?
+          ? [ */
             '     vec4 texelColor = fourTapSample(tileOffset, //Tile offset in the atlas ',
             '                  tileUV, //Tile coordinate (as above)',
             '                  tileSize,',
-            '                  tileMap);'].join('\n')
+            '                  tileMap);',//].join('\n')
             // 'vec2 texCoord = tileOffset + tileSize * fract(tileUV);',
             // 'vec4 texelColor = texture2D(tileMap, texCoord);'].join('\n')
-          : [
+          /* : [
             // index tile at offset into texture atlas
             'vec2 texCoord = tileOffset + tileSize * fract(tileUV);',
-            'vec4 texelColor = texture2D(tileMap, texCoord);'].join('\n')),
+            'vec4 texelColor = texture2D(tileMap, texCoord);'].join('\n')), */
 
         'if (texelColor.a < 0.5) discard;',
 
@@ -333,198 +304,13 @@ function voxelBlockShader(opts) {
       //depthTest: false
     };
 
-    materialParams.uniforms.tileMap.value = this.texture;
+    materialParams.uniforms.tileMap.value = this.atlas.getTexture();
 
     return materialParams;
-  };
+  })();
 
-  this.materialParams = getMaterialParams.call(this, false);
-  this.materialTransparentParams = getMaterialParams.call(this, true);
-
-  if (useFlatColors) {
-    // If were using simple colors
-    this.material = new THREE.MeshBasicMaterial({
-      vertexColors: THREE.VertexColors
-    });
-  } else {
-    this.material = new THREE.ShaderMaterial(this.materialTransparentParams);
-  }
-
-  // a place for meshes to wait while textures are loading
-  this._meshQueue = [];
+  this.material = new THREE.ShaderMaterial(materialParams);
 }
-
-voxelBlockShader.prototype.reconfigure = function() {
-  return reconfigure(this);
-};
-
-voxelBlockShader.prototype.load = function(names, done) {
-  // if (!names || names.length === 0) return;
-  // this.names = this.names.concat(names); // save for reconfiguration
-
-  var self = this;
-  // if (!Array.isArray(names)) names = [names];
-  done = done || function() {};
-  this.loading++;
-
-  var materialSlice = names; // names.map(self._expandName);
-  self.materials = self.materials.concat(materialSlice);
-
-  // load onto the texture atlas
-  var load = Object.create(null);
-  materialSlice.forEach(function(mats) {
-    mats.forEach(function(mats2) {
-      mats2.forEach(function(mat) {
-        load[mat] = true;
-      });
-    });
-  });
-  if (Object.keys(load).length > 0) {
-    each(Object.keys(load), self.pack.bind(self), function() {
-      self._afterLoading();
-      done(materialSlice);
-    });
-  } else {
-    self._afterLoading();
-  }
-};
-
-/* voxelBlockShader.prototype.getTransparentVoxelTypes = function() {
-  var transparentMap = {};
-
-  for (var i = 0; i < this.materials.length; i += 1) {
-    var blockIndex = i + 1;
-    var materialSlice = this.materials[i];
-
-    var anyTransparent = false;
-    for (var j = 0; j < materialSlice.length; j += 1) {
-      var materialSubSlice = materialSlice[j];
-      for (var k = 0; k < materialSubSlice.length; k += 1) {
-        anyTransparent = this.transparents.indexOf(materialSubSlice[k]) !== -1;
-        if (anyTransparent) break;
-      }
-      if (anyTransparent) break;
-    }
-
-    if (anyTransparent)
-      transparentMap[blockIndex] = true;
-  }
-
-  return transparentMap;
-}; */
-
-voxelBlockShader.prototype.pack = function(name, done) {
-  var self = this;
-  function pack(img) {
-    var node = self.atlas.pack(img);
-    if (node === false) {
-      self.atlas = self.atlas.expand(img);
-      self.atlas.tilepad = true;
-    }
-    done();
-  }
-  self.getTextureImage(name, function(img) {
-
-    if (Array.isArray(img)) {
-      // TODO: support animated textures, returned as array https://github.com/deathcap/voxel-texture-shader/issues/5
-      // but for now, only use the first frame
-      img = img[0];
-    }
-
-    if (isTransparent(img)) {
-      self.transparents.push(name);
-    }
-    // repeat 2x2 for mipmap padding 4-tap trick
-    // TODO: replace with atlaspack padding, but changed to 2x2: https://github.com/deathcap/atlaspack/tree/tilepadamount
-    var img2 = new Image();
-    img2.id = name;
-    img2.src = touchup.repeat(img, 2, 2);
-    img2.onload = function() {
-      pack(img2);
-    }
-  }, function(err, img) {
-    console.error('Couldn\'t load URL [' + img.src + ']: ',err);
-    done();
-  });
-};
-
-/* voxelBlockShader.prototype.find = function(name) {
-  // lookup first material with any matching texture name
-  var self = this;
-  var type = 0;
-  self.materials.forEach(function(mats, i) {
-    mats.forEach(function(mat) {
-      if (mat === name) {
-        type = i + 1;
-        return false;
-      }
-    });
-    if (type !== 0) return false;
-  });
-  return type;
-}; */
-
-/* voxelBlockShader.prototype._expandName = function(name) {
-  // if (name === null) return Array(6);
-  // if (name.top) return [name.back, name.front, name.top, name.bottom, name.left, name.right];
-  if (!Array.isArray(name)) name = [name];
-  // load the 0 texture to all
-  if (name.length === 1) name = [name[0],name[0],name[0],name[0],name[0],name[0]];
-  // 0 is top/bottom, 1 is sides
-  if (name.length === 2) name = [name[1],name[1],name[0],name[0],name[1],name[1]];
-  // 0 is top, 1 is bottom, 2 is sides
-  if (name.length === 3) name = [name[2],name[2],name[0],name[1],name[2],name[2]];
-  // 0 is top, 1 is bottom, 2 is front/back, 3 is left/right
-  if (name.length === 4) name = [name[2],name[2],name[0],name[1],name[3],name[3]];
-  return name;
-}; */
-
-voxelBlockShader.prototype._afterLoading = function() {
-  var self = this;
-  function alldone() {
-    self.loading--;
-    self._atlasuv = self.atlas.uv(self.canvas.width, self.canvas.height);
-    /* self._atlaskey = Object.create(null);
-    self.atlas.index().forEach(function(key) {
-      self._atlaskey[key.name] = key;
-    }); */
-    self.texture.needsUpdate = true;
-    self.material.needsUpdate = true;
-    //window.open(self.canvas.toDataURL());
-    if (self._meshQueue.length > 0) {
-      for (let i = 0; i < self._meshQueue.length; i++) {
-        const args = self._meshQueue[i];
-        self.paint(...args);
-      }
-      self._meshQueue = [];
-    }
-  }
-  self._powerof2(function() {
-    setTimeout(alldone, 100);
-  });
-};
-
-// Ensure the texture stays at a power of 2 for mipmaps
-// this is cheating :D
-voxelBlockShader.prototype._powerof2 = function(done) {
-  var w = this.canvas.width;
-  var h = this.canvas.height;
-  function pow2(x) {
-    x--;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    x++;
-    return x;
-  }
-  if (h > w) w = h;
-  var old = this.canvas.getContext('2d').getImageData(0, 0, this.canvas.width, this.canvas.height);
-  this.canvas.width = this.canvas.height = pow2(w);
-  this.canvas.getContext('2d').putImageData(old, 0, 0);
-  done();
-};
 
 voxelBlockShader.prototype.getFaceMaterial = function(mesh, i, frame) {
   const frameMaterials = (() => {
@@ -532,7 +318,7 @@ voxelBlockShader.prototype.getFaceMaterial = function(mesh, i, frame) {
     const colorIndex = i * 3;
     const colorArray = [colors.array[colorIndex + 0], colors.array[colorIndex + 1], colors.array[colorIndex + 2]]
     const colorValue = voxelBlockShader.colorArrayToValue(colorArray);
-    const frameMaterials = this.materials[colorValue - 1] || this.materials[0];
+    const frameMaterials = this.atlas.getFrameMaterials(colorValue);
     return frameMaterials;
   })();
 
@@ -557,7 +343,7 @@ voxelBlockShader.prototype.getFaceMaterial = function(mesh, i, frame) {
 
 voxelBlockShader.prototype.paint = function(mesh, frame) {
   // if were loading put into queue
-  if (this.loading > 0) {
+  if (this.loading) {
     this._meshQueue.push([mesh, frame]);
     return false;
   }
@@ -567,82 +353,46 @@ voxelBlockShader.prototype.paint = function(mesh, frame) {
   const uvs = mesh.geometry.getAttribute('uv');
   if (uvs) {
     const numVertices = uvs.array.length / 2;
-    for (let i = 0; i < numVertices; i++) {
-      const faceMaterial = this.getFaceMaterial(mesh, i, frame);
+    if (numVertices > 0) {
+      const texture = this.atlas.getTexture();
+      const {image: canvas} = texture;
+      const {width, height} = canvas;
 
-      var atlasuvs = this._atlasuv[faceMaterial];
-      if (!atlasuvs) {
-        throw new Error('no material index');
+      for (let i = 0; i < numVertices; i++) {
+        const faceMaterial = this.getFaceMaterial(mesh, i, frame);
+
+        var atlasuvs = this.atlas.getMaterialUvs(faceMaterial);
+        if (!atlasuvs) {
+          throw new Error('no material index');
+        }
+
+        // range of UV coordinates for this texture (see above diagram)
+        const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
+
+        // pass texture start in UV coordinates
+
+        // WARNING: ugly hack ahead. because I don't know how to pass per-geometry uniforms
+        // to custom shaders using three.js (https://github.com/deathcap/voxel-texture-shader/issues/3),
+        // I'm (ab)using faceVertexUvs = the 'uv' attribute: it is the same for all coordinates,
+        // and the fractional part is the top-left UV, the whole part is the tile size.
+
+        const tileSizeX = bottomUV[0] - topUV[0];
+        const tileSizeY = topUV[1] - bottomUV[1];
+
+        // half because of four-tap repetition
+        const tileSizeIntX = (tileSizeX * width) / 2;
+        const tileSizeIntY = (tileSizeY * height) / 2;
+
+        // set all to top (+ encoded tileSize)
+        const uvIndex = i * 2;
+        uvs.array[uvIndex + 0] = tileSizeIntX + topUV[0];
+        uvs.array[uvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
       }
 
-      // range of UV coordinates for this texture (see above diagram)
-      const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
-
-      // pass texture start in UV coordinates
-
-      // WARNING: ugly hack ahead. because I don't know how to pass per-geometry uniforms
-      // to custom shaders using three.js (https://github.com/deathcap/voxel-texture-shader/issues/3),
-      // I'm (ab)using faceVertexUvs = the 'uv' attribute: it is the same for all coordinates,
-      // and the fractional part is the top-left UV, the whole part is the tile size.
-
-      const tileSizeX = bottomUV[0] - topUV[0];
-      const tileSizeY = topUV[1] - bottomUV[1];
-
-      // half because of four-tap repetition
-      const tileSizeIntX = (tileSizeX * this.canvas.width) / 2;
-      const tileSizeIntY = (tileSizeY * this.canvas.height) / 2;
-
-      // set all to top (+ encoded tileSize)
-      const uvIndex = i * 2;
-      uvs.array[uvIndex + 0] = tileSizeIntX + topUV[0];
-      uvs.array[uvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
+      uvs.needsUpdate = true;
     }
-
-    uvs.needsUpdate = true;
   }
 };
-
-/* voxelBlockShader.prototype.sprite = function(name, w, h, cb) {
-  var self = this;
-  if (typeof w === 'function') { cb = w; w = null; }
-  if (typeof h === 'function') { cb = h; h = null; }
-  w = w || 16; h = h || w;
-  self.loading++;
-  self.artPacks.getTextureImage(name, function(img) {
-    var canvases = [];
-    for (var x = 0; x < img.width; x += w) {
-      for (var y = 0; y < img.height; y += h) {
-        var canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.name = name + '_' + x + '_' + y;
-        canvas.getContext('2d').drawImage(img, x, y, w, h, 0, 0, w, h);
-        canvases.push(canvas);
-      }
-    }
-    var textures = [];
-    each(canvases, function(canvas, next) {
-      var tex = new Image();
-      tex.name = canvas.name;
-      tex.src = canvas.toDataURL();
-      tex.onload = function() {
-        self.pack(tex, next);
-      };
-      tex.onerror = next;
-      textures.push([
-        tex.name, tex.name, tex.name,
-        tex.name, tex.name, tex.name
-      ]);
-    }, function() {
-      self._afterLoading();
-      canvases = [];
-      self.materials = self.materials.concat(textures);
-      cb(textures);
-    });
-  }, function(err, img) {
-    cb();
-  });
-  return self;
-}; */
 
 voxelBlockShader.colorArrayToValue = function(a) {
   return floor(
@@ -671,3 +421,5 @@ function each(arr, it, done) {
 }
 
 function _isInteger(n) { return round(n) === n; }; // Number.isInteger :(
+
+module.exports = voxelBlockShader;

@@ -11,13 +11,6 @@ var round = Math.round;
 
 module.exports = voxelPlaneShader;
 
-/* function reconfigure(old) {
-  var ret = module.exports(old.opts);
-  ret.load(old.names);
-
-  return ret;
-} */
-
 function voxelPlaneShader(opts) {
   if (!(this instanceof voxelPlaneShader)) return new voxelPlaneShader(opts || {});
   var self = this;
@@ -28,13 +21,13 @@ function voxelPlaneShader(opts) {
   this.transparents = [];
   this.getTextureImage = opts.getTextureImage;
   this.loading = 0;
-  this.ao = voxelFakeAo(this.game);
+  /* this.ao = voxelFakeAo(this.game);
 
   var useFlatColors = opts.materialFlatColor === true;
   delete opts.materialFlatColor;
 
   this.useFourTap = opts.useFourTap = opts.useFourTap === undefined ? true : opts.useFourTap;
-  this.useTransparency = opts.useTransparency = opts.useTransparency === undefined ? true : opts.useTransparency;
+  this.useTransparency = opts.useTransparency = opts.useTransparency === undefined ? true : opts.useTransparency; */
 
   // create a canvas for the texture atlas
   this.canvas = (typeof document !== 'undefined') ? document.createElement('canvas') : {};
@@ -236,10 +229,6 @@ function voxelPlaneShader(opts) {
   this._meshQueue = [];
 }
 
-/* voxelPlaneShader.prototype.reconfigure = function() {
-  return reconfigure(this);
-}; */
-
 voxelPlaneShader.prototype.load = function(names, done) {
   // if (!names || names.length === 0) return;
   // this.names = this.names.concat(names); // save for reconfiguration
@@ -305,7 +294,7 @@ voxelPlaneShader.prototype.pack = function(name, done) {
     }
     done();
   }
-  self.getTextureImage(name, function(img) {
+  self.getTextureImage(name, function(err, img) {
     if (isTransparent(img)) {
       self.transparents.push(name);
     }
