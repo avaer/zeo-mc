@@ -640,6 +640,7 @@ Game.prototype.showChunk = function(chunk) {
   const {THREE} = this;
 
   let mesh = this.voxels.meshes[chunkIndex];
+  const hadOldMesh = !!mesh;
   if (!mesh) {
     mesh = new THREE.Object3D();
 
@@ -653,12 +654,8 @@ Game.prototype.showChunk = function(chunk) {
     mesh.planesNeedUpdate = true;
     mesh.modelsNeedUpdate = true;
 
-    const bounds = this.voxels.getBounds.apply(this.voxels, chunk.position);
+    const bounds = this.voxels.getBounds(chunk.position[0], chunk.position[1], chunk.position[2]);
     mesh.position.set(bounds[0][0], bounds[0][1], bounds[0][2]);
-
-    this.scene.add(mesh);
-
-    this.voxels.meshes[chunkIndex] = mesh;
   }
 
   const {blocksNeedUpdate, /* fluidsNeedUpdate,*/ planesNeedUpdate, modelsNeedUpdate} = mesh;
@@ -719,6 +716,11 @@ Game.prototype.showChunk = function(chunk) {
   voxelAsync.clearMeshCache(chunk);
 
   this.voxels.chunks[chunkIndex] = chunk;
+  this.voxels.meshes[chunkIndex] = mesh;
+
+  if (!hadOldMesh) {
+    this.scene.add(mesh);
+  }
 
   this.emit('renderChunk', chunk);
 
