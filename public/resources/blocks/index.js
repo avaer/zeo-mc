@@ -92,24 +92,40 @@ export const MATERIALS = (() => {
   return result;
 })();
 
+const TRANSPARENT_TEXTURES = [
+  /water/,
+  /lava/,
+  /leaves/,
+];
+
+export const TRANSPARENT = (() => {
+  function isTransparent(m) {
+    return TRANSPARENT_TEXTURES.some(transparencySpec => {
+      if (typeof transparencySpec === 'string') {
+        return m === transparencySpec;
+      } else if (transparencySpec instanceof RegExp) {
+        return transparencySpec.test(m);
+      } else {
+        return false;
+      }
+    });
+  }
+
+  const result = {};
+  for (let m in BLOCKS) {
+    if (isTransparent(m)) {
+      const index = BLOCKS[m];
+      result[index] = true;
+    }
+  }
+  return result;
+})();
+
 function _range(a, b) {
   const l = b - a;
   const result = Array(l);
   for (let i = 0; i < l; i++) {
     result[i] = a + i;
-  }
-  return result;
-}
-
-function _doubleRange(a, b) {
-  const result = [];
-  const l = b - a;
-  // const mid = floor(l / 2);
-  for (let i = 0; i < l; i++) {
-    result.push(a + i);
-  }
-  for (let i = l - 1; i > 0; i--) {
-    result.push(a + i);
   }
   return result;
 }
@@ -141,9 +157,3 @@ function _expandFrames(name, frames) {
   }
   return result;
 }
-
-export const TRANSPARENT = [
-  /water/,
-  /lava/,
-  /leaves/,
-];

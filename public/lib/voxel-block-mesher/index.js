@@ -1,40 +1,36 @@
 var GreedyMesh = (function greedyLoader() {
   // contains all forward faces (in terms of scan direction)
-  var mask = new Int32Array(4096);
+  const mask = new Int32Array(4096);
   // and all backwards faces. needed when there are two transparent blocks
   // next to each other.
-  var invMask = new Int32Array(4096);
+  const invMask = new Int32Array(4096);
 
   // setting 16th bit if transparent
-  var kTransparentMask    = 0x8000;
-  var kNoFlagsMask        = 0x7FFF;
+  const kTransparentMask    = 0x8000;
+  const kNoFlagsMask        = 0x7FFF;
 
-  function getType(voxels, offset) {
-    const type = voxels[offset];
-    return type;
-  }
-
-  /* function isTransparentMasked(v) {
-    return (v & kTransparentMask) === kTransparentMask;
-  } */
-
-  /* function removeFlags(v) {
-    return (v & kNoFlagsMask);
-  } */
-
-  return function(opts) {
-    opts = opts || {};
-    const {mesherExtraData} = opts;
-    const {transparentTypes} = mesherExtraData;
+  return function(voxelAsync) {
+    function getType(voxels, offset) {
+      const type = voxels[offset];
+      return type;
+    }
 
     function isTransparent(type) {
-      return Boolean(transparentTypes[type]);
+      return voxelAsync.isTransparent(type);
     }
 
     /* function getTransparencyMask(type) {
       const transparency = isTransparent(type);
       const transparencyMask = transparency ? kTransparentMask : 0;
       return transparencyMask;
+    } */
+
+    /* function isTransparentMasked(v) {
+      return (v & kTransparentMask) === kTransparentMask;
+    } */
+
+    /* function removeFlags(v) {
+      return (v & kNoFlagsMask);
     } */
 
     return function ohSoGreedyMesher(volume, dims, {transparent}) {
@@ -61,8 +57,9 @@ var GreedyMesh = (function greedyLoader() {
           , xd
 
         if (mask.length < dimsU * dimsV) {
-          mask = new Int32Array(dimsU * dimsV);
-          invMask = new Int32Array(dimsU * dimsV);
+          throw new Error('mask not big enough');
+          // mask = new Int32Array(dimsU * dimsV);
+          // invMask = new Int32Array(dimsU * dimsV);
         }
 
         q[d] =  1;

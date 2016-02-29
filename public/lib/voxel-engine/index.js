@@ -4,6 +4,7 @@ var voxelFluidRenderer = require('../voxel-fluid-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
 var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
+var voxelAsync = require('../voxel-async/index')
 var voxelUtils = require('../voxel-utils/index')
 var voxelTextureAtlas = require('../voxel-texture-atlas/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
@@ -26,7 +27,7 @@ var SpatialEventEmitter = require('spatial-events')
 var regionChange = require('voxel-region-change')
 var kb = require('kb-controls')
 var physical = require('voxel-physical')
-var pin = require('pin-it')
+// var pin = require('pin-it')
 var tic = require('tic')()
 
 var floor = Math.floor;
@@ -65,10 +66,10 @@ function Game(opts) {
   this.antialias = opts.antialias
   this.playerHeight = opts.playerHeight || 1.62
   this.meshType = opts.meshType || 'surfaceMesh'
-  this.meshers = opts.meshers
+  /* this.meshers = opts.meshers
   this.modeler = opts.modeler
   this.materialType = opts.materialType || THREE.MeshLambertMaterial
-  this.materialParams = opts.materialParams || {}
+  this.materialParams = opts.materialParams || {} */
   this.items = []
   this.voxels = voxel(this)
   this.voxelUtils = voxelUtils({chunkSize: this.chunkSize})
@@ -325,14 +326,22 @@ Game.prototype.getValue = function(position) {
 }
 
 Game.prototype.deleteValue = function(value) {
-  const {type, chunkIndex, index} = value;
+  const {type, chunkIndex, index, value: voxelValue} = value;
   const chunk = this.voxels.chunks[chunkIndex];
+  const mesh = this.voxels.meshes[chunkIndex];
   if (type === 'block') {
     chunk.voxels[index] = 0;
+    if (!voxelAsync.isTransparent(voxelValue)) {
+      mesh.blocksNeedUpdate = true;
+    } else {
+      mesh.fluidsNeedUpdate = true;
+    }
   } else if (type === 'vegetation') {
     chunk.vegetations[index] = null;
+    mesh.planesNeedUpdate = true;
   } else if (type === 'effect') {
     chunk.effects[index] = null;
+    mesh.planesNeedUpdate = true;
   }
   this.addChunkToNextUpdate(chunk);
 }
@@ -628,61 +637,92 @@ Game.prototype.showAllChunks = function() {
 Game.prototype.showChunk = function(chunk) {
   const chunkIndex = chunk.position.join('|');
 
-  const oldMesh = this.voxels.meshes[chunkIndex];
+  const {THREE} = this;
 
-  const newMesh = (() => {
-    const mesh = new THREE.Object3D();
+  let mesh = this.voxels.meshes[chunkIndex];
+  if (!mesh) {
+    mesh = new THREE.Object3D();
 
-    const worldTick = this.getWorldTick();
+    mesh.blockMesh = null;
+    mesh.fluidMesh = null;
+    mesh.planeMesh = null;
+    mesh.modelMesh = null;
 
-    const blockMesh = (() => {
-      const blockMesh = voxelBlockRenderer(chunk, this.THREE);
-      blockMesh.material = this.blockShader.material;
-      this.blockShader.paint(blockMesh, worldTick);
-      return blockMesh;
-    })();
-    mesh.add(blockMesh);
-    mesh.blockMesh = blockMesh;
-
-    const fluidMesh = (() => {
-      // XXX flatten this into a single meshing pass; only clear the chunk.dims cache at the end
-      const fluidMesh = voxelFluidRenderer(chunk, this.THREE);
-      fluidMesh.material = this.fluidShader.material;
-      this.fluidShader.paint(fluidMesh, worldTick);
-      return fluidMesh;
-    })();
-    mesh.add(fluidMesh);
-    mesh.fluidMesh = fluidMesh;
-
-    const planeMesh = (() => {
-      const planeMesh = voxelPlaneRenderer(chunk, this.THREE);
-      planeMesh.material = this.planeShader.material;
-      this.planeShader.paint(planeMesh, worldTick);
-      return planeMesh;
-    })();
-    mesh.add(planeMesh);
-    mesh.planeMesh = planeMesh;
-
-    const modelMesh = voxelModelRenderer(chunk, this.THREE);
-    mesh.add(modelMesh);
-    mesh.modelMesh = modelMesh;
+    mesh.blocksNeedUpdate = true;
+    mesh.fluidsNeedUpdate = true;
+    mesh.planesNeedUpdate = true;
+    mesh.modelsNeedUpdate = true;
 
     const bounds = this.voxels.getBounds.apply(this.voxels, chunk.position);
     mesh.position.set(bounds[0][0], bounds[0][1], bounds[0][2]);
 
-    return mesh;
-  })();
+    this.scene.add(mesh);
 
-  if (oldMesh) {
-    this.scene.remove(oldMesh);
+    this.voxels.meshes[chunkIndex] = mesh;
   }
-  this.scene.add(newMesh);
+
+  const {blocksNeedUpdate, fluidsNeedUpdate, planesNeedUpdate, modelsNeedUpdate} = mesh;
+
+  const worldTick = this.getWorldTick();
+
+  if (blocksNeedUpdate) {
+    const blockMesh = (() => {
+      const blockMesh = voxelBlockRenderer(chunk, THREE);
+      blockMesh.material = this.blockShader.material;
+      this.blockShader.paint(blockMesh, worldTick);
+      return blockMesh;
+    })();
+    if (mesh.blockMesh) {
+      mesh.remove(mesh.blockMesh);
+    }
+    mesh.add(blockMesh);
+    mesh.blockMesh = blockMesh;
+    mesh.blocksNeedUpdate = false;
+  }
+
+  if (fluidsNeedUpdate) {
+    const fluidMesh = (() => {
+      const fluidMesh = voxelFluidRenderer(chunk, THREE);
+      fluidMesh.material = this.fluidShader.material;
+      this.fluidShader.paint(fluidMesh, worldTick);
+      return fluidMesh;
+    })();
+    if (mesh.fluidMesh) {
+      mesh.remove(mesh.fluidMesh);
+    }
+    mesh.add(fluidMesh);
+    mesh.fluidMesh = fluidMesh;
+    mesh.fluidsNeedUpdate = false;
+  }
+
+  if (planesNeedUpdate) {
+    const planeMesh = (() => {
+      const planeMesh = voxelPlaneRenderer(chunk, THREE);
+      planeMesh.material = this.planeShader.material;
+      this.planeShader.paint(planeMesh, worldTick);
+      return planeMesh;
+    })();
+    if (mesh.planeMesh) {
+      mesh.remove(mesh.planeMesh);
+    }
+    mesh.add(planeMesh);
+    mesh.planeMesh = planeMesh;
+    mesh.planesNeedUpdate = false;
+  }
+
+  if (modelsNeedUpdate) {
+    const modelMesh = voxelModelRenderer(chunk, THREE);
+    mesh.add(modelMesh);
+    mesh.modelMesh = modelMesh;
+  }
+
+  voxelAsync.clearMeshCache(chunk);
 
   this.voxels.chunks[chunkIndex] = chunk;
-  this.voxels.meshes[chunkIndex] = newMesh;
 
   this.emit('renderChunk', chunk);
-  return newMesh;
+
+  // return mesh;
 }
 
 // # Debugging methods
@@ -709,7 +749,7 @@ Game.prototype.addVoxelMarker = function(x, y, z, color) {
   return this.addAABBMarker(bbox, color)
 }
 
-Game.prototype.pin = pin
+// Game.prototype.pin = pin
 
 // # Misc internal methods
 
