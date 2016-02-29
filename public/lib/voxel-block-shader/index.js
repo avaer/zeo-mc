@@ -6,7 +6,7 @@ const {floor, ceil, round} = Math;
 
 function voxelBlockShader(opts) {
   if (!(this instanceof voxelBlockShader)) return new voxelBlockShader(opts || {});
-  const {game, atlas, transparent} = opts;
+  const {game, atlas} = opts;
 
   this.game = game;
   this.atlas = atlas;
@@ -33,7 +33,7 @@ function voxelBlockShader(opts) {
   const {THREE} = game;
 
   const materialParams = {
-    transparent,
+    transparent: true,
     side: THREE.FrontSide,
     lights: [], // force lights refresh to setup uniforms, three.js WebGLRenderer line 4323
     fog: true,
@@ -88,6 +88,9 @@ function voxelBlockShader(opts) {
     'varying vec3 vNormal;',
     'varying vec3 vPosition;',
     'varying vec2 vUv;',
+    '',
+    'attribute float transparent;',
+    'varying float vTransparent;',
     // end custom
 
     "void main() {",
@@ -164,6 +167,8 @@ function voxelBlockShader(opts) {
     'varying vec3 vNormal;',
     'varying vec3 vPosition;',
     'varying vec2 vUv;',
+    '',
+    'varying float vTransparent;',
 
     // based on @mikolalysenko's code at:
     // http://0fps.wordpress.com/2013/07/09/texture-atlases-wrapping-and-mip-mapping/
@@ -256,9 +261,7 @@ function voxelBlockShader(opts) {
           'vec2 texCoord = tileOffset + tileSize * fract(tileUV);',
           'vec4 texelColor = texture2D(tileMap, texCoord);'].join('\n')), */
 
-      (transparent ?
-         'if (texelColor.a < 0.5) discard;'
-      : ''),
+      'if (vTransparent < (1.0 / 128.0) && texelColor.a < 0.5) discard;',
 
       'texelColor.xyz = inputToLinear(texelColor.xyz);',
 

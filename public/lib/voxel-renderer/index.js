@@ -1,3 +1,4 @@
+const voxelAsync = require('../voxel-async/index');
 const voxelBlockShader = require('../voxel-block-shader/index');
 
 function voxelRenderer(data, THREE) {
@@ -5,6 +6,7 @@ function voxelRenderer(data, THREE) {
     const vertices = new Float32Array(data.faces.length * 6 * 3);
     const uvs = new Float32Array(data.faces.length * 6 * 2);
     const colors = new Float32Array(data.faces.length * 6 * 3);
+    const transparents = new Float32Array(data.faces.length * 6);
 
     for (let i = 0, l = data.faces.length; i < l; i++) {
       const faceVertices = [
@@ -39,9 +41,7 @@ function voxelRenderer(data, THREE) {
       vertices[i * 18 + 15] = faceVertices[3][0];
       vertices[i * 18 + 16] = faceVertices[3][1];
       vertices[i * 18 + 17] = faceVertices[3][2];
-    }
 
-    for (let i = 0, l = data.faces.length; i < l; i++) {
       const colorValue = data.faces[i];
       const colorArray = voxelBlockShader.colorValueToArray(colorValue);
 
@@ -50,12 +50,25 @@ function voxelRenderer(data, THREE) {
         colors[i * 18 + j * 3 + 1] = colorArray[1];
         colors[i * 18 + j * 3 + 2] = colorArray[2];
       }
+
+      for (let j = 0; j < 6; j++) {
+        colors[i * 18 + j * 3 + 0] = colorArray[0];
+        colors[i * 18 + j * 3 + 1] = colorArray[1];
+        colors[i * 18 + j * 3 + 2] = colorArray[2];
+      }
+
+      const isTransparent = voxelAsync.isTransparent(colorValue);
+      const transparentValue = isTransparent ? 1 : 0;
+      for (let j = 0; j < 6; j++) {
+        transparents[i * 6 + j] = transparentValue;
+      }
     }
 
     const geometry = new THREE.BufferGeometry();
     geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
     geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.addAttribute('transparent', new THREE.BufferAttribute(transparents, 1));
 
     geometry.computeVertexNormals();
 

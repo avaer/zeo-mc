@@ -130,11 +130,11 @@ function Game(opts) {
     atlas: this.atlas,
     transparent: false
   });
-  this.fluidShader = voxelBlockShader({
+  /* this.fluidShader = voxelBlockShader({
     game: this,
     atlas: this.atlas,
     transparent: true
-  });
+  }); */
   this.planeShader = voxelPlaneShader({
     game: this,
     atlas: this.atlas
@@ -683,8 +683,8 @@ Game.prototype.showChunk = function(chunk) {
   if (fluidsNeedUpdate) {
     const fluidMesh = (() => {
       const fluidMesh = voxelFluidRenderer(chunk, THREE);
-      fluidMesh.material = this.fluidShader.material;
-      this.fluidShader.paint(fluidMesh, worldTick);
+      fluidMesh.material = this.blockShader.material;
+      this.blockShader.paint(fluidMesh, worldTick);
       return fluidMesh;
     })();
     if (mesh.fluidMesh) {
