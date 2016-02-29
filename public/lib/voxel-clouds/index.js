@@ -1,11 +1,15 @@
+var resources = require('../../resources/index');
+var BLOCKS = resources.BLOCKS;
 var voxelFluidRenderer = require('../voxel-fluid-renderer/index');
 var voxelAsync = require('../voxel-async/index');
 var voxel = require('../voxel/index');
+
 var Alea = require('alea');
 var FastSimplexNoise = require('fast-simplex-noise');
 
 var constants = require('../../constants/index');
 var DEFAULT_SEED = constants.DEFAULT_SEED;
+var CLOUD_VALUE = BLOCKS.BLOCKS['water_still_0'];
 
 var round = Math.round;
 var random = Math.random;
@@ -38,7 +42,12 @@ function Clouds(opts) {
     var offset = Number.MAX_SAFE_INTEGER / 2;
 
     return (x, y, i) => {
-      return round(noise.in2D(x + (i * this.size) + offset, y + (i * this.size) + offset));
+      const noiseN = noise.in2D(x + (i * this.size) + offset, y + (i * this.size) + offset);
+      if (noiseN > 0.5) {
+        return CLOUD_VALUE;
+      } else {
+        return 0;
+      }
     };
   })();
   for (var i = 0; i < this.many; i++) {
