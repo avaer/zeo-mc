@@ -1,6 +1,7 @@
 var resources = require('../../resources/index');
 var BLOCKS = resources.BLOCKS;
-var voxelFluidRenderer = require('../voxel-fluid-renderer/index');
+// var voxelFluidRenderer = require('../voxel-fluid-renderer/index');
+var voxelBlockRenderer = require('../voxel-block-renderer/index');
 var voxelAsync = require('../voxel-async/index');
 var voxel = require('../voxel/index');
 
@@ -64,7 +65,7 @@ Clouds.prototype.generate = function(i) {
     return this.generator(x, z, i);
   });
 
-  var cloud = voxelFluidRenderer(data, game.THREE);
+  var cloud = voxelBlockRenderer(data, game.THREE);
   cloud.material = this.material;
 
   game.scene.add(cloud);

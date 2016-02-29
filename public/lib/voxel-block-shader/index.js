@@ -261,7 +261,8 @@ function voxelBlockShader(opts) {
           'vec2 texCoord = tileOffset + tileSize * fract(tileUV);',
           'vec4 texelColor = texture2D(tileMap, texCoord);'].join('\n')), */
 
-      'if (vTransparent < (1.0 / 128.0) && texelColor.a < 0.5) discard;',
+      // 'if (vTransparent > 0.9 && texelColor.a < 0.5) discard;',
+      'if (texelColor.a < 0.5) discard;',
 
       'texelColor.xyz = inputToLinear(texelColor.xyz);',
 

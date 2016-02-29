@@ -19,27 +19,25 @@ var GreedyMesh = (function greedyLoader() {
       return voxelAsync.isTransparent(type);
     }
 
-    /* function getTransparencyMask(type) {
+    function getTransparencyMask(type) {
       const transparency = isTransparent(type);
       const transparencyMask = transparency ? kTransparentMask : 0;
       return transparencyMask;
-    } */
+    }
 
-    /* function isTransparentMasked(v) {
+    function isTransparentMasked(v) {
       return (v & kTransparentMask) === kTransparentMask;
-    } */
+    }
 
-    /* function removeFlags(v) {
+    function removeFlags(v) {
       return (v & kNoFlagsMask);
-    } */
+    }
 
-    return function ohSoGreedyMesher(volume, dims, {transparent}) {
-      var vertices = [], faces = []
+    return function ohSoGreedyMesher(volume, dims) {
+      var vertices = [], faces = [], tVertices = [], tFaces = []
         , dimsX = dims[0]
         , dimsY = dims[1]
         , dimsXY = dimsX * dimsY;
-
-      var tVertices = [], tFaces = []
 
       //Sweep over 3-axes
       for(var d=0; d<3; ++d) {
@@ -79,48 +77,36 @@ var GreedyMesh = (function greedyLoader() {
               let a = xd >= 0      ? getType(volume, x[0]      + dimsX * x[1]          + dimsXY * x[2]          ) : 0;
               let b = xd < dimsD-1 ? getType(volume, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY) : 0;
 
-              if (transparent) {
-                /* if (!isTransparent(a)) {
-                  a = 0;
-                }
-                if (!isTransparent(b)) {
-                  b = 0;
-                } */
-
-                // transparent only at the interface of different materials
-                // XXX make this work across chunk boundaries
+              if (a !== b) {
+                a = a | getTransparencyMask(a);
+                b = b | getTransparencyMask(b);
+                /* // only consider transparency at interfaces between different materials
+                let aT, bT;
                 if (a !== b) {
-                  const aT = isTransparent(a);
-                  const bT = isTransparent(b);
+                  aT = isTransparent(a);
+                  bT = isTransparent(b);
+                } else {
+                  aT = false;
+                  bT = false;
+                }
 
-                  // both are transparent, add to both directions
-                  if (aT && bT) {
-                    // nothing
-                  // if a is transparent and b is not, draw only b
-                  } else if (aT && !bT) {
-                    b = 0;
-                  // if b is transparent and a is not, draw only a
-                  } else if (bT && !aT) {
-                    a = 0;
-                  // else if neither are transparent, don't draw this face
-                  } else {
-                    a = 0;
-                    b = 0;
-                  }
+                // both are transparent, add to both directions
+                if (aT && bT) {
+                  // nothing
+                // if a is solid and b is not there or transparent
+                } else if (a && (!b || bT)) {
+                  b = 0;
+                // if b is solid and a is not there or transparent
+                } else if (b && (!a || aT)) {
+                  a = 0;
+                // dont draw this face
                 } else {
                   a = 0;
                   b = 0;
-                }
+                } */
               } else {
-                const aT = isTransparent(a);
-                const bT = isTransparent(b);
-
-                if (aT) {
-                  a = 0;
-                }
-                if (bT) {
-                  b = 0;
-                }
+                a = 0;
+                b = 0;
               }
 
               mask[n] = a;
@@ -170,27 +156,25 @@ var GreedyMesh = (function greedyLoader() {
                 }
 
                 // ## enable code to ensure that transparent faces are last in the list
-                // if (!isTransparent(c)) {
+                if (!isTransparentMasked(c)) {
                   const vertex_count = vertices.length;
                   vertices.push([x[0],             x[1],             x[2]            ]);
                   vertices.push([x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ]);
                   vertices.push([x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]]);
                   vertices.push([x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]]);
-                  faces.push(c);
 
-                  /* const color = removeFlags(c);
-                  faces.push(color); */
+                  const color = removeFlags(c);
+                  faces.push(color);
+                } else {
+                  const vertex_count = tVertices.length;
+                  tVertices.push([x[0],             x[1],             x[2]            ]);
+                  tVertices.push([x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ]);
+                  tVertices.push([x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]]);
+                  tVertices.push([x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]]);
 
-                  // faces.push([vertex_count, vertex_count+1, vertex_count+3, color]); // abd
-                  // faces.push([vertex_count+1, vertex_count+2, vertex_count+3, color]); // bcd
-                // } else {
-                //   var vertex_count = tVertices.length;
-                //   tVertices.push([x[0],             x[1],             x[2]            ]);
-                //   tVertices.push([x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ]);
-                //   tVertices.push([x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]]);
-                //   tVertices.push([x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]]);
-                //   tFaces.push([vertex_count, vertex_count+1, vertex_count+2, vertex_count+3, removeFlags(c)]);
-                // }
+                  const color = removeFlags(c);
+                  tFaces.push(color);
+                }
 
                 //Zero-out mask
                 W = n + w;
@@ -216,13 +200,13 @@ var GreedyMesh = (function greedyLoader() {
       //   return [vertex_count+v[0], vertex_count+v[1], vertex_count+v[2], vertex_count+v[3], v[4]]
       // })
       //
-      // return { vertices:vertices.concat(tVertices), faces:faces.concat(newFaces) };
+      return { vertices: vertices.concat(tVertices), faces: faces.concat(tFaces) };
 
       // TODO: Try sorting by texture to see if we can reduce draw calls.
       // faces.sort(function sortFaces(a, b) {
       //   return b[4] - a[4];
       // })
-      return { vertices:vertices, faces:faces };
+      // return { vertices:vertices, faces:faces };
     };
   };
 })();

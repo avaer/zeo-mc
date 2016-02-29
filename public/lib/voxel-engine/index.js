@@ -1,6 +1,6 @@
 var voxel = require('../voxel/index')
 var voxelBlockRenderer = require('../voxel-block-renderer/index')
-var voxelFluidRenderer = require('../voxel-fluid-renderer/index')
+// var voxelFluidRenderer = require('../voxel-fluid-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
 var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
@@ -331,11 +331,11 @@ Game.prototype.deleteValue = function(value) {
   const mesh = this.voxels.meshes[chunkIndex];
   if (type === 'block') {
     chunk.voxels[index] = 0;
-    if (!voxelAsync.isTransparent(voxelValue)) {
+    /* if (!voxelAsync.isTransparent(voxelValue)) { */
       mesh.blocksNeedUpdate = true;
-    } else {
+    /* } else {
       mesh.fluidsNeedUpdate = true;
-    }
+    } */
   } else if (type === 'vegetation') {
     chunk.vegetations[index] = null;
     mesh.planesNeedUpdate = true;
@@ -644,12 +644,12 @@ Game.prototype.showChunk = function(chunk) {
     mesh = new THREE.Object3D();
 
     mesh.blockMesh = null;
-    mesh.fluidMesh = null;
+    // mesh.fluidMesh = null;
     mesh.planeMesh = null;
     mesh.modelMesh = null;
 
     mesh.blocksNeedUpdate = true;
-    mesh.fluidsNeedUpdate = true;
+    // mesh.fluidsNeedUpdate = true;
     mesh.planesNeedUpdate = true;
     mesh.modelsNeedUpdate = true;
 
@@ -661,7 +661,7 @@ Game.prototype.showChunk = function(chunk) {
     this.voxels.meshes[chunkIndex] = mesh;
   }
 
-  const {blocksNeedUpdate, fluidsNeedUpdate, planesNeedUpdate, modelsNeedUpdate} = mesh;
+  const {blocksNeedUpdate, /* fluidsNeedUpdate,*/ planesNeedUpdate, modelsNeedUpdate} = mesh;
 
   const worldTick = this.getWorldTick();
 
@@ -680,7 +680,7 @@ Game.prototype.showChunk = function(chunk) {
     mesh.blocksNeedUpdate = false;
   }
 
-  if (fluidsNeedUpdate) {
+  /* if (fluidsNeedUpdate) {
     const fluidMesh = (() => {
       const fluidMesh = voxelFluidRenderer(chunk, THREE);
       fluidMesh.material = this.blockShader.material;
@@ -693,7 +693,7 @@ Game.prototype.showChunk = function(chunk) {
     mesh.add(fluidMesh);
     mesh.fluidMesh = fluidMesh;
     mesh.fluidsNeedUpdate = false;
-  }
+  } */
 
   if (planesNeedUpdate) {
     const planeMesh = (() => {
