@@ -143,7 +143,7 @@ function _expandFrames(name, frames) {
 }
 
 export const TRANSPARENT = [
-  'water_still',
-  'leaves_big_oak_plains',
-  'log_big_oak',
+  /water/,
+  /lava/,
+  /leaves/,
 ];

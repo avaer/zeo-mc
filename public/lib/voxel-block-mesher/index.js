@@ -8,43 +8,42 @@ var GreedyMesh = (function greedyLoader() {
   // setting 16th bit if transparent
   var kTransparentMask    = 0x8000;
   var kNoFlagsMask        = 0x7FFF;
-  var kTransparentTypes   = [];
 
-  kTransparentTypes[16] = true
+  function getType(voxels, offset) {
+    const type = voxels[offset];
+    return type;
+  }
 
-  function isTransparent(v) {
+  /* function isTransparentMasked(v) {
     return (v & kTransparentMask) === kTransparentMask;
-  }
+  } */
 
-  function removeFlags(v) {
+  /* function removeFlags(v) {
     return (v & kNoFlagsMask);
-  }
+  } */
 
   return function(opts) {
     opts = opts || {};
-    var mesherExtraData = opts.mesherExtraData;
+    const {mesherExtraData} = opts;
+    const {transparentTypes} = mesherExtraData;
 
-    return function ohSoGreedyMesher(volume, dims) {
+    function isTransparent(type) {
+      return Boolean(transparentTypes[type]);
+    }
+
+    /* function getTransparencyMask(type) {
+      const transparency = isTransparent(type);
+      const transparencyMask = transparency ? kTransparentMask : 0;
+      return transparencyMask;
+    } */
+
+    return function ohSoGreedyMesher(volume, dims, {transparent}) {
       var vertices = [], faces = []
         , dimsX = dims[0]
         , dimsY = dims[1]
         , dimsXY = dimsX * dimsY;
 
       var tVertices = [], tFaces = []
-
-      function getType(voxels, offset) {
-        const type = voxels[offset];
-        return type;
-      }
-      const transparentTypes = mesherExtraData ? (mesherExtraData.transparentTypes || {}) : {};
-      function getTypeTransparency(type) {
-        return type in transparentTypes;
-      }
-      function getTypeTransparencyMask(type) {
-        const transparency = getTypeTransparency(type);
-        const transparencyMask = transparency ? kTransparentMask : 0;
-        return transparencyMask;
-      }
 
       //Sweep over 3-axes
       for(var d=0; d<3; ++d) {
@@ -80,33 +79,55 @@ var GreedyMesh = (function greedyLoader() {
           for(x[v] = 0; x[v] < dimsV; ++x[v]) {
             for(x[u] = 0; x[u] < dimsU; ++x[u], ++n) {
               // Modified to read through getType()
-              let a = xd >= 0      && getType(volume, x[0]      + dimsX * x[1]          + dimsXY * x[2]          );
-              let b = xd < dimsD-1 && getType(volume, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY);
+              let a = xd >= 0      ? getType(volume, x[0]      + dimsX * x[1]          + dimsXY * x[2]          ) : 0;
+              let b = xd < dimsD-1 ? getType(volume, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY) : 0;
 
-              // transparent only at the interface of different materials
-              // XXX make this work across chunk boundaries
-              if (a !== b) {
-                a && (a = a | getTypeTransparencyMask(a));
-                b && (b = b | getTypeTransparencyMask(b));
-              }
+              if (transparent) {
+                /* if (!isTransparent(a)) {
+                  a = 0;
+                }
+                if (!isTransparent(b)) {
+                  b = 0;
+                } */
 
-              // both are transparent, add to both directions
-              if (isTransparent(a) && isTransparent(b)) {
-                mask[n] = a;
-                invMask[n] = b;
-              // if a is solid and b is not there or transparent
-              } else if (a && (!b || isTransparent(b))) {
-                mask[n] = a;
-                invMask[n] = 0
-              // if b is solid and a is not there or transparent
-              } else if (b && (!a || isTransparent(a))) {
-                mask[n] = 0
-                invMask[n] = b;
-              // dont draw this face
+                // transparent only at the interface of different materials
+                // XXX make this work across chunk boundaries
+                if (a !== b) {
+                  const aT = isTransparent(a);
+                  const bT = isTransparent(b);
+
+                  // both are transparent, add to both directions
+                  if (aT && bT) {
+                    // nothing
+                  // if a is transparent and b is not, draw only b
+                  } else if (aT && !bT) {
+                    b = 0;
+                  // if b is transparent and a is not, draw only a
+                  } else if (bT && !aT) {
+                    a = 0;
+                  // else if neither are transparent, don't draw this face
+                  } else {
+                    a = 0;
+                    b = 0;
+                  }
+                } else {
+                  a = 0;
+                  b = 0;
+                }
               } else {
-                mask[n] = 0
-                invMask[n] = 0
+                const aT = isTransparent(a);
+                const bT = isTransparent(b);
+
+                if (aT) {
+                  a = 0;
+                }
+                if (bT) {
+                  b = 0;
+                }
               }
+
+              mask[n] = a;
+              invMask[n] = b;
             }
           }
 
@@ -153,13 +174,16 @@ var GreedyMesh = (function greedyLoader() {
 
                 // ## enable code to ensure that transparent faces are last in the list
                 // if (!isTransparent(c)) {
-                  var vertex_count = vertices.length;
+                  const vertex_count = vertices.length;
                   vertices.push([x[0],             x[1],             x[2]            ]);
                   vertices.push([x[0]+du[0],       x[1]+du[1],       x[2]+du[2]      ]);
                   vertices.push([x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]]);
                   vertices.push([x[0]      +dv[0], x[1]      +dv[1], x[2]      +dv[2]]);
-                  var color = removeFlags(c);
-                  faces.push(color);
+                  faces.push(c);
+
+                  /* const color = removeFlags(c);
+                  faces.push(color); */
+
                   // faces.push([vertex_count, vertex_count+1, vertex_count+3, color]); // abd
                   // faces.push([vertex_count+1, vertex_count+2, vertex_count+3, color]); // bcd
                 // } else {

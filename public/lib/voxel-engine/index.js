@@ -1,5 +1,6 @@
 var voxel = require('voxel')
 var voxelBlockRenderer = require('../voxel-block-renderer/index')
+var voxelFluidRenderer = require('../voxel-fluid-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
 var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
@@ -125,7 +126,13 @@ function Game(opts) {
 
   this.blockShader = voxelBlockShader({
     game: this,
-    atlas: this.atlas
+    atlas: this.atlas,
+    transparent: false
+  });
+  this.fluidShader = voxelBlockShader({
+    game: this,
+    atlas: this.atlas,
+    transparent: true
   });
   this.planeShader = voxelPlaneShader({
     game: this,
@@ -637,6 +644,15 @@ Game.prototype.showChunk = function(chunk) {
     mesh.add(blockMesh);
     mesh.blockMesh = blockMesh;
 
+    const fluidMesh = (() => {
+      const fluidMesh = voxelFluidRenderer(chunk, this.THREE);
+      fluidMesh.material = this.fluidShader.material;
+      this.fluidShader.paint(fluidMesh, worldTick);
+      return fluidMesh;
+    })();
+    mesh.add(fluidMesh);
+    mesh.fluidMesh = fluidMesh;
+
     const planeMesh = (() => {
       const planeMesh = voxelPlaneRenderer(chunk, this.THREE);
       planeMesh.material = this.planeShader.material;
@@ -729,7 +745,8 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   if (newWorldTick !== oldWorldTick) {
     for (let chunkIndex in this.voxels.meshes) {
       const mesh = this.voxels.meshes[chunkIndex];
-      const {planeMesh} = mesh;
+      const {fluidMesh, planeMesh} = mesh;
+      this.fluidShader.paint(fluidMesh, newWorldTick);
       this.planeShader.paint(planeMesh, newWorldTick);
     }
   }

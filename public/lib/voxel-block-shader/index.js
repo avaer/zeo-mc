@@ -1,16 +1,15 @@
-var floor = Math.floor;
-var ceil = Math.ceil;
-var round = Math.round;
+const {floor, ceil, round} = Math;
 
 function voxelBlockShader(opts) {
   if (!(this instanceof voxelBlockShader)) return new voxelBlockShader(opts || {});
-  var self = this;
-  this.game = opts.game;
-  this.atlas = opts.atlas;
+  const {game, atlas, transparent} = opts;
+
+  this.game = game;
+  this.atlas = atlas;
 
   this._loading = true;
   this._meshQueue = [];
-  this.atlas.once('load', () => {
+  atlas.once('load', () => {
     if (this._meshQueue.length > 0) {
       for (let i = 0; i < this._meshQueue.length; i++) {
         const args = this._meshQueue[i];
@@ -24,10 +23,10 @@ function voxelBlockShader(opts) {
     this._loading = false;
   });
 
-  const {THREE} = this.game;
+  const {THREE} = game;
 
   const materialParams = {
-    transparent: true,
+    transparent,
     side: THREE.FrontSide,
     lights: [], // force lights refresh to setup uniforms, three.js WebGLRenderer line 4323
     fog: true,
@@ -250,7 +249,9 @@ function voxelBlockShader(opts) {
           'vec2 texCoord = tileOffset + tileSize * fract(tileUV);',
           'vec4 texelColor = texture2D(tileMap, texCoord);'].join('\n')), */
 
-      'if (texelColor.a < 0.5) discard;',
+      (transparent ?
+         'if (texelColor.a < 0.5) discard;'
+      : ''),
 
       'texelColor.xyz = inputToLinear(texelColor.xyz);',
 

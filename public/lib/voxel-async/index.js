@@ -10,18 +10,35 @@ let voxelBlockMesherInstance = null;
 let voxelPlaneMesherInstance = null;
 let voxelModelMesherInstance = null;
 
-export function init({seed, chunkSize}) {
-  voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
-
+const mesherExtraData = (() => {
   const transparentTypes = (() => {
+    function isTransparent(m) {
+      return BLOCKS.TRANSPARENT.some(transparencySpec => {
+        if (typeof transparencySpec === 'string') {
+          return m === transparencySpec;
+        } else if (transparencySpec instanceof RegExp) {
+          return transparencySpec.test(m);
+        } else {
+          return false;
+        }
+      });
+    }
+
     const result = {};
-    BLOCKS.TRANSPARENT.forEach(t => {
-      const index = BLOCKS.BLOCKS[t];
-      result[index] = true;
-    });
+    for (let m in BLOCKS.BLOCKS) {
+      if (isTransparent(m)) {
+        const index = BLOCKS.BLOCKS[m];
+        result[index] = true;
+      }
+    }
     return result;
   })();
   const mesherExtraData = {transparentTypes};
+  return mesherExtraData;
+})();
+
+export function init({seed, chunkSize}) {
+  voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
   voxelBlockMesherInstance = voxelBlockMesher({mesherExtraData});
   voxelPlaneMesherInstance = voxelPlaneMesher();
   voxelModelMesherInstance = voxelModelMesher();
@@ -32,7 +49,8 @@ export function generateSync(position) {
 
   const chunk = voxelTerrainGenerate(position);
   const {voxels, vegetations, weathers, effects, dims} = chunk;
-  chunk.dims._cachedBlockMesh = voxelBlockMesherInstance(voxels, dims);
+  chunk.dims._cachedBlockMesh = voxelBlockMesherInstance(voxels, dims, {transparent: false});
+  chunk.dims._cachedFluidMesh = voxelBlockMesherInstance(voxels, dims, {transparent: true});
   chunk.dims._cachedPlaneMesh = voxelPlaneMesherInstance({vegetations, weathers, effects}, dims);
   return chunk;
 }
@@ -45,7 +63,31 @@ export function blockMesher(voxels, dims) {
     dims._cachedBlockMesh = null;
     return cachedBlockMesh;
   } else {
-    return voxelBlockMesherInstance(voxels, dims);
+    return voxelBlockMesherInstance(voxels, dims, {transparent: false});
+  }
+}
+
+export function fluidMesher(voxels, dims) {
+  _ensureInitialized();
+
+  var cachedFluidMesh = dims._cachedFluidMesh;
+  if (cachedFluidMesh) {
+    dims._cachedFluidMesh = null;
+    return cachedFluidMesh;
+  } else {
+    return voxelBlockMesherInstance(voxels, dims, {transparent: true});
+  }
+}
+
+export function planeMesher(data, dims) {
+  _ensureInitialized();
+
+  var cachedPlaneMesh = dims._cachedPlaneMesh;
+  if (cachedPlaneMesh) {
+    dims._cachedPlaneMesh = null;
+    return cachedPlaneMesh;
+  } else {
+    return voxelPlaneMesherInstance(data, dims);
   }
 }
 
@@ -70,18 +112,6 @@ export function entityMesher(entities, dims) {
     }
   }
   return result;
-}
-
-export function planeMesher(data, dims) {
-  _ensureInitialized();
-
-  var cachedPlaneMesh = dims._cachedPlaneMesh;
-  if (cachedPlaneMesh) {
-    dims._cachedPlaneMesh = null;
-    return cachedPlaneMesh;
-  } else {
-    return voxelPlaneMesherInstance(data, dims);
-  }
 }
 
 export function modelMesher(data, dims) {

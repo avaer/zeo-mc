@@ -1,4 +1,4 @@
-var voxelBlockRenderer = require('../voxel-block-renderer/index');
+var voxelFluidRenderer = require('../voxel-fluid-renderer/index');
 var voxelAsync = require('../voxel-async/index');
 var voxel = require('voxel');
 var Alea = require('alea');
@@ -55,7 +55,7 @@ Clouds.prototype.generate = function(i) {
     return this.generator(x, z, i);
   });
 
-  var cloud = voxelBlockRenderer(data, game.THREE);
+  var cloud = voxelFluidRenderer(data, game.THREE);
   cloud.material = this.material;
 
   game.scene.add(cloud);

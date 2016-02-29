@@ -1,25 +1,19 @@
-// var tic = require('tic')();
-var createAtlas = require('atlaspack');
-var isTransparent = require('opaque').transparent;
-var touchup = require('touchup');
-var voxelFakeAo = require('voxel-fakeao');
-var voxelBlockShader = require('../voxel-block-shader/index');
+const voxelBlockShader = require('../voxel-block-shader/index');
 
-var floor = Math.floor;
-var ceil = Math.ceil;
-var round = Math.round;
+const {floor, ceil, round} = Math;
 
 module.exports = voxelPlaneShader;
 
 function voxelPlaneShader(opts) {
   if (!(this instanceof voxelPlaneShader)) return new voxelPlaneShader(opts || {});
-  var self = this;
-  this.game = opts.game;
-  this.atlas = opts.atlas;
+  const {game, atlas} = opts;
+
+  this.game = game;
+  this.atlas = atlas;
 
   this._loading = true;
   this._meshQueue = [];
-  this.atlas.once('load', () => {
+  atlas.once('load', () => {
     if (this._meshQueue.length > 0) {
       for (let i = 0; i < this._meshQueue.length; i++) {
         const args = this._meshQueue[i];
