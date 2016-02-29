@@ -645,6 +645,7 @@ Game.prototype.showChunk = function(chunk) {
     mesh.blockMesh = blockMesh;
 
     const fluidMesh = (() => {
+      // XXX flatten this into a single meshing pass; only clear the chunk.dims cache at the end
       const fluidMesh = voxelFluidRenderer(chunk, this.THREE);
       fluidMesh.material = this.fluidShader.material;
       this.fluidShader.paint(fluidMesh, worldTick);
@@ -746,8 +747,9 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
     for (let chunkIndex in this.voxels.meshes) {
       const mesh = this.voxels.meshes[chunkIndex];
       const {fluidMesh, planeMesh} = mesh;
-      this.fluidShader.paint(fluidMesh, newWorldTick);
-      this.planeShader.paint(planeMesh, newWorldTick);
+      // XXX use the shader for this instead
+      // this.fluidShader.paint(fluidMesh, newWorldTick);
+      // this.planeShader.paint(planeMesh, newWorldTick);
     }
   }
 
