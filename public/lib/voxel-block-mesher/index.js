@@ -19,14 +19,8 @@ var GreedyMesh = (function greedyLoader() {
       return voxelAsync.isTransparent(type);
     }
 
-    function getTransparencyMask(type) {
-      const transparency = isTransparent(type);
-      const transparencyMask = transparency ? kTransparentMask : 0;
-      return transparencyMask;
-    }
-
     function isTransparentMasked(v) {
-      return (v & kTransparentMask) === kTransparentMask;
+      return (v & kTransparentMask) !== 0;
     }
 
     function removeFlags(v) {
@@ -78,17 +72,11 @@ var GreedyMesh = (function greedyLoader() {
               let b = xd < dimsD-1 ? getType(volume, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY) : 0;
 
               if (a !== b) {
-                a = a | getTransparencyMask(a);
-                b = b | getTransparencyMask(b);
-                /* // only consider transparency at interfaces between different materials
-                let aT, bT;
-                if (a !== b) {
-                  aT = isTransparent(a);
-                  bT = isTransparent(b);
-                } else {
-                  aT = false;
-                  bT = false;
-                }
+                const aT = isTransparent(a);
+                const bT = isTransparent(b);
+
+                aT && (a = a | kTransparentMask);
+                bT && (b = b | kTransparentMask);
 
                 // both are transparent, add to both directions
                 if (aT && bT) {
@@ -103,7 +91,7 @@ var GreedyMesh = (function greedyLoader() {
                 } else {
                   a = 0;
                   b = 0;
-                } */
+                }
               } else {
                 a = 0;
                 b = 0;
