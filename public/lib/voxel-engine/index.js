@@ -1,4 +1,4 @@
-var voxel = require('voxel')
+var voxel = require('../voxel/index')
 var voxelBlockRenderer = require('../voxel-block-renderer/index')
 var voxelFluidRenderer = require('../voxel-fluid-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
