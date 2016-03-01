@@ -1,14 +1,36 @@
 const voxelAsync = require('../voxel-async/index');
 const voxelBlockShader = require('../voxel-block-shader/index');
 
-function voxelRenderer(data, THREE) {
+function voxelRenderer(data, atlas, THREE) {
   const geometry = (() => {
-    const vertices = new Float32Array(data.faces.length * 6 * 3);
-    const uvs = new Float32Array(data.faces.length * 6 * 2);
-    const colors = new Float32Array(data.faces.length * 6 * 3);
-    const transparents = new Float32Array(data.faces.length * 6);
+    function getColorValue(faces, i) {
+      return faces[i];
+    }
 
-    for (let i = 0, l = data.faces.length; i < l; i++) {
+    function getNormalDirection(normals, i) {
+      const normalIndex = i * 6 * 3;
+      if      (normals[normalIndex + 0] === 1)  return 1; // z === 1
+      else if (normals[normalIndex + 1] === 1)  return 2; // y === 1
+      else if (normals[normalIndex + 1] === -1) return 3; // y === -1
+      else if (normals[normalIndex + 2] === -1) return 4; // x === -1
+      else if (normals[normalIndex + 2] === 1)  return 5; // x === 0
+      else                                           return 0;
+    }
+
+    function getFaceMaterial(colorValue, normalDirection) {
+      return atlas.getFaceMaterial(colorValue, normalDirection);
+    }
+
+    function getFrameUvs(faceMaterial) {
+      return atlas.getFrameUvs(faceMaterial);
+    }
+
+    const numFaces = data.faces.length;
+    const vertices = new Float32Array(numFaces * 6 * 3);
+    // const uvs = new Float32Array(numFaces * 6 * 2);
+    // const colors = new Float32Array(numFaces * 6 * 3);
+
+    for (let i = 0; i < numFaces; i++) {
       const faceVertices = [
         data.vertices[i * 4 + 0],
         data.vertices[i * 4 + 1],
@@ -42,35 +64,36 @@ function voxelRenderer(data, THREE) {
       vertices[i * 18 + 16] = faceVertices[3][1];
       vertices[i * 18 + 17] = faceVertices[3][2];
 
-      const colorValue = data.faces[i];
+      /* const colorValue = data.faces[i];
       const colorArray = voxelBlockShader.colorValueToArray(colorValue);
-
       for (let j = 0; j < 6; j++) {
         colors[i * 18 + j * 3 + 0] = colorArray[0];
         colors[i * 18 + j * 3 + 1] = colorArray[1];
         colors[i * 18 + j * 3 + 2] = colorArray[2];
-      }
-
-      for (let j = 0; j < 6; j++) {
-        colors[i * 18 + j * 3 + 0] = colorArray[0];
-        colors[i * 18 + j * 3 + 1] = colorArray[1];
-        colors[i * 18 + j * 3 + 2] = colorArray[2];
-      }
-
-      const isTransparent = voxelAsync.isTransparent(colorValue);
-      const transparentValue = isTransparent ? 1 : 0;
-      for (let j = 0; j < 6; j++) {
-        transparents[i * 6 + j] = transparentValue;
-      }
+      } */
     }
 
     const geometry = new THREE.BufferGeometry();
     geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-    geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.addAttribute('transparent', new THREE.BufferAttribute(transparents, 1));
+    // geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+    // geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     geometry.computeVertexNormals();
+
+    const normals = geometry.getAttribute('normal').array;
+
+    const frameUvs = new Float32Array(numFaces * 6 * 32 * 2);
+    for (let i = 0; i < numFaces; i++) {
+      const colorValue = getColorValue(data.faces, i);
+      const normalDirection = getNormalDirection(normals, i);
+      const faceMaterial = getFaceMaterial(colorValue, normalDirection);
+      const faceMaterialFrameUvs = getFrameUvs(faceMaterial);
+
+      for (let j = 0; j < 6; j++) {
+        frameUvs.set(faceMaterialFrameUvs, (i * 6 * 32 * 2) + (j * 32 * 2));
+      }
+    }
+    geometry.addAttribute('frameUv', new THREE.BufferAttribute(frameUvs, 2));
 
     return geometry;
   })();

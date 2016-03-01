@@ -62,15 +62,44 @@ export default class Voxels extends React.Component {
   }
 
   componentDidMount() {
-    let game, avatar;
+    let atlas, game, avatar;
+
+    const loadTextureAtlas = cb => {
+      function getTexturePath(texture) {
+        return './api/img/textures/blocks/' + texture + '.png';
+      }
+
+      function getTextureImage(texture, cb) {
+        const img = document.createElement('img');
+        img.onload = () => {
+          cb(null, img);
+        };
+        img.onerror = err => {
+          cb(err);
+        };
+        img.src = opts.texturePath(texture);
+      }
+
+      atlas = voxelTextureAtlas({
+        materials: opts.materials,
+        materials: BLOCKS.MATERIALS
+        getTextureImage,
+        THREE
+      });
+
+      atlas.once('load', err => {
+        if (!err) {
+          cb();
+        } else {
+          console.warn(err);
+        }
+      });
+    };
 
     const initializeGame = cb => {
       game = voxelEngine({
-        // generate: voxelPerlinTerrain({scaleFactor:10}),
-        // generate: voxelSimplexTerrain({seed: 'lol', scaleFactor: 10, chunkDistance: CHUNK_DISTANCE}),
+        atlas: ,
         generateChunks: false,
-        texturePath: name => './api/img/textures/blocks/' + name + '.png',
-        materials: BLOCKS.MATERIALS,
         chunkSize: CHUNK_SIZE,
         chunkDistance: CHUNK_DISTANCE,
         lightsDisabled: true,
@@ -121,8 +150,6 @@ export default class Voxels extends React.Component {
 
       const $domNode = this.getDomNode();
       game.appendTo($domNode[0]);
-
-      game.paused = false;
     };
 
     const generateInitialChunks = cb => {
@@ -141,8 +168,6 @@ export default class Voxels extends React.Component {
     };
 
     const startGame = () => {
-      game.paused = false;
-
       game.voxels.on('missingChunk', position => {
         // console.log('missing chunk', position);
         this.generateAsync(position, chunk => {
@@ -179,7 +204,7 @@ export default class Voxels extends React.Component {
       });
     };
 
-    initializeGame(generateInitialChunks(startGame));
+    loadTextureAtlas(initializeGame(generateInitialChunks(startGame)));
   }
 
   shouldComponentUpdate() {

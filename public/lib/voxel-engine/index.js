@@ -65,10 +65,8 @@ function Game(opts) {
   this.antialias = opts.antialias
   this.playerHeight = opts.playerHeight || 1.62
   this.meshType = opts.meshType || 'surfaceMesh'
-  /* this.meshers = opts.meshers
-  this.modeler = opts.modeler
-  this.materialType = opts.materialType || THREE.MeshLambertMaterial
-  this.materialParams = opts.materialParams || {} */
+  this.atlas = opts.atlas
+
   this.items = []
   this.voxels = voxel(this)
   this.voxelUtils = voxelUtils({chunkSize: this.chunkSize})
@@ -93,8 +91,8 @@ function Game(opts) {
     [-Infinity, -Infinity, -Infinity]
   )
   
-  this.timer = this.initializeTimer((opts.tickFPS || 16))
-  this.paused = false
+  this.timer = this.initializeTimer(opts.tickFPS || 16)
+  // this.paused = false
 
   this.spatial = new SpatialEventEmitter
   this.region = regionChange(this.spatial, aabb([0, 0, 0], [1, 1, 1]), this.chunkSize)
@@ -106,23 +104,6 @@ function Game(opts) {
   this.chunksNeedsUpdate = {}
   // contains new chunks yet to be generated. Handled by game.loadPendingChunks
   this.pendingChunks = []
-
-  function getTextureImage(name, cb) {
-    const img = document.createElement('img');
-    img.onload = () => {
-      cb(null, img);
-    };
-    img.onerror = err => {
-      cb(err);
-    };
-    img.src = opts.texturePath(name);
-  }
-
-  this.atlas = voxelTextureAtlas({
-    materials: opts.materials,
-    getTextureImage,
-    THREE
-  });
 
   this.blockShader = voxelBlockShader({
     game: this,
@@ -143,7 +124,7 @@ function Game(opts) {
   // client side only after this point
   if (!this.isClient) return
   
-  this.paused = true
+  // this.paused = true
   this.initializeRendering(opts)
  
   this.showAllChunks()
@@ -652,9 +633,8 @@ Game.prototype.showChunk = function(chunk) {
 
   if (blocksNeedUpdate) {
     const blockMesh = (() => {
-      const blockMesh = voxelBlockRenderer(chunk, THREE);
+      const blockMesh = voxelBlockRenderer(chunk, this.atlas, THREE);
       blockMesh.material = this.blockShader.material;
-      this.blockShader.paint(blockMesh, worldTick);
       return blockMesh;
     })();
     if (mesh.blockMesh) {
@@ -669,7 +649,7 @@ Game.prototype.showChunk = function(chunk) {
     const planeMesh = (() => {
       const planeMesh = voxelPlaneRenderer(chunk, THREE);
       planeMesh.material = this.planeShader.material;
-      this.planeShader.paint(planeMesh, worldTick);
+      this.planeShader.paint(planeMesh, worldTick); // XXX make this work via paintless frameUvs and frame uniform
       return planeMesh;
     })();
     if (mesh.planeMesh) {
@@ -729,7 +709,7 @@ Game.prototype.addVoxelMarker = function(x, y, z, color) {
 // # Misc internal methods
 
 Game.prototype.onControlChange = function(gained, stream) {
-  this.paused = false
+  // this.paused = false
 
   if (!gained && !this.optout) {
     this.buttons.disable()
@@ -759,12 +739,13 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   const oldWorldTick = this.getWorldTick(oldWorldTime);
   const newWorldTick = this.getWorldTick(newWorldTime);
   if (newWorldTick !== oldWorldTick) {
-    for (let chunkIndex in this.voxels.meshes) {
+    this.blockShader.setFrame(newWorldTick);
+    /* for (let chunkIndex in this.voxels.meshes) {
       const mesh = this.voxels.meshes[chunkIndex];
       const {planeMesh} = mesh;
       // XXX use the shader for this instead
       // this.planeShader.paint(planeMesh, newWorldTick);
-    }
+    } */
   }
 
   if (this.pendingChunks.length) this.loadPendingChunks()
@@ -797,11 +778,11 @@ Game.prototype.initializeTimer = function(rate) {
   return self.interval;
   
   function timer() {
-    if (self.paused) {
+    /* if (self.paused) {
       last = Date.now();
       accum = 0;
       return;
-    }
+    } */
     now = Date.now()
     dt = now - (last || now)
     last = now

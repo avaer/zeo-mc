@@ -11,7 +11,7 @@ function voxelPlaneShader(opts) {
   this.game = game;
   this.atlas = atlas;
 
-  this._loading = true;
+  /* this._loading = true;
   this._meshQueue = [];
   atlas.once('load', () => {
     if (this._meshQueue.length > 0) {
@@ -25,7 +25,7 @@ function voxelPlaneShader(opts) {
     this.material.needsUpdate = true;
 
     this._loading = false;
-  });
+  }); */
 
   const {THREE} = this.game;
 
@@ -207,28 +207,19 @@ function voxelPlaneShader(opts) {
 }
 
 voxelPlaneShader.prototype.getFaceMaterial = function(mesh, i, frame) {
-  const frameMaterials = (() => {
-    const colors = mesh.geometry.getAttribute('color');
-    const colorIndex = i * 2 * 3 * 3;
-    const colorArray = [colors.array[colorIndex + 0], colors.array[colorIndex + 1], colors.array[colorIndex + 2]]
-    const colorValue = voxelBlockShader.colorArrayToValue(colorArray);
-    const frameMaterials = this.atlas.getFrameMaterials(colorValue);
-    return frameMaterials;
-  })();
-
-  const frameMaterial = frameMaterials[frame % frameMaterials.length];
-
-  const faceMaterial = frameMaterial[0] || '';
-
-  return faceMaterial;
+  const colors = mesh.geometry.getAttribute('color');
+  const colorIndex = i * 2 * 3 * 3;
+  const colorArray = [colors.array[colorIndex + 0], colors.array[colorIndex + 1], colors.array[colorIndex + 2]]
+  const colorValue = voxelBlockShader.colorArrayToValue(colorArray);
+  const faceMaterial = this.atlas.getFaceMaterial(colorValue, 0);
 }
 
 voxelPlaneShader.prototype.paint = function(mesh, frame) {
-  // if were loading put into queue
+  /* // if were loading put into queue
   if (this._loading) {
     this._meshQueue.push([mesh, frame]);
     return false;
-  }
+  } */
 
   frame = frame || 0;
 
@@ -240,7 +231,7 @@ voxelPlaneShader.prototype.paint = function(mesh, frame) {
     for (let i = 0; i < numFaces; i++) {
       const faceMaterial = this.getFaceMaterial(mesh, i, frame);
 
-      const atlasuvs = this.atlas.getMaterialUvs(faceMaterial);
+      const atlasuvs = this.atlas.getAtalsUvs(faceMaterial);
       if (!atlasuvs) {
         throw new Error('no material index');
       }

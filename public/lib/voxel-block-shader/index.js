@@ -11,7 +11,7 @@ function voxelBlockShader(opts) {
   this.game = game;
   this.atlas = atlas;
 
-  this._loading = true;
+  /* this._loading = true;
   this._meshQueue = [];
   this._materialLookup = null;
   atlas.once('load', () => {
@@ -28,7 +28,7 @@ function voxelBlockShader(opts) {
     this.material.needsUpdate = true;
 
     this._loading = false;
-  });
+  }); */
 
   const {THREE} = game;
 
@@ -55,6 +55,7 @@ function voxelBlockShader(opts) {
         // begin custom
         tileMap: {type: 't', value: null}, // textures not preserved by UniformsUtils.merge(); set below instead
         atlasSize: {type: 'f', value: this.atlas.getTexture().image.width} // atlas canvas width (= height) in pixels
+        frame: {type: 'i', value: 0}
         // end custom
       }
   ] ),
@@ -89,8 +90,19 @@ function voxelBlockShader(opts) {
     'varying vec3 vPosition;',
     'varying vec2 vUv;',
     '',
-    'attribute float transparent;',
-    'varying float vTransparent;',
+    'uniform uint frame;',
+    'attribute vec2 frameUv[32];',
+    'varying vec2 vTile;',
+    '',
+    'vec4 getTileFrame(vec2 frameUv[32], uint frame) {',
+    '  switch (frame) {',
+    _range(0, 32).map(i =>
+    '    case ' + i + ': return frameUv[' + i + '];'
+    ).join('\n'),
+    '    default: return vec2(0.0, 0.0);',
+    '  }',
+    '}',
+    '',
     // end custom
 
     "void main() {",
@@ -120,6 +132,7 @@ function voxelBlockShader(opts) {
       'vNormal = normal;',
       'vPosition = position;',
       'vUv = uv;',  // passed in from three.js vertexFaceUvs TODO: let shader chunks do it for us (proper #defines)
+      'vTile = getTileFrame(frameUv, frame);',
       'gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
       // end custom
 
@@ -168,7 +181,7 @@ function voxelBlockShader(opts) {
     'varying vec3 vPosition;',
     'varying vec2 vUv;',
     '',
-    'varying float vTransparent;',
+    'varying vec2 vTile;',
 
     // based on @mikolalysenko's code at:
     // http://0fps.wordpress.com/2013/07/09/texture-atlases-wrapping-and-mip-mapping/
@@ -244,8 +257,8 @@ function voxelBlockShader(opts) {
 
       // three.js' UV coordinate is passed as tileOffset, starting point determining the texture
       // material type (_not_ interpolated; same for all vertices).
-      '   vec2 tileOffset = fract(vUv);',
-      '   vec2 tileSize = floor(vUv) / vec2(atlasSize, atlasSize);', // TODO: trunc? overloaded not found
+      '   vec2 tileOffset = fract(vTile);',
+      '   vec2 tileSize = floor(vTile) / atlasSize;', // TODO: trunc? overloaded not found
 
       '',
       /* (this.useFourTap // TODO: use glsl conditional compilation?
@@ -319,9 +332,9 @@ function voxelBlockShader(opts) {
   this.material = new THREE.ShaderMaterial(materialParams);
 }
 
-voxelBlockShader.prototype._buildMaterialLookup = function() {
-  function getKey(colorValue, frameIndex, normalDirection) {
-    return [colorValue, frameIndex, normalDirection].join(':');
+/* voxelBlockShader.prototype._buildMaterialLookup = function() {
+  function getKey(colorValue, normalDirection, frameIndex) {
+    return [colorValue, normalDirection, frameIndex].join(':');
   }
 
   const map = (() => {
@@ -331,19 +344,19 @@ voxelBlockShader.prototype._buildMaterialLookup = function() {
       for (let j = 0; j < MAX_FRAMES; j++) {
         const faces = frames[j % frames.length];
         for (let k = 0; k < 6; k++) {
-          map[getKey(i + 1, j, k)] = faces[k];
+          map[getKey(i + 1, k, j)] = faces[k];
         }
       }
     }
     return map;
   })();
 
-  return function(colorValue, frameIndex, normalDirection) {
-    return map[getKey(colorValue, frameIndex, normalDirection)];
+  return function(colorValue, normalDirection, frameIndex) {
+    return map[getKey(colorValue, normalDirection, frameIndex)];
   };
-};
+}; */
 
-voxelBlockShader.prototype.paint = function(mesh, frame) {
+/* voxelBlockShader.prototype.paint = function(mesh, frame) {
   // if were loading put into queue
   if (this.loading) {
     this._meshQueue.push([mesh, frame]);
@@ -355,11 +368,13 @@ voxelBlockShader.prototype.paint = function(mesh, frame) {
 
   const uvs = mesh.geometry.getAttribute('uv');
   if (uvs) {
-    const uvsArray = uvs.array;
+    // const uvsArray = uvs.array;
     const colorsArray = mesh.geometry.getAttribute('color').array;
     const normalsArray = mesh.geometry.getAttribute('normal').array;
+    const faceUvs = mesh.geometry.getAttribute('faceUv');
+    const faceUvsArray = faceUvs.array;
 
-    const numVertices = uvsArray.length / 2;
+    const numVertices = uvs.array.length / 2;
     if (numVertices > 0) {
       const texture = this.atlas.getTexture();
       const {image: canvas} = texture;
@@ -368,7 +383,7 @@ voxelBlockShader.prototype.paint = function(mesh, frame) {
       for (let i = 0; i < numVertices; i++) {
         const colorValue = getColorValue(colorsArray, i * 3);
         const normalDirection = getNormalDirection(normalsArray, i * 3);
-        const faceMaterial = this._materialLookup(colorValue, frameIndex, normalDirection);
+        const faceMaterial = this._materialLookup(colorValue, normalDirection, frameIndex);
 
         const atlasuvs = this.atlas.getMaterialUvs(faceMaterial);
         if (!atlasuvs) {
@@ -376,7 +391,8 @@ voxelBlockShader.prototype.paint = function(mesh, frame) {
         }
 
         // range of UV coordinates for this texture (see above diagram)
-        const [topUV, /* rightUV */, bottomUV, /* leftUV */] = atlasuvs;
+        // const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
+        const [topUV,,bottomUV,] = atlasuvs;
 
         // pass texture start in UV coordinates
 
@@ -398,10 +414,15 @@ voxelBlockShader.prototype.paint = function(mesh, frame) {
         uvsArray[uvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
       }
 
-      uvs.needsUpdate = true;
+      faceUvs.needsUpdate = true;
     }
   }
-};
+}; */
+
+voxelBlockShader.prototype.setFrame = function(frame) {
+  frame = frame % MAX_FRAMES;
+  this.material.uniforms.frame = frame;
+}
 
 function getColorValue(colorsArray, colorIndex) {
   const colorArray = [colorsArray[colorIndex + 0], colorsArray[colorIndex + 1], colorsArray[colorIndex + 2]];
@@ -434,5 +455,14 @@ function colorValueToArray(v) {
   ];
 }
 voxelBlockShader.colorValueToArray = colorValueToArray;
+
+function _range(a, b) {
+  const l = b - a;
+  const result = Array(l);
+  for (let i = 0; i < l; i++) {
+    result[i] = a + i;
+  }
+  return result;
+}
 
 module.exports = voxelBlockShader;
