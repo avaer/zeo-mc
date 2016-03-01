@@ -1,6 +1,5 @@
 var voxel = require('../voxel/index')
 var voxelBlockRenderer = require('../voxel-block-renderer/index')
-// var voxelFluidRenderer = require('../voxel-fluid-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
 var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
@@ -130,11 +129,6 @@ function Game(opts) {
     atlas: this.atlas,
     transparent: false
   });
-  /* this.fluidShader = voxelBlockShader({
-    game: this,
-    atlas: this.atlas,
-    transparent: true
-  }); */
   this.planeShader = voxelPlaneShader({
     game: this,
     atlas: this.atlas
@@ -331,11 +325,7 @@ Game.prototype.deleteValue = function(value) {
   const mesh = this.voxels.meshes[chunkIndex];
   if (type === 'block') {
     chunk.voxels[index] = 0;
-    /* if (!voxelAsync.isTransparent(voxelValue)) { */
-      mesh.blocksNeedUpdate = true;
-    /* } else {
-      mesh.fluidsNeedUpdate = true;
-    } */
+    mesh.blocksNeedUpdate = true;
   } else if (type === 'vegetation') {
     chunk.vegetations[index] = null;
     mesh.planesNeedUpdate = true;
@@ -645,12 +635,10 @@ Game.prototype.showChunk = function(chunk) {
     mesh = new THREE.Object3D();
 
     mesh.blockMesh = null;
-    // mesh.fluidMesh = null;
     mesh.planeMesh = null;
     mesh.modelMesh = null;
 
     mesh.blocksNeedUpdate = true;
-    // mesh.fluidsNeedUpdate = true;
     mesh.planesNeedUpdate = true;
     mesh.modelsNeedUpdate = true;
 
@@ -658,7 +646,7 @@ Game.prototype.showChunk = function(chunk) {
     mesh.position.set(bounds[0][0], bounds[0][1], bounds[0][2]);
   }
 
-  const {blocksNeedUpdate, /* fluidsNeedUpdate,*/ planesNeedUpdate, modelsNeedUpdate} = mesh;
+  const {blocksNeedUpdate, planesNeedUpdate, modelsNeedUpdate} = mesh;
 
   const worldTick = this.getWorldTick();
 
@@ -676,21 +664,6 @@ Game.prototype.showChunk = function(chunk) {
     mesh.blockMesh = blockMesh;
     mesh.blocksNeedUpdate = false;
   }
-
-  /* if (fluidsNeedUpdate) {
-    const fluidMesh = (() => {
-      const fluidMesh = voxelFluidRenderer(chunk, THREE);
-      fluidMesh.material = this.blockShader.material;
-      this.blockShader.paint(fluidMesh, worldTick);
-      return fluidMesh;
-    })();
-    if (mesh.fluidMesh) {
-      mesh.remove(mesh.fluidMesh);
-    }
-    mesh.add(fluidMesh);
-    mesh.fluidMesh = fluidMesh;
-    mesh.fluidsNeedUpdate = false;
-  } */
 
   if (planesNeedUpdate) {
     const planeMesh = (() => {
@@ -788,9 +761,8 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   if (newWorldTick !== oldWorldTick) {
     for (let chunkIndex in this.voxels.meshes) {
       const mesh = this.voxels.meshes[chunkIndex];
-      const {fluidMesh, planeMesh} = mesh;
+      const {planeMesh} = mesh;
       // XXX use the shader for this instead
-      // this.fluidShader.paint(fluidMesh, newWorldTick);
       // this.planeShader.paint(planeMesh, newWorldTick);
     }
   }

@@ -26,7 +26,6 @@ function generateSync(position) {
   const chunk = voxelTerrainGenerate(position);
   const {voxels, vegetations, weathers, effects, dims} = chunk;
   dims._cachedBlockMesh = voxelBlockMesherInstance(voxels, dims/*, {transparent: false}*/);
-  // dims._cachedFluidMesh = voxelBlockMesherInstance(voxels, dims, {transparent: true});
   dims._cachedPlaneMesh = voxelPlaneMesherInstance({vegetations, weathers, effects}, dims);
   return chunk;
 }
@@ -43,18 +42,6 @@ function blockMesher(voxels, dims) {
   }
 }
 api.blockMesher = blockMesher;
-
-/* function fluidMesher(voxels, dims) {
-  _ensureInitialized();
-
-  var cachedFluidMesh = dims._cachedFluidMesh;
-  if (cachedFluidMesh) {
-    return cachedFluidMesh;
-  } else {
-    return voxelBlockMesherInstance(voxels, dims, {transparent: true});
-  }
-}
-api.fluidMesher = fluidMesher; */
 
 function planeMesher(data, dims) {
   _ensureInitialized();
@@ -102,7 +89,6 @@ api.modelMesher = modelMesher;
 function clearMeshCache(chunk) {
   const {dims} = chunk;
   dims._cachedBlockMesh = null;
-  // dims._cachedFluidMesh = null;
   dims._cachedPlaneMesh = null;
 }
 api.clearMeshCache = clearMeshCache;

@@ -1,6 +1,5 @@
 var resources = require('../../resources/index');
 var BLOCKS = resources.BLOCKS;
-// var voxelFluidRenderer = require('../voxel-fluid-renderer/index');
 var voxelBlockRenderer = require('../voxel-block-renderer/index');
 var voxelAsync = require('../voxel-async/index');
 var voxel = require('../voxel/index');
