@@ -1,7 +1,6 @@
 const voxelAsync = require('../voxel-async/index');
 const voxelBlockShader = require('../voxel-block-shader/index');
-
-const MAX_FRAMES = 32;
+import {MATERIAL_FRAMES} from '../../constants/index';
 
 function voxelRenderer(data, atlas, THREE) {
   const geometry = (() => {
@@ -84,14 +83,14 @@ function voxelRenderer(data, atlas, THREE) {
 
     const normals = geometry.getAttribute('normal').array;
 
-    const frameUvs = new Float32Array(numFaces * 6 * MAX_FRAMES * 2);
+    const frameUvs = new Float32Array(numFaces * 6 * MATERIAL_FRAMES * 2);
     for (let i = 0; i < numFaces; i++) {
       const colorValue = getColorValue(data.faces, i);
       const normalDirection = getNormalDirection(normals, i);
       const faceMaterial = getFaceMaterial(colorValue, normalDirection);
       const faceFrameUvs = getFaceFrameUvs(faceMaterial);
 
-      frameUvs.set(faceFrameUvs, i * MAX_FRAMES * 2 * 6);
+      frameUvs.set(faceFrameUvs, i * MATERIAL_FRAMES * 2 * 6);
     }
     geometry.addAttribute('frameUv', new THREE.BufferAttribute(frameUvs, 2));
 

@@ -2,10 +2,9 @@ import events from 'events';
 const EventEmitter = events.EventEmitter;
 
 import atlaspack from 'atlaspack';
-// import opaque from 'opaque';
 import touchup from 'touchup';
 
-const MAX_FRAMES = 32;
+import {MATERIAL_FRAMES} from '../../constants/index';
 
 class VoxelTextureAtlas extends EventEmitter {
   constructor({materials = [], frames = {}, size = 2048, getTextureImage, THREE}) {
@@ -196,7 +195,7 @@ class VoxelTextureAtlas extends EventEmitter {
 
         const material = this.materials[i];
         const frames = this.textures[material];
-        for (let j = 0; j < MAX_FRAMES; j++) {
+        for (let j = 0; j < MATERIAL_FRAMES; j++) {
           const frameMaterial = frames[j];
           const atlasuvs = this.getAltasUvs(faceMaterial);
 
@@ -224,9 +223,9 @@ class VoxelTextureAtlas extends EventEmitter {
       })();
 
       const faceFrameUvs = (() => {
-        const result = new Float32Array(MAX_FRAMES * 2 * 6);
+        const result = new Float32Array(MATERIAL_FRAMES * 2 * 6);
         for (let j = 0; j < 6; j++) {
-          result.set(vertexFrameUvs, j * MAX_FRAMES * 2);
+          result.set(vertexFrameUvs, j * MATERIAL_FRAMES * 2);
         }
         return result;
       })();

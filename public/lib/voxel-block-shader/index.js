@@ -1,6 +1,5 @@
 import {BLOCKS} from '../../resources/index';
-
-const MAX_FRAMES = 32;
+import {MATERIAL_FRAMES} from '../../constants/index';
 
 const {floor, ceil, round} = Math;
 
@@ -341,7 +340,7 @@ function voxelBlockShader(opts) {
     const map = {};
     for (let i = 0; i < BLOCKS.MATERIALS.length; i++) {
       const frames = BLOCKS.MATERIALS[i];
-      for (let j = 0; j < MAX_FRAMES; j++) {
+      for (let j = 0; j < MATERIAL_FRAMES; j++) {
         const faces = frames[j % frames.length];
         for (let k = 0; k < 6; k++) {
           map[getKey(i + 1, k, j)] = faces[k];
@@ -364,7 +363,7 @@ function voxelBlockShader(opts) {
   }
 
   frame = frame || 0;
-  const frameIndex = frame % MAX_FRAMES;
+  const frameIndex = frame % MATERIAL_FRAMES;
 
   const uvs = mesh.geometry.getAttribute('uv');
   if (uvs) {
@@ -420,7 +419,7 @@ function voxelBlockShader(opts) {
 }; */
 
 voxelBlockShader.prototype.setFrame = function(frame) {
-  frame = frame % MAX_FRAMES;
+  frame = frame % MATERIAL_FRAMES;
   this.material.uniforms.frame = frame;
 }
 

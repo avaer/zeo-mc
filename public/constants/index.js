@@ -22,6 +22,8 @@ export const TREE_TEXTURES = [
   'spruce',
 ];
 
+const MATERIAL_FRAMES = 32;
+
 export const NUM_WORKERS = 4;
 
 export const UI_MODES = {
