@@ -81,8 +81,8 @@ export default class Voxels extends React.Component {
       }
 
       atlas = voxelTextureAtlas({
-        materials: opts.materials,
-        materials: BLOCKS.MATERIALS
+        materials: BLOCKS.MATERIALS,
+        textures: BLOCKS.TEXTURES,
         getTextureImage,
         THREE
       });
@@ -98,7 +98,7 @@ export default class Voxels extends React.Component {
 
     const initializeGame = cb => {
       game = voxelEngine({
-        atlas: ,
+        atlas,
         generateChunks: false,
         chunkSize: CHUNK_SIZE,
         chunkDistance: CHUNK_DISTANCE,

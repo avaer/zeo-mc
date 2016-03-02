@@ -1,6 +1,8 @@
 const voxelAsync = require('../voxel-async/index');
 const voxelBlockShader = require('../voxel-block-shader/index');
 
+const MAX_FRAMES = 32;
+
 function voxelRenderer(data, atlas, THREE) {
   const geometry = (() => {
     function getColorValue(faces, i) {
@@ -21,8 +23,8 @@ function voxelRenderer(data, atlas, THREE) {
       return atlas.getFaceMaterial(colorValue, normalDirection);
     }
 
-    function getFrameUvs(faceMaterial) {
-      return atlas.getFrameUvs(faceMaterial);
+    function getFaceFrameUvs(faceMaterial) {
+      return atlas.getBlockMeshFaceFrameUvs(faceMaterial);
     }
 
     const numFaces = data.faces.length;
@@ -82,16 +84,14 @@ function voxelRenderer(data, atlas, THREE) {
 
     const normals = geometry.getAttribute('normal').array;
 
-    const frameUvs = new Float32Array(numFaces * 6 * 32 * 2);
+    const frameUvs = new Float32Array(numFaces * 6 * MAX_FRAMES * 2);
     for (let i = 0; i < numFaces; i++) {
       const colorValue = getColorValue(data.faces, i);
       const normalDirection = getNormalDirection(normals, i);
       const faceMaterial = getFaceMaterial(colorValue, normalDirection);
-      const faceMaterialFrameUvs = getFrameUvs(faceMaterial);
+      const faceFrameUvs = getFaceFrameUvs(faceMaterial);
 
-      for (let j = 0; j < 6; j++) {
-        frameUvs.set(faceMaterialFrameUvs, (i * 6 * 32 * 2) + (j * 32 * 2));
-      }
+      frameUvs.set(faceFrameUvs, i * MAX_FRAMES * 2 * 6);
     }
     geometry.addAttribute('frameUv', new THREE.BufferAttribute(frameUvs, 2));
 

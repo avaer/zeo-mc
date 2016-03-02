@@ -54,7 +54,7 @@ function voxelBlockShader(opts) {
 
         // begin custom
         tileMap: {type: 't', value: null}, // textures not preserved by UniformsUtils.merge(); set below instead
-        atlasSize: {type: 'f', value: this.atlas.getTexture().image.width} // atlas canvas width (= height) in pixels
+        atlasSize: {type: 'f', value: this.atlas.getTexture().image.width}, // atlas canvas width (= height) in pixels
         frame: {type: 'i', value: 0}
         // end custom
       }

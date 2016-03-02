@@ -5,15 +5,18 @@ import atlaspack from 'atlaspack';
 // import opaque from 'opaque';
 import touchup from 'touchup';
 
+const MAX_FRAMES = 32;
+
 class VoxelTextureAtlas extends EventEmitter {
-  constructor({materials = [], frames = {}, size = 2048, getTextureImage, THREE}) { // XXX pass in the frames separately
+  constructor({materials = [], frames = {}, size = 2048, getTextureImage, THREE}) {
     super();
 
     this._materials = materials;
     this._frames = frames;
     this._atlasUvs = null;
     this._faceMaterials = null;
-    this._frameUvs = null;
+    this._blockMeshFaceFrameUvs = null;
+    this._planeMeshFrameUvs = null;
 
     const canvas = (() => {
       const canvas = document.createElement('canvas');
@@ -60,16 +63,21 @@ class VoxelTextureAtlas extends EventEmitter {
     return this._faceMaterials(colorValue, normalDirection);
   }
 
-  getFrameUvs(material) {
-    return this._frameUvs[material];
+  getBlockMeshFaceFrameUvs(material) {
+    return this._blockMeshFaceFrameUvs[material];
+  }
+
+  getPlaneMeshFrameUvs(material) {
+    return this._planeMeshFrameUvs[material];
   }
 
   _init() {
     const loadIndex = {};
     this._materials.forEach(faceMaterials => {
       faceMaterials.forEach(material => {
-        this._textures[
-        loadIndex[material] = true;
+        this._textures[material].forEach(texture => {
+          loadIndex[material] = true;
+        });
       });
     });
 
@@ -86,7 +94,8 @@ class VoxelTextureAtlas extends EventEmitter {
       this._texture.needsUpdate = true;
       this._atlasUvs = this._buildAtlasUvs();
       this._faceMaterials = this._buildFaceMaterials();
-      this._frameUvs = this._buildFrameUvs();
+      this._blockMeshFaceFrameUvs = this._buildBlockMeshFaceFrameUvs();
+      this._planeMeshFrameUvs = this._buildPlaneMeshFrameUvs();
 
       this.emit('load', null);
     };
@@ -179,42 +188,22 @@ class VoxelTextureAtlas extends EventEmitter {
     };
   }
 
-  _buildFrameUvs() { // XXX
-    frame = frame || 0;
-    const frameIndex = frame % MAX_FRAMES;
+  _buildBlockMeshFaceFrameUvs() {
+    const result = {};
+    for (let i = 0; i < this.materials.length; i++) {
+      const vertexFrameUvs = (() => {
+        const result = new Float32Array(32 * 2);
 
-    const uvs = mesh.geometry.getAttribute('uv');
-    if (uvs) {
-      // const uvsArray = uvs.array;
-      const colorsArray = mesh.geometry.getAttribute('color').array;
-      const normalsArray = mesh.geometry.getAttribute('normal').array;
-      const faceUvs = mesh.geometry.getAttribute('faceUv');
-      const faceUvsArray = faceUvs.array;
+        const material = this.materials[i];
+        const frames = this.textures[material];
+        for (let j = 0; j < MAX_FRAMES; j++) {
+          const frameMaterial = frames[j];
+          const atlasuvs = this.getAltasUvs(faceMaterial);
 
-      const numVertices = uvs.array.length / 2;
-      if (numVertices > 0) {
-        const texture = this.atlas.getTexture();
-        const {image: canvas} = texture;
-        const {width, height} = canvas;
-
-        for (let i = 0; i < numVertices; i++) {
-          const colorValue = getColorValue(colorsArray, i * 3);
-          const normalDirection = getNormalDirection(normalsArray, i * 3);
-          const faceMaterial = this._materialLookup(colorValue, normalDirection, frameIndex);
-
-          const atlasuvs = this.atlas.getMaterialUvs(faceMaterial);
-          if (!atlasuvs) {
-            throw new Error('no material index');
-          }
-
-          // range of UV coordinates for this texture (see above diagram)
           // const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
           const [topUV,,bottomUV,] = atlasuvs;
 
-          // pass texture start in UV coordinates
-
-          // WARNING: ugly hack ahead. because I don't know how to pass per-geometry uniforms
-          // to custom shaders using three.js (https://github.com/deathcap/voxel-texture-shader/issues/3),
+          // WARNING: ugly hack ahead.
           // I'm (ab)using faceVertexUvs = the 'uv' attribute: it is the same for all coordinates,
           // and the fractional part is the top-left UV, the whole part is the tile size.
 
@@ -226,14 +215,29 @@ class VoxelTextureAtlas extends EventEmitter {
           const tileSizeIntY = (tileSizeY * height) / 2;
 
           // set all to top (+ encoded tileSize)
-          const uvIndex = i * 2;
-          uvsArray[uvIndex + 0] = tileSizeIntX + topUV[0];
-          uvsArray[uvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
+          const frameUvIndex = j * 2;
+          vertexFrameUvs[frameUvIndex + 0] = tileSizeIntX + topUV[0];
+          vertexFrameUvs[frameUvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
         }
 
-        faceUvs.needsUpdate = true;
-      }
+        return result;
+      })();
+
+      const faceFrameUvs = (() => {
+        const result = new Float32Array(MAX_FRAMES * 2 * 6);
+        for (let j = 0; j < 6; j++) {
+          result.set(vertexFrameUvs, j * MAX_FRAMES * 2);
+        }
+        return result;
+      })();
+
+      result[material] = faceFrameUvs;
     }
+    return result;
+  }
+
+  _buildPlaneMeshFrameUvs() {
+    return null; // XXX
   }
 }
 

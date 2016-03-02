@@ -16,7 +16,7 @@ const MULTI_BLOCK_TEXTURES = (() => {
   return result;
 })();
 
-const MULTI_FRAME_TEXTURES = {
+const MULTI_FRAME_MATERIALS = {
   'water_still': _range(0, 32),
   'water_flow': _range(0, 32),
   'lava_still': [
@@ -78,15 +78,20 @@ export const MATERIALS = (() => {
   const result = [];
   for (let k in BLOCK_TEXTURES) {
     const index = BLOCK_TEXTURES[k] - 1;
-    result[index] = [_expandNames(k)];
+    result[index] = _expandNames(k);
   }
   for (let k in MULTI_BLOCK_TEXTURES) {
     const index = BLOCK_TEXTURES[k] - 1;
-    result[index] = [_expandNames(MULTI_BLOCK_TEXTURES[k])];
+    result[index] = _expandNames(MULTI_BLOCK_TEXTURES[k]);
   }
-  for (let k in MULTI_FRAME_TEXTURES) {
+  return result;
+})();
+
+const TEXTURES = (() => {
+  const result = {};
+  for (let k in MULTI_FRAME_MATERIALS) {
     const index = BLOCK_TEXTURES[k] - 1;
-    const frames = MULTI_FRAME_TEXTURES[k];
+    const frames = MULTI_FRAME_MATERIALS[k];
     result[index] = _expandFrames(k, frames).map(_expandNames);
   }
   return result;
