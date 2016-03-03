@@ -12,8 +12,9 @@ class VoxelTextureAtlas extends EventEmitter {
 
     this._materials = materials;
     this._frames = frames;
-    this._atlasUvs = null;
     this._faceMaterials = null;
+    this._atlasUvs = null;
+    this._faceNormalMaterials = null;
     this._blockMeshFaceFrameUvs = null;
     this._planeMeshFrameUvs = null;
 
@@ -58,8 +59,8 @@ class VoxelTextureAtlas extends EventEmitter {
     return this._atlasUvs[material];
   }
 
-  getFaceMaterial(colorValue, normalDirection) {
-    return this._faceMaterials(colorValue, normalDirection);
+  getFaceNormalMaterial(colorValue, normalDirection) {
+    return this._faceNormalMaterials(colorValue, normalDirection);
   }
 
   getBlockMeshFaceFrameUvs(material) {
@@ -74,7 +75,7 @@ class VoxelTextureAtlas extends EventEmitter {
     const loadIndex = {};
     this._materials.forEach(faceMaterials => {
       faceMaterials.forEach(material => {
-        this._textures[material].forEach(texture => {
+        this._frames[material].forEach(texture => {
           loadIndex[material] = true;
         });
       });
@@ -91,8 +92,10 @@ class VoxelTextureAtlas extends EventEmitter {
       this._ensurePowerof2();
 
       this._texture.needsUpdate = true;
-      this._atlasUvs = this._buildAtlasUvs();
+
       this._faceMaterials = this._buildFaceMaterials();
+      this._atlasUvs = this._buildAtlasUvs();
+      this._faceNormalMaterials = this._buildFaceNormalMaterials();
       this._blockMeshFaceFrameUvs = this._buildBlockMeshFaceFrameUvs();
       this._planeMeshFrameUvs = this._buildPlaneMeshFrameUvs();
 
@@ -165,11 +168,27 @@ class VoxelTextureAtlas extends EventEmitter {
     ctx.putImageData(imageData, 0, 0);
   }
 
+  _buildFaceMaterials() {
+    const result = [];
+    const index = {}
+    for (let i = 0; i < this._materials.length; i++) {
+      const faces = this._materials[i];
+      for (let j = 0; j < faces.length; j++) {
+        const material = faces[j];
+        if (!(material in index)) {
+          result.push(material);
+          index[material] = true;
+        }
+      }
+    }
+    return result;
+  }
+
   _buildAtlasUvs() {
     return this._atlas.uv(this._canvas.width, this._canvas.height);
   }
 
-  _buildFaceMaterials() {
+  _buildFaceNormalMaterials() {
     function getKey(colorValue, normalDirection) {
       return [colorValue, normalDirection].join(':');
     }
@@ -178,7 +197,7 @@ class VoxelTextureAtlas extends EventEmitter {
     for (let i = 0; i < this._materials.length; i++) {
       const faces = this._materials[i];
       for (let j = 0; j < 6; j++) {
-        map[keyKey(i + 1, j)] = faces[j];
+        map[getKey(i + 1, j)] = faces[j];
       }
     }
 
@@ -189,15 +208,19 @@ class VoxelTextureAtlas extends EventEmitter {
 
   _buildBlockMeshFaceFrameUvs() {
     const result = {};
-    for (let i = 0; i < this.materials.length; i++) {
-      const vertexFrameUvs = (() => {
-        const result = new Float32Array(32 * 2);
 
-        const material = this.materials[i];
-        const frames = this.textures[material];
+    const {_canvas: canvas} = this;
+    const {width, height} = canvas;
+    for (let i = 0; i < this._faceMaterials.length; i++) {
+      const faceMaterial = this._faceMaterials[i];
+
+      const vertexFrameUvs = (() => {
+        const result = new Float32Array(MATERIAL_FRAMES * 2);
+
+        const frames = this._frames[faceMaterial];
         for (let j = 0; j < MATERIAL_FRAMES; j++) {
           const frameMaterial = frames[j];
-          const atlasuvs = this.getAltasUvs(faceMaterial);
+          const atlasuvs = this.getAtlasUvs(faceMaterial);
 
           // const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
           const [topUV,,bottomUV,] = atlasuvs;
@@ -215,8 +238,8 @@ class VoxelTextureAtlas extends EventEmitter {
 
           // set all to top (+ encoded tileSize)
           const frameUvIndex = j * 2;
-          vertexFrameUvs[frameUvIndex + 0] = tileSizeIntX + topUV[0];
-          vertexFrameUvs[frameUvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
+          result[frameUvIndex + 0] = tileSizeIntX + topUV[0];
+          result[frameUvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
         }
 
         return result;
@@ -230,7 +253,7 @@ class VoxelTextureAtlas extends EventEmitter {
         return result;
       })();
 
-      result[material] = faceFrameUvs;
+      result[faceMaterial] = faceFrameUvs;
     }
     return result;
   }

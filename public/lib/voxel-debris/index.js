@@ -80,7 +80,7 @@ function createDebris(game, pos, value, power) {
     _getDebrisGeometry(game, value),
     game.blockShader.material
   );
-  game.blockShader.paint(mesh);
+  // game.blockShader.paint(mesh); // XXX make this use voxelTextureAtlas.getBlockMeshFaceFrameUvs()
   mesh.scale.set(0.25, 0.25, 0.25);
   mesh.translateX(pos[0]);
   mesh.translateY(pos[1]);

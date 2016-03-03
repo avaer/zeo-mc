@@ -1,4 +1,4 @@
-import {BIOME_TEXTURES, TREE_TEXTURES} from '../../constants/index';
+import {MATERIAL_FRAMES, BIOME_TEXTURES, TREE_TEXTURES} from '../../constants/index';
 
 const {floor} = Math;
 
@@ -87,8 +87,15 @@ export const MATERIALS = (() => {
   return result;
 })();
 
-const TEXTURES = (() => {
+export const FRAMES = (() => {
   const result = {};
+  for (let i = 0; i < MATERIALS.length; i++) {
+    const faces = MATERIALS[i];
+    for (let j = 0; j < 6; j++) {
+      const material = faces[j];
+      result[material] = _repeatFrames(material);
+    }
+  }
   for (let k in MULTI_FRAME_MATERIALS) {
     const index = BLOCK_TEXTURES[k] - 1;
     const frames = MULTI_FRAME_MATERIALS[k];
@@ -151,6 +158,14 @@ function _expandNames(name) {
   else if (name.length === 4) name = [name[2],name[2],name[0],name[1],name[3],name[3]];
 
   return name;
+}
+
+function _repeatFrames(material) {
+  const result = Array(MATERIAL_FRAMES);
+  for (let i = 0; i < MATERIAL_FRAMES; i++) {
+    result[i] = material;
+  }
+  return result;
 }
 
 function _expandFrames(name, frames) {

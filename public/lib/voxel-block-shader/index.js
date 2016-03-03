@@ -10,6 +10,10 @@ function voxelBlockShader(opts) {
   this.game = game;
   this.atlas = atlas;
 
+if (!this.atlas) {
+  console.log('fail', new Error().stack);
+}
+
   /* this._loading = true;
   this._meshQueue = [];
   this._materialLookup = null;

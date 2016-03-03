@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {is} from 'immutable';
 import voxelEngine from '../lib/voxel-engine/index';
+import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
 import voxelTerrain from '../lib/voxel-terrain/index';
 import voxelSky from '../lib/voxel-sky/index';
 import voxelClouds from '../lib/voxel-clouds/index';
@@ -77,12 +78,12 @@ export default class Voxels extends React.Component {
         img.onerror = err => {
           cb(err);
         };
-        img.src = opts.texturePath(texture);
+        img.src = getTexturePath(texture);
       }
 
       atlas = voxelTextureAtlas({
         materials: BLOCKS.MATERIALS,
-        textures: BLOCKS.TEXTURES,
+        frames: BLOCKS.FRAMES,
         getTextureImage,
         THREE
       });
@@ -140,6 +141,7 @@ export default class Voxels extends React.Component {
 
       const clouds = voxelClouds({
         game,
+        atlas,
         size: 16,
         // color: new THREE.Color(0, 0, 0),
         speed: 0.01
@@ -150,6 +152,8 @@ export default class Voxels extends React.Component {
 
       const $domNode = this.getDomNode();
       game.appendTo($domNode[0]);
+
+      cb();
     };
 
     const generateInitialChunks = cb => {
@@ -167,7 +171,7 @@ export default class Voxels extends React.Component {
       }
     };
 
-    const startGame = () => {
+    const startGame = cb => {
       game.voxels.on('missingChunk', position => {
         // console.log('missing chunk', position);
         this.generateAsync(position, chunk => {
@@ -202,9 +206,26 @@ export default class Voxels extends React.Component {
           voxelDebrisExplode(pos);
         }
       });
+
+      cb();
     };
 
-    loadTextureAtlas(initializeGame(generateInitialChunks(startGame)));
+    function step(fns) {
+      (function recurse(i) {
+        if (i < fns.length) {
+          const fn = fns[i];
+          fn(err => {
+            if (!err) {
+              recurse(i + 1);
+            } else {
+              console.warn(err);
+            }
+          });
+        }
+      })(0);
+    }
+
+    step([loadTextureAtlas, initializeGame, generateInitialChunks, startGame]);
   }
 
   shouldComponentUpdate() {

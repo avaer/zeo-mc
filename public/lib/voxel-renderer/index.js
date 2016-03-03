@@ -18,8 +18,8 @@ function voxelRenderer(data, atlas, THREE) {
       else                                           return 0;
     }
 
-    function getFaceMaterial(colorValue, normalDirection) {
-      return atlas.getFaceMaterial(colorValue, normalDirection);
+    function getFaceNormalMaterial(colorValue, normalDirection) {
+      return atlas.getFaceNormalMaterial(colorValue, normalDirection);
     }
 
     function getFaceFrameUvs(faceMaterial) {
@@ -87,7 +87,7 @@ function voxelRenderer(data, atlas, THREE) {
     for (let i = 0; i < numFaces; i++) {
       const colorValue = getColorValue(data.faces, i);
       const normalDirection = getNormalDirection(normals, i);
-      const faceMaterial = getFaceMaterial(colorValue, normalDirection);
+      const faceMaterial = getFaceNormalMaterial(colorValue, normalDirection);
       const faceFrameUvs = getFaceFrameUvs(faceMaterial);
 
       frameUvs.set(faceFrameUvs, i * MATERIAL_FRAMES * 2 * 6);

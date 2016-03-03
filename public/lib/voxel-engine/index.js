@@ -5,7 +5,6 @@ var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
 var voxelAsync = require('../voxel-async/index')
 var voxelUtils = require('../voxel-utils/index')
-var voxelTextureAtlas = require('../voxel-texture-atlas/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
 var control = require('voxel-control')
@@ -647,7 +646,7 @@ Game.prototype.showChunk = function(chunk) {
 
   if (planesNeedUpdate) {
     const planeMesh = (() => {
-      const planeMesh = voxelPlaneRenderer(chunk, THREE);
+      const planeMesh = voxelPlaneRenderer(chunk, this.atlas, THREE);
       planeMesh.material = this.planeShader.material;
       this.planeShader.paint(planeMesh, worldTick); // XXX make this work via paintless frameUvs and frame uniform
       return planeMesh;
@@ -677,7 +676,7 @@ Game.prototype.showChunk = function(chunk) {
 
   this.emit('renderChunk', chunk);
 
-  // return mesh;
+  return mesh;
 }
 
 // # Debugging methods
