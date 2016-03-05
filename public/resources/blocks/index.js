@@ -19,7 +19,8 @@ const MULTI_BLOCK_TEXTURES = (() => {
 const MULTI_FRAME_MATERIALS = {
   'water_still': _frameRange(32),
   'water_flow': _frameRange(32),
-  'lava_still': [
+  'lava_still': _frameRange(20),
+  /* 'lava_still': [
     0,
     1,
     2,
@@ -58,7 +59,7 @@ const MULTI_FRAME_MATERIALS = {
     3,
     2,
     1
-  ],
+  ], */
   'lava_flow': _frameRange(16),
   'fire_layer_0': _frameRange(32),
   'fire_layer_1': _frameRange(32),
@@ -97,12 +98,13 @@ export const FRAMES = (() => {
     }
   }
   for (let k in MULTI_FRAME_MATERIALS) {
-    const index = BLOCK_TEXTURES[k] - 1;
     const frames = MULTI_FRAME_MATERIALS[k];
-    result[index] = _expandFrames(k, frames).map(_expandNames);
+    result[k] = _buildFrames(k, frames);
   }
   return result;
 })();
+
+global.MULTI_FRAME_MATERIALS = MULTI_FRAME_MATERIALS;
 
 const TRANSPARENT_TEXTURES = [
   /water/,
@@ -134,18 +136,54 @@ export const TRANSPARENT = (() => {
 })();
 
 function _frameRange(n) {
-  const range = _range(0, n);
-  const numToRemove = range.length - MATERIAL_FRAMES;
-  if (numToRemove > 0) {
-    const removeIndex = (() => {
-      const result = {};
-      for (let i = 1; i <= numToRemove; i++) {
-        const index = floor(i * (range.length - 1) / numToRemove);
-        result[index] = true;
+  let range = _range(0, n);
+
+  // add
+  range = (() => {
+    const numToAdd = MATERIAL_FRAMES - range.length;
+
+    if (numToAdd > 0) {
+      const addIndex = (() => {
+        const result = {};
+        for (let i = 0; i < numToAdd; i++) {
+          const index = floor(i * range.length / numToAdd);
+          if (!(index in result)) {
+            result[index] = 0;
+          }
+          result[index]++;
+        }
+        return result;
+      })();
+
+      const result = [];
+      for (let i = 0; i < range.length; i++) {
+        result.push(range[i]);
+
+        const numToAddAtThisIndex = addIndex[i] || 0;
+        for (let j = 0; j < numToAddAtThisIndex; j++) {
+          result.push(range[i]);
+        }
       }
       return result;
-    })();
-    const removedRange = (() => {
+    } else {
+      return range.slice();
+    }
+  })();
+
+  // remove
+  range = (() => {
+    const numToRemove = range.length - MATERIAL_FRAMES;
+
+    if (numToRemove > 0) {
+      const removeIndex = (() => {
+        const result = {};
+        for (let i = 1; i <= numToRemove; i++) {
+          const index = floor(i * (range.length - 1) / numToRemove);
+          result[index] = true;
+        }
+        return result;
+      })();
+
       const result = [];
       for (let i = 0; i < range.length; i++) {
         if (!removeIndex[i]) {
@@ -153,11 +191,12 @@ function _frameRange(n) {
         }
       }
       return result;
-    })();
-    return removedRange;
-  } else {
-    return range;
-  }
+    } else {
+      return range.slice();
+    }
+  })();
+
+  return range;
 }
 
 function _range(a, b) {
@@ -195,7 +234,7 @@ function _repeatFrames(material) {
   return result;
 }
 
-function _expandFrames(name, frames) {
+function _buildFrames(name, frames) {
   const result = [];
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i];
