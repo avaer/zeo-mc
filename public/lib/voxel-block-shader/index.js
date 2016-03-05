@@ -10,10 +10,6 @@ function voxelBlockShader(opts) {
   this.game = game;
   this.atlas = atlas;
 
-if (!this.atlas) {
-  console.log('fail', new Error().stack);
-}
-
   /* this._loading = true;
   this._meshQueue = [];
   this._materialLookup = null;
@@ -91,19 +87,16 @@ if (!this.atlas) {
     // added to pass to fragment shader for tile UV coordinate calculation
     'varying vec3 vNormal;',
     'varying vec3 vPosition;',
-    'varying vec2 vUv;',
     '',
-    'uniform uint frame;',
-    'attribute vec2 frameUv[32];',
+    'uniform int frame;',
+    _range(0, 14).map(i => 'attribute vec4 frameUv' + i +';').join('\n'),
     'varying vec2 vTile;',
     '',
-    'vec4 getTileFrame(vec2 frameUv[32], uint frame) {',
-    '  switch (frame) {',
-    _range(0, 32).map(i =>
-    '    case ' + i + ': return frameUv[' + i + '];'
+    'vec2 getTileFrame() {',
+    _range(0, 28).map(i =>
+    '  if (frame == ' + i + ') return frameUv' + floor(i / 2) + '.' + ((i % 2 === 0) ? 'xy' : 'zw') + ';'
     ).join('\n'),
-    '    default: return vec2(0.0, 0.0);',
-    '  }',
+    '  return vec2(0.0, 0.0);',
     '}',
     '',
     // end custom
@@ -134,8 +127,7 @@ if (!this.atlas) {
       // begin custom
       'vNormal = normal;',
       'vPosition = position;',
-      'vUv = uv;',  // passed in from three.js vertexFaceUvs TODO: let shader chunks do it for us (proper #defines)
-      'vTile = getTileFrame(frameUv, frame);',
+      'vTile = getTileFrame();',
       'gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
       // end custom
 
@@ -182,7 +174,6 @@ if (!this.atlas) {
     '',
     'varying vec3 vNormal;',
     'varying vec3 vPosition;',
-    'varying vec2 vUv;',
     '',
     'varying vec2 vTile;',
 
@@ -424,7 +415,7 @@ if (!this.atlas) {
 
 voxelBlockShader.prototype.setFrame = function(frame) {
   frame = frame % MATERIAL_FRAMES;
-  this.material.uniforms.frame = frame;
+  this.material.uniforms.frame.value = frame;
 }
 
 function getColorValue(colorsArray, colorIndex) {

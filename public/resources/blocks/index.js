@@ -17,8 +17,8 @@ const MULTI_BLOCK_TEXTURES = (() => {
 })();
 
 const MULTI_FRAME_MATERIALS = {
-  'water_still': _range(0, 32),
-  'water_flow': _range(0, 32),
+  'water_still': _frameRange(32),
+  'water_flow': _frameRange(32),
   'lava_still': [
     0,
     1,
@@ -59,11 +59,11 @@ const MULTI_FRAME_MATERIALS = {
     2,
     1
   ],
-  'lava_flow': _range(0, 16),
-  'fire_layer_0': _range(0, 32),
-  'fire_layer_1': _range(0, 32),
-  'sea_lantern': _range(0, 5),
-  'prismarine_rough': _range(0, 4)
+  'lava_flow': _frameRange(16),
+  'fire_layer_0': _frameRange(32),
+  'fire_layer_1': _frameRange(32),
+  'sea_lantern': _frameRange(5),
+  'prismarine_rough': _frameRange(4)
 };
 
 export const BLOCKS = (() => {
@@ -132,6 +132,33 @@ export const TRANSPARENT = (() => {
   }
   return result;
 })();
+
+function _frameRange(n) {
+  const range = _range(0, n);
+  const numToRemove = range.length - MATERIAL_FRAMES;
+  if (numToRemove > 0) {
+    const removeIndex = (() => {
+      const result = {};
+      for (let i = 1; i <= numToRemove; i++) {
+        const index = floor(i * (range.length - 1) / numToRemove);
+        result[index] = true;
+      }
+      return result;
+    })();
+    const removedRange = (() => {
+      const result = [];
+      for (let i = 0; i < range.length; i++) {
+        if (!removeIndex[i]) {
+          result.push(range[i]);
+        }
+      }
+      return result;
+    })();
+    return removedRange;
+  } else {
+    return range;
+  }
+}
 
 function _range(a, b) {
   const l = b - a;

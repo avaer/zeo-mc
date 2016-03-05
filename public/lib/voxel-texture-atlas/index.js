@@ -6,6 +6,8 @@ import touchup from 'touchup';
 
 import {MATERIAL_FRAMES} from '../../constants/index';
 
+const FACE_VERTICES = 6;
+
 class VoxelTextureAtlas extends EventEmitter {
   constructor({materials = [], frames = {}, size = 2048, getTextureImage, THREE}) {
     super();
@@ -196,7 +198,7 @@ class VoxelTextureAtlas extends EventEmitter {
     const map = {};
     for (let i = 0; i < this._materials.length; i++) {
       const faces = this._materials[i];
-      for (let j = 0; j < 6; j++) {
+      for (let j = 0; j < FACE_VERTICES; j++) {
         map[getKey(i + 1, j)] = faces[j];
       }
     }
@@ -246,8 +248,8 @@ class VoxelTextureAtlas extends EventEmitter {
       })();
 
       const faceFrameUvs = (() => {
-        const result = new Float32Array(MATERIAL_FRAMES * 2 * 6);
-        for (let j = 0; j < 6; j++) {
+        const result = new Float32Array(FACE_VERTICES * MATERIAL_FRAMES * 2);
+        for (let j = 0; j < FACE_VERTICES; j++) {
           result.set(vertexFrameUvs, j * MATERIAL_FRAMES * 2);
         }
         return result;

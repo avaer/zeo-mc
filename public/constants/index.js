@@ -22,7 +22,7 @@ export const TREE_TEXTURES = [
   'spruce',
 ];
 
-export const MATERIAL_FRAMES = 32;
+export const MATERIAL_FRAMES = 28;
 
 export const NUM_WORKERS = 4;
 
