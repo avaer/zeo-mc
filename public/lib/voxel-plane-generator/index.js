@@ -5,7 +5,7 @@ import * as Planes from '../../resources/planes/index';
 const {BLOCKS} = Blocks;
 const {VEGETATIONS, WEATHERS, EFFECTS} = Planes;
 
-function voxelPlaneMesher() {
+function voxelPlaneGenerator() {
   return function({vegetations, weathers, effects}, dims) {
     const vertices = [];
     const faces = [];
@@ -76,5 +76,5 @@ function voxelPlaneMesher() {
 }
 
 if (module) {
-  module.exports = voxelPlaneMesher;
+  module.exports = voxelPlaneGenerator;
 }

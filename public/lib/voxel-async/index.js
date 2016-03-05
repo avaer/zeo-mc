@@ -1,22 +1,22 @@
 import voxelTerrain from '../voxel-terrain/index';
-import voxelBlockMesher from '../voxel-block-mesher/index';
-import voxelPlaneMesher from '../voxel-plane-mesher/index';
-import voxelModelMesher from '../voxel-model-mesher/index';
+import voxelBlockGenerator from '../voxel-block-generator/index';
+import voxelPlaneGenerator from '../voxel-plane-generator/index';
+import voxelModelGenerator from '../voxel-model-generator/index';
 
 import {BLOCKS} from '../../resources/index';
 
 let voxelTerrainGenerate = null;
-let voxelBlockMesherInstance = null;
-let voxelPlaneMesherInstance = null;
-let voxelModelMesherInstance = null;
+let voxelBlockGeneratorInstance = null;
+let voxelPlaneGeneratorInstance = null;
+let voxelModelGeneratorInstance = null;
 
 const api = {};
 
 function init({seed, chunkSize}) {
   voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
-  voxelBlockMesherInstance = voxelBlockMesher(api);
-  voxelPlaneMesherInstance = voxelPlaneMesher(api);
-  voxelModelMesherInstance = voxelModelMesher(api);
+  voxelBlockGeneratorInstance = voxelBlockGenerator(api);
+  voxelPlaneGeneratorInstance = voxelPlaneGenerator(api);
+  voxelModelGeneratorInstance = voxelModelGenerator(api);
 }
 api.init = init;
 
@@ -25,37 +25,37 @@ function generateSync(position) {
 
   const chunk = voxelTerrainGenerate(position);
   const {voxels, vegetations, weathers, effects, dims} = chunk;
-  dims._cachedBlockMesh = voxelBlockMesherInstance(voxels, dims/*, {transparent: false}*/);
-  dims._cachedPlaneMesh = voxelPlaneMesherInstance({vegetations, weathers, effects}, dims);
+  dims._cachedBlockMesh = voxelBlockGeneratorInstance(voxels, dims/*, {transparent: false}*/);
+  dims._cachedPlaneMesh = voxelPlaneGeneratorInstance({vegetations, weathers, effects}, dims);
   return chunk;
 }
 api.generateSync = generateSync;
 
-function blockMesher(voxels, dims) {
+function blockGenerator(voxels, dims) {
   _ensureInitialized();
 
   var cachedBlockMesh = dims._cachedBlockMesh;
   if (cachedBlockMesh) {
     return cachedBlockMesh;
   } else {
-    return voxelBlockMesherInstance(voxels, dims, {transparent: false});
+    return voxelBlockGeneratorInstance(voxels, dims, {transparent: false});
   }
 }
-api.blockMesher = blockMesher;
+api.blockGenerator = blockGenerator;
 
-function planeMesher(data, dims) {
+function planeGenerator(data, dims) {
   _ensureInitialized();
 
   var cachedPlaneMesh = dims._cachedPlaneMesh;
   if (cachedPlaneMesh) {
     return cachedPlaneMesh;
   } else {
-    return voxelPlaneMesherInstance(data, dims);
+    return voxelPlaneGeneratorInstance(data, dims);
   }
 }
-api.planeMesher = planeMesher;
+api.planeGenerator = planeGenerator;
 
-function entityMesher(entities, dims) {
+function entityGenerator(entities, dims) {
   _ensureInitialized();
 
   const result = [];
@@ -77,14 +77,14 @@ function entityMesher(entities, dims) {
   }
   return result;
 }
-api.entityMesher = entityMesher;
+api.entityGenerator = entityGenerator;
 
-function modelMesher(data, dims) {
+function modelGenerator(data, dims) {
   _ensureInitialized();
 
-  return voxelModelMesherInstance(data, dims);
+  return voxelModelGeneratorInstance(data, dims);
 }
-api.modelMesher = modelMesher;
+api.modelGenerator = modelGenerator;
 
 function clearMeshCache(chunk) {
   const {dims} = chunk;
@@ -99,7 +99,12 @@ function isTransparent(value) {
 api.isTransparent = isTransparent;
 
 function _ensureInitialized() {
-  if (voxelTerrainGenerate !== null && voxelBlockMesherInstance !== null && voxelPlaneMesher !== null && voxelModelMesherInstance !== null) {
+  if (
+    voxelTerrainGenerate !== null &&
+    voxelBlockGeneratorInstance !== null &&
+    voxelPlaneGenerator !== null &&
+    voxelModelGeneratorInstance !== null
+  ) {
     // nothing
   } else {
     throw new Error('voxel-async is not initialized');
