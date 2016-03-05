@@ -71,8 +71,8 @@ class VoxelTextureAtlas extends EventEmitter {
     return this._blockMeshFaceFrameUvs[material];
   }
 
-  getPlaneMeshFrameUvs(material) {
-    return this._planeMeshFrameUvs[material];
+  getPlaneMeshFrameUvs(material, even) {
+    return this._planeMeshFrameUvs[material][even ? 0 : 1];
   }
 
   _init() {
@@ -213,8 +213,6 @@ class VoxelTextureAtlas extends EventEmitter {
   _buildBlockMeshFaceFrameUvs() {
     const result = {};
 
-    window.atlas = this;
-
     const {_canvas: canvas} = this;
     const {width, height} = canvas;
     for (let i = 0; i < this._faceMaterials.length; i++) {
@@ -227,7 +225,6 @@ class VoxelTextureAtlas extends EventEmitter {
         for (let j = 0; j < MATERIAL_FRAMES; j++) {
           const frameMaterial = frames[j];
           const atlasuvs = this.getAtlasUvs(frameMaterial);
-          // const atlasuvs = this.getAtlasUvs(frames[10]); // XXX
 
           // const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
           const [topUV,,bottomUV,] = atlasuvs;
@@ -272,7 +269,71 @@ class VoxelTextureAtlas extends EventEmitter {
   }
 
   _buildPlaneMeshFrameUvs() {
-    return null; // XXX
+    const result = {};
+
+    for (let i = 0; i < this._faceMaterials.length; i++) {
+      const faceMaterial = this._faceMaterials[i];
+
+      const faceFrameUvs = (() => {
+        const evenResult = new Float32Array(FACE_VERTICES * MATERIAL_FRAMES * 2);
+        const oddResult = new Float32Array(FACE_VERTICES * MATERIAL_FRAMES * 2);
+
+        function writeResult(result, frame, uvOrder) {
+          const index = frame * FACE_VERTICES * 2;
+
+          // abd
+          result[index + 0] = uvOrder[0][0];
+          result[index + 1] = 1.0 - uvOrder[0][1];
+
+          result[index + 2] = uvOrder[1][0];
+          result[index + 3] = 1.0 - uvOrder[1][1];
+
+          result[index + 4] = uvOrder[2][0];
+          result[index + 5] = 1.0 - uvOrder[2][1];
+
+          // bcd
+          result[index + 6] = uvOrder[3][0];
+          result[index + 7] = 1.0 - uvOrder[3][1];
+
+          result[index + 8] = uvOrder[4][0];
+          result[index + 9] = 1.0 - uvOrder[4][1];
+
+          result[index + 10] = uvOrder[5][0];
+          result[index + 11] = 1.0 - uvOrder[5][1];
+        }
+
+        const frames = this._frames[faceMaterial];
+        for (let j = 0; j < MATERIAL_FRAMES; j++) {
+          const frameMaterial = frames[j];
+
+          const atlasuvs = this.getAtlasUvs(frameMaterial);
+
+          // halved because of four-tap representation
+          const topUV = [atlasuvs[0][0], atlasuvs[0][1]];
+          const rightUV = [(atlasuvs[1][0] + atlasuvs[0][0])/2, atlasuvs[1][1]];
+          const bottomUV = [(atlasuvs[2][0] + atlasuvs[0][0])/2, (atlasuvs[2][1] + atlasuvs[0][1])/2];
+          const leftUV = [atlasuvs[3][0], (atlasuvs[3][1] + atlasuvs[0][1])/2];
+
+          // set uvs
+
+          // RIGHT TOP
+          // BOTTOM LEFT
+          const evenOrder = [rightUV, bottomUV, topUV, bottomUV, leftUV, topUV];
+          writeResult(evenResult, j, evenOrder);
+
+          // TOP RIGHT
+          // LEFT BOTTOM
+          const oddOrder = [topUV, leftUV, rightUV, leftUV, bottomUV, rightUV];
+          writeResult(oddResult, j, oddOrder);
+        }
+
+        return [evenResult, oddResult];
+      })();
+
+      result[faceMaterial] = faceFrameUvs;
+    }
+
+    return result;
   }
 }
 

@@ -66,15 +66,16 @@ function voxelBlockShader(opts) {
 
     // begin custom
     // added to pass to fragment shader for tile UV coordinate calculation
+    'uniform int frame;',
+    '',
+    _range(0, MATERIAL_FRAMES / 2).map(i => 'attribute vec4 frameUv' + i +';').join('\n'),
+    '',
     'varying vec3 vNormal;',
     'varying vec3 vPosition;',
-    '',
-    'uniform int frame;',
-    _range(0, 14).map(i => 'attribute vec4 frameUv' + i +';').join('\n'),
     'varying vec2 vTile;',
     '',
     'vec2 getTileFrame() {',
-    _range(0, 28).map(i =>
+    _range(0, MATERIAL_FRAMES).map(i =>
     '  if (frame == ' + i + ') return frameUv' + floor(i / 2) + '.' + ((i % 2 === 0) ? 'xy' : 'zw') + ';'
     ).join('\n'),
     '  return vec2(0.0, 0.0);',

@@ -1,10 +1,11 @@
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
 function voxelBlockMesher(data, atlas, THREE) {
-  const numFaces = data.faces.length;
+  const {faces} = data;
+  const numFaces = faces.length;
   if (numFaces > 0) {
     const geometry = (() => {
-      function getColorValue(faces, i) {
+      function getColorValue(i) {
         return faces[i];
       }
 
@@ -29,9 +30,6 @@ function voxelBlockMesher(data, atlas, THREE) {
       const geometry = new THREE.BufferGeometry();
 
       const vertices = new Float32Array(numFaces * FACE_VERTICES * 3);
-      // const uvs = new Float32Array(numFaces * 6 * 2);
-      // const colors = new Float32Array(numFaces * 6 * 3);
-
       for (let i = 0; i < numFaces; i++) {
         const faceVertices = [
           data.vertices[i * 4 + 0],
@@ -77,7 +75,7 @@ function voxelBlockMesher(data, atlas, THREE) {
           frameUvs[i] = new Float32Array(numFaces * FACE_VERTICES * MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTES);
         }
         for (let i = 0; i < numFaces; i++) {
-          const colorValue = getColorValue(data.faces, i);
+          const colorValue = getColorValue(i);
           const normalDirection = getNormalDirection(normals, i);
           const faceMaterial = getFaceNormalMaterial(colorValue, normalDirection);
           const faceFrameUvs = getFaceFrameUvs(faceMaterial);

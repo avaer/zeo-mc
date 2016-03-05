@@ -754,7 +754,7 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   const newWorldTick = this.getWorldTick(newWorldTime);
   if (newWorldTick !== oldWorldTick) {
     this.blockShader.setFrame(newWorldTick);
-    // this.planeShader.setFrame(newWorldTick); // XXX enable this when the shader supports it
+    this.planeShader.setFrame(newWorldTick);
   }
 
   if (this.pendingChunks.length) this.loadPendingChunks()

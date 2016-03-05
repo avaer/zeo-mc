@@ -1,10 +1,11 @@
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
 function voxelPlaneMesher(data, atlas, THREE) {
-  const numFaces = data.faces.length;
+  const {faces} = data;
+  const numFaces = faces.length;
   if (numFaces > 0) {
     const geometry = (() => {
-      function getColorValue(faces, i) {
+      function getColorValue(i) {
         return faces[i];
       }
 
@@ -12,16 +13,13 @@ function voxelPlaneMesher(data, atlas, THREE) {
         return atlas.getFaceMaterial(colorValue);
       }
 
-      function getAtlasUvs(faceMaterial) {
-        return atlas.getAtlasUvs(faceMaterial);
+      function getPlaneMeshFrameUvs(faceMaterial, even) {
+        return atlas.getPlaneMeshFrameUvs(faceMaterial, even);
       }
 
       const geometry = new THREE.BufferGeometry();
 
       const vertices = new Float32Array(numFaces * FACE_VERTICES * 3);
-      // const uvs = new Float32Array(numFaces * 6 * 2);
-      // const colors = new Float32Array(numFaces * 6 * 3);
-
       for (let i = 0; i < numFaces; i++) {
         const faceVertices = [
           data.vertices[i * 4 + 0],
@@ -59,80 +57,29 @@ function voxelPlaneMesher(data, atlas, THREE) {
       geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
       geometry.computeVertexNormals();
 
-      const uvs = new Float32Array(numFaces * FACE_VERTICES * 2);
-      for (let i = 0; i < numFaces; i++) {
-        const colorValue = getColorValue(data.faces, i);
-        const faceMaterial = getFaceMaterial(colorValue);
-
-        const atlasuvs = getAtlasUvs(faceMaterial);
-        if (!atlasuvs) {
-          throw new Error('no material index');
-        }
-        const halfAtlasUvs = [
-          [atlasuvs[0][0], atlasuvs[0][1]],
-          [(atlasuvs[1][0] + atlasuvs[0][0])/2, atlasuvs[1][1]],
-          [(atlasuvs[2][0] + atlasuvs[0][0])/2, (atlasuvs[2][1] + atlasuvs[0][1])/2],
-          [atlasuvs[3][0], (atlasuvs[3][1] + atlasuvs[0][1])/2]
-        ];
-
-        // range of UV coordinates for this texture (see above diagram)
-        const [topUV, rightUV, bottomUV, leftUV] = halfAtlasUvs;
-
-        // set uvs
-        const uvIndex = i * 2 * 3 * 2;
-        const uvOrder = (i % 2 === 1) ?
-          // TOP RIGHT
-          // LEFT BOTTOM
-          [ topUV, leftUV, rightUV, leftUV, bottomUV, rightUV ]
-        :
-          // RIGHT TOP
-          // BOTTOM LEFT
-          [ rightUV, bottomUV, topUV, bottomUV, leftUV, topUV ];
-        // abd
-        uvs[uvIndex + 0] = uvOrder[0][0];
-        uvs[uvIndex + 1] = 1.0 - uvOrder[0][1];
-
-        uvs[uvIndex + 2] = uvOrder[1][0];
-        uvs[uvIndex + 3] = 1.0 - uvOrder[1][1];
-
-        uvs[uvIndex + 4] = uvOrder[2][0];
-        uvs[uvIndex + 5] = 1.0 - uvOrder[2][1];
-
-        // bcd
-        uvs[uvIndex + 6] = uvOrder[3][0];
-        uvs[uvIndex + 7] = 1.0 - uvOrder[3][1];
-
-        uvs[uvIndex + 8] = uvOrder[4][0];
-        uvs[uvIndex + 9] = 1.0 - uvOrder[4][1];
-
-        uvs[uvIndex + 10] = uvOrder[5][0];
-        uvs[uvIndex + 11] = 1.0 - uvOrder[5][1];
-      }
-      geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-
-      /* const normals = geometry.getAttribute('normal').array;
-
-      // we split the face frame uvs over a set of matrices that we can pass as vertext shader attributes
       const frameUvs = (() => {
         const frameUvs = Array(FRAME_UV_ATTRIBUTES);
         for (let i = 0; i < FRAME_UV_ATTRIBUTES; i++) {
           frameUvs[i] = new Float32Array(numFaces * FACE_VERTICES * MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTES);
         }
         for (let i = 0; i < numFaces; i++) {
-          const colorValue = getColorValue(data.faces, i);
-          const normalDirection = getNormalDirection(normals, i);
-          const faceMaterial = getFaceNormalMaterial(colorValue, normalDirection);
-          const faceFrameUvs = getFaceFrameUvs(faceMaterial);
+          const colorValue = getColorValue(i);
+          const faceMaterial = getFaceMaterial(colorValue);
 
+          const faceFrameUvs = getPlaneMeshFrameUvs(faceMaterial, i % 2 === 0);
           for (let j = 0; j < FRAME_UV_ATTRIBUTES; j++) {
-            frameUvs[j].set(faceFrameUvs.slice(FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * j, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * (j + 1)), i * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME);
+            frameUvs[j].set(
+              faceFrameUvs.slice(FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * j, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * (j + 1)),
+              i * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME
+            );
           }
         }
         return frameUvs;
       })();
       for (let i = 0; i < FRAME_UV_ATTRIBUTES; i++) {
         geometry.addAttribute('frameUv' + i, new THREE.BufferAttribute(frameUvs[i], FRAME_UV_ATTRIBUTE_SIZE))
-      } */
+      }
+
       return geometry;
     })();
 
