@@ -1,31 +1,31 @@
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
 function voxelRenderer(data, atlas, THREE) {
-  const geometry = (() => {
-    function getColorValue(faces, i) {
-      return faces[i];
-    }
+  const numFaces = data.faces.length;
+  if (numFaces > 0) {
+    const geometry = (() => {
+      function getColorValue(faces, i) {
+        return faces[i];
+      }
 
-    function getNormalDirection(normals, i) {
-      const normalIndex = i * FACE_VERTICES * 3;
-      if      (normals[normalIndex + 0] === 1)  return 1; // z === 1
-      else if (normals[normalIndex + 1] === 1)  return 2; // y === 1
-      else if (normals[normalIndex + 1] === -1) return 3; // y === -1
-      else if (normals[normalIndex + 2] === -1) return 4; // x === -1
-      else if (normals[normalIndex + 2] === 1)  return 5; // x === 0
-      else                                           return 0;
-    }
+      function getNormalDirection(normals, i) {
+        const normalIndex = i * FACE_VERTICES * 3;
+        if      (normals[normalIndex + 0] === 1)  return 1; // z === 1
+        else if (normals[normalIndex + 1] === 1)  return 2; // y === 1
+        else if (normals[normalIndex + 1] === -1) return 3; // y === -1
+        else if (normals[normalIndex + 2] === -1) return 4; // x === -1
+        else if (normals[normalIndex + 2] === 1)  return 5; // x === 0
+        else                                           return 0;
+      }
 
-    function getFaceNormalMaterial(colorValue, normalDirection) {
-      return atlas.getFaceNormalMaterial(colorValue, normalDirection);
-    }
+      function getFaceNormalMaterial(colorValue, normalDirection) {
+        return atlas.getFaceNormalMaterial(colorValue, normalDirection);
+      }
 
-    function getFaceFrameUvs(faceMaterial) {
-      return atlas.getBlockMeshFaceFrameUvs(faceMaterial);
-    }
+      function getFaceFrameUvs(faceMaterial) {
+        return atlas.getBlockMeshFaceFrameUvs(faceMaterial);
+      }
 
-    const numFaces = data.faces.length;
-    if (numFaces > 0) {
       const geometry = new THREE.BufferGeometry();
 
       const vertices = new Float32Array(numFaces * FACE_VERTICES * 3);
@@ -95,13 +95,10 @@ function voxelRenderer(data, atlas, THREE) {
         geometry.addAttribute('frameUv' + i, new THREE.BufferAttribute(frameUvs[i], FRAME_UV_ATTRIBUTE_SIZE))
       }
       return geometry;
-    } else {
-      return null;
-    }
-  })();
+    })();
 
-  if (geometry) {
     const material = new THREE.MeshNormalMaterial();
+
     const mesh = new THREE.Mesh(geometry, material);
     return mesh;
   } else {
