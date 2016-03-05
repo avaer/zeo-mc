@@ -1,6 +1,6 @@
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
-function voxelRenderer(data, atlas, THREE) {
+function voxelPlaneMesher(data, atlas, THREE) {
   const numFaces = data.faces.length;
   if (numFaces > 0) {
     const geometry = (() => {
@@ -106,4 +106,4 @@ function voxelRenderer(data, atlas, THREE) {
   }
 }
 
-module.exports = voxelRenderer;
+module.exports = voxelPlaneMesher;
