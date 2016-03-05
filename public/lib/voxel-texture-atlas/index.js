@@ -4,11 +4,7 @@ const EventEmitter = events.EventEmitter;
 import atlaspack from 'atlaspack';
 import touchup from 'touchup';
 
-import {MATERIAL_FRAMES} from '../../constants/index';
-
-const FACE_VERTICES = 6;
-const FRAME_UV_ATTRIBUTE_SIZE = 4;
-const FRAME_UV_ATTRIBURES = MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTE_SIZE;
+import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES} from '../../constants/index';
 
 class VoxelTextureAtlas extends EventEmitter {
   constructor({materials = [], frames = {}, size = 2048, getTextureImage, THREE}) {
@@ -255,7 +251,7 @@ class VoxelTextureAtlas extends EventEmitter {
       const faceFrameUvs = (() => {
         // sequentially copy FACE_VERTICES copies of each FRAME_UV_ATTRIBUTE_SIZE chunk of data
         const result = new Float32Array(FACE_VERTICES * MATERIAL_FRAMES * 2);
-        for (let j = 0; j < FRAME_UV_ATTRIBURES; j++) {
+        for (let j = 0; j < FRAME_UV_ATTRIBUTES; j++) {
           for (let k = 0; k < FACE_VERTICES; k++) {
             result.set(
               vertexFrameUvs.slice(FRAME_UV_ATTRIBUTE_SIZE * j, FRAME_UV_ATTRIBUTE_SIZE * (j + 1)),

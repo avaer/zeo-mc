@@ -1,14 +1,8 @@
 const voxelAsync = require('../voxel-async/index');
 const voxelBlockShader = require('../voxel-block-shader/index');
-import {MATERIAL_FRAMES} from '../../constants/index';
+import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
 const EMPTY_ARRAY = new Float32Array(0);
-
-const FACE_VERTICES = 6;
-const FRAME_UV_ATTRIBUTE_SIZE = 4;
-const FRAME_UV_ATTRIBUTES = MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTE_SIZE;
-const FRAME_UV_ATTRIBUTE_SIZE_PER_FACE = FACE_VERTICES * MATERIAL_FRAMES * 2;
-const FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME = FRAME_UV_ATTRIBUTE_SIZE_PER_FACE / FRAME_UV_ATTRIBUTES;
 
 function voxelRenderer(data, atlas, THREE) {
   const geometry = (() => {
