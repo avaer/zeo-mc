@@ -91,7 +91,7 @@ function voxelPlaneMesher(data, atlas, THREE) {
         }
         return frameUvs;
       })();
-      for (let i = 0; i < 14; i++) {
+      for (let i = 0; i < FRAME_UV_ATTRIBUTES; i++) {
         geometry.addAttribute('frameUv' + i, new THREE.BufferAttribute(frameUvs[i], FRAME_UV_ATTRIBUTE_SIZE))
       }
       return geometry;
