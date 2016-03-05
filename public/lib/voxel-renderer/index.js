@@ -2,8 +2,6 @@ const voxelAsync = require('../voxel-async/index');
 const voxelBlockShader = require('../voxel-block-shader/index');
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
-const EMPTY_ARRAY = new Float32Array(0);
-
 function voxelRenderer(data, atlas, THREE) {
   const geometry = (() => {
     function getColorValue(faces, i) {
@@ -28,10 +26,10 @@ function voxelRenderer(data, atlas, THREE) {
       return atlas.getBlockMeshFaceFrameUvs(faceMaterial);
     }
 
-    const geometry = new THREE.BufferGeometry();
-
     const numFaces = data.faces.length;
     if (numFaces > 0) {
+      const geometry = new THREE.BufferGeometry();
+
       const vertices = new Float32Array(numFaces * FACE_VERTICES * 3);
       // const uvs = new Float32Array(numFaces * 6 * 2);
       // const colors = new Float32Array(numFaces * 6 * 3);
@@ -111,22 +109,19 @@ function voxelRenderer(data, atlas, THREE) {
       for (let i = 0; i < 14; i++) {
         geometry.addAttribute('frameUv' + i, new THREE.BufferAttribute(frameUvs[i], FRAME_UV_ATTRIBUTE_SIZE))
       }
+      return geometry;
     } else {
-      geometry.addAttribute('position', new THREE.BufferAttribute(EMPTY_ARRAY, 3));
-      // geometry.computeVertexNormals();
-      /* geometry.addAttribute('frameUv0', new THREE.BufferAttribute(EMPTY_ARRAY, FRAME_UV_MATRIX_SIZE));
-      geometry.addAttribute('frameUv1', new THREE.BufferAttribute(EMPTY_ARRAY, FRAME_UV_MATRIX_SIZE));
-      geometry.addAttribute('frameUv2', new THREE.BufferAttribute(EMPTY_ARRAY, FRAME_UV_MATRIX_SIZE)); */
+      return null;
     }
-
-    return geometry;
   })();
 
-  const material = new THREE.MeshNormalMaterial();
-
-  const mesh = new THREE.Mesh(geometry, material);
-
-  return mesh;
+  if (geometry) {
+    const material = new THREE.MeshNormalMaterial();
+    const mesh = new THREE.Mesh(geometry, material);
+    return mesh;
+  } else {
+    return null;
+  }
 }
 
 module.exports = voxelRenderer;

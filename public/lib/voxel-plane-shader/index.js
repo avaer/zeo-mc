@@ -231,7 +231,7 @@ voxelPlaneShader.prototype.paint = function(mesh, frame) {
     for (let i = 0; i < numFaces; i++) {
       const faceMaterial = this.getFaceMaterial(mesh, i, frame);
 
-      const atlasuvs = this.atlas.getAtalsUvs(faceMaterial);
+      const atlasuvs = this.atlas.getAtlasUvs(faceMaterial);
       if (!atlasuvs) {
         throw new Error('no material index');
       }

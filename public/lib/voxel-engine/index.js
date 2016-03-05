@@ -633,29 +633,45 @@ Game.prototype.showChunk = function(chunk) {
   if (blocksNeedUpdate) {
     const blockMesh = (() => {
       const blockMesh = voxelBlockRenderer(chunk, this.atlas, THREE);
-      blockMesh.material = this.blockShader.material;
-      return blockMesh;
+      if (blockMesh) {
+        blockMesh.material = this.blockShader.material;
+        return blockMesh;
+      } else {
+        return null;
+      }
     })();
     if (mesh.blockMesh) {
       mesh.remove(mesh.blockMesh);
     }
-    mesh.add(blockMesh);
-    mesh.blockMesh = blockMesh;
+    if (blockMesh) {
+      mesh.add(blockMesh);
+      mesh.blockMesh = blockMesh;
+    } else {
+      mesh.blockMesh = null;
+    }
     mesh.blocksNeedUpdate = false;
   }
 
   if (planesNeedUpdate) {
     const planeMesh = (() => {
       const planeMesh = voxelPlaneRenderer(chunk, this.atlas, THREE);
-      planeMesh.material = this.planeShader.material;
-      this.planeShader.paint(planeMesh, worldTick); // XXX make this work via paintless frameUvs and frame uniform
-      return planeMesh;
+      if (planeMesh) {
+        planeMesh.material = this.planeShader.material;
+        this.planeShader.paint(planeMesh, worldTick); // XXX make this work via paintless frameUvs and frame uniform
+        return planeMesh;
+      } else {
+        return null;
+      }
     })();
     if (mesh.planeMesh) {
       mesh.remove(mesh.planeMesh);
     }
-    mesh.add(planeMesh);
-    mesh.planeMesh = planeMesh;
+    if (planeMesh) {
+      mesh.add(planeMesh);
+      mesh.planeMesh = planeMesh;
+    } else {
+      mesh.planeMesh = null;
+    }
     mesh.planesNeedUpdate = false;
   }
 
