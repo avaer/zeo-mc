@@ -657,7 +657,6 @@ Game.prototype.showChunk = function(chunk) {
       const planeMesh = voxelPlaneRenderer(chunk, this.atlas, THREE);
       if (planeMesh) {
         planeMesh.material = this.planeShader.material;
-        this.planeShader.paint(planeMesh, worldTick); // XXX make this work via paintless frameUvs and frame uniform
         return planeMesh;
       } else {
         return null;
@@ -755,12 +754,7 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   const newWorldTick = this.getWorldTick(newWorldTime);
   if (newWorldTick !== oldWorldTick) {
     this.blockShader.setFrame(newWorldTick);
-    /* for (let chunkIndex in this.voxels.meshes) {
-      const mesh = this.voxels.meshes[chunkIndex];
-      const {planeMesh} = mesh;
-      // XXX use the shader for this instead
-      // this.planeShader.paint(planeMesh, newWorldTick);
-    } */
+    // this.planeShader.setFrame(newWorldTick); // XXX enable this when the shader supports it
   }
 
   if (this.pendingChunks.length) this.loadPendingChunks()

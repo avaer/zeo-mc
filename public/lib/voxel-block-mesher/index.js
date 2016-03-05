@@ -66,11 +66,8 @@ function voxelBlockMesher(data, atlas, THREE) {
         vertices[i * 18 + 16] = faceVertices[3][1];
         vertices[i * 18 + 17] = faceVertices[3][2];
       }
-
       geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-
       geometry.computeVertexNormals();
-
       const normals = geometry.getAttribute('normal').array;
 
       // we split the face frame uvs over a set of matrices that we can pass as vertext shader attributes

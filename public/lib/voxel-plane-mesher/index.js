@@ -8,22 +8,12 @@ function voxelPlaneMesher(data, atlas, THREE) {
         return faces[i];
       }
 
-      function getNormalDirection(normals, i) {
-        const normalIndex = i * FACE_VERTICES * 3;
-        if      (normals[normalIndex + 0] === 1)  return 1; // z === 1
-        else if (normals[normalIndex + 1] === 1)  return 2; // y === 1
-        else if (normals[normalIndex + 1] === -1) return 3; // y === -1
-        else if (normals[normalIndex + 2] === -1) return 4; // x === -1
-        else if (normals[normalIndex + 2] === 1)  return 5; // x === 0
-        else                                           return 0;
+      function getFaceMaterial(colorValue) {
+        return atlas.getFaceMaterial(colorValue);
       }
 
-      function getFaceNormalMaterial(colorValue, normalDirection) {
-        return atlas.getFaceNormalMaterial(colorValue, normalDirection);
-      }
-
-      function getFaceFrameUvs(faceMaterial) {
-        return atlas.getBlockMeshFaceFrameUvs(faceMaterial);
+      function getAtlasUvs(faceMaterial) {
+        return atlas.getAtlasUvs(faceMaterial);
       }
 
       const geometry = new THREE.BufferGeometry();
@@ -66,12 +56,61 @@ function voxelPlaneMesher(data, atlas, THREE) {
         vertices[i * 18 + 16] = faceVertices[3][1];
         vertices[i * 18 + 17] = faceVertices[3][2];
       }
-
       geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-
       geometry.computeVertexNormals();
 
-      const normals = geometry.getAttribute('normal').array;
+      const uvs = new Float32Array(numFaces * FACE_VERTICES * 2);
+      for (let i = 0; i < numFaces; i++) {
+        const colorValue = getColorValue(data.faces, i);
+        const faceMaterial = getFaceMaterial(colorValue);
+
+        const atlasuvs = getAtlasUvs(faceMaterial);
+        if (!atlasuvs) {
+          throw new Error('no material index');
+        }
+        const halfAtlasUvs = [
+          [atlasuvs[0][0], atlasuvs[0][1]],
+          [(atlasuvs[1][0] + atlasuvs[0][0])/2, atlasuvs[1][1]],
+          [(atlasuvs[2][0] + atlasuvs[0][0])/2, (atlasuvs[2][1] + atlasuvs[0][1])/2],
+          [atlasuvs[3][0], (atlasuvs[3][1] + atlasuvs[0][1])/2]
+        ];
+
+        // range of UV coordinates for this texture (see above diagram)
+        const [topUV, rightUV, bottomUV, leftUV] = halfAtlasUvs;
+
+        // set uvs
+        const uvIndex = i * 2 * 3 * 2;
+        const uvOrder = (i % 2 === 1) ?
+          // TOP RIGHT
+          // LEFT BOTTOM
+          [ topUV, leftUV, rightUV, leftUV, bottomUV, rightUV ]
+        :
+          // RIGHT TOP
+          // BOTTOM LEFT
+          [ rightUV, bottomUV, topUV, bottomUV, leftUV, topUV ];
+        // abd
+        uvs[uvIndex + 0] = uvOrder[0][0];
+        uvs[uvIndex + 1] = 1.0 - uvOrder[0][1];
+
+        uvs[uvIndex + 2] = uvOrder[1][0];
+        uvs[uvIndex + 3] = 1.0 - uvOrder[1][1];
+
+        uvs[uvIndex + 4] = uvOrder[2][0];
+        uvs[uvIndex + 5] = 1.0 - uvOrder[2][1];
+
+        // bcd
+        uvs[uvIndex + 6] = uvOrder[3][0];
+        uvs[uvIndex + 7] = 1.0 - uvOrder[3][1];
+
+        uvs[uvIndex + 8] = uvOrder[4][0];
+        uvs[uvIndex + 9] = 1.0 - uvOrder[4][1];
+
+        uvs[uvIndex + 10] = uvOrder[5][0];
+        uvs[uvIndex + 11] = 1.0 - uvOrder[5][1];
+      }
+      geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+      /* const normals = geometry.getAttribute('normal').array;
 
       // we split the face frame uvs over a set of matrices that we can pass as vertext shader attributes
       const frameUvs = (() => {
@@ -93,7 +132,7 @@ function voxelPlaneMesher(data, atlas, THREE) {
       })();
       for (let i = 0; i < FRAME_UV_ATTRIBUTES; i++) {
         geometry.addAttribute('frameUv' + i, new THREE.BufferAttribute(frameUvs[i], FRAME_UV_ATTRIBUTE_SIZE))
-      }
+      } */
       return geometry;
     })();
 
@@ -103,70 +142,6 @@ function voxelPlaneMesher(data, atlas, THREE) {
     return mesh;
   } else {
     return null;
-  }
-}
-
-function paint(mesh, frame) { // XXX
-  frame = frame || 0;
-
-  const uvs = mesh.geometry.getAttribute('uv');
-  if (uvs) {
-    const numVertices = uvs.array.length / 2;
-    const numTrigs = numVertices / 3;
-    const numFaces = numTrigs / 2;
-    for (let i = 0; i < numFaces; i++) {
-      const faceMaterial = this.getFaceMaterial(mesh, i, frame);
-
-      const atlasuvs = this.atlas.getAtlasUvs(faceMaterial);
-      if (!atlasuvs) {
-        throw new Error('no material index');
-      }
-      const halfAtlasUvs = [
-        [atlasuvs[0][0], atlasuvs[0][1]],
-        [(atlasuvs[1][0] + atlasuvs[0][0])/2, atlasuvs[1][1]],
-        [(atlasuvs[2][0] + atlasuvs[0][0])/2, (atlasuvs[2][1] + atlasuvs[0][1])/2],
-        [atlasuvs[3][0], (atlasuvs[3][1] + atlasuvs[0][1])/2]
-      ];
-
-      // range of UV coordinates for this texture (see above diagram)
-      const [topUV, rightUV, bottomUV, leftUV] = halfAtlasUvs;
-
-      // set uvs
-      const uvIndex = i * 2 * 3 * 2;
-      const uvOrder = (i % 2 === 1) ?
-        /*
-         TOP RIGHT
-         LEFT BOTTOM
-        */
-        [ topUV, leftUV, rightUV, leftUV, bottomUV, rightUV ]
-      :
-        /*
-         RIGHT TOP
-         BOTTOM LEFT
-        */
-        [ rightUV, bottomUV, topUV, bottomUV, leftUV, topUV ];
-      // abd
-      uvs.array[uvIndex + 0] = uvOrder[0][0];
-      uvs.array[uvIndex + 1] = 1.0 - uvOrder[0][1];
-
-      uvs.array[uvIndex + 2] = uvOrder[1][0];
-      uvs.array[uvIndex + 3] = 1.0 - uvOrder[1][1];
-
-      uvs.array[uvIndex + 4] = uvOrder[2][0];
-      uvs.array[uvIndex + 5] = 1.0 - uvOrder[2][1];
-
-      // bcd
-      uvs.array[uvIndex + 6] = uvOrder[3][0];
-      uvs.array[uvIndex + 7] = 1.0 - uvOrder[3][1];
-
-      uvs.array[uvIndex + 8] = uvOrder[4][0];
-      uvs.array[uvIndex + 9] = 1.0 - uvOrder[4][1];
-
-      uvs.array[uvIndex + 10] = uvOrder[5][0];
-      uvs.array[uvIndex + 11] = 1.0 - uvOrder[5][1];
-    }
-
-    uvs.needsUpdate = true;
   }
 }
 

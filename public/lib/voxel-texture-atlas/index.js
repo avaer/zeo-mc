@@ -63,6 +63,10 @@ class VoxelTextureAtlas extends EventEmitter {
     return this._faceNormalMaterials(colorValue, normalDirection);
   }
 
+  getFaceMaterial(colorValue) {
+    return this.getFaceNormalMaterial(colorValue, 0);
+  }
+
   getBlockMeshFaceFrameUvs(material) {
     return this._blockMeshFaceFrameUvs[material];
   }

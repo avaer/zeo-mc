@@ -10,25 +10,6 @@ function voxelBlockShader(opts) {
   this.game = game;
   this.atlas = atlas;
 
-  /* this._loading = true;
-  this._meshQueue = [];
-  this._materialLookup = null;
-  atlas.once('load', () => {
-    this._materialLookup = this._buildMaterialLookup();
-
-    if (this._meshQueue.length > 0) {
-      for (let i = 0; i < this._meshQueue.length; i++) {
-        const args = this._meshQueue[i];
-        this.paint(...args);
-      }
-      this._meshQueue = [];
-    }
-
-    this.material.needsUpdate = true;
-
-    this._loading = false;
-  }); */
-
   const {THREE} = game;
 
   const materialParams = {
@@ -325,93 +306,6 @@ function voxelBlockShader(opts) {
 
   this.material = new THREE.ShaderMaterial(materialParams);
 }
-
-/* voxelBlockShader.prototype._buildMaterialLookup = function() {
-  function getKey(colorValue, normalDirection, frameIndex) {
-    return [colorValue, normalDirection, frameIndex].join(':');
-  }
-
-  const map = (() => {
-    const map = {};
-    for (let i = 0; i < BLOCKS.MATERIALS.length; i++) {
-      const frames = BLOCKS.MATERIALS[i];
-      for (let j = 0; j < MATERIAL_FRAMES; j++) {
-        const faces = frames[j % frames.length];
-        for (let k = 0; k < 6; k++) {
-          map[getKey(i + 1, k, j)] = faces[k];
-        }
-      }
-    }
-    return map;
-  })();
-
-  return function(colorValue, normalDirection, frameIndex) {
-    return map[getKey(colorValue, normalDirection, frameIndex)];
-  };
-}; */
-
-/* voxelBlockShader.prototype.paint = function(mesh, frame) {
-  // if were loading put into queue
-  if (this.loading) {
-    this._meshQueue.push([mesh, frame]);
-    return false;
-  }
-
-  frame = frame || 0;
-  const frameIndex = frame % MATERIAL_FRAMES;
-
-  const uvs = mesh.geometry.getAttribute('uv');
-  if (uvs) {
-    // const uvsArray = uvs.array;
-    const colorsArray = mesh.geometry.getAttribute('color').array;
-    const normalsArray = mesh.geometry.getAttribute('normal').array;
-    const faceUvs = mesh.geometry.getAttribute('faceUv');
-    const faceUvsArray = faceUvs.array;
-
-    const numVertices = uvs.array.length / 2;
-    if (numVertices > 0) {
-      const texture = this.atlas.getTexture();
-      const {image: canvas} = texture;
-      const {width, height} = canvas;
-
-      for (let i = 0; i < numVertices; i++) {
-        const colorValue = getColorValue(colorsArray, i * 3);
-        const normalDirection = getNormalDirection(normalsArray, i * 3);
-        const faceMaterial = this._materialLookup(colorValue, normalDirection, frameIndex);
-
-        const atlasuvs = this.atlas.getMaterialUvs(faceMaterial);
-        if (!atlasuvs) {
-          throw new Error('no material index');
-        }
-
-        // range of UV coordinates for this texture (see above diagram)
-        // const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
-        const [topUV,,bottomUV,] = atlasuvs;
-
-        // pass texture start in UV coordinates
-
-        // WARNING: ugly hack ahead. because I don't know how to pass per-geometry uniforms
-        // to custom shaders using three.js (https://github.com/deathcap/voxel-texture-shader/issues/3),
-        // I'm (ab)using faceVertexUvs = the 'uv' attribute: it is the same for all coordinates,
-        // and the fractional part is the top-left UV, the whole part is the tile size.
-
-        const tileSizeX = bottomUV[0] - topUV[0];
-        const tileSizeY = topUV[1] - bottomUV[1];
-
-        // half because of four-tap repetition
-        const tileSizeIntX = (tileSizeX * width) / 2;
-        const tileSizeIntY = (tileSizeY * height) / 2;
-
-        // set all to top (+ encoded tileSize)
-        const uvIndex = i * 2;
-        uvsArray[uvIndex + 0] = tileSizeIntX + topUV[0];
-        uvsArray[uvIndex + 1] = tileSizeIntY + (1.0 - topUV[1]);
-      }
-
-      faceUvs.needsUpdate = true;
-    }
-  }
-}; */
 
 voxelBlockShader.prototype.setFrame = function(frame) {
   frame = frame % MATERIAL_FRAMES;

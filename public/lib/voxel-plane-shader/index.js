@@ -2,30 +2,12 @@ const voxelBlockShader = require('../voxel-block-shader/index');
 
 const {floor, ceil, round} = Math;
 
-module.exports = voxelPlaneShader;
-
 function voxelPlaneShader(opts) {
   if (!(this instanceof voxelPlaneShader)) return new voxelPlaneShader(opts || {});
   const {game, atlas} = opts;
 
   this.game = game;
   this.atlas = atlas;
-
-  /* this._loading = true;
-  this._meshQueue = [];
-  atlas.once('load', () => {
-    if (this._meshQueue.length > 0) {
-      for (let i = 0; i < this._meshQueue.length; i++) {
-        const args = this._meshQueue[i];
-        this.paint(...args);
-      }
-      this._meshQueue = [];
-    }
-
-    this.material.needsUpdate = true;
-
-    this._loading = false;
-  }); */
 
   const {THREE} = this.game;
 
@@ -214,13 +196,7 @@ voxelPlaneShader.prototype.getFaceMaterial = function(mesh, i, frame) {
   const faceMaterial = this.atlas.getFaceMaterial(colorValue, 0);
 }
 
-voxelPlaneShader.prototype.paint = function(mesh, frame) {
-  /* // if were loading put into queue
-  if (this._loading) {
-    this._meshQueue.push([mesh, frame]);
-    return false;
-  } */
-
+/* voxelPlaneShader.prototype.paint = function(mesh, frame) {
   frame = frame || 0;
 
   const uvs = mesh.geometry.getAttribute('uv');
@@ -248,16 +224,12 @@ voxelPlaneShader.prototype.paint = function(mesh, frame) {
       // set uvs
       const uvIndex = i * 2 * 3 * 2;
       const uvOrder = (i % 2 === 1) ?
-        /*
-         TOP RIGHT
-         LEFT BOTTOM
-        */
+        // TOP RIGHT
+        // LEFT BOTTOM
         [ topUV, leftUV, rightUV, leftUV, bottomUV, rightUV ]
       :
-        /*
-         RIGHT TOP
-         BOTTOM LEFT
-        */
+        // RIGHT TOP
+        // BOTTOM LEFT
         [ rightUV, bottomUV, topUV, bottomUV, leftUV, topUV ];
       // abd
       uvs.array[uvIndex + 0] = uvOrder[0][0];
@@ -282,4 +254,6 @@ voxelPlaneShader.prototype.paint = function(mesh, frame) {
 
     uvs.needsUpdate = true;
   }
-};
+}; */
+
+module.exports = voxelPlaneShader;
