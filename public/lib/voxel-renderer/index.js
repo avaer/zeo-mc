@@ -1,5 +1,3 @@
-const voxelAsync = require('../voxel-async/index');
-const voxelBlockShader = require('../voxel-block-shader/index');
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
 function voxelRenderer(data, atlas, THREE) {
@@ -67,19 +65,9 @@ function voxelRenderer(data, atlas, THREE) {
         vertices[i * 18 + 15] = faceVertices[3][0];
         vertices[i * 18 + 16] = faceVertices[3][1];
         vertices[i * 18 + 17] = faceVertices[3][2];
-
-        /* const colorValue = data.faces[i];
-        const colorArray = voxelBlockShader.colorValueToArray(colorValue);
-        for (let j = 0; j < 6; j++) {
-          colors[i * 18 + j * 3 + 0] = colorArray[0];
-          colors[i * 18 + j * 3 + 1] = colorArray[1];
-          colors[i * 18 + j * 3 + 2] = colorArray[2];
-        } */
       }
 
       geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-      // geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-      // geometry.addAttribute('color', new THREE.BufferAttribute(colors, 3));
 
       geometry.computeVertexNormals();
 
@@ -103,9 +91,6 @@ function voxelRenderer(data, atlas, THREE) {
         }
         return frameUvs;
       })();
-      /* geometry.addAttribute('frameUv0', new THREE.BufferAttribute(frameUvs0, FRAME_UV_MATRIX_SIZE));
-      geometry.addAttribute('frameUv1', new THREE.BufferAttribute(frameUvs1, FRAME_UV_MATRIX_SIZE));
-      geometry.addAttribute('frameUv2', new THREE.BufferAttribute(frameUvs2, FRAME_UV_MATRIX_SIZE)); */
       for (let i = 0; i < 14; i++) {
         geometry.addAttribute('frameUv' + i, new THREE.BufferAttribute(frameUvs[i], FRAME_UV_ATTRIBUTE_SIZE))
       }
