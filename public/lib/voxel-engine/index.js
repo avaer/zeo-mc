@@ -52,7 +52,7 @@ function Game(opts) {
   this.arrayType = opts.arrayType || Uint8Array
   this.cubeSize = 1 // backwards compat
   this.chunkSize = opts.chunkSize || 32
-  this.tickRate = opts.tickRate || 5
+  this.tickRate = opts.tickRate || 10
   this.tickTime = 1000 / this.tickRate;
   
   // chunkDistance and removeDistance should not be set to the same thing

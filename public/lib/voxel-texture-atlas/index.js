@@ -7,6 +7,8 @@ import touchup from 'touchup';
 import {MATERIAL_FRAMES} from '../../constants/index';
 
 const FACE_VERTICES = 6;
+const FRAME_UV_ATTRIBUTE_SIZE = 4;
+const FRAME_UV_ATTRIBURES = MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTE_SIZE;
 
 class VoxelTextureAtlas extends EventEmitter {
   constructor({materials = [], frames = {}, size = 2048, getTextureImage, THREE}) {
@@ -211,6 +213,8 @@ class VoxelTextureAtlas extends EventEmitter {
   _buildBlockMeshFaceFrameUvs() {
     const result = {};
 
+    window.atlas = this;
+
     const {_canvas: canvas} = this;
     const {width, height} = canvas;
     for (let i = 0; i < this._faceMaterials.length; i++) {
@@ -222,7 +226,8 @@ class VoxelTextureAtlas extends EventEmitter {
         const frames = this._frames[faceMaterial];
         for (let j = 0; j < MATERIAL_FRAMES; j++) {
           const frameMaterial = frames[j];
-          const atlasuvs = this.getAtlasUvs(faceMaterial);
+          const atlasuvs = this.getAtlasUvs(frameMaterial);
+          // const atlasuvs = this.getAtlasUvs(frames[10]); // XXX
 
           // const [topUV, rightUV, bottomUV, leftUV] = atlasuvs;
           const [topUV,,bottomUV,] = atlasuvs;
@@ -248,9 +253,15 @@ class VoxelTextureAtlas extends EventEmitter {
       })();
 
       const faceFrameUvs = (() => {
+        // sequentially copy FACE_VERTICES copies of each FRAME_UV_ATTRIBUTE_SIZE chunk of data
         const result = new Float32Array(FACE_VERTICES * MATERIAL_FRAMES * 2);
-        for (let j = 0; j < FACE_VERTICES; j++) {
-          result.set(vertexFrameUvs, j * MATERIAL_FRAMES * 2);
+        for (let j = 0; j < FRAME_UV_ATTRIBURES; j++) {
+          for (let k = 0; k < FACE_VERTICES; k++) {
+            result.set(
+              vertexFrameUvs.slice(FRAME_UV_ATTRIBUTE_SIZE * j, FRAME_UV_ATTRIBUTE_SIZE * (j + 1)),
+              j * FACE_VERTICES * FRAME_UV_ATTRIBUTE_SIZE + k * FRAME_UV_ATTRIBUTE_SIZE
+            );
+          }
         }
         return result;
       })();
