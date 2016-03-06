@@ -1,8 +1,18 @@
-var walkSpeed = 1.0
-var startedWalking = 0.0
-var stoppedWalking = 0.0
+var walkSpeed = 1
+var walkRangeZ = 2
+var walkRangeX = 1
+var startedWalking = 0
+var stoppedWalking = 0
 var walking = false
-var acceleration = 1.0
+var acceleration = 1
+
+var holdSpeed = 5
+var holdExponent = 1/5
+var holdRangeZ = 1.7
+var holdRangeX = 0.5
+var holding = false
+var startedHolding = 0
+var stoppedHolding = 0
 
 exports.render = function(skin){
   var time = Date.now() / 1000
@@ -15,12 +25,26 @@ exports.render = function(skin){
 
   skin.head.rotation.y = Math.sin(time * 1.5) / 3 * walkSpeed
   skin.head.rotation.z = Math.sin(time) / 2 * walkSpeed
-  
-  skin.rightArm.rotation.z = 2 * Math.cos(0.6662 * time * 10 + Math.PI) * walkSpeed
-  skin.rightArm.rotation.x = 1 * (Math.cos(0.2812 * time * 10) - 1) * walkSpeed
+
+  var walkRightArmZ = holding ?
+    holdRangeZ * Math.cos(0.6662 * time * 10 + Math.PI) * walkSpeed
+  :
+    walkRangeZ * Math.cos(0.6662 * time * 10 + Math.PI) * walkSpeed;
+  var holdRightArmZ = holding ?
+    holdRangeZ * Math.pow(Math.min((time - startedHolding) * holdSpeed, 1), holdExponent)
+  :
+    holdRangeZ * Math.pow(Math.max(1 - ((time - stoppedHolding) * holdSpeed), 0), 1/holdExponent);
+
+  var walkRightArmX = holding ?
+    holdRangeX * (Math.cos(0.2812 * time * 10) - 1) * walkSpeed
+  :
+    walkRangeX * (Math.cos(0.2812 * time * 10) - 1) * walkSpeed;
+
+  skin.rightArm.rotation.z = Math.max(walkRightArmZ, holdRightArmZ);
+  skin.rightArm.rotation.x = walkRightArmX;
   skin.leftArm.rotation.z = 2 * Math.cos(0.6662 * time * 10) * walkSpeed
   skin.leftArm.rotation.x = 1 * (Math.cos(0.2312 * time * 10) + 1) * walkSpeed
-  
+
   skin.rightLeg.rotation.z = 1.4 * Math.cos(0.6662 * time * 10) * walkSpeed
   skin.leftLeg.rotation.z = 1.4 * Math.cos(0.6662 * time * 10 + Math.PI) * walkSpeed
 }
@@ -46,6 +70,24 @@ exports.stopWalking = function() {
 }
 exports.isWalking = function(){
   return walking
+}
+
+exports.startHolding = function(){
+  if (!holding) {
+    holding = true
+    var now = Date.now() / 1000
+    startedHolding = now
+  }
+}
+exports.stopHolding = function() {
+  if (holding) {
+    holding = false
+    var now = Date.now() / 1000
+    stoppedHolding = now
+  }
+}
+exports.isHolding = function(){
+  return holding
 }
 
 exports.setAcceleration = function(newA){

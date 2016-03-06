@@ -204,6 +204,11 @@ export default class Voxels extends React.Component {
         const pos = game.raycastVoxels(cp, cv, CHUNK_SIZE).voxel;
         if (pos) {
           voxelDebrisExplode(pos);
+          if (!voxelWalk.isHolding()) {
+            voxelWalk.startHolding();
+          } else {
+            voxelWalk.stopHolding();
+          }
         }
       });
 
