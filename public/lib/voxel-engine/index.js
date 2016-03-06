@@ -245,6 +245,11 @@ Game.prototype.createBlock = function(pos, val) {
   return true
 }
 
+Game.prototype.getBlock = function(pos) {
+  pos = this.parseVectorArguments(arguments)
+  return this.voxels.voxelAtPosition(pos)
+}
+
 Game.prototype.setBlock = function(pos, val) {
   if (typeof val === 'string') val = this.blockShader.find(val)
   var old = this.voxels.voxelAtPosition(pos, val)
@@ -256,15 +261,6 @@ Game.prototype.setBlock = function(pos, val) {
   this.emit('setBlock', pos, val, old)
 }
 
-Game.prototype.getBlock = function(pos) {
-  pos = this.parseVectorArguments(arguments)
-  return this.voxels.voxelAtPosition(pos)
-}
-
-/* Game.prototype.getIndex = function(position) {
-  return (position.x) + (position.y * this.chunkSize) + (position.z * this.chunkSize * this.chunkSize);
-} */
-
 Game.prototype.getValue = function(position) {
   position = this.parseVectorArguments(arguments);
 
@@ -274,28 +270,64 @@ Game.prototype.getValue = function(position) {
   if (chunk) {
     const index = this.voxelUtils.getIndex(position[0], position[1], position[2]);
     const match = (() => {
-      let value;
-      if (value = chunk.voxels[index]) {
+      let variant;
+      if (variant = chunk.voxels[index]) {
         const type = 'block';
-        return {type, value};
-      } else if (value = chunk.vegetations[index]) {
+        return {type, variant};
+      } else if (variant = chunk.vegetations[index]) {
         const type = 'vegetation';
-        return {type, value};
-      } else if (value = chunk.effects[index]) {
+        return {type, variant};
+      } else if (variant = chunk.effects[index]) {
         const type = 'effect';
-        return {type, value};
+        return {type, variant};
       } else {
         return null;
       }
     })();
     if (match) {
-      const {type, value} = match;
+      const {type, variant: value} = match;
       return {type, value, chunkIndex, index};
     } else {
       return null;
     }
   } else {
     return null;
+  }
+}
+
+Game.prototype.setValue = function(position, value) {
+  position = this.parseVectorArguments(arguments);
+
+  const oldValue = this.getValue(position);
+  if (!oldValue) {
+    const chunkPos = this.voxels.chunkAtPosition(position);
+    const chunkIndex = chunkPos.join('|');
+    const chunk = this.voxels.chunks[chunkIndex];
+    const mesh = this.voxels.meshes[chunkIndex];
+    if (chunk) {
+      const {type, value: variant} = value;
+      const index = this.voxelUtils.getIndex(position[0], position[1], position[2]);
+
+      if (type === 'block') {
+        chunk.voxels[index] = variant;
+        mesh.blocksNeedUpdate = true;
+      } else if (type === 'vegetation') {
+        const x = this.voxelUtils.snapCoordinate(position[0]);
+        const y = this.voxelUtils.snapCoordinate(position[1]);
+        const z = this.voxelUtils.snapCoordinate(position[2]);
+        const variantValue = variant[3];
+        chunk.vegetations[index] = [x, y, z, variantValue];
+        mesh.planesNeedUpdate = true;
+      } else if (type === 'effect') {
+        const x = this.voxelUtils.snapCoordinate(position[0]);
+        const y = this.voxelUtils.snapCoordinate(position[1]);
+        const z = this.voxelUtils.snapCoordinate(position[2]);
+        const variantValue = variant[3];
+        chunk.effects[index] = [x, y, z, variantValue];
+        mesh.planesNeedUpdate = true;
+      }
+      this.addChunkToNextUpdate(chunk);
+    }
   }
 }
 

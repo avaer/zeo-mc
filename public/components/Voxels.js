@@ -9,7 +9,7 @@ import voxelClouds from '../lib/voxel-clouds/index';
 import voxelPlayer from '../lib/voxel-player/index';
 import voxelWalk from '../lib/voxel-walk/index';
 import voxelHighlight from '../lib/voxel-highlight/index';
-import voxelDebris from '../lib/voxel-debris/index';
+import voxelConstruct from '../lib/voxel-construct/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
@@ -191,7 +191,7 @@ export default class Voxels extends React.Component {
         linewidth: 1
       });
 
-      const voxelDebrisInstance = voxelDebris(game, {
+      const voxelConstructInstance = voxelConstruct(game, {
         power: 1,
         expire: {
           start: 1 * 1000,
@@ -199,20 +199,27 @@ export default class Voxels extends React.Component {
         },
       });
 
+      let holdValue = null;
+
       $(game.view.element).on('mousedown', e => {
         const cp = game.cameraPosition();
         const cv = game.cameraVector();
-        const pos = game.raycastVoxels(cp, cv, CHUNK_SIZE).voxel;
-        if (pos) {
-          if (!voxelWalk.isHolding()) {
-            voxelDebrisInstance(pos);
+        const hit = game.raycastVoxels(cp, cv, CHUNK_SIZE);
+        if (hit) {
+          if (holdValue === null) {
+            const {voxel: position} = hit;
+            holdValue = voxelConstructInstance.delete(position);
             voxelHighlightInstance.setMode('adjacent');
 
             voxelWalk.startHolding();
           } else {
+            const {adjacent: position} = hit;
+            voxelConstructInstance.set(position, holdValue);
             voxelHighlightInstance.setMode('normal');
 
             voxelWalk.stopHolding();
+
+            holdValue = null;
           }
         }
       });

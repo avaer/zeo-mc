@@ -34,7 +34,7 @@ api.generateSync = generateSync;
 function blockGenerator(voxels, dims) {
   _ensureInitialized();
 
-  var cachedBlockMesh = dims._cachedBlockMesh;
+  const cachedBlockMesh = dims._cachedBlockMesh;
   if (cachedBlockMesh) {
     return cachedBlockMesh;
   } else {
@@ -46,7 +46,7 @@ api.blockGenerator = blockGenerator;
 function planeGenerator(data, dims) {
   _ensureInitialized();
 
-  var cachedPlaneMesh = dims._cachedPlaneMesh;
+  const cachedPlaneMesh = dims._cachedPlaneMesh;
   if (cachedPlaneMesh) {
     return cachedPlaneMesh;
   } else {
