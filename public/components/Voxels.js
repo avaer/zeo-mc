@@ -175,7 +175,7 @@ export default class Voxels extends React.Component {
       game.voxels.on('missingChunk', position => {
         // console.log('missing chunk', position);
         this.generateAsync(position, chunk => {
-          // console.log('generated hunk', position);
+          // console.log('generated chunk', position);
 
           game.showChunk(chunk);
         });

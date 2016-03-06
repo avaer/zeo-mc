@@ -551,6 +551,7 @@ Game.prototype.removeFarChunks = function(playerPosition) {
     var chunkPosition = chunk.position
     if (mesh) {
       self.scene.remove(mesh);
+      self.voxels.meshes[chunkIndex] = null;
     }
     self.voxels.chunks[chunkIndex] = null;
     self.emit('removeChunk', chunkPosition)
