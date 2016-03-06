@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {is} from 'immutable';
 import voxelEngine from '../lib/voxel-engine/index';
+import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
 import voxelTerrain from '../lib/voxel-terrain/index';
 import voxelSky from '../lib/voxel-sky/index';
 import voxelClouds from '../lib/voxel-clouds/index';
@@ -62,15 +63,44 @@ export default class Voxels extends React.Component {
   }
 
   componentDidMount() {
-    let game, avatar;
+    let atlas, game, avatar;
+
+    const loadTextureAtlas = cb => {
+      function getTexturePath(texture) {
+        return './api/img/textures/blocks/' + texture + '.png';
+      }
+
+      function getTextureImage(texture, cb) {
+        const img = document.createElement('img');
+        img.onload = () => {
+          cb(null, img);
+        };
+        img.onerror = err => {
+          cb(err);
+        };
+        img.src = getTexturePath(texture);
+      }
+
+      atlas = voxelTextureAtlas({
+        materials: BLOCKS.MATERIALS,
+        frames: BLOCKS.FRAMES,
+        getTextureImage,
+        THREE
+      });
+
+      atlas.once('load', err => {
+        if (!err) {
+          cb();
+        } else {
+          console.warn(err);
+        }
+      });
+    };
 
     const initializeGame = cb => {
       game = voxelEngine({
-        // generate: voxelPerlinTerrain({scaleFactor:10}),
-        // generate: voxelSimplexTerrain({seed: 'lol', scaleFactor: 10, chunkDistance: CHUNK_DISTANCE}),
+        atlas,
         generateChunks: false,
-        texturePath: name => './api/img/textures/blocks/' + name + '.png',
-        materials: BLOCKS.MATERIALS,
         chunkSize: CHUNK_SIZE,
         chunkDistance: CHUNK_DISTANCE,
         lightsDisabled: true,
@@ -111,6 +141,7 @@ export default class Voxels extends React.Component {
 
       const clouds = voxelClouds({
         game,
+        atlas,
         size: 16,
         // color: new THREE.Color(0, 0, 0),
         speed: 0.01
@@ -122,7 +153,7 @@ export default class Voxels extends React.Component {
       const $domNode = this.getDomNode();
       game.appendTo($domNode[0]);
 
-      game.paused = false;
+      cb();
     };
 
     const generateInitialChunks = cb => {
@@ -140,13 +171,11 @@ export default class Voxels extends React.Component {
       }
     };
 
-    const startGame = () => {
-      game.paused = false;
-
+    const startGame = cb => {
       game.voxels.on('missingChunk', position => {
         // console.log('missing chunk', position);
         this.generateAsync(position, chunk => {
-          // console.log('generated hunk', position);
+          // console.log('generated chunk', position);
 
           game.showChunk(chunk);
         });
@@ -177,9 +206,26 @@ export default class Voxels extends React.Component {
           voxelDebrisExplode(pos);
         }
       });
+
+      cb();
     };
 
-    initializeGame(generateInitialChunks(startGame));
+    function step(fns) {
+      (function recurse(i) {
+        if (i < fns.length) {
+          const fn = fns[i];
+          fn(err => {
+            if (!err) {
+              recurse(i + 1);
+            } else {
+              console.warn(err);
+            }
+          });
+        }
+      })(0);
+    }
+
+    step([loadTextureAtlas, initializeGame, generateInitialChunks, startGame]);
   }
 
   shouldComponentUpdate() {

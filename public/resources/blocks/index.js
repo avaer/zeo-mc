@@ -1,4 +1,4 @@
-import {BIOME_TEXTURES, TREE_TEXTURES} from '../../constants/index';
+import {MATERIAL_FRAMES, BIOME_TEXTURES, TREE_TEXTURES} from '../../constants/index';
 
 const {floor} = Math;
 
@@ -16,10 +16,11 @@ const MULTI_BLOCK_TEXTURES = (() => {
   return result;
 })();
 
-const MULTI_FRAME_TEXTURES = {
-  'water_still': _range(0, 32),
-  'water_flow': _range(0, 32),
-  'lava_still': [
+const MULTI_FRAME_MATERIALS = {
+  'water_still': _frameRange(32),
+  'water_flow': _frameRange(32),
+  'lava_still': _frameRange(20),
+  /* 'lava_still': [
     0,
     1,
     2,
@@ -58,12 +59,12 @@ const MULTI_FRAME_TEXTURES = {
     3,
     2,
     1
-  ],
-  'lava_flow': _range(0, 16),
-  'fire_layer_0': _range(0, 32),
-  'fire_layer_1': _range(0, 32),
-  'sea_lantern': _range(0, 5),
-  'prismarine_rough': _range(0, 4)
+  ], */
+  'lava_flow': _frameRange(16),
+  'fire_layer_0': _frameRange(32),
+  'fire_layer_1': _frameRange(32),
+  'sea_lantern': _frameRange(5),
+  'prismarine_rough': _frameRange(4)
 };
 
 export const BLOCKS = (() => {
@@ -78,19 +79,32 @@ export const MATERIALS = (() => {
   const result = [];
   for (let k in BLOCK_TEXTURES) {
     const index = BLOCK_TEXTURES[k] - 1;
-    result[index] = [_expandNames(k)];
+    result[index] = _expandNames(k);
   }
   for (let k in MULTI_BLOCK_TEXTURES) {
     const index = BLOCK_TEXTURES[k] - 1;
-    result[index] = [_expandNames(MULTI_BLOCK_TEXTURES[k])];
-  }
-  for (let k in MULTI_FRAME_TEXTURES) {
-    const index = BLOCK_TEXTURES[k] - 1;
-    const frames = MULTI_FRAME_TEXTURES[k];
-    result[index] = _expandFrames(k, frames).map(_expandNames);
+    result[index] = _expandNames(MULTI_BLOCK_TEXTURES[k]);
   }
   return result;
 })();
+
+export const FRAMES = (() => {
+  const result = {};
+  for (let i = 0; i < MATERIALS.length; i++) {
+    const faces = MATERIALS[i];
+    for (let j = 0; j < 6; j++) {
+      const material = faces[j];
+      result[material] = _repeatFrames(material);
+    }
+  }
+  for (let k in MULTI_FRAME_MATERIALS) {
+    const frames = MULTI_FRAME_MATERIALS[k];
+    result[k] = _buildFrames(k, frames);
+  }
+  return result;
+})();
+
+global.MULTI_FRAME_MATERIALS = MULTI_FRAME_MATERIALS;
 
 const TRANSPARENT_TEXTURES = [
   /water/,
@@ -121,6 +135,70 @@ export const TRANSPARENT = (() => {
   return result;
 })();
 
+function _frameRange(n) {
+  let range = _range(0, n);
+
+  // add
+  range = (() => {
+    const numToAdd = MATERIAL_FRAMES - range.length;
+
+    if (numToAdd > 0) {
+      const addIndex = (() => {
+        const result = {};
+        for (let i = 0; i < numToAdd; i++) {
+          const index = floor(i * range.length / numToAdd);
+          if (!(index in result)) {
+            result[index] = 0;
+          }
+          result[index]++;
+        }
+        return result;
+      })();
+
+      const result = [];
+      for (let i = 0; i < range.length; i++) {
+        result.push(range[i]);
+
+        const numToAddAtThisIndex = addIndex[i] || 0;
+        for (let j = 0; j < numToAddAtThisIndex; j++) {
+          result.push(range[i]);
+        }
+      }
+      return result;
+    } else {
+      return range.slice();
+    }
+  })();
+
+  // remove
+  range = (() => {
+    const numToRemove = range.length - MATERIAL_FRAMES;
+
+    if (numToRemove > 0) {
+      const removeIndex = (() => {
+        const result = {};
+        for (let i = 1; i <= numToRemove; i++) {
+          const index = floor(i * (range.length - 1) / numToRemove);
+          result[index] = true;
+        }
+        return result;
+      })();
+
+      const result = [];
+      for (let i = 0; i < range.length; i++) {
+        if (!removeIndex[i]) {
+          result.push(range[i]);
+        }
+      }
+      return result;
+    } else {
+      return range.slice();
+    }
+  })();
+
+  return range;
+}
+
 function _range(a, b) {
   const l = b - a;
   const result = Array(l);
@@ -148,7 +226,15 @@ function _expandNames(name) {
   return name;
 }
 
-function _expandFrames(name, frames) {
+function _repeatFrames(material) {
+  const result = Array(MATERIAL_FRAMES);
+  for (let i = 0; i < MATERIAL_FRAMES; i++) {
+    result[i] = material;
+  }
+  return result;
+}
+
+function _buildFrames(name, frames) {
   const result = [];
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i];

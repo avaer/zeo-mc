@@ -5,7 +5,6 @@ var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
 var voxelAsync = require('../voxel-async/index')
 var voxelUtils = require('../voxel-utils/index')
-var voxelTextureAtlas = require('../voxel-texture-atlas/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
 var control = require('voxel-control')
@@ -53,7 +52,7 @@ function Game(opts) {
   this.arrayType = opts.arrayType || Uint8Array
   this.cubeSize = 1 // backwards compat
   this.chunkSize = opts.chunkSize || 32
-  this.tickRate = opts.tickRate || 5
+  this.tickRate = opts.tickRate || 10
   this.tickTime = 1000 / this.tickRate;
   
   // chunkDistance and removeDistance should not be set to the same thing
@@ -65,10 +64,8 @@ function Game(opts) {
   this.antialias = opts.antialias
   this.playerHeight = opts.playerHeight || 1.62
   this.meshType = opts.meshType || 'surfaceMesh'
-  /* this.meshers = opts.meshers
-  this.modeler = opts.modeler
-  this.materialType = opts.materialType || THREE.MeshLambertMaterial
-  this.materialParams = opts.materialParams || {} */
+  this.atlas = opts.atlas
+
   this.items = []
   this.voxels = voxel(this)
   this.voxelUtils = voxelUtils({chunkSize: this.chunkSize})
@@ -93,8 +90,8 @@ function Game(opts) {
     [-Infinity, -Infinity, -Infinity]
   )
   
-  this.timer = this.initializeTimer((opts.tickFPS || 16))
-  this.paused = false
+  this.timer = this.initializeTimer(opts.tickFPS || 16)
+  // this.paused = false
 
   this.spatial = new SpatialEventEmitter
   this.region = regionChange(this.spatial, aabb([0, 0, 0], [1, 1, 1]), this.chunkSize)
@@ -106,23 +103,6 @@ function Game(opts) {
   this.chunksNeedsUpdate = {}
   // contains new chunks yet to be generated. Handled by game.loadPendingChunks
   this.pendingChunks = []
-
-  function getTextureImage(name, cb) {
-    const img = document.createElement('img');
-    img.onload = () => {
-      cb(null, img);
-    };
-    img.onerror = err => {
-      cb(err);
-    };
-    img.src = opts.texturePath(name);
-  }
-
-  this.atlas = voxelTextureAtlas({
-    materials: opts.materials,
-    getTextureImage,
-    THREE
-  });
 
   this.blockShader = voxelBlockShader({
     game: this,
@@ -143,7 +123,7 @@ function Game(opts) {
   // client side only after this point
   if (!this.isClient) return
   
-  this.paused = true
+  // this.paused = true
   this.initializeRendering(opts)
  
   this.showAllChunks()
@@ -571,6 +551,7 @@ Game.prototype.removeFarChunks = function(playerPosition) {
     var chunkPosition = chunk.position
     if (mesh) {
       self.scene.remove(mesh);
+      self.voxels.meshes[chunkIndex] = null;
     }
     self.voxels.chunks[chunkIndex] = null;
     self.emit('removeChunk', chunkPosition)
@@ -652,31 +633,45 @@ Game.prototype.showChunk = function(chunk) {
 
   if (blocksNeedUpdate) {
     const blockMesh = (() => {
-      const blockMesh = voxelBlockRenderer(chunk, THREE);
-      blockMesh.material = this.blockShader.material;
-      this.blockShader.paint(blockMesh, worldTick);
-      return blockMesh;
+      const blockMesh = voxelBlockRenderer(chunk, this.atlas, THREE);
+      if (blockMesh) {
+        blockMesh.material = this.blockShader.material;
+        return blockMesh;
+      } else {
+        return null;
+      }
     })();
     if (mesh.blockMesh) {
       mesh.remove(mesh.blockMesh);
     }
-    mesh.add(blockMesh);
-    mesh.blockMesh = blockMesh;
+    if (blockMesh) {
+      mesh.add(blockMesh);
+      mesh.blockMesh = blockMesh;
+    } else {
+      mesh.blockMesh = null;
+    }
     mesh.blocksNeedUpdate = false;
   }
 
   if (planesNeedUpdate) {
     const planeMesh = (() => {
-      const planeMesh = voxelPlaneRenderer(chunk, THREE);
-      planeMesh.material = this.planeShader.material;
-      this.planeShader.paint(planeMesh, worldTick);
-      return planeMesh;
+      const planeMesh = voxelPlaneRenderer(chunk, this.atlas, THREE);
+      if (planeMesh) {
+        planeMesh.material = this.planeShader.material;
+        return planeMesh;
+      } else {
+        return null;
+      }
     })();
     if (mesh.planeMesh) {
       mesh.remove(mesh.planeMesh);
     }
-    mesh.add(planeMesh);
-    mesh.planeMesh = planeMesh;
+    if (planeMesh) {
+      mesh.add(planeMesh);
+      mesh.planeMesh = planeMesh;
+    } else {
+      mesh.planeMesh = null;
+    }
     mesh.planesNeedUpdate = false;
   }
 
@@ -697,7 +692,7 @@ Game.prototype.showChunk = function(chunk) {
 
   this.emit('renderChunk', chunk);
 
-  // return mesh;
+  return mesh;
 }
 
 // # Debugging methods
@@ -729,7 +724,7 @@ Game.prototype.addVoxelMarker = function(x, y, z, color) {
 // # Misc internal methods
 
 Game.prototype.onControlChange = function(gained, stream) {
-  this.paused = false
+  // this.paused = false
 
   if (!gained && !this.optout) {
     this.buttons.disable()
@@ -759,12 +754,8 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   const oldWorldTick = this.getWorldTick(oldWorldTime);
   const newWorldTick = this.getWorldTick(newWorldTime);
   if (newWorldTick !== oldWorldTick) {
-    for (let chunkIndex in this.voxels.meshes) {
-      const mesh = this.voxels.meshes[chunkIndex];
-      const {planeMesh} = mesh;
-      // XXX use the shader for this instead
-      // this.planeShader.paint(planeMesh, newWorldTick);
-    }
+    this.blockShader.setFrame(newWorldTick);
+    this.planeShader.setFrame(newWorldTick);
   }
 
   if (this.pendingChunks.length) this.loadPendingChunks()
@@ -797,11 +788,11 @@ Game.prototype.initializeTimer = function(rate) {
   return self.interval;
   
   function timer() {
-    if (self.paused) {
+    /* if (self.paused) {
       last = Date.now();
       accum = 0;
       return;
-    }
+    } */
     now = Date.now()
     dt = now - (last || now)
     last = now

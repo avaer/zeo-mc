@@ -1,7 +1,7 @@
 var Models = require('../../resources/models/index');
 var ENTITIES = Models.ENTITIES;
 
-function voxelModelMesher() {
+function voxelModelGenerator() {
   return function(entities, dims) {
     const models = [];
 
@@ -27,5 +27,5 @@ function voxelModelMesher() {
 }
 
 if (module) {
-  module.exports = voxelModelMesher;
+  module.exports = voxelModelGenerator;
 }

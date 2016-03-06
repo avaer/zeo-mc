@@ -4,7 +4,7 @@ const MODEL_SCALE = 1 / 16;
 
 function voxelModelRenderer(data, THREE) {
   const {entities, dims} = data;
-  const models = voxelAsync.modelMesher(entities, dims);
+  const models = voxelAsync.modelGenerator(entities, dims);
   const mesh = _makeObjects(models, THREE);
   return mesh;
 }
