@@ -1,7 +1,8 @@
 var funstance = require('funstance');
 var EventEmitter = require('events').EventEmitter;
 
-var voxelBlockShader = require('../voxel-block-shader/index');
+var voxelBlockMesher = require('../voxel-block-mesher/index');
+// var voxelBlockShader = require('../voxel-block-shader/index');
 
 module.exports = function (game, opts) {
     if (!opts) opts = {};
@@ -63,24 +64,17 @@ module.exports = function (game, opts) {
 function _getDebrisGeometry(game, value) {
   const cubeGeometry = new game.THREE.CubeGeometry(1, 1, 1);
   const bufferGeometry = new game.THREE.BufferGeometry().fromGeometry(cubeGeometry);
+  const normals = bufferGeometry.getAttribute('normal').array;
 
-  const colors = bufferGeometry.getAttribute('color');
-  const colorArray = voxelBlockShader.colorValueToArray(value);
-  for (let i = 0; i < colors.array.length; i += 3) {
-    colors.array[i + 0] = colorArray[0];
-    colors.array[i + 1] = colorArray[1];
-    colors.array[i + 2] = colorArray[2];
-  }
+  const facesData = [value, value, value, value, value, value];
+  const frameUvs = voxelBlockMesher.getFrameUvs(facesData, normals, game.atlas);
+  voxelBlockMesher.applyFrameUvs(bufferGeometry, frameUvs, game.THREE);
 
   return bufferGeometry;
 }
 
 function createDebris(game, pos, value, power) {
-  const mesh = new game.THREE.Mesh(
-    _getDebrisGeometry(game, value),
-    game.blockShader.material
-  );
-  // game.blockShader.paint(mesh); // XXX make this use voxelTextureAtlas.getBlockMeshFaceFrameUvs()
+  const mesh = new game.THREE.Mesh(_getDebrisGeometry(game, value), game.blockShader.material);
   mesh.scale.set(0.25, 0.25, 0.25);
   mesh.translateX(pos[0]);
   mesh.translateY(pos[1]);
