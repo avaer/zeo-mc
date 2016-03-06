@@ -9,12 +9,15 @@ var acceleration = 1
 var holdSpeed = 5
 var holdExponent = 1/5
 var holdRangeZ = 1.7
-var holdRangeX = 0.5
+var holdRangeX = 0.25
 var holding = false
 var startedHolding = 0
 var stoppedHolding = 0
 
-exports.render = function(skin){
+exports.render = function(avatar){
+  var skin = avatar.playerSkin
+  var pitch = avatar.pitch.rotation.x / (Math.PI/2);
+
   var time = Date.now() / 1000
   if (walking && time < startedWalking + acceleration){
     walkSpeed = (time - startedWalking) / acceleration
@@ -26,22 +29,17 @@ exports.render = function(skin){
   skin.head.rotation.y = Math.sin(time * 1.5) / 3 * walkSpeed
   skin.head.rotation.z = Math.sin(time) / 2 * walkSpeed
 
-  var walkRightArmZ = holding ?
-    holdRangeZ * Math.cos(0.6662 * time * 10 + Math.PI) * walkSpeed
-  :
-    walkRangeZ * Math.cos(0.6662 * time * 10 + Math.PI) * walkSpeed;
+  var walkRightArmZ = walkRangeZ * Math.cos(0.6662 * time * 10 + Math.PI) * walkSpeed
   var holdRightArmZ = holding ?
-    holdRangeZ * Math.pow(Math.min((time - startedHolding) * holdSpeed, 1), holdExponent)
+    holdRangeZ * Math.pow(Math.min((time - startedHolding) * holdSpeed, 1), holdExponent) * (1 + pitch)
   :
-    holdRangeZ * Math.pow(Math.max(1 - ((time - stoppedHolding) * holdSpeed), 0), 1/holdExponent);
+    holdRangeZ * Math.pow(Math.max(1 - ((time - stoppedHolding) * holdSpeed), 0), 1/holdExponent) * (1 + pitch);
 
-  var walkRightArmX = holding ?
-    holdRangeX * (Math.cos(0.2812 * time * 10) - 1) * walkSpeed
-  :
-    walkRangeX * (Math.cos(0.2812 * time * 10) - 1) * walkSpeed;
+  var walkRightArmX = walkRangeX * (Math.cos(0.2812 * time * 10) - 1) * walkSpeed
+  var holdRightArmX = holdRangeX * (Math.cos(0.2812 * time * 10) - 1) * walkSpeed
 
-  skin.rightArm.rotation.z = Math.max(walkRightArmZ, holdRightArmZ);
-  skin.rightArm.rotation.x = walkRightArmX;
+  skin.rightArm.rotation.z = holding ? (holdRightArmZ * 0.95) + (walkRightArmZ * 0.05): walkRightArmZ;
+  skin.rightArm.rotation.x = holding ? holdRightArmX : walkRightArmX;
   skin.leftArm.rotation.z = 2 * Math.cos(0.6662 * time * 10) * walkSpeed
   skin.leftArm.rotation.x = 1 * (Math.cos(0.2312 * time * 10) + 1) * walkSpeed
 

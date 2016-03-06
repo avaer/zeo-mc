@@ -125,7 +125,7 @@ export default class Voxels extends React.Component {
       // avatar.yaw.position.set(2, 14, 4);
       avatar.possess();
       game.on('tick', function(dt) {
-        voxelWalk.render(avatar.playerSkin);
+        voxelWalk.render(avatar);
 
         const vx = Math.abs(avatar.velocity.x);
         const vz = Math.abs(avatar.velocity.z);
