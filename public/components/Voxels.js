@@ -183,19 +183,20 @@ export default class Voxels extends React.Component {
 
       avatar.subjectTo(GRAVITY);
 
-      const highlight = voxelHighlight(game, {
+      const voxelHighlightInstance = voxelHighlight(game, {
         distance: CHUNK_SIZE,
+        mode: 'normal',
         color: 0x000000,
         opacity: 0.75,
         linewidth: 1
       });
 
-      const voxelDebrisExplode = voxelDebris(game, {
+      const voxelDebrisInstance = voxelDebris(game, {
         power: 1,
         expire: {
           start: 1 * 1000,
           end: 3 * 1000
-        }
+        },
       });
 
       $(game.view.element).on('mousedown', e => {
@@ -203,10 +204,14 @@ export default class Voxels extends React.Component {
         const cv = game.cameraVector();
         const pos = game.raycastVoxels(cp, cv, CHUNK_SIZE).voxel;
         if (pos) {
-          voxelDebrisExplode(pos);
           if (!voxelWalk.isHolding()) {
+            voxelDebrisInstance(pos);
+            voxelHighlightInstance.setMode('adjacent');
+
             voxelWalk.startHolding();
           } else {
+            voxelHighlightInstance.setMode('normal');
+
             voxelWalk.stopHolding();
           }
         }

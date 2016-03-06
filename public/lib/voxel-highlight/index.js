@@ -3,8 +3,6 @@ var events = require('events')
 
 var u = require('../../utils/js/index')
 
-module.exports = Highlighter
-
 function Highlighter(game, opts) {
   if (!(this instanceof Highlighter)) return new Highlighter(game, opts)
   this.game = game
@@ -20,15 +18,17 @@ function Highlighter(game, opts) {
   edges.material.linewidth = opts.linewidth;
   this.mesh = edges;
   this.distance = opts.distance || 10
+  this.mode = opts.mode || 'inner'
+
   this.currVoxelPos // undefined when no voxel selected for highlight
   this.currVoxelAdj // undefined when no adjacent voxel selected for highlight
   this.targetPosition // desired position of highlight cube center
   
   // the adjacent highlight will be active when the following returns true
-  this.adjacentActive = opts.adjacentActive || function () { return game.controls.state.alt }
+  // this.adjacentActive = opts.adjacentActive || function () { return game.controls.state.alt }
   
   // the selection highlight will be active when the following returns true
-  this.selectActive = opts.selectActive || function () { return game.controls.state.select }
+  // this.selectActive = opts.selectActive || function () { return game.controls.state.select }
   
   // animate highlight transitions?
   this.animate = opts.animate
@@ -76,6 +76,7 @@ Highlighter.prototype.highlight = function () {
   var cp = this.game.cameraPosition()
   var cv = this.game.cameraVector()
   var hit = this.game.raycastVoxels(cp, cv, this.distance)
+  window.hit = hit;
   var targetPositionCandidate
 
   var removeAdjacent = function (self) { // remove adjacent highlight if any
@@ -113,7 +114,7 @@ Highlighter.prototype.highlight = function () {
   targetPositionCandidate = [this.currVoxelPos[0] + 0.5, this.currVoxelPos[1] + 0.5, this.currVoxelPos[2] + 0.5]
 
   // if in "adjacent" mode, highlight adjacent voxel instead
-  if (this.adjacentActive()) {
+  if (this.mode === 'adjacent') {
     // since we got here, we know we have a selected non-empty voxel
     // and with an empty adjacent voxel that we can work with
     var newVoxelAdj = hit.adjacent
@@ -134,7 +135,7 @@ Highlighter.prototype.highlight = function () {
   else removeAdjacent(this)
 
   // if in "select" mode, track start and end voxel bounds
-  if (this.selectActive()) {
+  if (this.mode === 'select') {
     if (!this.selectStart) { // start a new selection
       this.selectStart = this.selectEnd = this.currVoxelAdj || this.currVoxelPos
     }
@@ -172,3 +173,9 @@ Highlighter.prototype.highlight = function () {
   }
   if (!this.animate) this.mesh.position.set(this.targetPosition[0], this.targetPosition[1], this.targetPosition[2])
 }
+
+Highlighter.prototype.setMode = function(mode) {
+  this.mode = mode;
+};
+
+module.exports = Highlighter
