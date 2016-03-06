@@ -17,6 +17,9 @@ function voxelPlaneGenerator() {
           const [x, y, z, value] = plane;
 
           const planeSpec = templates[value - 1];
+          if (!planeSpec) {
+            throw new Error('invalid plane value: ' + JSON.stringify(value));
+          }
           const {plane: planeName, p, s} = planeSpec;
 
           const planeInstance = Planes.make(planeName, p, s);

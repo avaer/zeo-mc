@@ -10,8 +10,11 @@ function voxelModelGenerator() {
       if (entity !== null) {
         const [x, y, z, value] = entity;
 
-        const spec = ENTITIES[value - 1];
-        const {model: modelName, p, s} = spec;
+        const modelSpec = ENTITIES[value - 1];
+        if (!modelSpec) {
+          throw new Error('invalid model value: ' + JSON.stringify(value));
+        }
+        const {model: modelName, p, s} = modelSpec;
         const modelPrototype = Models.make(modelName, p, s);
 
         const position = [x, y, z];
