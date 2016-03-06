@@ -66,7 +66,9 @@ function voxelPlaneMesher(data, atlas, THREE) {
           const colorValue = getColorValue(i);
           const faceMaterial = getFaceMaterial(colorValue);
 
+          // frame uvs for one face frame (indexed by attribute, vertex, frame, uv)
           const faceFrameUvs = getPlaneMeshFrameUvs(faceMaterial, i % 2 === 0);
+
           for (let j = 0; j < FRAME_UV_ATTRIBUTES; j++) {
             frameUvs[j].set(
               faceFrameUvs.slice(FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * j, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * (j + 1)),

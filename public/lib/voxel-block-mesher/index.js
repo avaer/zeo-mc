@@ -78,10 +78,15 @@ function voxelBlockMesher(data, atlas, THREE) {
           const colorValue = getColorValue(i);
           const normalDirection = getNormalDirection(normals, i);
           const faceMaterial = getFaceNormalMaterial(colorValue, normalDirection);
+
+          // frame uvs for one face frame (6 copies of each 4 attribute floats in sequence)
           const faceFrameUvs = getFaceFrameUvs(faceMaterial);
 
           for (let j = 0; j < FRAME_UV_ATTRIBUTES; j++) {
-            frameUvs[j].set(faceFrameUvs.slice(FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * j, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * (j + 1)), i * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME);
+            frameUvs[j].set(
+              faceFrameUvs.slice(FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * j, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * (j + 1)),
+              i * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME
+            );
           }
         }
         return frameUvs;

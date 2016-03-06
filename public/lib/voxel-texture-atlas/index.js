@@ -4,7 +4,9 @@ const EventEmitter = events.EventEmitter;
 import atlaspack from 'atlaspack';
 import touchup from 'touchup';
 
-import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES} from '../../constants/index';
+import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UVS_PER_ATTRIBUTE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
+
+const {floor} = Math;
 
 class VoxelTextureAtlas extends EventEmitter {
   constructor({materials = [], frames = {}, size = 2048, getTextureImage, THREE}) {
@@ -279,27 +281,34 @@ class VoxelTextureAtlas extends EventEmitter {
         const oddResult = new Float32Array(FACE_VERTICES * MATERIAL_FRAMES * 2);
 
         function writeResult(result, frame, uvOrder) {
-          const index = frame * FACE_VERTICES * 2;
+          // index first by attribute, then by vertex, then by frame
+          function getIndex(vertex, uv) {
+            const attributeIndex = floor(frame / 2);
+            const vertexIndex = vertex;
+            const frameIndex = frame % 2;
+            const uvIndex = uv;
+            return attributeIndex * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME + vertexIndex * FRAME_UVS_PER_ATTRIBUTE * 2 + frameIndex * FRAME_UVS_PER_ATTRIBUTE + uvIndex;
+          }
 
           // abd
-          result[index + 0] = uvOrder[0][0];
-          result[index + 1] = 1.0 - uvOrder[0][1];
+          result[getIndex(0, 0)] = uvOrder[0][0];
+          result[getIndex(0, 1)] = 1.0 - uvOrder[0][1];
 
-          result[index + 2] = uvOrder[1][0];
-          result[index + 3] = 1.0 - uvOrder[1][1];
+          result[getIndex(1, 0)] = uvOrder[1][0];
+          result[getIndex(1, 1)] = 1.0 - uvOrder[1][1];
 
-          result[index + 4] = uvOrder[2][0];
-          result[index + 5] = 1.0 - uvOrder[2][1];
+          result[getIndex(2, 0)] = uvOrder[2][0];
+          result[getIndex(2, 1)] = 1.0 - uvOrder[2][1];
 
           // bcd
-          result[index + 6] = uvOrder[3][0];
-          result[index + 7] = 1.0 - uvOrder[3][1];
+          result[getIndex(3, 0)] = uvOrder[3][0];
+          result[getIndex(3, 1)] = 1.0 - uvOrder[3][1];
 
-          result[index + 8] = uvOrder[4][0];
-          result[index + 9] = 1.0 - uvOrder[4][1];
+          result[getIndex(4, 0)] = uvOrder[4][0];
+          result[getIndex(4, 1)] = 1.0 - uvOrder[4][1];
 
-          result[index + 10] = uvOrder[5][0];
-          result[index + 11] = 1.0 - uvOrder[5][1];
+          result[getIndex(5, 0)] = uvOrder[5][0];
+          result[getIndex(5, 1)] = 1.0 - uvOrder[5][1];
         }
 
         const frames = this._frames[faceMaterial];
@@ -308,13 +317,11 @@ class VoxelTextureAtlas extends EventEmitter {
 
           const atlasuvs = this.getAtlasUvs(frameMaterial);
 
-          // halved because of four-tap representation
+          // half because of four-tap representation
           const topUV = [atlasuvs[0][0], atlasuvs[0][1]];
           const rightUV = [(atlasuvs[1][0] + atlasuvs[0][0])/2, atlasuvs[1][1]];
           const bottomUV = [(atlasuvs[2][0] + atlasuvs[0][0])/2, (atlasuvs[2][1] + atlasuvs[0][1])/2];
           const leftUV = [atlasuvs[3][0], (atlasuvs[3][1] + atlasuvs[0][1])/2];
-
-          // set uvs
 
           // RIGHT TOP
           // BOTTOM LEFT
