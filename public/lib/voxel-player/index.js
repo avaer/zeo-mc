@@ -1,6 +1,7 @@
 import skin from '../minecraft-skin/index';
 import voxelBlockRenderer from '../voxel-block-renderer/index';
 import voxelPlaneRenderer from '../voxel-plane-renderer/index';
+import voxelSpriteRenderer from '../voxel-sprite-renderer/index';
 
 module.exports = function (game) {
   var mountPoint;
@@ -105,12 +106,22 @@ module.exports = function (game) {
           mesh.rotation.set(0, 0, -Math.PI/2);
           mesh.scale.set(4, 4, 4);
           return mesh;
+        } else if (type === 'item') {
+          const items = [variant]
+          const dims = [1, 1, 1];
+          const data = {items, dims};
+          const mesh = voxelSpriteRenderer(data, game.textureLoader, game.THREE);
+          // mesh.material = game.planeShader.material;
+          mesh.position.set(1, -8, -3);
+          mesh.rotation.set(0, 0, -Math.PI/2);
+          mesh.scale.set(4, 4, 4);
+          return mesh;
         } else {
           return null;
         }
       })();
       if (rightArmHold) {
-        window.rightArmHold = rightArmHold;
+        window.rightArmHold = rightArmHold; // XXX
         rightArm.add(rightArmHold);
         playerSkin.rightArmHold = rightArmHold;
       }

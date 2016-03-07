@@ -5,6 +5,7 @@ var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
 var voxelAsync = require('../voxel-async/index')
 var voxelUtils = require('../voxel-utils/index')
+var voxelTextureLoader = require('../voxel-texture-loader/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
 var control = require('voxel-control')
@@ -68,6 +69,8 @@ function Game(opts) {
   this.items = []
   this.voxels = voxel(this)
   this.voxelUtils = voxelUtils({chunkSize: this.chunkSize})
+  this.textureLoader = voxelTextureLoader({THREE});
+
   this.scene = new THREE.Scene()
   this.view = opts.view || new voxelView(THREE, {
     width: this.width,

@@ -1,10 +1,10 @@
 var voxelAsync = require('../voxel-async/index');
 var voxelSpriteMesher = require('../voxel-sprite-mesher/index');
 
-function voxelPlaneRenderer(data, atlas, THREE) {
-  const {sprites, dims} = data;
-  const sprites = voxelAsync.spriteGenerator({sprites}, dims);
-  const mesh = voxelSpriteMesher(sprites, atlas, THREE);
+function voxelSpriteRenderer(data, textureLoader, THREE) {
+  const {items, dims} = data;
+  const sprites = voxelAsync.spriteGenerator({items}, dims);
+  const mesh = voxelSpriteMesher(sprites, textureLoader, THREE);
   return mesh;
 }
 
