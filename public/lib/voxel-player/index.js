@@ -1,5 +1,5 @@
 import skin from '../minecraft-skin/index';
-import voxelBlockMesher from '../voxel-block-mesher/index';
+import voxelBlockRenderer from '../voxel-block-renderer/index';
 import voxelPlaneRenderer from '../voxel-plane-renderer/index';
 
 module.exports = function (game) {
@@ -67,29 +67,17 @@ module.exports = function (game) {
 
     playerSkin.rightArmHold = null;
     physics.startHolding = function(value) {
-      console.log('start holding', playerSkin); // XXX
       const {rightArm} = playerSkin;
       const rightArmHold = (() => {
         const {type, value: variant} = value;
         if (type === 'block') {
-          const geometry = (() => {
-            const cubeGeometry = new game.THREE.CubeGeometry(1, 1, 1);
-            for (let i = 0; i < 8; i++) {
-              cubeGeometry.vertices[i].y -= 1;
-            }
-            const bufferGeometry = new game.THREE.BufferGeometry().fromGeometry(cubeGeometry);
-            /* const material = new game.THREE.MeshBasicMaterial({
-              color: 0xCCCCCC
-            }); */
-            const facesData = [variant, variant, variant, variant, variant, variant];
-            const normals = bufferGeometry.getAttribute('normal').array;
-            const frameUvs = voxelBlockMesher.getFrameUvs(facesData, normals, game.atlas);
-            voxelBlockMesher.applyFrameUvs(bufferGeometry, frameUvs, game.THREE);
-            return bufferGeometry;
-          })();
-          const {material} = game.blockShader;
-          const mesh = new game.THREE.Mesh(geometry, material);
-          mesh.position.set(5, -8, -1);
+          const voxels = new Float32Array(1);
+          voxels[0] = variant;
+          const dims = [1, 1, 1];
+          const data = {voxels, dims};
+          const mesh = voxelBlockRenderer(data, game.atlas, game.THREE);
+          mesh.material = game.blockShader.material;
+          mesh.position.set(-1, -7, -3);
           mesh.rotation.set(0, 0, -Math.PI/2);
           mesh.scale.set(4, 4, 4);
           return mesh;
@@ -122,12 +110,12 @@ module.exports = function (game) {
         }
       })();
       if (rightArmHold) {
+        window.rightArmHold = rightArmHold;
         rightArm.add(rightArmHold);
         playerSkin.rightArmHold = rightArmHold;
       }
     };
     physics.stopHolding = function() {
-      console.log('stop holding', playerSkin); // XXX
       const {rightArm, rightArmHold} = playerSkin;
       if (rightArmHold) {
         rightArm.remove(rightArmHold);
