@@ -8,14 +8,21 @@ import THREE from 'three';
 const SIZE = 0.25;
 
 function voxelSpriteGenerator() {
-  return function({sprites}, dims) {
+  return function({items}, dims) {
     const vertices = [];
     const faces = [];
 
-    const numSprites = sprites.length;
-    for (let i = 0; i < numSprites; i++) {
-      const sprite = sprites[i];
+    const numItems = items.length;
+    for (let i = 0; i < numItems; i++) {
+      const item = items[i];
+
       // XXX
+
+      vertices.push([0, 0, 0]);
+      vertices.push([1, 1, 1]);
+      vertices.push([2, 2, 2]);
+      vertices.push([3, 3, 3]);
+      faces.push(item);
     }
 
     return {vertices, faces};

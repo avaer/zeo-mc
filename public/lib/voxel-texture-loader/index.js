@@ -1,5 +1,6 @@
 class VoxelTextureLoader {
-  constructor({THREE}) {
+  constructor({getTextureUrl, THREE}) {
+    this._getTextureUrl = getTextureUrl;
     this._THREE = THREE;
 
     this._cache = new Map();
@@ -9,7 +10,11 @@ class VoxelTextureLoader {
     return url + '-' + (offset ? offset.join(',') : null);
   }
 
-  get(url, offset) {
+  getTextureUrl(texture) {
+    return this._getTextureUrl(texture);
+  }
+
+  getTexture(url, offset) {
     offset = offset || null;
 
     const key = this.getKey(url, offset);

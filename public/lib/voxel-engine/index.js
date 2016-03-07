@@ -69,7 +69,10 @@ function Game(opts) {
   this.items = []
   this.voxels = voxel(this)
   this.voxelUtils = voxelUtils({chunkSize: this.chunkSize})
-  this.textureLoader = voxelTextureLoader({THREE});
+  this.textureLoader = voxelTextureLoader({
+    getTextureUrl: texture => '/api/img/textures/' + texture + '.png',
+    THREE
+  });
 
   this.scene = new THREE.Scene()
   this.view = opts.view || new voxelView(THREE, {
@@ -712,7 +715,7 @@ Game.prototype.showChunk = function(chunk) {
   }
 
   if (modelsNeedUpdate) {
-    const modelMesh = voxelModelRenderer(chunk, THREE);
+    const modelMesh = voxelModelRenderer(chunk, this.textureLoader, THREE);
     mesh.add(modelMesh);
     mesh.modelMesh = modelMesh;
   }

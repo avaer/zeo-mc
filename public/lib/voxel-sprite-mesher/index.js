@@ -4,6 +4,8 @@ function voxelSpriteMesher(data, atlas, THREE) {
   const {vertices: verticesData, faces: facesData} = data;
   const numFaces = facesData.length;
   if (numFaces > 0) {
+    // XXX
+
     const geometry = new THREE.CubeGeometry(1, 1, 1);
     const material = new THREE.MeshLambertMaterial({
       color: 0xCCCCCC

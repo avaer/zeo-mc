@@ -18,7 +18,7 @@ function init({seed, chunkSize}) {
   voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
   voxelBlockGeneratorInstance = voxelBlockGenerator(api);
   voxelPlaneGeneratorInstance = voxelPlaneGenerator(api);
-  voxelSpriteGeneratorInstance = voxelPlaneGenerator(api);
+  voxelSpriteGeneratorInstance = voxelSpriteGenerator(api);
   voxelModelGeneratorInstance = voxelModelGenerator(api);
 }
 api.init = init;
@@ -81,6 +81,7 @@ function clearMeshCache(chunk) {
   const {dims} = chunk;
   dims._cachedBlockMesh = null;
   dims._cachedPlaneMesh = null;
+  dims._cachedSpriteMesh = null;
 }
 api.clearMeshCache = clearMeshCache;
 

@@ -8,4 +8,4 @@ function voxelSpriteRenderer(data, textureLoader, THREE) {
   return mesh;
 }
 
-module.exports = voxelSpiteRenderer;
+module.exports = voxelSpriteRenderer;
