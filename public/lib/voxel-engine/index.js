@@ -25,7 +25,6 @@ var SpatialEventEmitter = require('spatial-events')
 var regionChange = require('voxel-region-change')
 var kb = require('kb-controls')
 var physical = require('voxel-physical')
-// var pin = require('pin-it')
 var tic = require('tic')()
 
 var floor = Math.floor;
@@ -387,19 +386,21 @@ Game.prototype.epilson = 1e-8
 Game.prototype.terminalVelocity = [0.9, 0.1, 0.9]
 
 Game.prototype.defaultButtons = {
-  'W': 'forward'
-, 'A': 'left'
-, 'S': 'backward'
-, 'D': 'right'
-, '<up>': 'forward'
-, '<left>': 'left'
-, '<down>': 'backward'
-, '<right>': 'right'
-, '<mouse 1>': 'fire'
-, '<mouse 3>': 'firealt'
-, '<space>': 'jump'
-, '<shift>': 'crouch'
-, '<control>': 'alt'
+  'W': 'forward',
+  'A': 'left',
+  'S': 'backward',
+  'D': 'right',
+  '<up>': 'forward',
+  '<left>': 'left',
+  '<down>': 'backward',
+  '<right>': 'right',
+  '<mouse 1>': 'fire',
+  '<mouse 3>': 'firealt',
+  '<space>': 'jump',
+  '<shift>': 'crouch',
+  '<control>': 'alt',
+  'Q': 'bandage',
+  'E': 'dynamite',
 }
 
 // used in methods that have identity function(pos) {}
@@ -751,8 +752,6 @@ Game.prototype.addVoxelMarker = function(x, y, z, color) {
   return this.addAABBMarker(bbox, color)
 }
 
-// Game.prototype.pin = pin
-
 // # Misc internal methods
 
 Game.prototype.onControlChange = function(gained, stream) {
@@ -772,7 +771,11 @@ Game.prototype.onControlOptOut = function() {
 }
 
 Game.prototype.onFire = function(state) {
-  this.emit('fire', this.controlling, state)
+  this.emit('fire')
+}
+
+Game.prototype.onHold = function(item) {
+  this.emit('hold', item)
 }
 
 Game.prototype.setInterval = tic.interval.bind(tic)
@@ -889,6 +892,8 @@ Game.prototype.hookupControls = function(buttons, opts) {
   opts = opts || {}
   opts.controls = opts.controls || {}
   opts.controls.onfire = this.onFire.bind(this)
+  opts.controls.onhold = this.onHold.bind(this)
+  opts.controls.discreteFire = true
   this.controls = control(buttons, opts.controls)
   this.items.push(this.controls)
   this.controlling = null

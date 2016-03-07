@@ -199,32 +199,77 @@ export default class Voxels extends React.Component {
         },
       });
 
-      let holdValue = null;
+      function initControls() {
+        let holdValue = null;
 
-      $(game.view.element).on('mousedown', e => {
-        const cp = game.cameraPosition();
-        const cv = game.cameraVector();
-        const hit = game.raycastVoxels(cp, cv, CHUNK_SIZE);
-        if (hit) {
-          if (holdValue === null) {
-            const {voxel: position} = hit;
-            holdValue = voxelConstructInstance.delete(position);
-            voxelHighlightInstance.setMode('adjacent');
+        function startHolding(value) {
+          holdValue = value;
 
-            avatar.startHolding(holdValue);
-            voxelWalk.startHolding();
-          } else {
-            const {adjacent: position} = hit;
-            voxelConstructInstance.set(position, holdValue);
-            voxelHighlightInstance.setMode('normal');
+          voxelHighlightInstance.setMode('adjacent');
 
-            avatar.stopHolding();
-            voxelWalk.stopHolding();
-
-            holdValue = null;
-          }
+          avatar.startHolding(holdValue);
+          voxelWalk.startHolding();
         }
-      });
+
+        function stopHolding() {
+          voxelHighlightInstance.setMode('normal');
+
+          avatar.stopHolding();
+          voxelWalk.stopHolding();
+
+          holdValue = null;
+        }
+
+        game.on('fire', () => {
+          // try throw
+          if (holdValue !== null) {
+            const {type} = holdValue;
+            if (type === 'item') {
+              const {value} = holdValue;
+              console.log('throw item', value); // XXX
+
+              stopHolding();
+
+              return;
+            }
+          }
+
+          // try pickup/place
+          const cp = game.cameraPosition();
+          const cv = game.cameraVector();
+          const hit = game.raycastVoxels(cp, cv, CHUNK_SIZE);
+          if (hit) {
+            if (holdValue === null) {
+              const {voxel: position} = hit;
+              const value = voxelConstructInstance.delete(position);
+
+              startHolding(value);
+
+              return;
+            } else {
+              const {type} = holdValue;
+              if (type === 'block' || type === 'vegetation' || type === 'effect') {
+                const {adjacent: position} = hit;
+                voxelConstructInstance.set(position, holdValue);
+
+                stopHolding();
+
+                return;
+              }
+            }
+          }
+        });
+
+        game.on('hold', variant => {
+          if (!holdValue) {
+            console.log('spawn item', variant); // XXX
+            const type = 'item';
+            const value = {type, value: variant};
+            startHolding(value);
+          }
+        });
+      }
+      initControls();
 
       cb();
     };
