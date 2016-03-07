@@ -1,5 +1,6 @@
 import skin from '../minecraft-skin/index';
 import voxelBlockMesher from '../voxel-block-mesher/index';
+import voxelPlaneRenderer from '../voxel-plane-renderer/index';
 
 module.exports = function (game) {
   var mountPoint;
@@ -89,6 +90,30 @@ module.exports = function (game) {
           const {material} = game.blockShader;
           const mesh = new game.THREE.Mesh(geometry, material);
           mesh.position.set(5, -8, -1);
+          mesh.rotation.set(0, 0, -Math.PI/2);
+          mesh.scale.set(4, 4, 4);
+          return mesh;
+        } else if (type === 'vegetation') {
+          const vegetations = {
+            0: [0, 0, 0, variant[3]]
+          };
+          const dims = [1, 1, 1];
+          const data = {vegetations, dims};
+          const mesh = voxelPlaneRenderer(data, game.atlas, game.THREE);
+          mesh.material = game.planeShader.material;
+          mesh.position.set(0, -6, -6);
+          mesh.rotation.set(0, 0, -Math.PI/2);
+          mesh.scale.set(8, 8, 8);
+          return mesh;
+        } else if (type === 'effect') {
+          const effects = {
+            0: [0, 0, 0, variant[3]]
+          };
+          const dims = [1, 1, 1];
+          const data = {effects, dims};
+          const mesh = voxelPlaneRenderer(data, game.atlas, game.THREE);
+          mesh.material = game.planeShader.material;
+          mesh.position.set(1, -8, -3);
           mesh.rotation.set(0, 0, -Math.PI/2);
           mesh.scale.set(4, 4, 4);
           return mesh;
