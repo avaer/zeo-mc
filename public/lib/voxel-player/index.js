@@ -1,4 +1,5 @@
-var skin = require('../minecraft-skin/index');
+import skin from '../minecraft-skin/index';
+import voxelBlockMesher from '../voxel-block-mesher/index';
 
 module.exports = function (game) {
   var mountPoint;
@@ -68,29 +69,45 @@ module.exports = function (game) {
       console.log('start holding', playerSkin); // XXX
       const {rightArm} = playerSkin;
       const rightArmHold = (() => {
-        // const geometry = new game.THREE.CubeGeometry(2, 2, 2);
-        const geometry = new game.THREE.CubeGeometry(3, 3, 3);
-        // const geometry = new game.THREE.CubeGeometry(4, 4, 4);
-        for (let i = 0; i < 8; i++) {
-          geometry.vertices[i].y -= 4;
+        const {type, value: variant} = value;
+        if (type === 'block') {
+          const geometry = (() => {
+            const cubeGeometry = new game.THREE.CubeGeometry(1, 1, 1);
+            for (let i = 0; i < 8; i++) {
+              cubeGeometry.vertices[i].y -= 1;
+            }
+            const bufferGeometry = new game.THREE.BufferGeometry().fromGeometry(cubeGeometry);
+            /* const material = new game.THREE.MeshBasicMaterial({
+              color: 0xCCCCCC
+            }); */
+            const facesData = [variant, variant, variant, variant, variant, variant];
+            const normals = bufferGeometry.getAttribute('normal').array;
+            const frameUvs = voxelBlockMesher.getFrameUvs(facesData, normals, game.atlas);
+            voxelBlockMesher.applyFrameUvs(bufferGeometry, frameUvs, game.THREE);
+            return bufferGeometry;
+          })();
+          const {material} = game.blockShader;
+          const mesh = new game.THREE.Mesh(geometry, material);
+          mesh.position.set(5, -8, -1);
+          mesh.rotation.set(0, 0, -Math.PI/2);
+          mesh.scale.set(4, 4, 4);
+          return mesh;
+        } else {
+          return null;
         }
-        const material = new game.THREE.MeshBasicMaterial({
-          color: 0xCCCCCC
-        });
-        const mesh = new game.THREE.Mesh(geometry, material);
-        // mesh.position.set(2, -4, -2);
-        mesh.position.set(1.5, -5.5, -1.5);
-        // mesh.position.set(2, -4, -2);
-        return mesh;
       })();
-      rightArm.add(rightArmHold);
-      playerSkin.rightArmHold = rightArmHold;
+      if (rightArmHold) {
+        rightArm.add(rightArmHold);
+        playerSkin.rightArmHold = rightArmHold;
+      }
     };
     physics.stopHolding = function() {
       console.log('stop holding', playerSkin); // XXX
       const {rightArm, rightArmHold} = playerSkin;
-      rightArm.remove(rightArmHold);
-      playerSkin.rightArmHold = null;
+      if (rightArmHold) {
+        rightArm.remove(rightArmHold);
+        playerSkin.rightArmHold = null;
+      }
     };
     
     return physics;
