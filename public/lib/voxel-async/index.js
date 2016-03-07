@@ -1,6 +1,7 @@
 import voxelTerrain from '../voxel-terrain/index';
 import voxelBlockGenerator from '../voxel-block-generator/index';
 import voxelPlaneGenerator from '../voxel-plane-generator/index';
+import voxelSpriteGenerator from '../voxel-sprite-generator/index';
 import voxelModelGenerator from '../voxel-model-generator/index';
 
 import {BLOCKS} from '../../resources/index';
@@ -8,6 +9,7 @@ import {BLOCKS} from '../../resources/index';
 let voxelTerrainGenerate = null;
 let voxelBlockGeneratorInstance = null;
 let voxelPlaneGeneratorInstance = null;
+let voxelSpriteGeneratorInstance = null;
 let voxelModelGeneratorInstance = null;
 
 const api = {};
@@ -16,6 +18,7 @@ function init({seed, chunkSize}) {
   voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
   voxelBlockGeneratorInstance = voxelBlockGenerator(api);
   voxelPlaneGeneratorInstance = voxelPlaneGenerator(api);
+  voxelSpriteGeneratorInstance = voxelPlaneGenerator(api);
   voxelModelGeneratorInstance = voxelModelGenerator(api);
 }
 api.init = init;
@@ -55,29 +58,17 @@ function planeGenerator(data, dims) {
 }
 api.planeGenerator = planeGenerator;
 
-function entityGenerator(entities, dims) {
+function spriteGenerator(data, dims) {
   _ensureInitialized();
 
-  const result = [];
-  let idx = 0;
-  for (let z = 0; z < dims[2]; z++) {
-    for (let y = 0; y < dims[1]; y++) {
-      for (let x = 0; x < dims[0]; x++) {
-        const entity = entities[idx];
-        if (entity) {
-          const position = [x, y, z];
-          const spec = MODELS.ENTITIES[entity - 1];
-          const mesh = {position, spec};
-          result.push(mesh);
-        }
-
-        idx++;
-      }
-    }
+  const cachedSpriteMesh = dims._cachedSpriteMesh;
+  if (cachedSpriteMesh) {
+    return cachedSpriteMesh;
+  } else {
+    return voxelSpriteGeneratorInstance(data, dims);
   }
-  return result;
 }
-api.entityGenerator = entityGenerator;
+api.spriteGenerator = spriteGenerator;
 
 function modelGenerator(data, dims) {
   _ensureInitialized();
@@ -103,6 +94,7 @@ function _ensureInitialized() {
     voxelTerrainGenerate !== null &&
     voxelBlockGeneratorInstance !== null &&
     voxelPlaneGenerator !== null &&
+    voxelSpriteGenerator !== null &&
     voxelModelGeneratorInstance !== null
   ) {
     // nothing
