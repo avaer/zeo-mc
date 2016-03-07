@@ -117,6 +117,20 @@ class VoxelTextureLoader {
       cb();
     }
   }
+
+  getImageData(texture) {
+    const {image} = texture;
+    const {naturalWidth: width, naturalHeight: height} = image;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, width, height);
+    return imageData;
+  }
 }
 
 function voxelTextureLoader(opts) {

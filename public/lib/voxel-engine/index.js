@@ -401,8 +401,8 @@ Game.prototype.defaultButtons = {
   '<space>': 'jump',
   '<shift>': 'crouch',
   '<control>': 'alt',
-  'Q': 'bandage',
-  'E': 'dynamite',
+  'Q': 'greenapple',
+  'E': 'flare',
 }
 
 // used in methods that have identity function(pos) {}

@@ -1,17 +1,61 @@
 // import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
-function voxelSpriteMesher(data, atlas, THREE) {
+const SIZE = 0.25;
+const BYTES_PER_PIXEL = 4;
+
+function voxelSpriteMesher(data, textureLoader, THREE) {
   const {vertices: verticesData, faces: facesData} = data;
   const numFaces = facesData.length;
   if (numFaces > 0) {
-    // XXX
+    const object = new THREE.Object3D();
 
-    const geometry = new THREE.CubeGeometry(1, 1, 1);
-    const material = new THREE.MeshLambertMaterial({
-      color: 0xCCCCCC
-    });
-    const mesh = new THREE.Mesh(geometry, material);
-    return mesh;
+    const pixelGeometry = getPixelGeometry(THREE);
+    const pixelMaterial = getPixelMaterial(THREE);
+    for (let i = 0; i < numFaces; i++) {
+      const mesh = (() => {
+        const geometry = (() => {
+          const item = facesData[i];
+          const textureUrl = textureLoader.getTextureUrl('items/' + item);
+          const texture = textureLoader.getCachedTexture(textureUrl);
+          if (!texture) {
+            throw new Error('failed to load cached texture: ' + JSON.stringify(item));
+          }
+
+          const imageData = textureLoader.getImageData(texture);
+          const {data: pixelData, width, height} = imageData;
+          console.log('got image data', {pixelData, width, height}); // XXX
+
+          function getPixel(x, y) {
+            const index = (x + y * width) * BYTES_PER_PIXEL;
+            return [
+              pixelData[index + 0],
+              pixelData[index + 1],
+              pixelData[index + 2],
+              pixelData[index + 3],
+            ];
+          }
+
+          const bufferGeometry = (() => {
+            const bufferGeometry = new THREE.BufferGeometry();
+
+            const vertices = new Float32Array(0);
+            bufferGeometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+            const colors = new Float32Array(0);
+            bufferGeometry.addAttribute('color', new THREE.BufferAttribute(vertices, 3));
+
+            return bufferGeometry;
+          })();
+          return bufferGeometry;
+        })();
+        const material = pixelMaterial;
+        const mesh = new THREE.Mesh(geometry, material);
+        return mesh;
+      })();
+      object.add(mesh);
+    }
+
+    return object;
 
     /* const geometry = (() => {
       const geometry = new THREE.BufferGeometry();
@@ -119,5 +163,30 @@ voxelSpriteMesher.applyFrameUvs = function(geometry, frameUvs, THREE) {
     geometry.addAttribute('frameUv' + i, new THREE.BufferAttribute(frameUvs[i], FRAME_UV_ATTRIBUTE_SIZE))
   }
 }; */
+
+let cachedPixelGeometry = null;
+function getPixelGeometry(THREE) {
+  if (cachedPixelGeometry === null) {
+    const pixelGeometry = new THREE.CubeGeometry(SIZE, SIZE, SIZE);
+    for (let i = 0; i < pixelGeometry.vertices.length; i++) {
+      pixelGeometry.vertices[i].x -= SIZE/2;
+      pixelGeometry.vertices[i].y -= SIZE/2;
+      pixelGeometry.vertices[i].z -= SIZE/2;
+    }
+    cachedPixelGeometry = pixelGeometry;
+  }
+  return cachedPixelGeometry;
+}
+
+let cachedPixelMaterial = null;
+function getPixelMaterial(THREE) {
+  if (cachedPixelMaterial === null) {
+    const pixelMaterial = new THREE.MeshLambertMaterial({
+      vertexColors: THREE.FaceColors
+    });
+    cachedPixelMaterial = pixelMaterial;
+  }
+  return cachedPixelMaterial;
+}
 
 module.exports = voxelSpriteMesher;
