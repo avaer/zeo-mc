@@ -27,7 +27,8 @@ function Control(state, opts) {
 
   this.fire_rate = opts.fireRate || 0
   this.needs_discrete_fire = opts.discreteFire || false
-  this.onfire = opts.onfire || this.onfire
+  this.onfire = opts.onfire || noop
+  this.onhold = opts.onhold || noop
   this.firing = 0
 
   this.x_rotation_per_ms = opts.rotationXMax || opts.rotationMax || 33
@@ -163,6 +164,12 @@ proto.tick = function(dt) {
   this.state.x_rotation_accum =
   this.state.y_rotation_accum =
   this.state.z_rotation_accum = 0
+
+  if (this.state.greenapple) {
+    this.onhold('greenapple');
+  } else if (this.state.flare) {
+    this.onhold('flare');
+  }
 }
 
 proto.write = function(changes) {
@@ -272,9 +279,7 @@ proto.target = function(target) {
   return this._target
 }
 
-proto.onfire = function(_) {
-
-}
+function noop() {}
 
 function clamp(value, to) {
   return isFinite(to) ? max(min(value, to), -to) : value
