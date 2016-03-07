@@ -211,12 +211,14 @@ export default class Voxels extends React.Component {
             holdValue = voxelConstructInstance.delete(position);
             voxelHighlightInstance.setMode('adjacent');
 
+            avatar.startHolding(holdValue);
             voxelWalk.startHolding();
           } else {
             const {adjacent: position} = hit;
             voxelConstructInstance.set(position, holdValue);
             voxelHighlightInstance.setMode('normal');
 
+            avatar.stopHolding();
             voxelWalk.stopHolding();
 
             holdValue = null;

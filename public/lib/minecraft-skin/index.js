@@ -267,20 +267,25 @@ Skin.prototype.createPlayerObject = function(scene) {
   upperbody.add(leftarm);
   
   // Right arm
-  var rightarmgeo = new THREE.CubeGeometry(4, 12, 4);
-  for(var i=0; i < 8; i+=1) {
-    rightarmgeo.vertices[i].y -= 4;
-  }
-  var rightarm =this.rightArm = new THREE.Mesh(rightarmgeo, this.charMaterial);
+  var rightarm =this.rightArm = new THREE.Object3D();
+  var rightArmMesh = (() => {
+    var rightarmgeo = new THREE.CubeGeometry(4, 12, 4);
+    for(var i=0; i < 8; i+=1) {
+      rightarmgeo.vertices[i].y -= 4;
+    }
+    var rightArmMesh = new THREE.Mesh(rightarmgeo, this.charMaterial);
+    this.UVMap(rightArmMesh, 0, 44, 20, 4, 12);
+    this.UVMap(rightArmMesh, 1, 52, 20, 4, 12);
+    this.UVMap(rightArmMesh, 2, 44, 16, 4, 4, 1);
+    this.UVMap(rightArmMesh, 3, 48, 16, 4, 4, 3);
+    this.UVMap(rightArmMesh, 4, 40, 20, 4, 12);
+    this.UVMap(rightArmMesh, 5, 48, 20, 4, 12);
+    return rightArmMesh;
+  })();
+  rightarm.add(rightArmMesh);
   rightarm.position.z = 6;
   rightarm.position.y = 4;
   rightarm.rotation.x = -Math.PI/32;
-  this.UVMap(rightarm, 0, 44, 20, 4, 12);
-  this.UVMap(rightarm, 1, 52, 20, 4, 12);
-  this.UVMap(rightarm, 2, 44, 16, 4, 4, 1);
-  this.UVMap(rightarm, 3, 48, 16, 4, 4, 3);
-  this.UVMap(rightarm, 4, 40, 20, 4, 12);
-  this.UVMap(rightarm, 5, 48, 20, 4, 12);
   upperbody.add(rightarm);
   
   //Head
