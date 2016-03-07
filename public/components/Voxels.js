@@ -3,6 +3,7 @@ import ReactDom from 'react-dom';
 import {is} from 'immutable';
 import voxelEngine from '../lib/voxel-engine/index';
 import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
+import voxelTextureLoader from '../lib/voxel-texture-loader/index';
 import voxelTerrain from '../lib/voxel-terrain/index';
 import voxelSky from '../lib/voxel-sky/index';
 import voxelClouds from '../lib/voxel-clouds/index';
@@ -63,7 +64,7 @@ export default class Voxels extends React.Component {
   }
 
   componentDidMount() {
-    let atlas, game, avatar;
+    let atlas, textureLoader, game, avatar;
 
     const loadTextureAtlas = cb => {
       function getTexturePath(texture) {
@@ -81,25 +82,43 @@ export default class Voxels extends React.Component {
         img.src = getTexturePath(texture);
       }
 
-      atlas = voxelTextureAtlas({
-        materials: BLOCKS.MATERIALS,
-        frames: BLOCKS.FRAMES,
-        getTextureImage,
-        THREE
-      });
-
-      atlas.once('load', err => {
-        if (!err) {
-          cb();
-        } else {
-          console.warn(err);
+      (() => {
+        let pending = 2;
+        function pend() {
+          if (--pending === 0) {
+            cb();
+          }
         }
-      });
+
+        atlas = voxelTextureAtlas({
+          materials: BLOCKS.MATERIALS,
+          frames: BLOCKS.FRAMES,
+          getTextureImage,
+          THREE
+        });
+        atlas.once('load', err => {
+          if (!err) {
+            pend();
+          } else {
+            console.warn(err);
+          }
+        });
+
+        textureLoader = voxelTextureLoader({
+          getTextureUrl: texture => '/api/img/textures/' + texture + '.png',
+          THREE
+        });
+        textureLoader.loadTextures([
+          'items/greenapple',
+          'items/flare',
+        ], pend);
+      })();
     };
 
     const initializeGame = cb => {
       game = voxelEngine({
         atlas,
+        textureLoader,
         generateChunks: false,
         chunkSize: CHUNK_SIZE,
         chunkDistance: CHUNK_DISTANCE,

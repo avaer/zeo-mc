@@ -28,9 +28,9 @@ class VoxelTextureLoader {
       texture.minFilter = THREE.NearestFilter;
 
       let cbs = [];
-      let loaded = false;
+      texture.loaded = false;
       texture.onLoad = function(cb) {
-        if (loaded) {
+        if (texture.loaded) {
           cb();
         } else {
           cbs.push(cb);
@@ -39,8 +39,8 @@ class VoxelTextureLoader {
       texture.onLoaded = function(image) {
         texture.image = image;
         texture.needsUpdate = true;
+        texture.loaded = true;
 
-        loaded = true;
         for (let i = 0; i < cbs.length; i++) {
           const cb = cbs[i];
           cb();
@@ -67,6 +67,19 @@ class VoxelTextureLoader {
     }
   }
 
+  getCachedTexture(url, offset) {
+    offset = offset || null;
+
+    const key = this.getKey(url, offset);
+
+    const cachedTexture = this._cache.get(key);
+    if (cachedTexture && cachedTexture.loaded) {
+      return cachedTexture;
+    } else {
+      return null;
+    }
+  }
+
   cropImage(img, offset) {
     const startX = offset[0];
     const startY = offset[1];
@@ -83,6 +96,26 @@ class VoxelTextureLoader {
     const newImg = new Image();
     newImg.src = dataUrl;
     return newImg;
+  }
+
+  loadTextures(textures, cb) {
+    const numTextures = textures.length;
+    if (numTextures > 0) {
+      let pending = numTextures;
+      const pend = () => {
+        if (--pending === 0) {
+          cb();
+        }
+      };
+      for (let i = 0; i < numTextures; i++) {
+        const texture = textures[i];
+        const textureUrl = this.getTextureUrl(texture);
+        const loadedTexture = this.getTexture(textureUrl);
+        loadedTexture.onLoad(pend);
+      }
+    } else {
+      cb();
+    }
   }
 }
 
