@@ -72,12 +72,14 @@ function Game(opts) {
 
   this.scene = new THREE.Scene()
   this.view = opts.view || new voxelView(THREE, {
+    scene: this.scene,
     width: this.width,
     height: this.height,
+    devicePixelRatio: this.devicePixelRatio,
     skyColor: this.skyColor,
     antialias: this.antialias
   })
-  this.view.bindToScene(this.scene)
+  // this.view.bindToScene(this.scene)
   this.camera = this.view.getCamera()
   if (!opts.lightsDisabled) this.addLights(this.scene)
   
@@ -431,6 +433,7 @@ Game.prototype.setDimensions = function(opts) {
   } else {
     this.width = typeof window === "undefined" ? 1 : window.innerWidth
   }
+  this.devicePixelRatio = window.devicePixelRatio;
 }
 
 Game.prototype.notCapable = function(opts) {
@@ -460,11 +463,12 @@ Game.prototype.notCapableMessage = function() {
 Game.prototype.onWindowResize = function() {
   var width = window.innerWidth
   var height = window.innerHeight
+  var devicePixelRatio = window.devicePixelRatio
   if (this.container) {
     width = this.container.clientWidth
     height = this.container.clientHeight
   }
-  this.view.resizeWindow(width, height)
+  this.view.resizeWindow(width, height, devicePixelRatio)
 }
 
 // # Physics/collision related methods
@@ -808,7 +812,7 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
 }
 
 Game.prototype.render = function(delta) {
-  this.view.render(this.scene)
+  this.view.render()
 }
 
 Game.prototype.initializeTimer = function(rate) {

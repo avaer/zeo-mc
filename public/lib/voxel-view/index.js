@@ -1,3 +1,5 @@
+import voxelPostProcessShader from '../voxel-postprocess-shader/index';
+
 var THREE, temporaryPosition, temporaryVector
 
 module.exports = function(three, opts) {
@@ -9,9 +11,11 @@ module.exports = function(three, opts) {
 
 function View(three, opts) {
   THREE = three // three.js doesn't support multiple instances on a single page
+  this.scene = opts.scene
   this.fov = opts.fov || 60
   this.width = opts.width || 512
   this.height = opts.height || 512
+  this.devicePixelRatio = opts.devicePixelRatio || 1
   this.aspectRatio = opts.aspectRatio || this.width/this.height
   this.nearPlane = opts.nearPlane || 1
   this.farPlane = opts.farPlane || 10000
@@ -20,24 +24,63 @@ function View(three, opts) {
   this.camera = this.ortho?(new THREE.OrthographicCamera(this.width/-2, this.width/2, this.height/2, this.height/-2, this.nearPlane, this.farPlane)):(new THREE.PerspectiveCamera(this.fov, this.aspectRatio, this.nearPlane, this.farPlane))
   this.camera.lookAt(new THREE.Vector3(0, 0, 0))
 
-  if (!process.browser) return
+  this.scene.add(this.camera);
 
-  this.createRenderer()
-  this.element = this.renderer.domElement
+  // if (!process.browser) return
+
+  this.renderer = null
+  this.postProcessShader = null
+  this.element = null
+
+  this.init()
 }
 
-View.prototype.createRenderer = function() {
+View.prototype.init = function() {
+  this.initRenderer();
+  this.initPostProcessShader();
+}
+
+View.prototype.initRenderer = function() {
   this.renderer = new THREE.WebGLRenderer({
     antialias: true
   })
   this.renderer.setSize(this.width, this.height)
   this.renderer.setClearColor(new THREE.Color(this.skyColor), 1.0)
   this.renderer.clear()
-}
 
-View.prototype.bindToScene = function(scene) {
+  this.element = this.renderer.domElement
+};
+
+View.prototype.initPostProcessShader = function() {
+  this.postProcessShader = voxelPostProcessShader(
+    this.renderer,
+    this.scene,
+    this.camera,
+    this.width,
+    this.height,
+    this.devicePixelRatio,
+    [
+      /* new voxelPostProcessShader.PASSES.FXAA(this.scene, this.camera, {
+        width: this.width,
+        height: this.height,
+        devicePixelRatio: this.devicePixelRatio
+      }), */
+      new voxelPostProcessShader.PASSES.Bokeh(this.scene, this.camera, {
+        focus: 1.0,
+        aperture: 0.025,
+        maxblur: 1.0,
+
+        width: this.width,
+        height: this.height,
+        devicePixelRatio: this.devicePixelRatio
+      })
+    ]
+  );
+};
+
+/* View.prototype.bindToScene = function(scene) {
   scene.add(this.camera)
-}
+} */
 
 View.prototype.getCamera = function() {
   return this.camera
@@ -56,7 +99,7 @@ View.prototype.cameraVector = function() {
   return [temporaryVector.x, temporaryVector.y, temporaryVector.z]
 }
 
-View.prototype.resizeWindow = function(width, height) {
+View.prototype.resizeWindow = function(width, height, devicePixelRatio) {
   if (this.element.parentElement) {
     width = width || this.element.parentElement.clientWidth
     height = height || this.element.parentElement.clientHeight
@@ -65,14 +108,16 @@ View.prototype.resizeWindow = function(width, height) {
   this.camera.aspect = this.aspectRatio = width/height
   this.width = width
   this.height = height
+  this.devicePixelRatio = devicePixelRatio
 
   this.camera.updateProjectionMatrix()
 
   this.renderer.setSize( width, height )
+  this.initPostProcessShader();
 }
 
-View.prototype.render = function(scene) {
-  this.renderer.render(scene, this.camera)
+View.prototype.render = function() {
+  this.postProcessShader.render();
 }
 
 View.prototype.appendTo = function(element) {
@@ -83,5 +128,5 @@ View.prototype.appendTo = function(element) {
     document.querySelector(element).appendChild(this.element)
   }
 
-  this.resizeWindow(this.width,this.height)
+  this.resizeWindow(this.width, this.height, this.devicePixelRatio)
 }
