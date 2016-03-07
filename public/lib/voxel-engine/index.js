@@ -7,7 +7,7 @@ var voxelAsync = require('../voxel-async/index')
 var voxelUtils = require('../voxel-utils/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
-var control = require('voxel-control')
+var voxelControl = require('../voxel-control/index')
 var voxelView = require('../voxel-view/index')
 var THREE = require('three')
 var Stats = require('./lib/stats')
@@ -896,7 +896,7 @@ Game.prototype.hookupControls = function(buttons, opts) {
   opts.controls.onfire = this.onFire.bind(this)
   opts.controls.onhold = this.onHold.bind(this)
   opts.controls.discreteFire = true
-  this.controls = control(buttons, opts.controls)
+  this.controls = voxelControl(buttons, opts.controls)
   this.items.push(this.controls)
   this.controlling = null
 }
