@@ -1,7 +1,13 @@
 // import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
-const SIZE = 0.25;
+const SIZE = 1;
+// const OFFSET = [-1.5, 1.5, 0];
+// const OFFSET = [0, 1.5, 1];
+const OFFSET = [0, 1.35, 1.1];
+const ROTATION = [0, Math.PI/2, 0];
+const SCALE = 0.075;
 const BYTES_PER_PIXEL = 4;
+const CUBE_VERTICES = 108;
 
 function voxelSpriteMesher(data, textureLoader, THREE) {
   const {vertices: verticesData, faces: facesData} = data;
@@ -9,8 +15,6 @@ function voxelSpriteMesher(data, textureLoader, THREE) {
   if (numFaces > 0) {
     const object = new THREE.Object3D();
 
-    const pixelGeometry = getPixelGeometry(THREE);
-    const pixelMaterial = getPixelMaterial(THREE);
     for (let i = 0; i < numFaces; i++) {
       const mesh = (() => {
         const geometry = (() => {
@@ -23,6 +27,7 @@ function voxelSpriteMesher(data, textureLoader, THREE) {
 
           const imageData = textureLoader.getImageData(texture);
           const {data: pixelData, width, height} = imageData;
+
           console.log('got image data', {pixelData, width, height}); // XXX
 
           function getPixel(x, y) {
@@ -35,21 +40,65 @@ function voxelSpriteMesher(data, textureLoader, THREE) {
             ];
           }
 
-          const bufferGeometry = (() => {
-            const bufferGeometry = new THREE.BufferGeometry();
+          // generate vertices / colors
+          const vertices = [];
+          const colors = [];
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const pixel = getPixel(x, y);
+              const [r, g, b, a] = pixel;
+              const aFactor = a / 255;
+              if (aFactor > 0.5) {
+                const rFactor = r / 255;
+                const gFactor = g / 255;
+                const bFactor = b / 255;
 
-            const vertices = new Float32Array(0);
-            bufferGeometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+                const pixelVertices = getPixelVertices(x, y, THREE);
+                for (let i = 0; i < CUBE_VERTICES / 3; i++) {
+                  vertices.push(pixelVertices[i * 3 + 0], pixelVertices[i * 3 + 1], pixelVertices[i * 3 + 2]);
+                  colors.push(rFactor, gFactor, bFactor);
+                }
+              }
+            }
+          }
 
-            const colors = new Float32Array(0);
-            bufferGeometry.addAttribute('color', new THREE.BufferAttribute(vertices, 3));
+          /* // cull adjacent faces
+          const culledVertices = [];
+          const culledColors = [];
+          const seenFacesIndex = {};
+          function getFaceKey(vs) {
+            let x = 0, y = 0, z = 0;
+            for (let i = 0; i < 12; i += 3) x += vs[i];
+            for (let i = 1; i < 12; i += 3) y += vs[i];
+            for (let i = 2; i < 12; i += 3) z += vs[i];
+            return x + y * 256 + z * 256 * 256;
+          }
+          for (let i = 0; i < vertices.length / 12; i++) {
+            const faceVertices = vertices.slice(i * 12, (i + 1) * 12);
+            const faceKey = getFaceKey(faceVertices);
+            if (!(faceKey in seenFacesIndex)) {
+              for (let j = 0; j < 12; j++) {
+                culledVertices.push(vertices[i * 12 + j]);
+                culledColors.push(colors[i * 12 + j]);
+              }
 
-            return bufferGeometry;
-          })();
-          return bufferGeometry;
+              seenFacesIndex[faceKey] = true;
+            }
+          } */
+
+          // construct geometry
+          const geometry = new THREE.BufferGeometry();
+          geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+          geometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
+          /* geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(culledVertices), 3));
+          geometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(culledColors), 3)); */
+          return geometry;
         })();
-        const material = pixelMaterial;
+        const material = getPixelMaterial(THREE);
         const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(OFFSET[0], OFFSET[1], OFFSET[2]);
+        mesh.rotation.set(ROTATION[0], ROTATION[1], ROTATION[2]);
+        mesh.scale.set(SCALE, SCALE, SCALE);
         return mesh;
       })();
       object.add(mesh);
@@ -164,18 +213,32 @@ voxelSpriteMesher.applyFrameUvs = function(geometry, frameUvs, THREE) {
   }
 }; */
 
-let cachedPixelGeometry = null;
-function getPixelGeometry(THREE) {
-  if (cachedPixelGeometry === null) {
-    const pixelGeometry = new THREE.CubeGeometry(SIZE, SIZE, SIZE);
-    for (let i = 0; i < pixelGeometry.vertices.length; i++) {
-      pixelGeometry.vertices[i].x -= SIZE/2;
-      pixelGeometry.vertices[i].y -= SIZE/2;
-      pixelGeometry.vertices[i].z -= SIZE/2;
+let cachedPixelGeometryVertices = null;
+function getPixelGeometryVertices(THREE) {
+  if (cachedPixelGeometryVertices === null) {
+    const cubeGeometry = new THREE.CubeGeometry(SIZE, SIZE, SIZE);
+    for (let i = 0; i < cubeGeometry.vertices.length; i++) {
+      cubeGeometry.vertices[i].x -= SIZE/2;
+      cubeGeometry.vertices[i].y -= SIZE/2;
+      cubeGeometry.vertices[i].z -= SIZE/2;
     }
-    cachedPixelGeometry = pixelGeometry;
+    const bufferGeometry = new THREE.BufferGeometry().fromGeometry(cubeGeometry);
+    const pixelGeometryVertices = bufferGeometry.getAttribute('position').array;
+    cachedPixelGeometryVertices = pixelGeometryVertices;
   }
-  return cachedPixelGeometry;
+  return cachedPixelGeometryVertices;
+}
+
+function getPixelVertices(x, y, THREE) {
+  const pixelGeometryVertices = getPixelGeometryVertices(THREE);
+  const pixelVertices = pixelGeometryVertices.slice();
+  for (let i = 0; i < CUBE_VERTICES; i += 3) {
+    pixelVertices[i] += x;
+  }
+  for (let i = 1; i < CUBE_VERTICES; i += 3) {
+    pixelVertices[i] -= y;
+  }
+  return pixelVertices;
 }
 
 let cachedPixelMaterial = null;
