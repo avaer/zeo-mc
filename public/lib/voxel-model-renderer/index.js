@@ -2,20 +2,20 @@ var voxelAsync = require('../voxel-async/index');
 
 const MODEL_SCALE = 1 / 16;
 
-function voxelModelRenderer(data, THREE) {
+function voxelModelRenderer(data, textureLoader, THREE) {
   const {entities, dims} = data;
   const models = voxelAsync.modelGenerator(entities, dims);
-  const mesh = _makeObjects(models, THREE);
+  const mesh = _makeObjects(models, textureLoader, THREE);
   return mesh;
 }
 
-function _makeObjects(models, THREE) {
+function _makeObjects(models, textureLoader, THREE) {
   const object = new THREE.Object3D();
   for (let i = 0, l = models.length; i < l; i++) {
     const model = models[i];
 
     const {position, meshes, textures} = model;
-    const subobject = _makeObject(meshes, textures, THREE);
+    const subobject = _makeObject(meshes, textures, textureLoader, THREE);
     const boundingBox = new THREE.Box3().setFromObject(subobject);
     const minY = boundingBox.min.y;
 
@@ -26,7 +26,7 @@ function _makeObjects(models, THREE) {
   return object;
 }
 
-function _makeObject(meshes, textures, THREE) {
+function _makeObject(meshes, textures, textureLoader, THREE) {
   const root = new THREE.Object3D();
 
   const child = new THREE.Object3D();
@@ -39,7 +39,7 @@ function _makeObject(meshes, textures, THREE) {
         rotationPoint = [rotationPoint[0], -rotationPoint[1], rotationPoint[2]];
         const texture = _resolveTexture(textures, textureIndex);
 
-        const submesh = _makeCubeMesh(position, dimensions, texture, uv, THREE);
+        const submesh = _makeCubeMesh(position, dimensions, texture, uv, textureLoader, THREE);
 
         const subobject1 = new THREE.Object3D();
         subobject1.position.set(
@@ -60,7 +60,7 @@ function _makeObject(meshes, textures, THREE) {
         }
       } else if (position && dimensions && uv) {
         const texture = _resolveTexture(textures, textureIndex);
-        const submesh = _makeCubeMesh(position, dimensions, texture, uv, THREE);
+        const submesh = _makeCubeMesh(position, dimensions, texture, uv, textureLoader, THREE);
 
         object.add(submesh);
 
@@ -125,12 +125,12 @@ function _resolveTexture(textures, textureIndex) {
   return texture;
 }
 
-function _makeCubeMesh(position, dimensions, texture, uv, THREE) {
+function _makeCubeMesh(position, dimensions, texture, uv, textureLoader, THREE) {
   position = [position[0], -position[1], position[2]];
   dimensions = [dimensions[0], dimensions[1], dimensions[2]];
 
   const geometry = _getCubeGeometry(dimensions[0], dimensions[1], dimensions[2], THREE);
-  const material = _getCubeMaterial(texture, uv, THREE);
+  const material = _getCubeMaterial(texture, uv, textureLoader, THREE);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(
     (position[0] + (dimensions[0] / 2)),
@@ -188,7 +188,7 @@ function _getCubeGeometry(x, y, z, THREE) {
 }
 
 const cubeMaterialCache = new Map();
-function _getCubeMaterial(textureName, uv, THREE) {
+function _getCubeMaterial(textureName, uv, textureLoader, THREE) {
   uv = _normalizeUv(uv);
   const materialKey = textureName + '-' + uv.map(uv => uv.join(','));
 
@@ -198,7 +198,8 @@ function _getCubeMaterial(textureName, uv, THREE) {
   } else {
     const materials = [];
     for (let i = 0; i < 6; i++) {
-      const texture = _getTexture('/api/img/textures/' + textureName + '.png', uv[i], THREE);
+      const textureUrl = textureLoader.getTextureUrl(textureName);
+      const texture = textureLoader.getTexture(textureUrl, uv[i], THREE);
       const submaterial = new THREE.MeshLambertMaterial({
         map: texture,
         side: THREE.FrontSide,

@@ -49,7 +49,6 @@
     "spatial-trigger": "0.0.0",
     "three": "0.74.0",
     "tic": "0.2.1",
-    "voxel-control": "0.0.7",
     "voxel-physical": "0.0.10",
     "voxel-raycast": "0.2.1",
     "voxel-region-change": "0.1.0",
