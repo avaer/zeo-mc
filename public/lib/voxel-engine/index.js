@@ -9,6 +9,7 @@ var voxelUtils = require('../voxel-utils/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
 var voxelParticleShader = require('../voxel-particle-shader/index')
+var voxelWorldTicker = require('../voxel-world-ticker/index')
 var voxelControl = require('../voxel-control/index')
 var voxelView = require('../voxel-view/index')
 var THREE = require('three')
@@ -126,6 +127,8 @@ function Game(opts) {
     game: this,
     textureLoader: this.textureLoader
   });
+
+  this.worldTicker = voxelWorldTicker(this);
   
   self.chunkRegion.on('change', function(newChunk) {
     self.removeFarChunks()
@@ -836,6 +839,8 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   if (newWorldTick !== oldWorldTick) {
     this.blockShader.setFrame(newWorldTick);
     this.planeShader.setFrame(newWorldTick);
+
+    this.worldTicker.tick(newWorldTick - oldWorldTick);
   }
 
   const oldParticleTick = this.getParticleTick(oldWorldTime);
