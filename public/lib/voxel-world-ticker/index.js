@@ -1,3 +1,4 @@
+import Heap from 'heap';
 import * as resources from '../../resources/index';
 const {BLOCKS} = resources;
 
@@ -36,12 +37,32 @@ class VoxelWorldTicker {
       return null;
     };
 
-    const getBlobFrontier = (startPosition, predicate) => {
-      const topFrontier = Array(chunkSize * chunkSize);
-      const bottomFrontier = Array(chunkSize * chunkSize);
+    const getBlobFrontier = (startPosition, voxels, predicate) => {
+      const topHeap = new Heap(([ax, ay, az], [bx, by, bz]) => {
+        return by - ay;
+      });
+      const bottomHeap = new Heap(([ax, ay, az], [bx, by, bz]) => {
+        return ay - by;
+      });
 
-      function getPlaneIndex(x, z) {
-        return x + chunkSize * z;
+      function canFlowOut([x, y, z]) {
+        return [
+          [x - 1, y, z], // left
+          [x + 1, y, z], // right
+          [x, y - 1, z], // bottom
+          // [x, y + 1, z], // top
+          [x, y, z - 1], // back
+          [x, y, z + 1], // front
+        ].some(nextPosition => {
+          if (isInChunkBounds(nextPosition)) {
+            const [x, y, z] = nextPosition;
+            const index = voxelUtils.getIndex(x, y, z);
+            const value = voxels[index];
+            return !value;
+          } else {
+            return false;
+          }
+        });
       }
 
       const frontier = [startPosition];
@@ -52,23 +73,20 @@ class VoxelWorldTicker {
         const index = voxelUtils.getIndex(x, y, z);
         if (!(index in seenIndex)) {
           if (predicate(position)) {
-            const planeIndex = getPlaneIndex(x, z);
-            if (topFrontier[planeIndex] === undefined || y < topFrontier[planeIndex]) {
-              topFrontier[planeIndex] = y;
-            }
-            if (bottomFrontier[planeIndex] === undefined || y > bottomFrontier[planeIndex]) {
-              bottomFrontier[planeIndex] = y;
+            topHeap.push(position);
+            if (canFlowOut(position)) {
+              bottomHeap.push(position);
             }
 
             [
               [x - 1, y, z], // left
               [x + 1, y, z], // right
-              [x, y - 1, z], // top
-              [x, y + 1, z], // bottom
+              [x, y - 1, z], // bottom
+              [x, y + 1, z], // top
               [x, y, z - 1], // back
               [x, y, z + 1], // front
             ].forEach(nextPosition => {
-              if (isInBounds(nextPosition)) {
+              if (isInChunkBounds(nextPosition)) {
                 frontier.push(nextPosition);
               }
             });
@@ -77,10 +95,10 @@ class VoxelWorldTicker {
           seenIndex[index] = true;
         }
       }
-      return {top: topFrontier, bottom: bottomFrontier}; // XXX should compute a top max-heap and a bottom min-heap instead
+      return {topHeap, bottomHeap};
     };
 
-    const isInBounds = ([x, y, z]) => (
+    const isInChunkBounds = ([x, y, z]) => (
       x >= 0 && x < chunkSize &&
       y >= 0 && y < chunkSize &&
       z >= 0 && z < chunkSize
@@ -92,14 +110,16 @@ class VoxelWorldTicker {
 
       const startPosition = getPositionWithValue(voxels, WATER_STILL);
       if (startPosition) {
-        const blobFrontier = getBlobFrontier(startPosition, position => {
-          const index = voxelUtils.getIndex(position[0], position[1], position[2]);
+        const blobFrontier = getBlobFrontier(startPosition, voxels, position => {
+          const [x, y, z] = position;
+          const index = voxelUtils.getIndex(x, y, z);
           const value = voxels[index];
           return value === WATER_STILL;
         });
-        if (!window.lol) { // XXX
-          console.log('got blob frontier', {startPosition: startPosition.join(','), blobFrontier});
-          window.lol = true;
+        if (!window.topHeap) { // XXX
+          window.topHeap = blobFrontier.topHeap;
+          window.bottomHeap = blobFrontier.bottomHeap;
+          console.log('got blob frontier', {startPosition: startPosition.join(',')});
         }
       }
     }
