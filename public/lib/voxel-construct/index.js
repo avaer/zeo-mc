@@ -36,9 +36,9 @@ VoxelConstruct.prototype.delete = function(pos) {
     
     const {type} = value;
     if (type === 'block') {
-      const {value: blockValue} = value;
+      const {variant: {block}} = value;
       for (let i = 0; i < this._yield; i++) {
-        let item = this.createDebris(pos, blockValue, this._power);
+        let item = this.createDebris(pos, block, this._power);
         item = this._game.addItem(item);
 
         const time = this._expire.start + Math.random() * (this._expire.end - this._expire.start);

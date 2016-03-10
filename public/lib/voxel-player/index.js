@@ -70,10 +70,10 @@ module.exports = function (game) {
     physics.startHolding = function(value) {
       const {rightArm} = playerSkin;
       const rightArmHold = (() => {
-        const {type, value: variant} = value;
+        const {type, variant} = value;
         if (type === 'block') {
           const voxels = new Float32Array(1);
-          voxels[0] = variant;
+          voxels[0] = variant.block;
           const dims = [1, 1, 1];
           const data = {voxels, dims};
           const mesh = voxelBlockRenderer(data, game.atlas, game.THREE);

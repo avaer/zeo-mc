@@ -289,7 +289,8 @@ Game.prototype.getValue = function(position) {
       let variant;
       if (variant = chunk.voxels[index]) {
         const type = 'block';
-        return {type, variant};
+        const depth = chunk.depths[index];
+        return {type, variant: {block: variant, depth}};
       } else if (variant = chunk.vegetations[index]) {
         const type = 'vegetation';
         return {type, variant};
@@ -301,8 +302,8 @@ Game.prototype.getValue = function(position) {
       }
     })();
     if (match) {
-      const {type, variant: value} = match;
-      return {type, value, chunkIndex, index};
+      const {type, variant} = match;
+      return {type, variant, chunkIndex, index};
     } else {
       return null;
     }
@@ -321,11 +322,13 @@ Game.prototype.setValue = function(position, value) {
     const chunk = this.voxels.chunks[chunkIndex];
     const mesh = this.voxels.meshes[chunkIndex];
     if (chunk) {
-      const {type, value: variant} = value;
+      const {type, variant} = value;
       const index = this.voxelUtils.getIndex(position[0], position[1], position[2]);
 
       if (type === 'block') {
-        chunk.voxels[index] = variant;
+        const {block, depth} = variant;
+        chunk.voxels[index] = block;
+        chunk.depths[index] = depth;
         mesh.blocksNeedUpdate = true;
       } else if (type === 'vegetation') {
         const x = this.voxelUtils.snapCoordinate(position[0]);
@@ -348,11 +351,12 @@ Game.prototype.setValue = function(position, value) {
 }
 
 Game.prototype.deleteValue = function(value) {
-  const {type, chunkIndex, index, value: voxelValue} = value;
+  const {type, chunkIndex, index} = value;
   const chunk = this.voxels.chunks[chunkIndex];
   const mesh = this.voxels.meshes[chunkIndex];
   if (type === 'block') {
     chunk.voxels[index] = 0;
+    chunk.depths[index] = 0;
     mesh.blocksNeedUpdate = true;
   } else if (type === 'vegetation') {
     chunk.vegetations[index] = null;
