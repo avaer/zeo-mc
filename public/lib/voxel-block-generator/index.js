@@ -10,8 +10,7 @@ const kNoFlagsMask        = 0x7FFF;
 
 function voxelBlockGenerator(voxelAsync) {
   function getType(voxels, offset) {
-    const type = voxels[offset];
-    return type;
+    return voxels[offset] | 0;
   }
 
   function isTransparent(type) {
@@ -26,7 +25,7 @@ function voxelBlockGenerator(voxelAsync) {
     return (v & kNoFlagsMask);
   }
 
-  return function(volume, dims) {
+  return function(voxels, dims) {
     var vertices = [], faces = [], tVertices = [], tFaces = []
       , dimsX = dims[0]
       , dimsY = dims[1]
@@ -67,8 +66,8 @@ function voxelBlockGenerator(voxelAsync) {
         for(x[v] = 0; x[v] < dimsV; ++x[v]) {
           for(x[u] = 0; x[u] < dimsU; ++x[u], ++n) {
             // Modified to read through getType()
-            let a = xd >= 0      ? getType(volume, x[0]      + dimsX * x[1]          + dimsXY * x[2]          ) : 0;
-            let b = xd < dimsD-1 ? getType(volume, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY) : 0;
+            let a = xd >= 0      ? getType(voxels, x[0]      + dimsX * x[1]          + dimsXY * x[2]          ) : 0;
+            let b = xd < dimsD-1 ? getType(voxels, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY) : 0;
 
             if (a !== b) {
               const aT = isTransparent(a);

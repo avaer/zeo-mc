@@ -96,7 +96,7 @@ voxelBlockMesher.getFrameUvs = function(facesData, normals, atlas) {
   return result;
 
   function getColorValue(i) {
-    return facesData[i];
+    return facesData[i] | 0;
   }
 
   function getNormalDirection(i) {
