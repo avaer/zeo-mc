@@ -26,17 +26,25 @@ console = {
 };
 
 onmessage = reqMsg => {
-  function done(error, result) {
+  function done(error, returnValue) {
     const type = 'response';
-    const res = {
-      type,
-      error,
-      result
-    };
-    postMessage(res, transfers);
+    if (!error) {
+      const {result, transfers} = returnValue;
+      const res = {
+        type,
+        error: null,
+        result
+      };
+      postMessage(res, transfers);
+    } else {
+      const res = {
+        type,
+        error,
+        result: null
+      };
+      postMessage(res);
+    }
   }
-
-  const transfers = [];
 
   _tryCatch(() => {
     const {data: req} = reqMsg;
@@ -45,8 +53,8 @@ onmessage = reqMsg => {
       const {method, args} = req;
 
       switch (method) {
-        case 'init': return init(args[0] || null, transfers);
-        case 'generate': return generate(args[0] || null, transfers);
+        case 'init': return init(args[0] || null);
+        case 'generate': return generate(args[0] || null);
         default: throw new Error('ENOENT');
       }
     }
@@ -54,18 +62,17 @@ onmessage = reqMsg => {
 };
 
 function init(opts) {
-  return voxelAsync.init(opts);
+  const result = voxelAsync.init(opts);
+  return {result};
 }
 
-function generate(position, transfers) {
+function generate(position) {
   const chunks = voxelAsync.generateSync(position);
+  const {voxels, depths} = chunks;
 
-  const {voxels} = chunks;
-  [voxels].forEach(dataArray => {
-    transfers.push(dataArray.buffer);
-  });
-
-  return chunks;
+  const result = chunks;
+  const transfers = [voxels.buffer, depths.buffer];
+  return {result, transfers};
 }
 
 function _tryCatch(fn, cb) {

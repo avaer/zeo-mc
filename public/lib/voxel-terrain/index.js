@@ -115,17 +115,17 @@ const TREE_DIRECTIONS = (function() {
   return result;
 })();
 
-const BLOCK_FULL_VALUE = 0.9;
-
 const BEDROCK_VALUE = BLOCKS['bedrock'];
 const LAVA_VALUE = BLOCKS['lava_still'];
 const OBSIDIAN_VALUE = BLOCKS['obsidian'];
 const STONE_VALUE = BLOCKS['stone'];
 const DIRT_VALUE = BLOCKS['dirt'];
 const GRASS_VALUE = BLOCKS['grass_top_plains'];
-const WATER_VALUE = BLOCKS['water_still'] + BLOCK_FULL_VALUE;
+const WATER_VALUE = BLOCKS['water_still'];
 const LOG_VALUE = BLOCKS['log_big_oak'];
 const LEAVES_VALUE = BLOCKS['leaves_big_oak_plains'];
+
+const FULL_VALUE = 255;
 
 const {min, abs, floor, sqrt, pow} = Math;
 
@@ -281,7 +281,8 @@ function voxelTerrain(opts) {
     const endY = startY + chunkSize;
     const endZ = startZ + chunkSize;
 
-    const voxels = new Float32Array(chunkSize * chunkSize * chunkSize);
+    const voxels = new Uint16Array(chunkSize * chunkSize * chunkSize);
+    const depths = new Uint8Array(chunkSize * chunkSize * chunkSize);
     const vegetations = {};
     const weathers = [];
     const effects = {};
@@ -401,6 +402,9 @@ function voxelTerrain(opts) {
         })();
         if (material !== null) {
           setVoxel(x, y, z, material);
+          if (material === WATER_VALUE) {
+            setDepth(x, y, z, FULL_VALUE)
+          }
 
           if (y === h && material === WATER_VALUE && startY <= SEA_LEVEL && endY > SEA_LEVEL) {
             riverSurfaces.push([x, h, z]);
@@ -416,8 +420,8 @@ function voxelTerrain(opts) {
         const riverSurface = riverSurfaces[i];
         const [x, h, z] = riverSurface;
         for (let y = h; y <= riverSurfacesMedianHeight; y++) {
-          const river = WATER_VALUE;
-          setVoxel(x, y, z, river);
+          setVoxel(x, y, z, WATER_VALUE);
+          setDepth(x, y, z, FULL_VALUE);
         }
       }
     }
@@ -569,6 +573,11 @@ function voxelTerrain(opts) {
       voxels[idx] = value;
     }
 
+    function setDepth(x, y, z, depth) {
+      const idx = vu.getIndex(x, y, z);
+      depths[idx] = depth;
+    }
+
     function setVegetation(x, y, z, value) {
       const idxSpec = vu.getIndexSpec(x, y, z);
       const [,,,idx] = idxSpec;
@@ -620,6 +629,7 @@ function voxelTerrain(opts) {
       position,
       dims,
       voxels,
+      depths,
       vegetations,
       entities,
       weathers,

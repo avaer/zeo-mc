@@ -30,22 +30,22 @@ function generateSync(position) {
   _ensureInitialized();
 
   const chunk = voxelTerrainGenerate(position);
-  const {voxels, vegetations, weathers, effects, dims} = chunk;
-  dims._cachedBlockMesh = voxelBlockGeneratorInstance(voxels, dims);
+  const {voxels, depths, vegetations, weathers, effects, dims} = chunk;
+  dims._cachedBlockMesh = voxelBlockGeneratorInstance({voxels, depths}, dims);
   dims._cachedPlaneMesh = voxelPlaneGeneratorInstance({vegetations, effects}, dims);
   dims._cachedParticleMesh = voxelParticleGeneratorInstance({weathers}, dims);
   return chunk;
 }
 api.generateSync = generateSync;
 
-function blockGenerator(voxels, dims) {
+function blockGenerator(data, dims) {
   _ensureInitialized();
 
   const cachedBlockMesh = dims._cachedBlockMesh;
   if (cachedBlockMesh) {
     return cachedBlockMesh;
   } else {
-    return voxelBlockGeneratorInstance(voxels, dims, {transparent: false});
+    return voxelBlockGeneratorInstance(data, dims, {transparent: false});
   }
 }
 api.blockGenerator = blockGenerator;

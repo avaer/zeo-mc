@@ -10,7 +10,7 @@ const kNoFlagsMask        = 0x7FFF;
 
 function voxelBlockGenerator(voxelAsync) {
   function getType(voxels, offset) {
-    return voxels[offset] | 0;
+    return voxels[offset];
   }
 
   function isTransparent(type) {
@@ -25,7 +25,7 @@ function voxelBlockGenerator(voxelAsync) {
     return (v & kNoFlagsMask);
   }
 
-  return function(voxels, dims) {
+  return function({voxels, depths}, dims) {
     var vertices = [], faces = [], tVertices = [], tFaces = []
       , dimsX = dims[0]
       , dimsY = dims[1]
