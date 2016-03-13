@@ -4,17 +4,29 @@ class Engines {
   constructor(opts) {
     this._opts = opts;
 
-    this._engines = ENGINES.map(Engine => new Engine({
-      getState: name => this.getState(name),
-      setState: (name, state) => {
-        this.setState(name, state);
-      },
-      updateState: (name, fn) => {
-        this.updateState(name, fn);
-      }
-    }));
+    this._engines = (() => {
+      const result = {};
+      ENGINES.forEach(Engine => {
+        const engine = new Engine({
+          getState: name => this.getState(name),
+          setState: (name, state) => {
+            this.setState(name, state);
+          },
+          updateState: (name, fn) => {
+            this.updateState(name, fn);
+          }
+        });
+        const {NAME: name} = Engine;
+        result[name] = engine;
+      });
+      return result;
+    })();
 
     this.init();
+  }
+
+  getEngine(name) {
+    return this._engines[name] || null;
   }
 
   getState(name) {
@@ -32,15 +44,16 @@ class Engines {
   }
 
   init() {
-    this._engines.forEach(engine => {
+    for (let engineName in this._engines) {
+      const engine = this._engines[engineName];
       const states = engine.init();
       if (states !== null) {
-        for (let name in states) {
-          const state = states[name];
-          this.setState(name, state);
+        for (let storeName in states) {
+          const state = states[storeName];
+          this.setState(storeName, state);
         }
       }
-    });
+    }
   }
 }
 

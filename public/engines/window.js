@@ -4,6 +4,8 @@ import Engines from './index';
 const {Engine} = Engines;
 
 class WindowEngine extends Engine {
+  static NAME = 'window';
+
   init() {
     return {
       'window': _updateWindowState(this.getState('window'))

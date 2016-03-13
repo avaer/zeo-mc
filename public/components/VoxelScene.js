@@ -294,8 +294,9 @@ export default class VoxelScene extends React.Component {
         let lastMenu = new Date(0);
         game.on('menu', () => {
           const now = new Date();
-          if (((+now - +lastMenu) / 1000) >= 0.1) {
-            console.log('menu engine', engines);
+          if (((+now - +lastMenu) / 1000) >= 0.05) {
+            const menuEngine = engines.getEngine('menu');
+            console.log('menu engine', menuEngine);
           }
           lastMenu = now;
         });
