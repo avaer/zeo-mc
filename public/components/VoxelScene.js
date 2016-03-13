@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {is} from 'immutable';
 import THREE from 'three';
+
 import voxelEngine from '../lib/voxel-engine/index';
 import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
 import voxelTextureLoader from '../lib/voxel-texture-loader/index';
@@ -15,7 +16,7 @@ import voxelPortal from '../lib/voxel-portal/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
-import {CHUNK_SIZE, CHUNK_DISTANCE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
+import {CHUNK_SIZE, CHUNK_DISTANCE, FRAME_RATE, WORLD_TICK_RATE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
 import {BLOCKS, PLANES, MODELS} from '../resources/index';
 
 window.BLOCKS = BLOCKS; // XXX remove this when we no longer need to support making models manually
@@ -35,23 +36,7 @@ const INITIAL_CHUNK_POSITIONS = (() => {
   return result;
 })();
 
-class Crosshair extends React.Component {
-  render() {
-    const style = {
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      margin: '-2px 0 0 -2px',
-      width: '4px',
-      height: '4px',
-      backgroundColor: '#d00'
-    };
-
-    return <div style={style} />;
-  }
-}
-
-export default class Voxels extends React.Component {
+export default class VoxelScene extends React.Component {
   componentWillMount() {
     const {seed} = this.props;
     const chunkSize = CHUNK_SIZE;
@@ -65,6 +50,8 @@ export default class Voxels extends React.Component {
   }
 
   componentDidMount() {
+    const {width, height} = this.props;
+
     let atlas, textureLoader, game, avatar;
 
     const loadTextureAtlas = cb => {
@@ -121,11 +108,15 @@ export default class Voxels extends React.Component {
 
     const initializeGame = cb => {
       game = voxelEngine({
+        width,
+        height,
         atlas,
         textureLoader,
         generateChunks: false,
         chunkSize: CHUNK_SIZE,
         chunkDistance: CHUNK_DISTANCE,
+        frameRate: FRAME_RATE,
+        worldTickRate: WORLD_TICK_RATE,
         lightsDisabled: true,
         gravity: GRAVITY,
         statsDisabled: true
@@ -425,6 +416,22 @@ function _makeWorkers(workerOpts) {
     })();
   }
   return workers;
+}
+
+class Crosshair extends React.Component {
+  render() {
+    const style = {
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      margin: '-2px 0 0 -2px',
+      width: '4px',
+      height: '4px',
+      backgroundColor: '#d00'
+    };
+
+    return <div style={style} />;
+  }
 }
 
 function _positionKey(position) {

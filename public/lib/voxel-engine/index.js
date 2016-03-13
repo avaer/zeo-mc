@@ -57,10 +57,12 @@ function Game(opts) {
   this.cubeSize = 1 // backwards compat
   this.chunkSize = opts.chunkSize || 32
 
+  this.frameRate = opts.frameRate || 60
+  this.frameTime = 1000 / this.frameRate
   this.worldTickRate = opts.worldTickRate || 10
   this.worldTickTime = 1000 / this.worldTickRate
   this.particleTickRate = opts.particleTickRate || 100
-  this.particleTickTime = 1000 / this.particleTickRate;
+  this.particleTickTime = 1000 / this.particleTickRate
   
   // chunkDistance and removeDistance should not be set to the same thing
   // as it causes lag when you go back and forth on a chunk boundary
@@ -100,7 +102,7 @@ function Game(opts) {
   )
   this.collisionTests = []
   
-  this.timer = this.initializeTimer(opts.tickFPS || 16)
+  this.timer = this.initializeTimer(this.frameTime)
   // this.paused = false
 
   this.spatial = new SpatialEventEmitter

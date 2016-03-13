@@ -2,15 +2,16 @@ import React from 'react';
 import Immutable from 'immutable'; // XXX
 
 // import World from './World';
-import Voxels from './Voxels';
-import Editor from './Editor';
-import Node from './Node';
+import VoxelScene from './VoxelScene';
+import VoxelMenu from './VoxelMenu';
+// import Editor from './Editor';
+// import Node from './Node';
 
-import {DEFAULT_SEED, UI_MODES} from '../constants/index';
+import {DEFAULT_SEED} from '../constants/index';
 
 export default class AppBody extends React.Component {
   render() {
-    const {stores, engines} = this.props;
+    /* const {stores, engines} = this.props;
     const {ui: uiState, window: windowState, world: worldState} = stores;
 
     const {mode, value, oldValue} = uiState;
@@ -34,13 +35,20 @@ export default class AppBody extends React.Component {
       hoverEndCoords,
 
       engines,
-    };
+    }; */
 
-    const voxelsProps = {
+    const {window: windowState} = stores;
+    const {width, height, pathname} = windowState;
+
+    const voxelSceneProps = {
       seed: pathname.replace(/^\//, '') || DEFAULT_SEED
     };
 
-    const editorProps = {
+    const voxelMenuProps = {
+      // XXX
+    };
+
+    /* const editorProps = {
       value,
       visible: mode === UI_MODES.EDITOR,
       focused: mode === UI_MODES.EDITOR,
@@ -59,14 +67,14 @@ export default class AppBody extends React.Component {
     const nodeProps = {
       src: oldValue,
       state: new Immutable.Map({lol: 'zol'}),
-    };
+    }; */
 
     return (
       <div className='app-body'>
-        {/*<World {...worldProps} />*/}
-        <Voxels {...voxelsProps} />
-        <Editor {...editorProps} />
-        <Node {...nodeProps} />
+        <VoxelScene {...voxelSceneProps} />
+        <VoxelMenu {...voxelMenuProps} />
+        /* <Editor {...editorProps} />
+        <Node {...nodeProps} /> */
       </div>
     );
   }
