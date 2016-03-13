@@ -16,6 +16,11 @@ export default class MenuEngine extends Engine {
         .set('lastOpenTime', lastOpenTime);
     });
   }
+
+  selectTab(tab) {
+    this.updateState('menu', state => state
+      .set('tab', tab));
+  }
 }
 
 module.exports = MenuEngine;

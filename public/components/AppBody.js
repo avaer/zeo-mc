@@ -40,8 +40,7 @@ export default class AppBody extends React.Component {
     const {stores, engines} = this.props;
     const {window: windowState, menu: menuState} = stores;
     const {width, height, devicePixelRatio, pathname} = windowState;
-
-    const {open: menuOpen, lastOpenTime: menuLastOpenTime} = menuState;
+    const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab} = menuState;
 
     const voxelSceneProps = {
       width,
@@ -59,6 +58,7 @@ export default class AppBody extends React.Component {
 
       open: menuOpen,
       lastOpenTime: menuLastOpenTime,
+      tab: menuTab,
 
       engines,
     };

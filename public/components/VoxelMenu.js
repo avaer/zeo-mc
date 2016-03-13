@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import THREE from 'three';
+import classnames from 'classnames';
 
 import {GRADIENTS} from '../resources/index';
 import {KEYS} from '../utils/input/index';
@@ -14,6 +15,14 @@ const MENU_FONT = '\'Press Start 2P\', cursive';
 const MENU_FG_DIM = 0.75;
 const MENU_BG_DIM = 0.5;
 const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
+
+const MENU_TABS = [
+  {name: 'blocks', icon: 'cube'},
+  {name: 'items', icon: 'heartbeat'},
+  {name: 'vegetations', icon: 'tree'},
+  {name: 'weapons', icon: 'wrench'},
+  {name: 'materia', icon: 'level-up'},
+];
 
 const CUBE_SIZE = 0.8;
 const CUBE_ROTATION_RATE = 5000;
@@ -32,8 +41,7 @@ export default class VoxelMenu extends React.Component {
       right: 0,
       fontFamily: MENU_FONT,
       color: '#444',
-      textShadow: '0 2px rgba(255,255,255,0.35)',
-      pointerEvents: open ? null : 'none'
+      pointerEvents: 'none'
     };
   }
 
@@ -50,7 +58,7 @@ export default class VoxelMenu extends React.Component {
   };
 
   render() {
-    return <div style={this.getStyles()} tabIndex={-1} onKeyDown={this.onKeyDown}>
+    return <div style={this.getStyles()} onKeyDown={this.onKeyDown}>
       <MenuBg {...this.props} />
       <MenuFg {...this.props} />
     </div>;
@@ -89,24 +97,20 @@ class MenuFg extends React.Component {
 
 class Menu2d extends React.Component {
   render() {
-    const {open} = this.props;
-
-    const menu2dReactProps = {
-      open,
-    };
-
-    const menu2dCanvasProps = {
-      open,
-    };
-
     return <div>
-      <Menu2dReact {...menu2dReactProps} />
-      <Menu2dCanvas {...menu2dCanvasProps} />
+      <Menu2dReact {...this.props} />
+      <Menu2dCanvas {...this.props} />
     </div>;
   }
 }
 
 class Menu2dReact extends React.Component {
+  getStyles() {
+    return {
+      pointerEvents: 'all'
+    };
+  }
+
   getLeftStyles() {
     const {open} = this.props;
     return _getLeftStyles({open, solid: true});
@@ -118,13 +122,143 @@ class Menu2dReact extends React.Component {
   }
 
   render() {
-    return <div>
+    const {tab, engines} = this.props;
+
+    return <div style={this.getStyles()}>
       <div style={this.getLeftStyles()}>
-        {/* XXX */}
+        <MenuTabs tab={tab} engines={engines} />
       </div>
       <div style={this.getRightStyles()}>
         <MenuStats />
       </div>
+    </div>;
+  }
+}
+
+class MenuTabs extends React.Component {
+  getStyles() {
+    return {
+      display: 'flex',
+      // borderBottom: '2px solid rgba(0,0,0,0.2)',
+    }
+  }
+
+  render() {
+    const {tab: selectedTab, engines} = this.props;
+
+    return <div style={this.getStyles()}>
+      {MENU_TABS.map((tab, i, a) => {
+        const {name, icon} = tab;
+        const selected = selectedTab === name;
+        const first = i === 0;
+        const last = i === a.length - 1;
+        return <MenuTab name={name} icon={icon} selected={selected} first={first} last={last} engines={engines} key={name} />;
+      })}
+    </div>;
+  }
+}
+
+class MenuTab extends React.Component {
+  state = {
+    hovered: false
+  };
+
+  getStyles() {
+    const {selected} = this.props;
+    const {hovered} = this.state;
+
+    return {
+      display: 'flex',
+      position: 'relative',
+      flex: 1,
+      height: 40,
+      // marginBottom: -2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: 20,
+      color: (selected || hovered) ? '#333' : 'rgba(0,0,0,0.2)',
+      cursor: 'pointer',
+    };
+  }
+
+  getIconClassName() {
+    const {icon} = this.props;
+    return classnames(['fa', 'fa-' + icon]);
+  }
+
+  getIconStyles() {
+    return {
+      // fontSize: 10,
+    };
+  }
+
+  getBorderSideStyles(side) {
+    const {selected, first, last} = this.props;
+
+    return {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: side === 'left' ? 0 : null,
+      right: side === 'right' ? 0 : null,
+      borderWidth: 0,
+      borderLeftWidth: (side === 'left' && !first) ? 2 : null,
+      borderRightWidth: (side === 'right' && !last) ? 2 : null,
+      borderStyle: 'solid',
+      borderColor: selected ? 'rgba(0,0,0,0.2)' : 'transparent',
+    };
+  }
+
+  getBorderVerticalStyles(side) {
+    const {selected} = this.props;
+
+    return {
+      position: 'absolute',
+      top: side === 'top' ? 0 : null,
+      bottom: side === 'bottom' ? 0 : null,
+      left: side === 'top' ? 2 : 0,
+      right: side === 'top' ? 2 : 0,
+      borderWidth: 0,
+      borderTopWidth: side === 'top' ? 2 : null,
+      borderBottomWidth: side === 'bottom' ? 2 : null,
+      borderStyle: 'solid',
+      borderColor: (() => {
+        if (side === 'top') {
+          return selected ? 'rgba(0,0,0,0.2)' : 'transparent';
+        } else if (side === 'bottom') {
+          return selected ? 'transparent' : 'rgba(0,0,0,0.2)';
+        } else {
+          return null;
+        }
+      })(),
+    };
+  }
+
+  onMouseOver = () => {
+    this.setState({
+      hovered: true
+    });
+  };
+
+  onMouseOut = () => {
+    this.setState({
+      hovered: false
+    });
+  };
+
+  onClick = () => {
+    const {name, engines} = this.props;
+    const menuEngine = engines.getEngine('menu');
+    menuEngine.selectTab(name);
+  };
+
+  render() {
+    return <div style={this.getStyles()} onMouseOver={this.onMouseOver} onMouseOut={this.onMouseOut} onClick={this.onClick}>
+      <i className={this.getIconClassName()} style={this.getIconStyles()} />
+      <div style={this.getBorderSideStyles('left')} />
+      <div style={this.getBorderSideStyles('right')} />
+      {/*<div style={this.getBorderVerticalStyles('top')} />*/}
+      <div style={this.getBorderVerticalStyles('bottom')} />
     </div>;
   }
 }
@@ -164,9 +298,10 @@ class MenuStatsBar extends React.Component {
   getLabelsStyles() {
     return {
       display: 'flex',
+      paddingBottom: 5,
       fontSize: 10,
       // lineHeight: 1.4,
-      paddingBottom: 5
+      textShadow: '0 2px rgba(255,255,255,0.35)',
     };
   }
 
@@ -247,7 +382,8 @@ class Menu2dCanvas extends React.Component {
   }
 
   componentDidMount() {
-    const {width, height} = this.props;
+    const width = MENU_LEFT_WIDTH;
+    const height = MENU_LEFT_WIDTH;
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -277,12 +413,23 @@ class Menu2dCanvas extends React.Component {
     return ReactDOM.findDOMNode(this);
   } 
 
+  getStyles() {
+    return {
+      position: 'absolute',
+    };
+  }
+
   render() {
-    return <div />;
+    return <div style={this.getStyles()} />;
   }
 }
 
 class Menu3d extends React.Component {
+  /* getStyles() {
+    return {
+    };
+  } */
+
   getLeftStyles() {
     const {open} = this.props;
     return _getLeftStyles({open});
@@ -383,6 +530,13 @@ class Menu3dLeft extends React.Component {
     return ReactDOM.findDOMNode(this);
   }
 
+  getStyles() {
+    return {
+      position: 'absolute',
+      top: 50,
+    };
+  }
+
   refresh() {
     const {renderer, scene, camera, cubes} = this._menu;
 
@@ -398,7 +552,7 @@ class Menu3dLeft extends React.Component {
   }
 
   render() {
-    return <div />;
+    return <div style={this.getStyles()} />;
   }
 }
 
