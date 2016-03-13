@@ -8,9 +8,11 @@ import {FRAME_RATE, MENU_TIME} from '../constants/index';
 const MENU_LEFT_WIDTH = 400;
 const MENU_RIGHT_WIDTH = 400;
 
-const MENU_FG_DIM = 0.75;
+const MENU_FG_DIM = 0.6;
 const MENU_BG_DIM = 0.5;
 const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
+
+const CUBE_ROTATION_RATE = 5000;
 
 const {min, max} = Math;
 
@@ -179,66 +181,6 @@ class Menu2dCanvas extends React.Component {
 }
 
 class Menu3d extends React.Component {
-  componentWillMount() {
-    _ManualRefreshComponent.componentWillMount.call(this);
-  }
-
-  componentWillUnmount() {
-    _ManualRefreshComponent.componentWillUnmount.call(this);
-  }
-
-  componentDidMount() {
-    this.initLeftMenu();
-    this.initRightMenu();
-  }
-
-  shouldComponentUpdate() {
-    return _ManualRefreshComponent.shouldComponentUpdate.call(this);
-  }
-
-  getLeftDomNode() {
-    return this.refs.left;
-  }
-
-  getRightDomNode() {
-    return this.refs.right;
-  }
-
-  initLeftMenu() {
-    const width = MENU_LEFT_WIDTH;
-    const height = MENU_LEFT_WIDTH;
-
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true
-    });
-    renderer.setSize(width, height);
-
-    const scene = new THREE.Scene();
-    const cube = (() => {
-      const geometry = new THREE.CubeGeometry(1, 1, 1);
-      const material = new THREE.MeshBasicMaterial({
-        color: 0x000000,
-        wireframe: true,
-      });
-      const mesh = new THREE.Mesh(geometry, material);
-      return mesh;
-    })();
-    scene.add(cube);
-
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1000);
-
-    const leftDomNode = this.getLeftDomNode();
-    leftDomNode.appendChild(renderer.domElement);
-    renderer.domElement.style.backgroundColor = 'white';
-    console.log('left dom node append child', leftDomNode, renderer.domElement);
-
-    this._leftMenu = {renderer, scene, camera, cube};
-  }
-
-  initRightMenu() {
-    // XXX
-  }
-
   getLeftStyles() {
     const {open} = this.props;
     return _getLeftStyles({open});
@@ -249,28 +191,105 @@ class Menu3d extends React.Component {
     return _getRightStyles({open});
   }
 
-  refresh() {
-    this.refreshLeftMenu();
-    this.refreshRightMenu();
-  }
-
-  refreshLeftMenu() {
-    const {renderer, scene, camera} = this._leftMenu;
-    renderer.render(scene, camera);
-  }
-
-  refreshRightMenu() {
-    // XXX
-  }
-
   render() {
+    const {open, lastOpenTime} = this.props;
+
+    const menuProps = {open, lastOpenTime};
+
     return <div>
-      <div ref='left' style={this.getLeftStyles()} />
-      <div ref='right' style={this.getRightStyles()} />
+      <div style={this.getLeftStyles()}>
+        <Menu3dLeft {...menuProps} />
+      </div>
+      <div style={this.getRightStyles()}>
+        <Menu3dRight {...menuProps} />
+      </div>
     </div>;
   }
 }
 
+class Menu3dLeft extends React.Component {
+  componentWillMount() {
+    _ManualRefreshComponent.componentWillMount.call(this);
+  }
+
+  componentWillUnmount() {
+    _ManualRefreshComponent.componentWillUnmount.call(this);
+  }
+
+  shouldComponentUpdate() {
+    return _ManualRefreshComponent.shouldComponentUpdate.call(this);
+  }
+
+  componentDidMount() {
+    const width = MENU_LEFT_WIDTH;
+    const height = MENU_LEFT_WIDTH;
+
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+    });
+    renderer.setSize(width, height);
+
+    const scene = new THREE.Scene();
+    const cubes = (() => {
+      const result = [];
+      for (let x = 0; x < 4; x++) {
+        for (let y = 0; y < 4; y++) {
+          const geometry = _makeCubeGeometry();
+          const material = new THREE.MeshBasicMaterial({
+            color: 0x000000,
+            opacity: 0.15,
+            wireframe: true,
+          });
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
+          mesh.rotation.order = 'XYZ';
+          result.push(mesh);
+        }
+      }
+      return result;
+    })();
+    cubes.forEach(cube => {
+      scene.add(cube);
+    });
+
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1000);
+    camera.position.set(0, 0, 12);
+
+    const domNode = this.domNode();
+    domNode.appendChild(renderer.domElement);
+
+    this._menu = {renderer, scene, camera, cubes};
+  }
+
+  domNode() {
+    return ReactDOM.findDOMNode(this);
+  }
+
+  refresh() {
+    const {renderer, scene, camera, cubes} = this._menu;
+
+    const time = new Date();
+    const timeFactor = (+time % CUBE_ROTATION_RATE) / CUBE_ROTATION_RATE;
+    const rotationFactor = timeFactor * Math.PI * 2;
+    cubes.forEach((cube, i) => {
+      const localRotationFactor = rotationFactor + (((i % 4) / 4) * Math.PI * 2);
+      cube.rotation.set(0, localRotationFactor, localRotationFactor);
+    });
+
+    renderer.render(scene, camera);
+  }
+
+  render() {
+    return <div />;
+  }
+}
+
+class Menu3dRight extends React.Component {
+  render() {
+    return <div />;
+  }
+}
 
 const _ManualRefreshComponent = {
   componentWillMount() {
@@ -343,4 +362,10 @@ function _getRightStyles({open}) {
     backgroundColor: 'rgba(255, 255, 255, ' + MENU_FG_DIM + ')',
     transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
   };
+}
+
+function _makeCubeGeometry() {
+  const cubeGeometry = new THREE.CubeGeometry(1, 1, 1);
+  const bufferGeometry = new THREE.BufferGeometry().fromGeometry(cubeGeometry);
+  return bufferGeometry;
 }
