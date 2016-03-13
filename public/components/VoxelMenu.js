@@ -20,6 +20,7 @@ const MENU_TABS = [
   {name: 'all', icon: 'map'},
   {name: 'blocks', icon: 'cube'},
   {name: 'items', icon: 'flask'},
+  {name: 'structures', icon: 'home'},
   {name: 'weapons', icon: 'bomb'},
   {name: 'materia', icon: 'diamond'},
 ];
