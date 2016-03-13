@@ -41,7 +41,7 @@ export default class AppBody extends React.Component {
     const {window: windowState, menu: menuState} = stores;
     const {width, height, pathname} = windowState;
 
-    const {visible: menuVisible} = menuState;
+    const {open: menuOpen, lastOpenTime: menuLastOpenTime} = menuState;
 
     const voxelSceneProps = {
       width,
@@ -56,7 +56,8 @@ export default class AppBody extends React.Component {
       width,
       height,
 
-      visible: menuVisible,
+      open: menuOpen,
+      lastOpenTime: menuLastOpenTime,
     };
 
     /* const editorProps = {

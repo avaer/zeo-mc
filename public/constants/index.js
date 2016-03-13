@@ -9,6 +9,8 @@ export const CHUNK_DISTANCE = 2;
 export const INITIAL_POSITION = [0, 32, 0];
 export const GRAVITY = [0, -0.0000036, 0];
 
+export const MENU_TIME = 0.1;
+
 export const BIOME_TEXTURES = [
   'plains',
   'forest',

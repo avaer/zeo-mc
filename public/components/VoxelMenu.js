@@ -2,40 +2,103 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import THREE from 'three';
 
-import {FRAME_RATE} from '../constants/index';
+import {FRAME_RATE, MENU_TIME} from '../constants/index';
 
 const MENU_LEFT_WIDTH = 300;
 const MENU_RIGHT_WIDTH = 300;
 
+const MENU_DIM = 0.75;
+
+const {min, max} = Math;
+
 export default class VoxelMenu extends React.Component {
+  getStyles() {
+    const {open} = this.props;
+
+    return {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      pointerEvents: open ? null : 'none'
+    };
+  }
+
   render() {
-    const {visible} = this.props;
+    const {open, lastOpenTime} = this.props;
 
-    const menu2dProps = {
-      visible,
+    const menuProps = {
+      open,
+      lastOpenTime,
     };
 
-    const menu3dProps = {
-      visible,
-    };
-
-    return <div>
-      <Menu2d {...menu2dProps} />
-      <Menu3d {...menu3dProps} />
+    return <div style={this.getStyles()}>
+      <MenuBg {...menuProps} />
+      <MenuFg {...menuProps} />
     </div>;
   }
 };
 
+class MenuBg extends React.Component {
+  getStyles() {
+    const {open, lastOpenTime} = this.props;
+
+    const opacity = (() => {
+      const now = new Date();
+      const timeDiff = (+now - +lastOpenTime) / 1000;
+      const timeFactor = timeDiff / MENU_TIME;
+
+      if (open) {
+        return min(timeFactor, 1);
+      } else {
+        return max(1 - timeFactor, 0); 
+      }
+    })();
+
+    return {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: 'rgba(0, 0, 0, ' + MENU_DIM + ')',
+      opacity,
+      transition: 'all 0.1s cubic-bezier(0,0,1,1)',
+    };
+  }
+
+  render() {
+    return <div style={this.getStyles()} />;
+  }
+}
+
+class MenuFg extends React.Component {
+  render() {
+    const {open, lastOpenTime} = this.props;
+
+    const menuProps = {
+      open,
+      lastOpenTime,
+    };
+
+    return <div>
+      <Menu2d {...menuProps} />
+      <Menu3d {...menuProps} />
+    </div>;
+  }
+}
+
 class Menu2d extends React.Component {
   render() {
-    const {visible} = this.props;
+    const {open} = this.props;
 
     const menu2dReactProps = {
-      visible,
+      open,
     };
 
     const menu2dCanvasProps = {
-      visible,
+      open,
     };
 
     return <div>
@@ -47,31 +110,30 @@ class Menu2d extends React.Component {
 
 class Menu2dReact extends React.Component {
   getStyles() {
-    const {visible} = this.props;
+    const {open} = this.props;
 
     return {
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      opacity: visible ? 1 : 0,
       transition: 'all 0.1s cubic-bezier(0,0,1,1)',
     };
   }
 
   getLeftStyles() {
-    const {visible} = this.props;
+    const {open} = this.props;
 
     return {
       position: 'relative',
-      left: visible ? 0 : -MENU_LEFT_WIDTH,
+      left: open ? 0 : -MENU_LEFT_WIDTH,
       transition: 'all 0.1s cubic-bezier(0,0,1,1)',
     };
   }
 
   getRightStyles() {
-    const {visible} = this.props;
+    const {open} = this.props;
 
     return {
       position: 'relative',
-      right: visible ? 0 : -MENU_RIGHT_WIDTH,
+      right: open ? 0 : -MENU_RIGHT_WIDTH,
       transition: 'all 0.1s cubic-bezier(0,0,1,1)',
     };
   }
@@ -184,8 +246,9 @@ const _ManualRefreshComponent = {
         this._frame = requestAnimationFrame(() => {
           this._frame = null;
 
-          const {visible} = this.props;
-          if (visible) {
+          const {lastOpenTime} = this.props;
+          const now = new Date();
+          if ((+now - +lastOpenTime) < MENU_TIME) {
             this.refresh();
           }
 

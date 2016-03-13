@@ -16,7 +16,7 @@ import voxelPortal from '../lib/voxel-portal/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
-import {CHUNK_SIZE, CHUNK_DISTANCE, FRAME_RATE, WORLD_TICK_RATE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
+import {CHUNK_SIZE, CHUNK_DISTANCE, FRAME_RATE, WORLD_TICK_RATE, INITIAL_POSITION, GRAVITY, NUM_WORKERS, MENU_TIME} from '../constants/index';
 import {BLOCKS, PLANES, MODELS} from '../resources/index';
 
 window.BLOCKS = BLOCKS; // XXX remove this when we no longer need to support making models manually
@@ -294,9 +294,10 @@ export default class VoxelScene extends React.Component {
         let lastMenu = new Date(0);
         game.on('menu', () => {
           const now = new Date();
-          if (((+now - +lastMenu) / 1000) >= 0.05) {
+          if (((+now - +lastMenu) / 1000) >= MENU_TIME) {
             const menuEngine = engines.getEngine('menu');
-            console.log('menu engine', menuEngine);
+            console.log('menu engine toggle open', menuEngine); // XXX
+            menuEngine.toggleOpen();
           }
           lastMenu = now;
         });
