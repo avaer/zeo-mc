@@ -8,32 +8,6 @@ const MENU_LEFT_WIDTH = 300;
 const MENU_RIGHT_WIDTH = 300;
 
 export default class VoxelMenu extends React.Component {
-  state = {
-    state: null,
-  };
-
-  componentWillReceiveProps(nextProps) {
-    const {visible} = nextProps;
-
-    this.updateState(state => state
-      .set('visible', visible));
-  }
-
-  componentWillUnmount() {
-    if (this._timeout) {
-      clearTimeout(this._timeout);
-    }
-    if (this._frame) {
-      clearAnimationFrame(this._frame);
-    }
-  }
-
-  updateState(fn) {
-    const {state: oldState} = this.state;
-    const newState = fn(oldState);
-    this.setState('state', newState);
-  }
-
   render() {
     const {visible} = this.props;
 

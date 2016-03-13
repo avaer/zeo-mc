@@ -15,8 +15,6 @@ class WindowEngine extends Engine {
   }
 
   listen() {
-    console.log('wwwwwwwwwwwwwwwwwwwwwww window listen'); // XXX
-
     const $window = $(window);
     $window.on('resize', () => {
       this.updateState('window', _updateWindowState);

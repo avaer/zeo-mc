@@ -6,8 +6,11 @@ class Engines {
 
     this._engines = ENGINES.map(Engine => new Engine({
       getState: name => this.getState(name),
-      updateState: (name, state) => {
+      setState: (name, state) => {
         this.setState(name, state);
+      },
+      updateState: (name, fn) => {
+        this.updateState(name, fn);
       }
     }));
 
@@ -53,7 +56,11 @@ class Engine {
   }
 
   setState(name, newState) {
-    return this._opts.setState(name, newState);
+    this._opts.setState(name, newState);
+  }
+
+  updateState(name, fn) {
+    this._opts.updateState(name, fn);
   }
 
   init() {

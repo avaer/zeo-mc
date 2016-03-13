@@ -321,6 +321,12 @@ export default class VoxelScene extends React.Component {
     step([loadTextureAtlas, initializeGame, generateInitialChunks, startGame]);
   }
 
+  componentWillReceiveProps(nextProps) {
+    const prevProps = this.props;
+
+    console.log('component will receive props', {nextProps, prevProps});
+  }
+
   shouldComponentUpdate() {
     return false;
   }
