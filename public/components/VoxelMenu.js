@@ -9,7 +9,7 @@ import {FRAME_RATE, MENU_TIME} from '../constants/index';
 const MENU_LEFT_WIDTH = 300;
 const MENU_RIGHT_WIDTH = 300;
 
-const MENU_FG_DIM = 0.6;
+const MENU_FG_DIM = 0.75;
 const MENU_BG_DIM = 0.5;
 const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
@@ -104,12 +104,12 @@ class Menu2d extends React.Component {
 class Menu2dReact extends React.Component {
   getLeftStyles() {
     const {open} = this.props;
-    return _getLeftStyles({open});
+    return _getLeftStyles({open, solid: true});
   }
 
   getRightStyles() {
     const {open} = this.props;
-    return _getRightStyles({open});
+    return _getRightStyles({open, solid: true});
   }
 
   render() {
@@ -343,26 +343,26 @@ const _ManualRefreshComponent = {
   }
 };
 
-function _getLeftStyles({open}) {
+function _getLeftStyles({open, solid}) {
   return {
     position: 'absolute',
     left: open ? 0 : -MENU_LEFT_WIDTH,
     top: 0,
     bottom: 0,
     width: MENU_LEFT_WIDTH,
-    backgroundColor: 'rgba(255, 255, 255, ' + MENU_FG_DIM + ')',
+    backgroundColor: solid ? ('rgba(255, 255, 255, ' + MENU_FG_DIM + ')') : null,
     transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
   };
 }
 
-function _getRightStyles({open}) {
+function _getRightStyles({open, solid}) {
   return {
     position: 'absolute',
     right: open ? 0 : -MENU_RIGHT_WIDTH,
     top: 0,
     bottom: 0,
     width: MENU_RIGHT_WIDTH,
-    backgroundColor: 'rgba(255, 255, 255, ' + MENU_FG_DIM + ')',
+    backgroundColor: solid ? ('rgba(255, 255, 255, ' + MENU_FG_DIM + ')') : null,
     transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
   };
 }
