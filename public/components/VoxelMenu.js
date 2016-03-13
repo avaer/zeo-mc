@@ -18,10 +18,10 @@ const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
 const MENU_TABS = [
   {name: 'blocks', icon: 'cube'},
-  {name: 'items', icon: 'heartbeat'},
+  {name: 'items', icon: 'flask'},
   {name: 'vegetations', icon: 'tree'},
-  {name: 'weapons', icon: 'wrench'},
-  {name: 'materia', icon: 'level-up'},
+  {name: 'weapons', icon: 'bomb'},
+  {name: 'materia', icon: 'diamond'},
 ];
 
 const CUBE_SIZE = 0.8;
@@ -177,7 +177,7 @@ class MenuTab extends React.Component {
       justifyContent: 'center',
       fontSize: 20,
       color: (selected || hovered) ? '#333' : 'rgba(0,0,0,0.2)',
-      cursor: 'pointer',
+      cursor: !selected ? 'pointer' : null,
     };
   }
 
