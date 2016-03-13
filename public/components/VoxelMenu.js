@@ -8,7 +8,9 @@ import {FRAME_RATE, MENU_TIME} from '../constants/index';
 
 const MENU_LEFT_WIDTH = 300;
 const MENU_RIGHT_WIDTH = 300;
+const MENU_BAR_WIDTH = 256;
 
+const MENU_FONT = '\'Press Start 2P\', cursive';
 const MENU_FG_DIM = 0.75;
 const MENU_BG_DIM = 0.5;
 const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
@@ -28,6 +30,9 @@ export default class VoxelMenu extends React.Component {
       bottom: 0,
       left: 0,
       right: 0,
+      fontFamily: MENU_FONT,
+      color: '#444',
+      textShadow: '0 2px rgba(255,255,255,0.35)',
       pointerEvents: open ? null : 'none'
     };
   }
@@ -118,7 +123,116 @@ class Menu2dReact extends React.Component {
         {/* XXX */}
       </div>
       <div style={this.getRightStyles()}>
-        {/* XXX */}
+        <MenuStats />
+      </div>
+    </div>;
+  }
+}
+
+class MenuStats extends React.Component {
+  getStyles() {
+    return {
+      position: 'absolute',
+      left: 0,
+      bottom: 0,
+      height: 300,
+      width: '100%',
+    };
+  }
+
+  render() {
+    return <div style={this.getStyles()}>
+      <MenuStatsBar label='HP' value={2263 * 0.75} total={2263} colors={['#5AD427', '#A4E786']} />
+      <MenuStatsBar label='MP' value={177 * 0.4} total={177} colors={['#1D77EF', '#81F3FD']} />
+      <MenuStatsBar label='Str' value={124} total={124} colors={['#FB2B69', '#FF5B37']} />
+      <MenuStatsBar label='Def' value={124} total={124} colors={['#F7F7F7', '#D7D7D7']} />
+      <MenuStatsBar label='Mag' value={124} total={124} colors={['#C86EDF', '#E4B7F0']} />
+      <MenuStatsBar label='Spd' value={124} total={124} colors={['#FF9500', '#FF5E3A']} />
+    </div>;
+  }
+}
+
+class MenuStatsBar extends React.Component {
+  getStyles() {
+    return {
+      padding: '5px 20px',
+      /* border: '2px solid rgba(0,0,0,0.2)',
+      borderRadius: 5, */
+    };
+  }
+
+  getLabelsStyles() {
+    return {
+      display: 'flex',
+      fontSize: 10,
+      // lineHeight: 1.4,
+      paddingBottom: 5
+    };
+  }
+
+  getLabelStyles() {
+    return {
+      flex: '1',
+    };
+  }
+
+  getTotalStyles() {
+    return {
+      color: '#808080',
+      alignContent: 'flex-end',
+    };
+  }
+
+  getBarWrapperStyles() {
+    return {
+      height: 4,
+      width: MENU_BAR_WIDTH,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      border: '2px solid transparent',
+    };
+  }
+
+  /* getBarWrapperBorderStyles() {
+    return {
+      height: 2,
+      width: '100%',
+      backgroundColor: 'rgba(0,0,0,0.2)',
+    };
+  } */
+
+  getBarContainerStyles() {
+    const {value, total} = this.props;
+
+    return {
+      height: '100%',
+      width: ((value / total) * 100) + '%',
+      overflow: 'hidden'
+    };
+  }
+
+  getBarStyles() {
+    const {colors} = this.props;
+
+    return {
+      height: '100%',
+      width: MENU_BAR_WIDTH,
+      backgroundImage: 'linear-gradient(to right, ' + colors.join(',') + ')',
+    };
+  }
+
+  render() {
+    const {label, total} = this.props;
+
+    return <div style={this.getStyles()}>
+      <div style={this.getLabelsStyles()}>
+        <div style={this.getLabelStyles()}>{label}</div>
+        <div style={this.getTotalStyles()}>{total}</div>
+      </div>
+      <div style={this.getBarWrapperStyles()}>
+        <div style={this.getBarContainerStyles()}>
+          <div style={this.getBarStyles()} />
+        </div>
+        {/* <div style={this.getBarWrapperBorderStyles()} /> */}
       </div>
     </div>;
   }
@@ -402,14 +516,14 @@ const CUBE_FULL_MATERIALS = [
   new THREE.MeshBasicMaterial({
     // shading: THREE.FlatShading,
     vertexColors: THREE.VertexColors,
-    opacity: 0.96,
-    transparent: true
+    // opacity: 0.96,
+    // transparent: true
   }),
   new THREE.MeshBasicMaterial({
     color: 0x000000,
-    opacity: 0.75,
+    opacity: 0.5,
     wireframe: true,
     wireframeLinewidth: 2,
-    // transparent: true
+    transparent: true
   }),
 ];
