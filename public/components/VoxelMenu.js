@@ -13,6 +13,7 @@ const MENU_FG_DIM = 0.6;
 const MENU_BG_DIM = 0.5;
 const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
+const CUBE_SIZE = 0.7;
 const CUBE_ROTATION_RATE = 5000;
 
 const {min, max, floor, random} = Math;
@@ -386,7 +387,7 @@ function _getRightStyles({open}) {
 function _makeCubeGeometry(gradient) {
   const {colors} = gradient;
 
-  const cubeGeometry = new THREE.CubeGeometry(1, 1, 1);
+  const cubeGeometry = new THREE.CubeGeometry(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
   const {faces, vertices} = cubeGeometry;
 
   function getVertexColor(v) {
