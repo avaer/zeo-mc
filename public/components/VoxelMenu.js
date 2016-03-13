@@ -114,30 +114,12 @@ class Menu2d extends React.Component {
 class Menu2dReact extends React.Component {
   getLeftStyles() {
     const {open} = this.props;
-
-    return {
-      position: 'absolute',
-      left: open ? 0 : -MENU_LEFT_WIDTH,
-      top: 0,
-      bottom: 0,
-      width: MENU_LEFT_WIDTH,
-      backgroundColor: 'rgba(255, 255, 255, ' + MENU_FG_DIM + ')',
-      transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
-    };
+    return _getLeftStyles({open});
   }
 
   getRightStyles() {
     const {open} = this.props;
-
-    return {
-      position: 'absolute',
-      right: open ? 0 : -MENU_RIGHT_WIDTH,
-      top: 0,
-      bottom: 0,
-      width: MENU_RIGHT_WIDTH,
-      backgroundColor: 'rgba(255, 255, 255, ' + MENU_FG_DIM + ')',
-      transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
-    };
+    return _getRightStyles({open});
   }
 
   render() {
@@ -184,7 +166,7 @@ class Menu2dCanvas extends React.Component {
   }
 
   refresh() {
-    console.log('menu 2d refresh');
+    // XXX
   }
 
   domNode() {
@@ -205,16 +187,87 @@ class Menu3d extends React.Component {
     _ManualRefreshComponent.componentWillUnmount.call(this);
   }
 
+  componentDidMount() {
+    this.initLeftMenu();
+    this.initRightMenu();
+  }
+
   shouldComponentUpdate() {
     return _ManualRefreshComponent.shouldComponentUpdate.call(this);
   }
 
+  getLeftDomNode() {
+    return this.refs.left;
+  }
+
+  getRightDomNode() {
+    return this.refs.right;
+  }
+
+  initLeftMenu() {
+    const width = MENU_LEFT_WIDTH;
+    const height = MENU_LEFT_WIDTH;
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
+    renderer.setSize(width, height);
+
+    const scene = new THREE.Scene();
+    const cube = (() => {
+      const geometry = new THREE.CubeGeometry(1, 1, 1);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        wireframe: true,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      return mesh;
+    })();
+    scene.add(cube);
+
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1000);
+
+    const leftDomNode = this.getLeftDomNode();
+    leftDomNode.appendChild(renderer.domElement);
+    renderer.domElement.style.backgroundColor = 'white';
+    console.log('left dom node append child', leftDomNode, renderer.domElement);
+
+    this._leftMenu = {renderer, scene, camera, cube};
+  }
+
+  initRightMenu() {
+    // XXX
+  }
+
+  getLeftStyles() {
+    const {open} = this.props;
+    return _getLeftStyles({open});
+  }
+
+  getRightStyles() {
+    const {open} = this.props;
+    return _getRightStyles({open});
+  }
+
   refresh() {
-    console.log('menu 3d refresh');
+    this.refreshLeftMenu();
+    this.refreshRightMenu();
+  }
+
+  refreshLeftMenu() {
+    const {renderer, scene, camera} = this._leftMenu;
+    renderer.render(scene, camera);
+  }
+
+  refreshRightMenu() {
+    // XXX
   }
 
   render() {
-    return <div />;
+    return <div>
+      <div ref='left' style={this.getLeftStyles()} />
+      <div ref='right' style={this.getRightStyles()} />
+    </div>;
   }
 }
 
@@ -248,17 +301,46 @@ const _ManualRefreshComponent = {
         this._frame = requestAnimationFrame(() => {
           this._frame = null;
 
-          const {lastOpenTime} = this.props;
-          const now = new Date();
-          if ((+now - +lastOpenTime) < MENU_TIME) {
+          const {open} = this.props;
+          if (open) {
             this.refresh();
+          } else {
+            const {lastOpenTime} = this.props;
+            const now = new Date();
+            if (((+now - +lastOpenTime) / 1000) < MENU_TIME) {
+              this.refresh();
+            }
           }
 
           recurse();
         });
-      }, FRAME_RATE);
+      }, 1000 / FRAME_RATE);
     };
 
     recurse();
   }
 };
+
+function _getLeftStyles({open}) {
+  return {
+    position: 'absolute',
+    left: open ? 0 : -MENU_LEFT_WIDTH,
+    top: 0,
+    bottom: 0,
+    width: MENU_LEFT_WIDTH,
+    backgroundColor: 'rgba(255, 255, 255, ' + MENU_FG_DIM + ')',
+    transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
+  };
+}
+
+function _getRightStyles({open}) {
+  return {
+    position: 'absolute',
+    right: open ? 0 : -MENU_RIGHT_WIDTH,
+    top: 0,
+    bottom: 0,
+    width: MENU_RIGHT_WIDTH,
+    backgroundColor: 'rgba(255, 255, 255, ' + MENU_FG_DIM + ')',
+    transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
+  };
+}
