@@ -45,16 +45,9 @@ export default class VoxelMenu extends React.Component {
   };
 
   render() {
-    const {open, lastOpenTime} = this.props;
-
-    const menuProps = {
-      open,
-      lastOpenTime,
-    };
-
     return <div style={this.getStyles()} tabIndex={-1} onKeyDown={this.onKeyDown}>
-      <MenuBg {...menuProps} />
-      <MenuFg {...menuProps} />
+      <MenuBg {...this.props} />
+      <MenuFg {...this.props} />
     </div>;
   }
 };
@@ -82,16 +75,9 @@ class MenuBg extends React.Component {
 
 class MenuFg extends React.Component {
   render() {
-    const {open, lastOpenTime} = this.props;
-
-    const menuProps = {
-      open,
-      lastOpenTime,
-    };
-
     return <div>
-      <Menu2d {...menuProps} />
-      <Menu3d {...menuProps} />
+      <Menu2d {...this.props} />
+      <Menu3d {...this.props} />
     </div>;
   }
 }
@@ -194,16 +180,12 @@ class Menu3d extends React.Component {
   }
 
   render() {
-    const {open, lastOpenTime} = this.props;
-
-    const menuProps = {open, lastOpenTime};
-
     return <div>
       <div style={this.getLeftStyles()}>
-        <Menu3dLeft {...menuProps} />
+        <Menu3dLeft {...this.props} />
       </div>
       <div style={this.getRightStyles()}>
-        <Menu3dRight {...menuProps} />
+        <Menu3dRight {...this.props} />
       </div>
     </div>;
   }
@@ -225,12 +207,13 @@ class Menu3dLeft extends React.Component {
   componentDidMount() {
     const width = MENU_LEFT_WIDTH;
     const height = MENU_LEFT_WIDTH;
+    const {devicePixelRatio} = this.props;
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
       antialias: true,
     });
-    renderer.setSize(width * 2, height * 2); // XXX should get devicePixelRatio
+    renderer.setSize(width * devicePixelRatio, height * devicePixelRatio);
     const canvas = renderer.domElement;
     canvas.style.width = width;
     canvas.style.height = height;

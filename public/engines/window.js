@@ -29,13 +29,13 @@ function _updateWindowState(oldState) {
   const $window = $(window);
   const width = $window.width();
   const height = $window.height();
-  const pixelRatio = window.devicePixelRatio;
+  const devicePixelRatio = window.devicePixelRatio;
   const pathname = window.location.pathname;
 
   return oldState
     .set('width', width)
     .set('height', height)
-    .set('pixelRatio', pixelRatio)
+    .set('devicePixelRatio', devicePixelRatio)
     .set('pathname', pathname);
 }
 

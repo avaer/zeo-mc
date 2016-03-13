@@ -39,7 +39,7 @@ export default class AppBody extends React.Component {
 
     const {stores, engines} = this.props;
     const {window: windowState, menu: menuState} = stores;
-    const {width, height, pathname} = windowState;
+    const {width, height, devicePixelRatio, pathname} = windowState;
 
     const {open: menuOpen, lastOpenTime: menuLastOpenTime} = menuState;
 
@@ -55,6 +55,7 @@ export default class AppBody extends React.Component {
     const voxelMenuProps = {
       width,
       height,
+      devicePixelRatio,
 
       open: menuOpen,
       lastOpenTime: menuLastOpenTime,
