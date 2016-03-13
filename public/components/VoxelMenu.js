@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import THREE from 'three';
 
+import {GRADIENTS} from '../resources/index';
 import {KEYS} from '../utils/input/index';
 import {FRAME_RATE, MENU_TIME} from '../constants/index';
 
@@ -14,7 +15,7 @@ const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
 const CUBE_ROTATION_RATE = 5000;
 
-const {min, max} = Math;
+const {min, max, floor, random} = Math;
 
 export default class VoxelMenu extends React.Component {
   getStyles() {
@@ -228,23 +229,41 @@ class Menu3dLeft extends React.Component {
       alpha: true,
       antialias: true,
     });
-    renderer.setSize(width, height);
+    renderer.setSize(width * 2, height * 2); // XXX should get devicePixelRatio
+    const canvas = renderer.domElement;
+    canvas.style.width = width;
+    canvas.style.height = height;
 
     const scene = new THREE.Scene();
     const cubes = (() => {
       const result = [];
       for (let x = 0; x < 4; x++) {
         for (let y = 0; y < 4; y++) {
-          const geometry = _makeCubeGeometry();
-          const material = new THREE.MeshBasicMaterial({
-            color: 0x000000,
-            opacity: 0.15,
-            wireframe: true,
-          });
-          const mesh = new THREE.Mesh(geometry, material);
-          mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
-          mesh.rotation.order = 'XYZ';
-          result.push(mesh);
+          const mesh = (() => {
+            if (random() < 0.5) {
+              const gradient = GRADIENTS[floor(random() * GRADIENTS.length)];
+              const geometry = _makeCubeGeometry(gradient);
+              const mesh = (() => {
+                if (random() < 0.5) {
+                  const material = CUBE_EMPTY_MATERIAL;
+                  const mesh = new THREE.Mesh(geometry, material);
+                  return mesh;
+                } else {
+                  const materials = CUBE_FULL_MATERIALS;
+                  const mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+                  return mesh;
+                }
+              })();
+              mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
+              mesh.rotation.order = 'XYZ';
+              return mesh;
+            } else {
+              return null;
+            }
+          })();
+          if (mesh) {
+            result.push(mesh);
+          }
         }
       }
       return result;
@@ -257,7 +276,7 @@ class Menu3dLeft extends React.Component {
     camera.position.set(0, 0, 12);
 
     const domNode = this.domNode();
-    domNode.appendChild(renderer.domElement);
+    domNode.appendChild(canvas);
 
     this._menu = {renderer, scene, camera, cubes};
   }
@@ -364,8 +383,49 @@ function _getRightStyles({open}) {
   };
 }
 
-function _makeCubeGeometry() {
+function _makeCubeGeometry(gradient) {
+  const {colors} = gradient;
+
   const cubeGeometry = new THREE.CubeGeometry(1, 1, 1);
+  const {faces, vertices} = cubeGeometry;
+
+  function getVertexColor(v) {
+    if (v.x < 0) {
+      return new THREE.Color(colors[0]);
+    } else {
+      return new THREE.Color(colors[1]);
+    }
+  }
+
+  for (let i = 0; i < faces.length; i++) {
+    const face = faces[i];
+    face.vertexColors[0] = getVertexColor(vertices[face.a]);
+    face.vertexColors[1] = getVertexColor(vertices[face.b]);
+    face.vertexColors[2] = getVertexColor(vertices[face.c]);
+  }
+
   const bufferGeometry = new THREE.BufferGeometry().fromGeometry(cubeGeometry);
   return bufferGeometry;
 }
+
+const CUBE_EMPTY_MATERIAL = new THREE.MeshBasicMaterial({
+  color: 0x000000,
+  opacity: 0.15,
+  wireframe: true,
+});
+
+const CUBE_FULL_MATERIALS = [
+  new THREE.MeshBasicMaterial({
+    // shading: THREE.FlatShading,
+    vertexColors: THREE.VertexColors,
+    opacity: 0.96,
+    transparent: true
+  }),
+  new THREE.MeshBasicMaterial({
+    color: 0x000000,
+    opacity: 0.75,
+    wireframe: true,
+    wireframeLinewidth: 2,
+    // transparent: true
+  }),
+];
