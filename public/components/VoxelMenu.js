@@ -6,14 +6,14 @@ import {GRADIENTS} from '../resources/index';
 import {KEYS} from '../utils/input/index';
 import {FRAME_RATE, MENU_TIME} from '../constants/index';
 
-const MENU_LEFT_WIDTH = 400;
-const MENU_RIGHT_WIDTH = 400;
+const MENU_LEFT_WIDTH = 300;
+const MENU_RIGHT_WIDTH = 300;
 
 const MENU_FG_DIM = 0.6;
 const MENU_BG_DIM = 0.5;
 const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
-const CUBE_SIZE = 0.7;
+const CUBE_SIZE = 0.8;
 const CUBE_ROTATION_RATE = 5000;
 
 const {min, max, floor, random} = Math;
