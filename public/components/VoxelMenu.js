@@ -17,12 +17,12 @@ const MENU_BG_DIM = 0.5;
 const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
 const MENU_TABS = [
-  {name: 'all', icon: 'map'},
+  {name: 'all', icon: 'search'},
   {name: 'blocks', icon: 'cube'},
   {name: 'items', icon: 'flask'},
-  {name: 'structures', icon: 'home'},
+  {name: 'structures', icon: 'industry'},
   {name: 'weapons', icon: 'bomb'},
-  {name: 'materia', icon: 'diamond'},
+  {name: 'materia', icon: 'level-up'},
 ];
 
 const CUBE_SIZE = 0.8;
