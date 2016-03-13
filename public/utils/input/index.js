@@ -9,6 +9,7 @@ export const KEYS = {
   ALT: 18,
   ESCAPE: 27,
   SPACE: 32,
+  TAB: 9,
   1: 49,
   2: 50,
   3: 51,

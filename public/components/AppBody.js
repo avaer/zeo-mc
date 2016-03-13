@@ -58,6 +58,8 @@ export default class AppBody extends React.Component {
 
       open: menuOpen,
       lastOpenTime: menuLastOpenTime,
+
+      engines,
     };
 
     /* const editorProps = {

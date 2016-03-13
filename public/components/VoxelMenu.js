@@ -2,12 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import THREE from 'three';
 
+import {KEYS} from '../utils/input/index';
 import {FRAME_RATE, MENU_TIME} from '../constants/index';
 
-const MENU_LEFT_WIDTH = 300;
-const MENU_RIGHT_WIDTH = 300;
+const MENU_LEFT_WIDTH = 400;
+const MENU_RIGHT_WIDTH = 400;
 
-const MENU_DIM = 0.75;
+const MENU_FG_DIM = 0.75;
+const MENU_BG_DIM = 0.5;
+const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
 const {min, max} = Math;
 
@@ -25,6 +28,18 @@ export default class VoxelMenu extends React.Component {
     };
   }
 
+  onKeyDown = e => {
+    const {which} = e;
+
+    if (which === KEYS.TAB) {
+      const {engines} = this.props;
+      const menuEngine = engines.getEngine('menu');
+      menuEngine.toggleOpen();
+
+      e.preventDefault();
+    }
+  };
+
   render() {
     const {open, lastOpenTime} = this.props;
 
@@ -33,7 +48,7 @@ export default class VoxelMenu extends React.Component {
       lastOpenTime,
     };
 
-    return <div style={this.getStyles()}>
+    return <div style={this.getStyles()} tabIndex={-1} onKeyDown={this.onKeyDown}>
       <MenuBg {...menuProps} />
       <MenuFg {...menuProps} />
     </div>;
@@ -42,19 +57,7 @@ export default class VoxelMenu extends React.Component {
 
 class MenuBg extends React.Component {
   getStyles() {
-    const {open, lastOpenTime} = this.props;
-
-    const opacity = (() => {
-      const now = new Date();
-      const timeDiff = (+now - +lastOpenTime) / 1000;
-      const timeFactor = timeDiff / MENU_TIME;
-
-      if (open) {
-        return min(timeFactor, 1);
-      } else {
-        return max(1 - timeFactor, 0); 
-      }
-    })();
+    const {open} = this.props;
 
     return {
       position: 'absolute',
@@ -62,9 +65,9 @@ class MenuBg extends React.Component {
       bottom: 0,
       left: 0,
       right: 0,
-      backgroundColor: 'rgba(0, 0, 0, ' + MENU_DIM + ')',
-      opacity,
-      transition: 'all 0.1s cubic-bezier(0,0,1,1)',
+      backgroundColor: 'rgba(0, 0, 0, ' + MENU_BG_DIM + ')',
+      opacity: open ? 1 : 0,
+      transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
     };
   }
 
@@ -109,22 +112,17 @@ class Menu2d extends React.Component {
 }
 
 class Menu2dReact extends React.Component {
-  getStyles() {
-    const {open} = this.props;
-
-    return {
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      transition: 'all 0.1s cubic-bezier(0,0,1,1)',
-    };
-  }
-
   getLeftStyles() {
     const {open} = this.props;
 
     return {
-      position: 'relative',
+      position: 'absolute',
       left: open ? 0 : -MENU_LEFT_WIDTH,
-      transition: 'all 0.1s cubic-bezier(0,0,1,1)',
+      top: 0,
+      bottom: 0,
+      width: MENU_LEFT_WIDTH,
+      backgroundColor: 'rgba(255, 255, 255, ' + MENU_FG_DIM + ')',
+      transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
     };
   }
 
@@ -132,14 +130,18 @@ class Menu2dReact extends React.Component {
     const {open} = this.props;
 
     return {
-      position: 'relative',
+      position: 'absolute',
       right: open ? 0 : -MENU_RIGHT_WIDTH,
-      transition: 'all 0.1s cubic-bezier(0,0,1,1)',
+      top: 0,
+      bottom: 0,
+      width: MENU_RIGHT_WIDTH,
+      backgroundColor: 'rgba(255, 255, 255, ' + MENU_FG_DIM + ')',
+      transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
     };
   }
 
   render() {
-    return <div style={this.getStyles()}>
+    return <div>
       <div style={this.getLeftStyles()}>
         {/* XXX */}
       </div>
@@ -230,7 +232,7 @@ const _ManualRefreshComponent = {
       clearTimeout(this._timeout);
     }
     if (this._frame) {
-      clearAnimationFrame(this._frame);
+      cancelAnimationFrame(this._frame);
     }
   },
 
