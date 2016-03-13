@@ -37,15 +37,20 @@ export default class AppBody extends React.Component {
       engines,
     }; */
 
-    const {window: windowState} = stores;
+    const {stores, engines} = this.props;
+    const {window: windowState, menu: menuState} = stores;
     const {width, height, pathname} = windowState;
+    const {visible} = menuState;
 
     const voxelSceneProps = {
-      seed: pathname.replace(/^\//, '') || DEFAULT_SEED
+      seed: pathname.replace(/^\//, '') || DEFAULT_SEED,
     };
 
     const voxelMenuProps = {
-      // XXX
+      width,
+      height,
+
+      visible,
     };
 
     /* const editorProps = {
@@ -73,8 +78,8 @@ export default class AppBody extends React.Component {
       <div className='app-body'>
         <VoxelScene {...voxelSceneProps} />
         <VoxelMenu {...voxelMenuProps} />
-        /* <Editor {...editorProps} />
-        <Node {...nodeProps} /> */
+        {/* <Editor {...editorProps} />
+        <Node {...nodeProps} /> */}
       </div>
     );
   }

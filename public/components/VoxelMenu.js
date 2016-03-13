@@ -8,13 +8,9 @@ const MENU_LEFT_WIDTH = 300;
 const MENU_RIGHT_WIDTH = 300;
 
 export default class VoxelMenu extends React.Component {
-  constructor() {
-    super();
-
-    this.state = {
-      state: null,
-    };
-  }
+  state = {
+    state: null,
+  };
 
   componentWillReceiveProps(nextProps) {
     const {visible} = nextProps;
@@ -30,7 +26,7 @@ export default class VoxelMenu extends React.Component {
     if (this._frame) {
       clearAnimationFrame(this._frame);
     }
-  };
+  }
 
   updateState(fn) {
     const {state: oldState} = this.state;
@@ -39,7 +35,7 @@ export default class VoxelMenu extends React.Component {
   }
 
   render() {
-    const {visible} = this.state.props;
+    const {visible} = this.props;
 
     const menu2dProps = {
       visible,
@@ -119,24 +115,14 @@ class Menu2dReact extends React.Component {
 }
 
 class Menu2dCanvas extends React.Component {
-  constructor() {
-    super();
+  componentWillMount() {
+    _ManualRefreshComponent.componentWillMount.call(this);
 
     this._canvas = null;
     this._ctx = null;
   }
 
-  refresh() {
-    console.log('menu 2d refresh');
-  }
-
-  domNode() {
-    return ReactDOM.findDOMNode(this);
-  }
-
-  componentWillMount() {
-    super.componentWillMount();
-
+  componentDidMount() {
     const {width, height} = this.props;
 
     const canvas = document.createElement('canvas');
@@ -151,18 +137,42 @@ class Menu2dCanvas extends React.Component {
     this._ctx = ctx;
   }
 
-  render() {
-    return <div />;
+  componentWillUnmount() {
+    _ManualRefreshComponent.componentWillUnmount.call(this);
   }
-}
 
-class Menu3d extends ManualRefreshComponent {
+  shouldComponentUpdate() {
+    return _ManualRefreshComponent.shouldComponentUpdate.call(this);
+  }
+
   refresh() {
-    console.log('menu 3d refresh');
+    console.log('menu 2d refresh');
   }
 
   domNode() {
     return ReactDOM.findDOMNode(this);
+  } 
+
+  render() {
+    return <div />;
+  }
+}
+
+class Menu3d extends React.Component {
+  componentWillMount() {
+    _ManualRefreshComponent.componentWillMount.call(this);
+  }
+
+  componentWillUnmount() {
+    _ManualRefreshComponent.componentWillUnmount.call(this);
+  }
+
+  shouldComponentUpdate() {
+    return _ManualRefreshComponent.shouldComponentUpdate.call(this);
+  }
+
+  refresh() {
+    console.log('menu 3d refresh');
   }
 
   render() {
@@ -171,17 +181,13 @@ class Menu3d extends ManualRefreshComponent {
 }
 
 
-class ManualRefreshComponent extends React.Component {
-  constructor() {
-    super()
-
+const _ManualRefreshComponent = {
+  componentWillMount() {
     this._timeout = null;
     this._frame = null;
-  }
 
-  componentWillMount() {
-    this.listen();
-  }
+    _ManualRefreshComponent.listen.call(this);
+  },
 
   componentWillUnmount() {
     if (this._timeout) {
@@ -190,32 +196,30 @@ class ManualRefreshComponent extends React.Component {
     if (this._frame) {
       clearAnimationFrame(this._frame);
     }
-  };
+  },
 
   shouldComponentUpdate() {
     return false;
-  }
-
-  refresh() {
-    throw new Error('ENOTIMPL');
-  }
+  },
 
   listen() {
     const recurse = () => {
       this._timeout = setTimeout(() => {
+        this._timeout = null;
+
         this._frame = requestAnimationFrame(() => {
+          this._frame = null;
+
           const {visible} = this.props;
           if (visible) {
             this.refresh();
           }
+
+          recurse();
         });
       }, FRAME_RATE);
     };
 
     recurse();
   }
-
-  render() {
-    throw new Error('ENOTIMPL');
-  }
-}
+};
