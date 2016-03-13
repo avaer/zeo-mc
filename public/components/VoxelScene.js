@@ -44,13 +44,15 @@ export default class VoxelScene extends React.Component {
 
     voxelAsync.init(voxelAsyncOpts);
 
+    this._game = null;
+
     this._workers = _makeWorkers(voxelAsyncOpts);
     this._workerIndex = 0;
     this._pendingGenerates = new Map();
   }
 
   componentDidMount() {
-    const {width, height} = this.props;
+    const {width, height, engines} = this.props;
 
     let atlas, textureLoader, game, avatar;
 
@@ -121,6 +123,7 @@ export default class VoxelScene extends React.Component {
         gravity: GRAVITY,
         statsDisabled: true
       });
+      this._game = game;
       window.game = game;
 
       const sky = voxelSky({
@@ -288,6 +291,15 @@ export default class VoxelScene extends React.Component {
           }
         });
 
+        let lastMenu = new Date(0);
+        game.on('menu', () => {
+          const now = new Date();
+          if (((+now - +lastMenu) / 1000) >= 0.1) {
+            console.log('menu engine', engines);
+          }
+          lastMenu = now;
+        });
+
         game.on('hold', variant => {
           if (holdValue) {
             stopHolding();
@@ -322,9 +334,12 @@ export default class VoxelScene extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const prevProps = this.props;
+    const {width: newWidth, height: newHeight} = nextProps;
+    const {width: oldWidth, height: oldHeight} = this.props;
 
-    console.log('component will receive props', {nextProps, prevProps});
+    if (newWidth !== oldWidth || newHeight !== oldHeight) {
+      this._game.resize(newWidth, newHeight);
+    }
   }
 
   shouldComponentUpdate() {
