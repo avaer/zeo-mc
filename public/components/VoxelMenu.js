@@ -17,9 +17,9 @@ const MENU_BG_DIM = 0.5;
 const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
 const MENU_TABS = [
+  {name: 'all', icon: 'map'},
   {name: 'blocks', icon: 'cube'},
   {name: 'items', icon: 'flask'},
-  {name: 'vegetations', icon: 'tree'},
   {name: 'weapons', icon: 'bomb'},
   {name: 'materia', icon: 'diamond'},
 ];
