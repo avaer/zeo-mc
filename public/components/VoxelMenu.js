@@ -11,6 +11,7 @@ const MENU_WIDTH = 300;
 const MENU_CANVAS_WIDTH = 250;
 const MENU_CANVAS_PIXELATION = 1.5;
 const MENU_BAR_WIDTH = 256;
+const MENU_BORDER_COLOR = '#333';
 
 const MENU_FONT = '\'Press Start 2P\', cursive';
 const MENU_FG_DIM = 0.75;
@@ -18,12 +19,12 @@ const MENU_BG_DIM = 0.5;
 const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
 const MENU_TABS = [
-  {name: 'all', icon: 'search'},
-  {name: 'blocks', icon: 'cube'},
-  {name: 'items', icon: 'flask'},
-  {name: 'structures', icon: 'industry'},
-  {name: 'weapons', icon: 'bomb'},
-  {name: 'materia', icon: 'level-up'},
+  {name: 'all', icon: 'search', value: '\uf002'},
+  {name: 'blocks', icon: 'cube', value: '\uf1b2'},
+  {name: 'items', icon: 'flask', value: '\uf0c3'},
+  {name: 'structures', icon: 'industry', value: '\uf275'},
+  {name: 'weapons', icon: 'bomb', value: '\uf1e2'},
+  {name: 'materia', icon: 'level-up', value: '\uf219'},
 ];
 
 const CUBE_SIZE = 0.8;
@@ -150,11 +151,11 @@ class MenuTabs extends React.Component {
 
     return <div style={this.getStyles()}>
       {MENU_TABS.map((tab, i, a) => {
-        const {name, icon} = tab;
+        const {name, value} = tab;
         const selected = selectedTab === name;
         const first = i === 0;
         const last = i === a.length - 1;
-        return <MenuTab name={name} icon={icon} selected={selected} first={first} last={last} engines={engines} key={name} />;
+        return <MenuTab name={name} value={value} selected={selected} first={first} last={last} engines={engines} key={name} />;
       })}
     </div>;
   }
@@ -167,7 +168,7 @@ class MenuTab extends React.Component {
 
   getStyles() {
     const {selected} = this.props;
-    const {hovered} = this.state;
+    // const {hovered} = this.state;
 
     return {
       display: 'flex',
@@ -177,22 +178,22 @@ class MenuTab extends React.Component {
       // marginBottom: -2,
       alignItems: 'center',
       justifyContent: 'center',
-      fontSize: 20,
-      color: (selected || hovered) ? '#333' : 'rgba(0,0,0,0.2)',
+      // fontSize: 20,
+      // color: (selected || hovered) ? '#333' : 'rgba(0,0,0,0.2)',
       cursor: !selected ? 'pointer' : null,
     };
   }
 
-  getIconClassName() {
-    const {icon} = this.props;
-    return classnames(['fa', 'fa-' + icon]);
-  }
-
-  getIconStyles() {
+ /*  getIconStyles() {
     return {
       // fontSize: 10,
     };
-  }
+  } */
+
+  /* getIconClassValue() {
+    const {icon} = this.props;
+    return classnames(['fa', 'fa-' + icon]);
+  } */
 
   getBorderSideStyles(side) {
     const {selected, first, last} = this.props;
@@ -207,7 +208,7 @@ class MenuTab extends React.Component {
       borderLeftWidth: (side === 'left' && !first) ? 2 : null,
       borderRightWidth: (side === 'right' && !last) ? 2 : null,
       borderStyle: 'solid',
-      borderColor: selected ? 'rgba(0,0,0,0.2)' : 'transparent',
+      borderColor: selected ? MENU_BORDER_COLOR : 'transparent',
     };
   }
 
@@ -226,9 +227,9 @@ class MenuTab extends React.Component {
       borderStyle: 'solid',
       borderColor: (() => {
         if (side === 'top') {
-          return selected ? 'rgba(0,0,0,0.2)' : 'transparent';
+          return selected ? MENU_BORDER_COLOR : 'transparent';
         } else if (side === 'bottom') {
-          return selected ? 'transparent' : 'rgba(0,0,0,0.2)';
+          return selected ? 'transparent' : MENU_BORDER_COLOR;
         } else {
           return null;
         }
@@ -255,13 +256,78 @@ class MenuTab extends React.Component {
   };
 
   render() {
+    const {value, selected} = this.props;
+    const {hovered} = this.state;
+
     return <div style={this.getStyles()} onMouseOver={this.onMouseOver} onMouseOut={this.onMouseOut} onClick={this.onClick}>
-      <i className={this.getIconClassName()} style={this.getIconStyles()} />
+      <FontAwesome
+        width={32}
+        height={32}
+        pixelation={MENU_CANVAS_PIXELATION}
+        fontSize={12}
+        color='#000'
+        value={value}
+        x={10.5}
+        y={14}
+        selected={selected}
+        hovered={hovered}
+      />
       <div style={this.getBorderSideStyles('left')} />
       <div style={this.getBorderSideStyles('right')} />
       {/*<div style={this.getBorderVerticalStyles('top')} />*/}
       <div style={this.getBorderVerticalStyles('bottom')} />
     </div>;
+  }
+}
+
+class FontAwesome extends React.Component {
+  componentDidMount() {
+    this.refresh(this.props);
+  }
+
+  shouldComponentUpdate() {
+    return false;
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const {selected: newSelected, hovered: newHovered} = nextProps;
+    const {selected: oldSelected, hovered: oldHovered} = this.props;
+
+    if (newSelected !== oldSelected || newHovered !== oldHovered) {
+      this.refresh(nextProps);
+    }
+  }
+
+  refresh(props) {
+    const {fontSize, color, value, x, y, selected, hovered} = props;
+
+    const canvas = this.domNode();
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = fontSize + 'px FontAwesome';
+    ctx.fillStyle = (selected || hovered) ? color : '#999';
+    ctx.textAlign='center';
+    ctx.fillText(value, x, y);
+  }
+
+  domNode() {
+    return ReactDOM.findDOMNode(this);
+  }
+
+  getCanvasStyles() {
+    const {width, height} = this.props;
+
+    return {
+      width,
+      height,
+      imageRendering: 'pixelated',
+    };
+  }
+
+  render() {
+    const {width, height, pixelation} = this.props;
+
+    return <canvas width={width / pixelation} height={height / pixelation} style={this.getCanvasStyles()}/>;
   }
 }
 
