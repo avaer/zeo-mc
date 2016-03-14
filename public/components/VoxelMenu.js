@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Immutable from 'immutable';
 import THREE from 'three';
+import murmur from 'murmurhash-js';
 
 import {GRADIENTS} from '../resources/index';
 import {KEYS} from '../utils/input/index';
@@ -20,10 +21,10 @@ const MENU_TRANSITION_FN = 'cubic-bezier(0,1,0,1)';
 
 const MENU_TABS = [
   {name: 'all', icon: 'search', value: '\uf002'},
-  {name: 'blocks', icon: 'cube', value: '\uf1b2'},
-  {name: 'items', icon: 'flask', value: '\uf0c3'},
-  {name: 'structures', icon: 'industry', value: '\uf275'},
-  {name: 'weapons', icon: 'bomb', value: '\uf1e2'},
+  {name: 'block', icon: 'cube', value: '\uf1b2'},
+  {name: 'item', icon: 'flask', value: '\uf0c3'},
+  {name: 'structure', icon: 'industry', value: '\uf275'},
+  {name: 'weapon', icon: 'bomb', value: '\uf1e2'},
   {name: 'materia', icon: 'level-up', value: '\uf219'},
 ];
 
@@ -61,9 +62,35 @@ export default class VoxelMenu extends React.Component {
   };
 
   render() {
+    const {tab, inventory, itemIndex} = this.props;
+    const filteredInventory = (() => {
+      if (tab === 'all') {
+        return inventory.slice(0, 16);
+      } else {
+        return inventory.filter(item => {
+          const {type} = item;
+          return type === tab;
+        }).slice(0, 16);
+      }
+    })();
+    const item = (() => {
+      if (itemIndex !== null) {
+        const item = filteredInventory.get(itemIndex);
+        return item;
+      } else {
+        return null;
+      }
+    })();
+
+    const props = {
+      ...this.props,
+      filteredInventory,
+      item,
+    };
+
     return <div style={this.getStyles()} onKeyDown={this.onKeyDown}>
-      <MenuBg {...this.props} />
-      <MenuFg {...this.props} />
+      <MenuBg {...props} />
+      <MenuFg {...props} />
     </div>;
   }
 };
@@ -363,9 +390,14 @@ class MenuInfo extends React.Component {
   }
 
   render() {
+    const item = this.props.item || {};
+    const {
+      name = '',
+    } = item;
+
     return <div style={this.getStyles()}>
       <div style={this.getWrapperStyles()}>
-        <div style={this.getHeadingStyles()}>Info</div>
+        <div style={this.getHeadingStyles()}>{_capitalize(name)}</div>
         <div style={this.getParagraphStyles()}>Final Fantasy VII is a role-playing video game developed and published by Square (now Square Enix) for the PlayStation platform.</div>
       </div>
     </div>;
@@ -472,6 +504,8 @@ class MenuStatsBar extends React.Component {
 
 class Menu2dCanvas extends React.Component {
   componentDidMount() {
+    const {filteredInventory} = this.props;
+
     const width = MENU_CANVAS_WIDTH;
     const height = MENU_CANVAS_WIDTH;
 
@@ -485,7 +519,7 @@ class Menu2dCanvas extends React.Component {
     const domNode = this.domNode();
     domNode.appendChild(canvas);
 
-    const placeholderObjects = _renderPlaceholderObjects();
+    const placeholderObjects = _renderPlaceholderObjects(filteredInventory);
     placeholderObjects.forEach(placeholderObject => {
       placeholderObject.updateMatrixWorld();
     });
@@ -501,6 +535,16 @@ class Menu2dCanvas extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    const {filteredInventory: newFilteredInventory} = nextProps;
+    const {filteredInventory: oldFilteredInventory} = this.props;
+    if (!Immutable.is(newFilteredInventory, oldFilteredInventory)) {
+      const placeholderObjects = _renderPlaceholderObjects(newFilteredInventory);
+      placeholderObjects.forEach(placeholderObject => {
+        placeholderObject.updateMatrixWorld();
+      });
+      this._placeholderObjects = placeholderObjects;
+    }
+
     const {item: newItem} = nextProps;
     const {item: oldItem} = this.props;
     if (!Immutable.is(newItem, oldItem)) {
@@ -516,7 +560,7 @@ class Menu2dCanvas extends React.Component {
     const {_canvas: canvas, _placeholderObjects: placeholderObjects, _placeholderCamera: placeholderCamera} = this;
     const {width, height} = canvas;
 
-    const placeholderObjectIndex = x * 4 + y;
+    const placeholderObjectIndex = x + y * 4;
     const placeholderObject = placeholderObjects[placeholderObjectIndex];
 
     const vector = new THREE.Vector3();
@@ -535,14 +579,16 @@ class Menu2dCanvas extends React.Component {
   }
 
   refresh(props) {
-    const {item} = props;
+    const {itemIndex} = props;
     const {_canvas: canvas, _ctx: ctx} = this;
 
     const {width, height} = canvas;
     ctx.clearRect(0, 0, width, height);
 
-    if (item) {
-      const {x, y} = item;
+    if (itemIndex !== null) {
+      const x = itemIndex % 4;
+      const y = floor(itemIndex / 4);
+
       for (let i = 0; i < 4; i++) {
         const offset = this.getItemOffset(x, y);
         let {left, top} = offset;
@@ -653,6 +699,8 @@ class Menu3dLeft extends React.Component {
       camera,
       object: null,
     };
+
+    this.updateItems(this.props);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -660,23 +708,22 @@ class Menu3dLeft extends React.Component {
     const {tab: oldTab} = this.props;
 
     if (newTab !== oldTab) {
-      const {_menu: menu} = this;
-      const {scene, object: oldObject} = menu;
-
-      if (oldObject) {
-        scene.remove(oldObject);
-      }
-
-      if (newTab === 'blocks') {
-        const blocks = _renderBlocks();
-        scene.add(blocks);
-        menu.object = blocks;
-      } else if (newTab === 'materia') {
-        const materia = _renderMateria();
-        scene.add(materia);
-        menu.object = materia;
-      }
+      this.updateItems(nextProps);
     }
+  }
+
+  updateItems(props) {
+    const {_menu: menu} = this;
+    const {scene, object: oldObject} = menu;
+
+    if (oldObject) {
+      scene.remove(oldObject);
+    }
+
+    const {filteredInventory} = props;
+    const items = _renderItems(filteredInventory);
+    scene.add(items);
+    menu.object = items;
   }
 
   domNode() {
@@ -692,6 +739,10 @@ class Menu3dLeft extends React.Component {
     };
   }
 
+  getInventoryIndex(x, y) {
+    return x + y * 4;
+  }
+
   onClick = e => {
     const {pageX, pageY} = e;
     const domNode = this.domNode();
@@ -704,9 +755,16 @@ class Menu3dLeft extends React.Component {
     const x = floor((relativeX / width) * 4);
     const y = floor((relativeY / height) * 4);
 
+    const {filteredInventory} = this.props;
+    const inventoryIndex = this.getInventoryIndex(x, y);
+    const item = filteredInventory.get(inventoryIndex);
     const {engines} = this.props;
     const menuEngine = engines.getEngine('menu');
-    menuEngine.selectItem({x, y});
+    if (item) {
+      menuEngine.selectItem(inventoryIndex);
+    } else {
+      menuEngine.selectItem(null);
+    }
   };
 
   domNode() {
@@ -860,43 +918,36 @@ const CUBE_FULL_MATERIALS = [
   }),
 ];
 
-function _renderBlocks() {
-  return _renderMateria();
-}
-
-function _renderMateria() {
+function _renderItems(inventory) {
   const object = new THREE.Object3D();
 
   const materia = [];
-  for (let x = 0; x < 4; x++) {
-    for (let y = 0; y < 4; y++) {
+  inventory.forEach((item, i) => {
+    const {name, count} = item;
+
+    const x = i % 4;
+    const y = floor(i / 4);
+
+    const mesh = (() => {
+      const gradient = GRADIENTS[murmur(name) % GRADIENTS.length];
+      const geometry = _makeCubeGeometry(gradient);
       const mesh = (() => {
-        if (random() < 0.5) {
-          const gradient = GRADIENTS[floor(random() * GRADIENTS.length)];
-          const geometry = _makeCubeGeometry(gradient);
-          const mesh = (() => {
-            if (random() < 0.5) {
-              const material = CUBE_EMPTY_MATERIAL;
-              const mesh = new THREE.Mesh(geometry, material);
-              return mesh;
-            } else {
-              const materials = CUBE_FULL_MATERIALS;
-              const mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
-              return mesh;
-            }
-          })();
-          mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
-          mesh.rotation.order = 'XYZ';
+        if (count < 5) {
+          const material = CUBE_EMPTY_MATERIAL;
+          const mesh = new THREE.Mesh(geometry, material);
           return mesh;
         } else {
-          return null;
+          const materials = CUBE_FULL_MATERIALS;
+          const mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+          return mesh;
         }
       })();
-      if (mesh) {
-        materia.push(mesh);
-      }
-    }
-  }
+      mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
+      mesh.rotation.order = 'XYZ';
+      return mesh;
+    })();
+    materia.push(mesh);
+  });
   materia.forEach(mesh => {
     object.add(mesh);
   });
@@ -914,16 +965,21 @@ function _renderMateria() {
   return object;
 }
 
-function _renderPlaceholderObjects() {
+function _renderPlaceholderObjects(inventory) {
   const result = [];
-  for (let x = 0; x < 4; x++) {
-    for (let y = 0; y < 4; y++) {
-      const geometry = new THREE.Geometry();
-      const material = new THREE.MeshBasicMaterial();
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
-      result.push(mesh);
-    }
-  }
+  inventory.forEach((item, i) => {
+    const x = i % 4;
+    const y = floor(i / 4);
+
+    const geometry = new THREE.Geometry();
+    const material = new THREE.MeshBasicMaterial();
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
+    result.push(mesh);
+  });
   return result;
+}
+
+function _capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }

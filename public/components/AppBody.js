@@ -10,9 +10,10 @@ export default class AppBody extends React.Component {
   render() {
 
     const {stores, engines} = this.props;
-    const {window: windowState, menu: menuState} = stores;
+    const {window: windowState, menu: menuState, player: playerState} = stores;
     const {width, height, devicePixelRatio, pathname} = windowState;
-    const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab, item: menuItem} = menuState;
+    const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab, itemIndex: menuItemIndex} = menuState;
+    const {inventory} = playerState;
 
     const voxelSceneProps = {
       width,
@@ -31,38 +32,17 @@ export default class AppBody extends React.Component {
       open: menuOpen,
       lastOpenTime: menuLastOpenTime,
       tab: menuTab,
-      item: menuItem,
+      itemIndex: menuItemIndex,
+
+      inventory,
 
       engines,
     };
-
-    /* const editorProps = {
-      value,
-      visible: mode === UI_MODES.EDITOR,
-      focused: mode === UI_MODES.EDITOR,
-
-      onChange: value => {
-        engines.editorChange({value});
-      },
-      onSave: value => {
-        engines.editorSave({value});
-      },
-      onQuit: () => {
-        engines.editorQuit();
-      }
-    };
-
-    const nodeProps = {
-      src: oldValue,
-      state: new Immutable.Map({lol: 'zol'}),
-    }; */
 
     return (
       <div className='app-body'>
         <VoxelScene {...voxelSceneProps} />
         <VoxelMenu {...voxelMenuProps} />
-        {/* <Editor {...editorProps} />
-        <Node {...nodeProps} /> */}
       </div>
     );
   }
