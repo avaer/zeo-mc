@@ -110,7 +110,7 @@ class Menu2d extends React.Component {
 class Menu2dReact extends React.Component {
   getStyles() {
     return {
-      pointerEvents: 'all'
+      pointerEvents: 'all',
     };
   }
 
@@ -143,6 +143,7 @@ class MenuTabs extends React.Component {
     return {
       display: 'flex',
       // borderBottom: '2px solid rgba(0,0,0,0.2)',
+      // pointerEvents: 'all',
     }
   }
 
@@ -593,7 +594,27 @@ class Menu3dLeft extends React.Component {
       position: 'absolute',
       top: 40,
       left: (MENU_WIDTH - MENU_CANVAS_WIDTH) / 2,
+      pointerEvents: 'all',
     };
+  }
+
+  onClick = e => {
+    const {pageX, pageY} = e;
+    const domNode = this.domNode();
+    const domNodeOffset = $(domNode).offset();
+    const {top, left} = domNodeOffset;
+    const relativeX = pageX - left;
+    const relativeY = pageY - top;
+    const width = $(domNode).width();
+    const height = $(domNode).height();
+    const x = floor((relativeX / width) * 4);
+    const y = floor((relativeY / height) * 4);
+
+    console.log('click offset', {x, y}); // XXX
+  };
+
+  domNode() {
+    return ReactDOM.findDOMNode(this);
   }
 
   refresh() {
@@ -607,7 +628,7 @@ class Menu3dLeft extends React.Component {
   }
 
   render() {
-    return <div style={this.getStyles()} />;
+    return <div style={this.getStyles()} onClick={this.onClick} />;
   }
 }
 
