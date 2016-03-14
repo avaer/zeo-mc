@@ -125,11 +125,12 @@ class Menu2dReact extends React.Component {
   }
 
   render() {
-    const {tab, engines} = this.props;
+    const {tab, item, engines} = this.props;
 
     return <div style={this.getStyles()}>
       <div style={this.getLeftStyles()}>
         <MenuTabs tab={tab} engines={engines} />
+        <MenuInfo tab={tab} item={item} />
       </div>
       <div style={this.getRightStyles()}>
         <MenuStats />
@@ -142,8 +143,6 @@ class MenuTabs extends React.Component {
   getStyles() {
     return {
       display: 'flex',
-      // borderBottom: '2px solid rgba(0,0,0,0.2)',
-      // pointerEvents: 'all',
     }
   }
 
@@ -322,6 +321,54 @@ class FontAwesome extends React.Component {
     const {width, height, pixelation} = this.props;
 
     return <canvas width={width / pixelation} height={height / pixelation} style={this.getCanvasStyles()}/>;
+  }
+}
+
+class MenuInfo extends React.Component {
+  getStyles() {
+    const {item} = this.props;
+
+    return {
+      display: item ? null : 'none',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      borderTop: '2px solid #333',
+    };
+  }
+
+  getWrapperStyles() {
+    return {
+      padding: '20px',
+    };
+  }
+
+  getHeadingStyles() {
+    return {
+      paddingBottom: '10px',
+      fontSize: 12,
+      // lineHeight: 1.4,
+      color: '#333',
+      textShadow: '0 2px rgba(255,255,255,0.35)',
+    };
+  }
+
+  getParagraphStyles() {
+    return {
+      fontSize: 10,
+      lineHeight: 1.4,
+      color: '#666',
+    };
+  }
+
+  render() {
+    return <div style={this.getStyles()}>
+      <div style={this.getWrapperStyles()}>
+        <div style={this.getHeadingStyles()}>Info</div>
+        <div style={this.getParagraphStyles()}>Final Fantasy VII is a role-playing video game developed and published by Square (now Square Enix) for the PlayStation platform.</div>
+      </div>
+    </div>;
   }
 }
 
