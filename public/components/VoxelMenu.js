@@ -435,12 +435,20 @@ class Menu2dCanvas extends React.Component {
     canvas.style.height = height;
     canvas.style.imageRendering = 'pixelated';
     const ctx = canvas.getContext('2d');
-
     const domNode = this.domNode();
     domNode.appendChild(canvas);
 
+    const placeholderObjects = _renderPlaceholderObjects();
+    placeholderObjects.forEach(placeholderObject => {
+      placeholderObject.updateMatrixWorld();
+    });
+    const placeholderCamera = _getBlockCamera(width, height);
+    placeholderCamera.updateMatrixWorld();
+
     this._canvas = canvas;
     this._ctx = ctx;
+    this._placeholderObjects = placeholderObjects;
+    this._placeholderCamera = placeholderCamera;
 
     this.refresh(this.props);
   }
@@ -457,22 +465,40 @@ class Menu2dCanvas extends React.Component {
     return false;
   }
 
+  getItemOffset(x, y) {
+    const {_canvas: canvas, _placeholderObjects: placeholderObjects, _placeholderCamera: placeholderCamera} = this;
+    const {width, height} = canvas;
+
+    const placeholderObjectIndex = x * 4 + y;
+    const placeholderObject = placeholderObjects[placeholderObjectIndex];
+
+    const vector = new THREE.Vector3();
+    vector.setFromMatrixPosition(placeholderObject.matrixWorld);
+    vector.project(placeholderCamera);
+
+    const widthHalf = width / 2;
+    const heightHalf = height / 2;
+    vector.x = ( vector.x * widthHalf ) + widthHalf;
+    vector.y = ( vector.y * heightHalf ) + heightHalf;
+
+    const left = vector.x;
+    const top = vector.y;
+
+    return {left, top};
+  }
+
   refresh(props) {
     const {item} = props;
     const {_canvas: canvas, _ctx: ctx} = this;
 
     const {width, height} = canvas;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, width, height);
 
     if (item) {
       const {x, y} = item;
       for (let i = 0; i < 4; i++) {
-        const baseAngle = (Math.PI / 2) * i;
-        ctx.beginPath();
-
-        let left = ((x + 0.5) / 4) * width; // XXX make this use the actual 3d projection
-        let top = ((y + 0.5) / 4) * height;
-
+        const offset = this.getItemOffset(x, y);
+        let {left, top} = offset;
         switch (i) {
           case 0:
             left += (0.2 / 4) * width;
@@ -492,10 +518,11 @@ class Menu2dCanvas extends React.Component {
             break;
         }
 
+        ctx.beginPath();
+        const baseAngle = (Math.PI / 2) * i;
         ctx.arc(left, top, 5, baseAngle + Math.PI / 4 - Math.PI / 4, baseAngle + Math.PI / 4 + Math.PI / 4);
         ctx.lineWidth = 2;
         ctx.stroke();
-        console.log('arc', item, x * 10, y * 10, 10, baseAngle + Math.PI / 8, baseAngle + Math.PI / 8 + Math.PI / 4);
       }
     }
   }
@@ -568,9 +595,7 @@ class Menu3dLeft extends React.Component {
     canvas.style.imageRendering = 'pixelated';
 
     const scene = new THREE.Scene();
-
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1000);
-    camera.position.set(0, 0, 10);
+    const camera = _getBlockCamera(width, height);
 
     const domNode = this.domNode();
     domNode.appendChild(canvas);
@@ -766,6 +791,12 @@ const CUBE_EMPTY_MATERIAL = new THREE.MeshBasicMaterial({
   wireframe: true,
 });
 
+function _getBlockCamera(width, height) {
+  const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1000);
+  camera.position.set(0, 0, 10);
+  return camera;
+}
+
 const CUBE_FULL_MATERIALS = [
   new THREE.MeshBasicMaterial({
     // shading: THREE.FlatShading,
@@ -834,4 +865,18 @@ function _renderMateria() {
   };
 
   return object;
+}
+
+function _renderPlaceholderObjects() {
+  const result = [];
+  for (let x = 0; x < 4; x++) {
+    for (let y = 0; y < 4; y++) {
+      const geometry = new THREE.Geometry();
+      const material = new THREE.MeshBasicMaterial();
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
+      result.push(mesh);
+    }
+  }
+  return result;
 }
