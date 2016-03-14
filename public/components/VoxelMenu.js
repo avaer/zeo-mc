@@ -9,6 +9,7 @@ import {FRAME_RATE, MENU_TIME} from '../constants/index';
 
 const MENU_WIDTH = 300;
 const MENU_CANVAS_WIDTH = 250;
+const MENU_CANVAS_PIXELATION = 1.5;
 const MENU_BAR_WIDTH = 256;
 
 const MENU_FONT = '\'Press Start 2P\', cursive';
@@ -469,16 +470,17 @@ class Menu3dLeft extends React.Component {
   componentDidMount() {
     const width = MENU_CANVAS_WIDTH;
     const height = MENU_CANVAS_WIDTH;
-    const {devicePixelRatio} = this.props;
+    // const {devicePixelRatio} = this.props;
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
-      antialias: true,
+      // antialias: true,
     });
-    renderer.setSize(width * devicePixelRatio, height * devicePixelRatio);
+    renderer.setSize(width / MENU_CANVAS_PIXELATION, height / MENU_CANVAS_PIXELATION);
     const canvas = renderer.domElement;
     canvas.style.width = width;
     canvas.style.height = height;
+    canvas.style.imageRendering = 'pixelated';
 
     const scene = new THREE.Scene();
 
@@ -657,15 +659,15 @@ const CUBE_FULL_MATERIALS = [
   new THREE.MeshBasicMaterial({
     // shading: THREE.FlatShading,
     vertexColors: THREE.VertexColors,
-    // opacity: 0.96,
+    // opacity: 0.9,
     // transparent: true
   }),
   new THREE.MeshBasicMaterial({
     color: 0x000000,
-    opacity: 0.5,
+    opacity: 0.8,
     wireframe: true,
-    wireframeLinewidth: 2,
-    transparent: true
+    // wireframeLinewidth: 1.5,
+    // transparent: true
   }),
 ];
 
