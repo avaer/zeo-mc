@@ -283,7 +283,15 @@ class MenuTab extends React.Component {
 
 class FontAwesome extends React.Component {
   componentDidMount() {
-    this.refresh(this.props);
+    const canvas = this.domNode();
+    const ctx = canvas.getContext('2d');
+
+    this._canvas = canvas;
+    this._ctx = ctx;
+
+    requestAnimationFrame(() => {
+      this.refresh(this.props);
+    });
   }
 
   shouldComponentUpdate() {
@@ -301,9 +309,8 @@ class FontAwesome extends React.Component {
 
   refresh(props) {
     const {fontSize, color, value, x, y, selected, hovered} = props;
+    const {_canvas: canvas, _ctx: ctx} = this;
 
-    const canvas = this.domNode();
-    const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.font = fontSize + 'px FontAwesome';
     ctx.fillStyle = (selected || hovered) ? color : '#999';
