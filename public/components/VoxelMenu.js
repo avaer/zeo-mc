@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Immutable from 'immutable';
 import THREE from 'three';
-import classnames from 'classnames';
 
 import {GRADIENTS} from '../resources/index';
 import {KEYS} from '../utils/input/index';
@@ -169,32 +169,17 @@ class MenuTab extends React.Component {
 
   getStyles() {
     const {selected} = this.props;
-    // const {hovered} = this.state;
 
     return {
       display: 'flex',
       position: 'relative',
       flex: 1,
       height: 40,
-      // marginBottom: -2,
       alignItems: 'center',
       justifyContent: 'center',
-      // fontSize: 20,
-      // color: (selected || hovered) ? '#333' : 'rgba(0,0,0,0.2)',
       cursor: !selected ? 'pointer' : null,
     };
   }
-
- /*  getIconStyles() {
-    return {
-      // fontSize: 10,
-    };
-  } */
-
-  /* getIconClassValue() {
-    const {icon} = this.props;
-    return classnames(['fa', 'fa-' + icon]);
-  } */
 
   getBorderSideStyles(side) {
     const {selected, first, last} = this.props;
@@ -289,6 +274,7 @@ class FontAwesome extends React.Component {
     this._canvas = canvas;
     this._ctx = ctx;
 
+    // async to let the font load + initialize
     requestAnimationFrame(() => {
       this.refresh(this.props);
     });
@@ -366,8 +352,6 @@ class MenuStatsBar extends React.Component {
   getStyles() {
     return {
       padding: '5px 20px',
-      /* border: '2px solid rgba(0,0,0,0.2)',
-      borderRadius: 5, */
     };
   }
 
@@ -376,7 +360,6 @@ class MenuStatsBar extends React.Component {
       display: 'flex',
       paddingBottom: 5,
       fontSize: 10,
-      // lineHeight: 1.4,
       textShadow: '0 2px rgba(255,255,255,0.35)',
     };
   }
@@ -402,14 +385,6 @@ class MenuStatsBar extends React.Component {
       border: '2px solid transparent',
     };
   }
-
-  /* getBarWrapperBorderStyles() {
-    return {
-      height: 2,
-      width: '100%',
-      backgroundColor: 'rgba(0,0,0,0.2)',
-    };
-  } */
 
   getBarContainerStyles() {
     const {value, total} = this.props;
@@ -443,27 +418,22 @@ class MenuStatsBar extends React.Component {
         <div style={this.getBarContainerStyles()}>
           <div style={this.getBarStyles()} />
         </div>
-        {/* <div style={this.getBarWrapperBorderStyles()} /> */}
       </div>
     </div>;
   }
 }
 
 class Menu2dCanvas extends React.Component {
-  componentWillMount() {
-    _ManualRefreshComponent.componentWillMount.call(this);
-
-    this._canvas = null;
-    this._ctx = null;
-  }
-
-  /* componentDidMount() {
+  componentDidMount() {
     const width = MENU_CANVAS_WIDTH;
     const height = MENU_CANVAS_WIDTH;
 
     const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
+    canvas.width = width / MENU_CANVAS_PIXELATION;
+    canvas.height = height / MENU_CANVAS_PIXELATION;
+    canvas.style.width = width;
+    canvas.style.height = height;
+    canvas.style.imageRendering = 'pixelated';
     const ctx = canvas.getContext('2d');
 
     const domNode = this.domNode();
@@ -471,18 +441,63 @@ class Menu2dCanvas extends React.Component {
 
     this._canvas = canvas;
     this._ctx = ctx;
-  } */
 
-  componentWillUnmount() {
-    _ManualRefreshComponent.componentWillUnmount.call(this);
+    this.refresh(this.props);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const {item: newItem} = nextProps;
+    const {item: oldItem} = this.props;
+    if (!Immutable.is(newItem, oldItem)) {
+      this.refresh(nextProps);
+    }
   }
 
   shouldComponentUpdate() {
-    return _ManualRefreshComponent.shouldComponentUpdate.call(this);
+    return false;
   }
 
-  refresh() {
-    // XXX
+  refresh(props) {
+    const {item} = props;
+    const {_canvas: canvas, _ctx: ctx} = this;
+
+    const {width, height} = canvas;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (item) {
+      const {x, y} = item;
+      for (let i = 0; i < 4; i++) {
+        const baseAngle = (Math.PI / 2) * i;
+        ctx.beginPath();
+
+        let left = ((x + 0.5) / 4) * width; // XXX make this use the actual 3d projection
+        let top = ((y + 0.5) / 4) * height;
+
+        switch (i) {
+          case 0:
+            left += (0.2 / 4) * width;
+            top += (0.2 / 4) * height;
+            break;
+          case 1:
+            left -= (0.2 / 4) * width;
+            top += (0.2 / 4) * height;
+            break;
+          case 2:
+            left -= (0.2 / 4) * width;
+            top -= (0.2 / 4) * height;
+            break;
+          case 3:
+            left += (0.2 / 4) * width;
+            top -= (0.2 / 4) * height;
+            break;
+        }
+
+        ctx.arc(left, top, 5, baseAngle + Math.PI / 4 - Math.PI / 4, baseAngle + Math.PI / 4 + Math.PI / 4);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        console.log('arc', item, x * 10, y * 10, 10, baseAngle + Math.PI / 8, baseAngle + Math.PI / 8 + Math.PI / 4);
+      }
+    }
   }
 
   domNode() {
@@ -492,6 +507,9 @@ class Menu2dCanvas extends React.Component {
   getStyles() {
     return {
       position: 'absolute',
+      top: 40,
+      left: (MENU_WIDTH - MENU_CANVAS_WIDTH) / 2,
+      pointerEvents: 'all',
     };
   }
 
@@ -501,11 +519,6 @@ class Menu2dCanvas extends React.Component {
 }
 
 class Menu3d extends React.Component {
-  /* getStyles() {
-    return {
-    };
-  } */
-
   getLeftStyles() {
     const {open} = this.props;
     return _getLeftStyles({open});
@@ -530,25 +543,23 @@ class Menu3d extends React.Component {
 
 class Menu3dLeft extends React.Component {
   componentWillMount() {
-    _ManualRefreshComponent.componentWillMount.call(this);
+    _ManualRefreshMenuComponent.componentWillMount.call(this);
   }
 
   componentWillUnmount() {
-    _ManualRefreshComponent.componentWillUnmount.call(this);
+    _ManualRefreshMenuComponent.componentWillUnmount.call(this);
   }
 
   shouldComponentUpdate() {
-    return _ManualRefreshComponent.shouldComponentUpdate.call(this);
+    return _ManualRefreshMenuComponent.shouldComponentUpdate.call(this);
   }
 
   componentDidMount() {
     const width = MENU_CANVAS_WIDTH;
     const height = MENU_CANVAS_WIDTH;
-    // const {devicePixelRatio} = this.props;
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
-      // antialias: true,
     });
     renderer.setSize(width / MENU_CANVAS_PIXELATION, height / MENU_CANVAS_PIXELATION);
     const canvas = renderer.domElement;
@@ -573,22 +584,26 @@ class Menu3dLeft extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {tab} = nextProps;
-    const {_menu: menu} = this;
-    const {scene, object: oldObject} = menu;
+    const {tab: newTab} = nextProps;
+    const {tab: oldTab} = this.props;
 
-    if (oldObject) {
-      scene.remove(oldObject);
-    }
+    if (newTab !== oldTab) {
+      const {_menu: menu} = this;
+      const {scene, object: oldObject} = menu;
 
-    if (tab === 'blocks') {
-      const blocks = _renderBlocks();
-      scene.add(blocks);
-      menu.object = blocks;
-    } else if (tab === 'materia') {
-      const materia = _renderMateria();
-      scene.add(materia);
-      menu.object = materia;
+      if (oldObject) {
+        scene.remove(oldObject);
+      }
+
+      if (newTab === 'blocks') {
+        const blocks = _renderBlocks();
+        scene.add(blocks);
+        menu.object = blocks;
+      } else if (newTab === 'materia') {
+        const materia = _renderMateria();
+        scene.add(materia);
+        menu.object = materia;
+      }
     }
   }
 
@@ -617,7 +632,9 @@ class Menu3dLeft extends React.Component {
     const x = floor((relativeX / width) * 4);
     const y = floor((relativeY / height) * 4);
 
-    console.log('click offset', {x, y}); // XXX
+    const {engines} = this.props;
+    const menuEngine = engines.getEngine('menu');
+    menuEngine.selectItem({x, y});
   };
 
   domNode() {
@@ -645,12 +662,12 @@ class Menu3dRight extends React.Component {
   }
 }
 
-const _ManualRefreshComponent = {
+const _ManualRefreshMenuComponent = {
   componentWillMount() {
     this._timeout = null;
     this._frame = null;
 
-    _ManualRefreshComponent.listen.call(this);
+    _ManualRefreshMenuComponent.listen.call(this);
   },
 
   componentWillUnmount() {

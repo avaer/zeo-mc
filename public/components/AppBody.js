@@ -1,46 +1,18 @@
 import React from 'react';
 import Immutable from 'immutable'; // XXX
 
-// import World from './World';
 import VoxelScene from './VoxelScene';
 import VoxelMenu from './VoxelMenu';
-// import Editor from './Editor';
-// import Node from './Node';
 
 import {DEFAULT_SEED} from '../constants/index';
 
 export default class AppBody extends React.Component {
   render() {
-    /* const {stores, engines} = this.props;
-    const {ui: uiState, window: windowState, world: worldState} = stores;
-
-    const {mode, value, oldValue} = uiState;
-    const {width, height, pixelRatio, pathname, mouse: {position: mousePosition, buttons: mouseButtons}} = windowState;
-    const {position, rotation, velocity, tool, nodes, hoverCoords, hoverEndCoords} = worldState;
-    const worldProps = {
-      width,
-      height,
-      pixelRatio,
-
-      position,
-      rotation,
-      velocity,
-      tool,
-
-      nodes,
-
-      mousePosition,
-      mouseButtons,
-      hoverCoords,
-      hoverEndCoords,
-
-      engines,
-    }; */
 
     const {stores, engines} = this.props;
     const {window: windowState, menu: menuState} = stores;
     const {width, height, devicePixelRatio, pathname} = windowState;
-    const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab} = menuState;
+    const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab, item: menuItem} = menuState;
 
     const voxelSceneProps = {
       width,
@@ -59,6 +31,7 @@ export default class AppBody extends React.Component {
       open: menuOpen,
       lastOpenTime: menuLastOpenTime,
       tab: menuTab,
+      item: menuItem,
 
       engines,
     };

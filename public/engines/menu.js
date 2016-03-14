@@ -19,7 +19,19 @@ export default class MenuEngine extends Engine {
 
   selectTab(tab) {
     this.updateState('menu', state => state
-      .set('tab', tab));
+      .set('tab', tab)
+      .set('item', null));
+  }
+
+  selectItem(item) {
+    if (item) {
+      const {x, y} = item;
+      this.updateState('menu', state => state
+        .set('item', {x, y}));
+    } else {
+      this.updateState('menu', state => state
+        .set('item', null));
+    }
   }
 }
 
