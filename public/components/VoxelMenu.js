@@ -481,42 +481,6 @@ class Menu3dLeft extends React.Component {
     canvas.style.height = height;
 
     const scene = new THREE.Scene();
-    const cubes = (() => {
-      const result = [];
-      for (let x = 0; x < 4; x++) {
-        for (let y = 0; y < 4; y++) {
-          const mesh = (() => {
-            if (random() < 0.5) {
-              const gradient = GRADIENTS[floor(random() * GRADIENTS.length)];
-              const geometry = _makeCubeGeometry(gradient);
-              const mesh = (() => {
-                if (random() < 0.5) {
-                  const material = CUBE_EMPTY_MATERIAL;
-                  const mesh = new THREE.Mesh(geometry, material);
-                  return mesh;
-                } else {
-                  const materials = CUBE_FULL_MATERIALS;
-                  const mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
-                  return mesh;
-                }
-              })();
-              mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
-              mesh.rotation.order = 'XYZ';
-              return mesh;
-            } else {
-              return null;
-            }
-          })();
-          if (mesh) {
-            result.push(mesh);
-          }
-        }
-      }
-      return result;
-    })();
-    cubes.forEach(cube => {
-      scene.add(cube);
-    });
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1000);
     camera.position.set(0, 0, 12);
@@ -524,7 +488,32 @@ class Menu3dLeft extends React.Component {
     const domNode = this.domNode();
     domNode.appendChild(canvas);
 
-    this._menu = {renderer, scene, camera, cubes};
+    this._menu = {
+      renderer,
+      scene,
+      camera,
+      object: null,
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const {tab} = nextProps;
+    const {_menu: menu} = this;
+    const {scene, object: oldObject} = menu;
+
+    if (oldObject) {
+      scene.remove(oldObject);
+    }
+
+    if (tab === 'blocks') {
+      const blocks = _renderBlocks();
+      scene.add(blocks);
+      menu.object = blocks;
+    } else if (tab === 'materia') {
+      const materia = _renderMateria();
+      scene.add(materia);
+      menu.object = materia;
+    }
   }
 
   domNode() {
@@ -539,15 +528,11 @@ class Menu3dLeft extends React.Component {
   }
 
   refresh() {
-    const {renderer, scene, camera, cubes} = this._menu;
+    const {renderer, scene, camera, object} = this._menu;
 
-    const time = new Date();
-    const timeFactor = (+time % CUBE_ROTATION_RATE) / CUBE_ROTATION_RATE;
-    const rotationFactor = timeFactor * Math.PI * 2;
-    cubes.forEach((cube, i) => {
-      const localRotationFactor = rotationFactor + (((i % 4) / 4) * Math.PI * 2);
-      cube.rotation.set(0, localRotationFactor, localRotationFactor);
-    });
+    if (object) {
+      object.refresh();
+    }
 
     renderer.render(scene, camera);
   }
@@ -682,3 +667,57 @@ const CUBE_FULL_MATERIALS = [
     transparent: true
   }),
 ];
+
+function _renderBlocks() {
+  return _renderMateria();
+}
+
+function _renderMateria() {
+  const object = new THREE.Object3D();
+
+  const materia = [];
+  for (let x = 0; x < 4; x++) {
+    for (let y = 0; y < 4; y++) {
+      const mesh = (() => {
+        if (random() < 0.5) {
+          const gradient = GRADIENTS[floor(random() * GRADIENTS.length)];
+          const geometry = _makeCubeGeometry(gradient);
+          const mesh = (() => {
+            if (random() < 0.5) {
+              const material = CUBE_EMPTY_MATERIAL;
+              const mesh = new THREE.Mesh(geometry, material);
+              return mesh;
+            } else {
+              const materials = CUBE_FULL_MATERIALS;
+              const mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+              return mesh;
+            }
+          })();
+          mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
+          mesh.rotation.order = 'XYZ';
+          return mesh;
+        } else {
+          return null;
+        }
+      })();
+      if (mesh) {
+        materia.push(mesh);
+      }
+    }
+  }
+  materia.forEach(mesh => {
+    object.add(mesh);
+  });
+
+  object.refresh = function() {
+    const time = new Date();
+    const timeFactor = (+time % CUBE_ROTATION_RATE) / CUBE_ROTATION_RATE;
+    const rotationFactor = timeFactor * Math.PI * 2;
+    materia.forEach((mesh, i) => {
+      const localRotationFactor = rotationFactor + (((i % 4) / 4) * Math.PI * 2);
+      mesh.rotation.set(0, localRotationFactor, localRotationFactor);
+    });
+  };
+
+  return object;
+}
