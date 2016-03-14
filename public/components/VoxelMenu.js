@@ -27,7 +27,7 @@ const MENU_TABS = [
   {name: 'materia', icon: 'level-up', value: '\uf219'},
 ];
 
-const CUBE_SIZE = 0.8;
+const CUBE_SIZE = 0.7;
 const CUBE_ROTATION_RATE = 5000;
 
 const {min, max, floor, random} = Math;
