@@ -7,8 +7,8 @@ import {GRADIENTS} from '../resources/index';
 import {KEYS} from '../utils/input/index';
 import {FRAME_RATE, MENU_TIME} from '../constants/index';
 
-const MENU_LEFT_WIDTH = 300;
-const MENU_RIGHT_WIDTH = 300;
+const MENU_WIDTH = 300;
+const MENU_CANVAS_WIDTH = 250;
 const MENU_BAR_WIDTH = 256;
 
 const MENU_FONT = '\'Press Start 2P\', cursive';
@@ -382,9 +382,9 @@ class Menu2dCanvas extends React.Component {
     this._ctx = null;
   }
 
-  componentDidMount() {
-    const width = MENU_LEFT_WIDTH;
-    const height = MENU_LEFT_WIDTH;
+  /* componentDidMount() {
+    const width = MENU_CANVAS_WIDTH;
+    const height = MENU_CANVAS_WIDTH;
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -396,7 +396,7 @@ class Menu2dCanvas extends React.Component {
 
     this._canvas = canvas;
     this._ctx = ctx;
-  }
+  } */
 
   componentWillUnmount() {
     _ManualRefreshComponent.componentWillUnmount.call(this);
@@ -467,8 +467,8 @@ class Menu3dLeft extends React.Component {
   }
 
   componentDidMount() {
-    const width = MENU_LEFT_WIDTH;
-    const height = MENU_LEFT_WIDTH;
+    const width = MENU_CANVAS_WIDTH;
+    const height = MENU_CANVAS_WIDTH;
     const {devicePixelRatio} = this.props;
 
     const renderer = new THREE.WebGLRenderer({
@@ -483,7 +483,7 @@ class Menu3dLeft extends React.Component {
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 1000);
-    camera.position.set(0, 0, 12);
+    camera.position.set(0, 0, 10);
 
     const domNode = this.domNode();
     domNode.appendChild(canvas);
@@ -523,7 +523,8 @@ class Menu3dLeft extends React.Component {
   getStyles() {
     return {
       position: 'absolute',
-      top: 50,
+      top: 40,
+      left: (MENU_WIDTH - MENU_CANVAS_WIDTH) / 2,
     };
   }
 
@@ -600,10 +601,10 @@ const _ManualRefreshComponent = {
 function _getLeftStyles({open, solid}) {
   return {
     position: 'absolute',
-    left: open ? 0 : -MENU_LEFT_WIDTH,
+    left: open ? 0 : -MENU_WIDTH,
     top: 0,
     bottom: 0,
-    width: MENU_LEFT_WIDTH,
+    width: MENU_WIDTH,
     backgroundColor: solid ? ('rgba(255, 255, 255, ' + MENU_FG_DIM + ')') : null,
     transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
   };
@@ -612,10 +613,10 @@ function _getLeftStyles({open, solid}) {
 function _getRightStyles({open, solid}) {
   return {
     position: 'absolute',
-    right: open ? 0 : -MENU_RIGHT_WIDTH,
+    right: open ? 0 : -MENU_WIDTH,
     top: 0,
     bottom: 0,
-    width: MENU_RIGHT_WIDTH,
+    width: MENU_WIDTH,
     backgroundColor: solid ? ('rgba(255, 255, 255, ' + MENU_FG_DIM + ')') : null,
     transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
   };
