@@ -14,6 +14,8 @@ const MENU_CANVAS_PIXELATION = 1.5;
 const MENU_BAR_WIDTH = 256;
 const MENU_BORDER_COLOR = '#333';
 
+const MENU_CANVAS_DRAG_WIDTH = 50; // XXX maybe give this the same size as the standard 3d menu canvas
+
 const MENU_FONT = '\'Press Start 2P\', cursive';
 const MENU_FG_DIM = 0.75;
 const MENU_BG_DIM = 0.5;
@@ -34,6 +36,10 @@ const CUBE_ROTATION_RATE = 5000;
 const {min, max, floor, random} = Math;
 
 export default class VoxelMenu extends React.Component {
+  state = {
+    dragState: null
+  };
+
   getStyles() {
     const {open} = this.props;
 
@@ -63,6 +69,7 @@ export default class VoxelMenu extends React.Component {
 
   render() {
     const {tab, inventory, itemIndex} = this.props;
+    const {dragState} = this.state;
     const filteredInventory = (() => {
       if (tab === 'all') {
         return inventory.slice(0, 16);
@@ -86,6 +93,7 @@ export default class VoxelMenu extends React.Component {
       ...this.props,
       filteredInventory,
       item,
+      dragState,
     };
 
     return <div style={this.getStyles()} onKeyDown={this.onKeyDown}>
@@ -649,6 +657,23 @@ class Menu3d extends React.Component {
     return _getRightStyles({open});
   }
 
+  getDragStyles() {
+    const {dragState} = this.props;
+
+    if (dragState) {
+      const {x, y} = dragState;
+      return {
+        position: 'absolute',
+        x,
+        y,
+      };
+    } else {
+      return {
+        display: 'none',
+      };
+    }
+  }
+
   render() {
     return <div>
       <div style={this.getLeftStyles()}>
@@ -656,6 +681,9 @@ class Menu3d extends React.Component {
       </div>
       <div style={this.getRightStyles()}>
         <Menu3dRight {...this.props} />
+      </div>
+      <div style={this.getDragStyles()}>
+        <Menu3dDrag {...this.props} />
       </div>
     </div>;
   }
@@ -721,9 +749,9 @@ class Menu3dLeft extends React.Component {
     }
 
     const {filteredInventory} = props;
-    const items = _renderItems(filteredInventory);
-    scene.add(items);
-    menu.object = items;
+    const newObject = _renderItems(filteredInventory);
+    scene.add(newObject);
+    menu.object = newObject;
   }
 
   domNode() {
@@ -743,7 +771,7 @@ class Menu3dLeft extends React.Component {
     return x + y * 4;
   }
 
-  onClick = e => {
+  onMouseDown = e => {
     const {pageX, pageY} = e;
     const domNode = this.domNode();
     const domNodeOffset = $(domNode).offset();
@@ -765,6 +793,8 @@ class Menu3dLeft extends React.Component {
     } else {
       menuEngine.selectItem(null);
     }
+
+    e.preventDefault();
   };
 
   domNode() {
@@ -782,11 +812,91 @@ class Menu3dLeft extends React.Component {
   }
 
   render() {
-    return <div style={this.getStyles()} onClick={this.onClick} />;
+    return <div style={this.getStyles()} onMouseDown={this.onMouseDown} />;
   }
 }
 
 class Menu3dRight extends React.Component {
+  render() {
+    return <div />;
+  }
+}
+
+class Menu3dDrag extends React.Component {
+  componentWillMount() {
+    _ManualRefreshMenuComponent.componentWillMount.call(this);
+  }
+
+  componentWillUnmount() {
+    _ManualRefreshMenuComponent.componentWillUnmount.call(this);
+  }
+
+  shouldComponentUpdate() {
+    return _ManualRefreshMenuComponent.shouldComponentUpdate.call(this);
+  }
+
+  componentDidMount() {
+    const width = MENU_CANVAS_DRAG_WIDTH;
+    const height = MENU_CANVAS_DRAG_WIDTH;
+
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+    });
+    renderer.setSize(width / MENU_CANVAS_PIXELATION, height / MENU_CANVAS_PIXELATION);
+    const canvas = renderer.domElement;
+    canvas.style.width = width;
+    canvas.style.height = height;
+    canvas.style.imageRendering = 'pixelated';
+
+    const scene = new THREE.Scene();
+    const camera = _getBlockCamera(width, height);
+
+    const domNode = this.domNode();
+    domNode.appendChild(canvas);
+
+    this._menu = {
+      renderer,
+      scene,
+      camera,
+      object: null,
+    };
+
+    this.updateItems(this.props);
+  }
+
+  updateItems(props) {
+    const {_menu: menu} = this;
+    const {scene, object: oldObject} = menu;
+
+    if (oldObject) {
+      scene.remove(oldObject);
+    }
+
+    const {dragState} = props;
+    if (dragState) {
+      const {item} = dragState;
+      const newObject = _renderItem(item);
+      scene.add(newObject);
+      menu.object = newObject;
+    } else {
+      menu.object = null;
+    }
+  }
+
+  domNode() {
+    return ReactDOM.findDOMNode(this);
+  }
+
+  refresh() {
+    const {renderer, scene, camera, object} = this._menu;
+
+    if (object) {
+      object.refresh();
+    }
+
+    renderer.render(scene, camera);
+  }
+
   render() {
     return <div />;
   }
@@ -918,37 +1028,40 @@ const CUBE_FULL_MATERIALS = [
   }),
 ];
 
+function _renderItem(item) {
+  const {name, count} = item;
+
+  const gradient = GRADIENTS[murmur(name) % GRADIENTS.length];
+  const geometry = _makeCubeGeometry(gradient);
+  const mesh = (() => {
+    if (count < 5) {
+      const material = CUBE_EMPTY_MATERIAL;
+      const mesh = new THREE.Mesh(geometry, material);
+      return mesh;
+    } else {
+      const materials = CUBE_FULL_MATERIALS;
+      const mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+      return mesh;
+    }
+  })();
+  return mesh;
+}
+
 function _renderItems(inventory) {
   const object = new THREE.Object3D();
 
-  const materia = [];
+  const items = [];
   inventory.forEach((item, i) => {
-    const {name, count} = item;
+    const mesh = _renderItem(item);
 
     const x = i % 4;
     const y = floor(i / 4);
+    mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
+    mesh.rotation.order = 'XYZ';
 
-    const mesh = (() => {
-      const gradient = GRADIENTS[murmur(name) % GRADIENTS.length];
-      const geometry = _makeCubeGeometry(gradient);
-      const mesh = (() => {
-        if (count < 5) {
-          const material = CUBE_EMPTY_MATERIAL;
-          const mesh = new THREE.Mesh(geometry, material);
-          return mesh;
-        } else {
-          const materials = CUBE_FULL_MATERIALS;
-          const mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
-          return mesh;
-        }
-      })();
-      mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
-      mesh.rotation.order = 'XYZ';
-      return mesh;
-    })();
-    materia.push(mesh);
+    items.push(mesh);
   });
-  materia.forEach(mesh => {
+  items.forEach(mesh => {
     object.add(mesh);
   });
 
@@ -956,7 +1069,7 @@ function _renderItems(inventory) {
     const time = new Date();
     const timeFactor = (+time % CUBE_ROTATION_RATE) / CUBE_ROTATION_RATE;
     const rotationFactor = timeFactor * Math.PI * 2;
-    materia.forEach((mesh, i) => {
+    items.forEach((mesh, i) => {
       const localRotationFactor = rotationFactor + (((i % 4) / 4) * Math.PI * 2);
       mesh.rotation.set(0, localRotationFactor, localRotationFactor);
     });
