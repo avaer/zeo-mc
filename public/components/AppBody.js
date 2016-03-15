@@ -12,7 +12,7 @@ export default class AppBody extends React.Component {
     const {stores, engines} = this.props;
     const {window: windowState, menu: menuState, player: playerState} = stores;
     const {width, height, devicePixelRatio, pathname} = windowState;
-    const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab, itemIndex: menuItemIndex} = menuState;
+    const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab, itemIndex: menuItemIndex, dragItemIndex: menuDragItemIndex, dragCoords: menuDragCoords} = menuState;
     const {inventory} = playerState;
 
     const voxelSceneProps = {
@@ -33,6 +33,8 @@ export default class AppBody extends React.Component {
       lastOpenTime: menuLastOpenTime,
       tab: menuTab,
       itemIndex: menuItemIndex,
+      dragItemIndex: menuDragItemIndex,
+      dragCoords: menuDragCoords,
 
       inventory,
 

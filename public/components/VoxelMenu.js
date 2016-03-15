@@ -62,7 +62,7 @@ export default class VoxelMenu extends React.Component {
   };
 
   render() {
-    const {tab, inventory, itemIndex} = this.props;
+    const {tab, inventory, itemIndex, dragItemIndex} = this.props;
     const filteredInventory = (() => {
       if (tab === 'all') {
         return inventory.slice(0, 16);
@@ -81,7 +81,14 @@ export default class VoxelMenu extends React.Component {
         return null;
       }
     })();
-    const dragItem = null; // XXX derive this
+    const dragItem = (() => {
+      if (dragItemIndex !== null) {
+        const item = filteredInventory.get(dragItemIndex);
+        return item;
+      } else {
+        return null;
+      }
+    })();
 
     const props = {
       ...this.props,
@@ -593,7 +600,7 @@ class Menu2dCanvasLeft extends React.Component {
     const widthHalf = width / 2;
     const heightHalf = height / 2;
     vector.x = ( vector.x * widthHalf ) + widthHalf;
-    vector.y = ( vector.y * heightHalf ) + heightHalf;
+    vector.y = - ( vector.y * heightHalf ) + heightHalf;
 
     const left = vector.x;
     const top = vector.y;
@@ -658,26 +665,11 @@ class Menu3d extends React.Component {
     return _getLeftStyles({open});
   }
 
-  getRightStyles() {
-    const {open} = this.props;
-    return _getRightStyles({open});
-  }
-
   getDragStyles() {
-    const {dragCoords} = this.props;
-
-    if (dragCoords) {
-      const {x, y} = dragCoords;
-      return {
-        position: 'absolute',
-        x,
-        y,
-      };
-    } else {
-      return {
-        display: 'none',
-      };
-    }
+    const {dragItem} = this.props;
+    return {
+      display: dragItem ? null : 'none',
+    };
   }
 
   render() {
@@ -685,11 +677,9 @@ class Menu3d extends React.Component {
       <div style={this.getLeftStyles()}>
         <Menu3dLeft {...this.props} />
       </div>
-      <div style={this.getRightStyles()}>
-        <Menu3dRight {...this.props} />
-      </div>
       <div style={this.getDragStyles()}>
         <Menu3dDrag {...this.props} />
+        <MenuDragMask {...this.props} />
       </div>
     </div>;
   }
@@ -773,11 +763,11 @@ class Menu3dLeft extends React.Component {
     };
   }
 
-  getInventoryIndex(x, y) {
+  getItemIndex(x, y) {
     return x + y * 4;
   }
 
-  getEventInventoryIndexIndex(e) {
+  getEventItemIndex(e) {
     const {pageX, pageY} = e;
     const domNode = this.domNode();
     const domNodeOffset = $(domNode).offset();
@@ -788,34 +778,32 @@ class Menu3dLeft extends React.Component {
     const height = $(domNode).height();
     const x = floor((relativeX / width) * 4);
     const y = floor((relativeY / height) * 4);
-    const inventoryIndex = this.getInventoryIndex(x, y);
-    return inventoryIndex;
+    const itemIndex = this.getItemIndex(x, y);
+    return itemIndex;
   }
 
   onMouseDown = e => {
     const {filteredInventory} = this.props;
-    const inventoryIndex = this.getEventInventoryIndexIndex(e);
-    const item = filteredInventory.get(inventoryIndex);
+    const itemIndex = this.getEventItemIndex(e);
+    const item = filteredInventory.get(itemIndex);
     const {engines} = this.props;
     const menuEngine = engines.getEngine('menu');
     if (item) {
-      menuEngine.selectItem(inventoryIndex);
+      menuEngine.selectItem(itemIndex);
     } else {
       menuEngine.selectItem(null);
     }
   };
 
   onDragStart = e => {
-    const {filteredInventory} = this.props;
-    const inventoryIndex = this.getEventInventoryIndexIndex(e);
-    const item = filteredInventory.get(inventoryIndex);
+    const {itemIndex: oldItemIndex, filteredInventory} = this.props;
+    const itemIndex = this.getEventItemIndex(e);
+    const item = filteredInventory.get(itemIndex);
     const {engines} = this.props;
     const menuEngine = engines.getEngine('menu');
     if (item) {
       const {pageX: x, pageY: y} = e;
-      menuEngine.startDrag({inventoryIndex, x, y});
-
-      console.log('drag start', {inventoryIndex, x, y});
+      menuEngine.startDrag({itemIndex, x, y});
     }
 
     e.preventDefault();
@@ -840,13 +828,64 @@ class Menu3dLeft extends React.Component {
   }
 }
 
-class Menu3dRight extends React.Component {
+class MenuDragMask extends React.Component {
+  getStyles() {
+    return {
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      cursor: '-webkit-grabbing',
+      pointerEvents: 'all',
+    };
+  }
+
+  onMouseMove = e => {
+    const {pageX: x, pageY: y} = e;
+    const {engines} = this.props;
+    const menuEngine = engines.getEngine('menu');
+    menuEngine.updateDrag({x, y});
+
+    e.preventDefault();
+  };
+
+  onMouseUp = e => {
+    const {engines} = this.props;
+    const menuEngine = engines.getEngine('menu');
+    menuEngine.endDrag();
+
+    e.preventDefault();
+  };
+
   render() {
-    return <div />;
+    return <div style={this.getStyles()} onMouseMove={this.onMouseMove} onMouseUp={this.onMouseUp} />;
   }
 }
 
 class Menu3dDrag extends React.Component {
+  getStyles() {
+    const {dragCoords} = this.props;
+    if (dragCoords) {
+      const {x, y} = dragCoords;
+      return {
+        position: 'absolute',
+        left: -(MENU_CANVAS_WIDTH / 2) + x,
+        top: -(MENU_CANVAS_WIDTH / 2) + y,
+      };
+    } else {
+      return null;
+    }
+  }
+
+  render() {
+    return <div style={this.getStyles()}>
+      <Menu3dDragIcon {...this.props} />
+    </div>;
+  }
+}
+
+class Menu3dDragIcon extends React.Component {
   componentWillMount() {
     _ManualRefreshMenuComponent.componentWillMount.call(this);
   }
@@ -889,10 +928,10 @@ class Menu3dDrag extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {tab: newDragState} = nextProps;
-    const {tab: oldDragState} = this.props;
+    const {dragItemIndex: newDragItemIndex, dragCoords: newDragCoords} = nextProps;
+    const {dragItemIndex: oldDragItemIndex, dragCoords: oldDragCoords} = this.props;
 
-    if (newDragState !== oldDragState) {
+    if (newDragItemIndex !== oldDragItemIndex || !Immutable.is(newDragCoords, oldDragCoords)) {
       this.updateItem(nextProps);
     }
   }
@@ -1076,6 +1115,14 @@ function _renderItem(item) {
       return mesh;
     }
   })();
+
+  mesh.refresh = () => {
+    const time = new Date();
+    const timeFactor = (+time % CUBE_ROTATION_RATE) / CUBE_ROTATION_RATE;
+    const rotationFactor = timeFactor * Math.PI * 2;
+    mesh.rotation.set(0, rotationFactor, rotationFactor);
+  };
+
   return mesh;
 }
 
@@ -1088,7 +1135,7 @@ function _renderItems(inventory) {
 
     const x = i % 4;
     const y = floor(i / 4);
-    mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
+    mesh.position.set(-3 + x * 2, -(-3 + y * 2), 0);
     mesh.rotation.order = 'XYZ';
 
     items.push(mesh);
@@ -1119,7 +1166,7 @@ function _renderPlaceholderObjects(inventory) {
     const geometry = new THREE.Geometry();
     const material = new THREE.MeshBasicMaterial();
     const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(-3 + x * 2, -3 + y * 2, 0);
+    mesh.position.set(-3 + x * 2, -(-3 + y * 2), 0);
     result.push(mesh);
   });
   return result;

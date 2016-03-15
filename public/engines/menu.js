@@ -3,6 +3,11 @@ import Immutable from 'immutable';
 import Engines from './index';
 const {Engine} = Engines;
 
+class Coords extends Immutable.Record({
+  x: 0,
+  y: 0,
+}) {}
+
 export default class MenuEngine extends Engine {
   static NAME = 'menu';
 
@@ -31,12 +36,12 @@ export default class MenuEngine extends Engine {
   startDrag({itemIndex, x, y}) {
     this.updateState('menu', state => state
       .set('dragItemIndex', itemIndex)
-      .set('dragCoords', {x, y}));
+      .set('dragCoords', new Coords({x, y})));
   }
 
   updateDrag({x, y}) {
     this.updateState('menu', state => state
-      .set('dragCoords', {x, y}));
+      .set('dragCoords', new Coords({x, y})));
   }
 
   endDrag() {
