@@ -27,6 +27,23 @@ export default class MenuEngine extends Engine {
     this.updateState('menu', state => state
       .set('itemIndex', itemIndex));
   }
+
+  startDrag({itemIndex, x, y}) {
+    this.updateState('menu', state => state
+      .set('dragItemIndex', itemIndex)
+      .set('dragCoords', {x, y}));
+  }
+
+  updateDrag({x, y}) {
+    this.updateState('menu', state => state
+      .set('dragCoords', {x, y}));
+  }
+
+  endDrag() {
+    this.updateState('menu', state => state
+      .set('dragItemIndex', null)
+      .set('dragCoords', null));
+  }
 }
 
 module.exports = MenuEngine;

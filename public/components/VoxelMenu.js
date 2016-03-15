@@ -14,8 +14,6 @@ const MENU_CANVAS_PIXELATION = 1.5;
 const MENU_BAR_WIDTH = 256;
 const MENU_BORDER_COLOR = '#333';
 
-const MENU_CANVAS_DRAG_WIDTH = 50; // XXX maybe give this the same size as the standard 3d menu canvas
-
 const MENU_FONT = '\'Press Start 2P\', cursive';
 const MENU_FG_DIM = 0.75;
 const MENU_BG_DIM = 0.5;
@@ -36,10 +34,6 @@ const CUBE_ROTATION_RATE = 5000;
 const {min, max, floor, random} = Math;
 
 export default class VoxelMenu extends React.Component {
-  state = {
-    dragState: null
-  };
-
   getStyles() {
     const {open} = this.props;
 
@@ -69,7 +63,6 @@ export default class VoxelMenu extends React.Component {
 
   render() {
     const {tab, inventory, itemIndex} = this.props;
-    const {dragState} = this.state;
     const filteredInventory = (() => {
       if (tab === 'all') {
         return inventory.slice(0, 16);
@@ -88,12 +81,13 @@ export default class VoxelMenu extends React.Component {
         return null;
       }
     })();
+    const dragItem = null; // XXX derive this
 
     const props = {
       ...this.props,
       filteredInventory,
       item,
-      dragState,
+      dragItem,
     };
 
     return <div style={this.getStyles()} onKeyDown={this.onKeyDown}>
@@ -511,6 +505,27 @@ class MenuStatsBar extends React.Component {
 }
 
 class Menu2dCanvas extends React.Component {
+  getLeftStyles() {
+    const {open} = this.props;
+    return {
+      position: 'absolute',
+      top: 40,
+      left: ((MENU_WIDTH - MENU_CANVAS_WIDTH) / 2) + (open ? 0 : -MENU_WIDTH),
+      transition: 'all ' + MENU_TIME + 's ' + MENU_TRANSITION_FN,
+      pointerEvents: 'all',
+    };
+  }
+
+  render() {
+    return <div>
+      <div style={this.getLeftStyles()}>
+        <Menu2dCanvasLeft {...this.props} />
+      </div>
+    </div>;
+  }
+}
+
+class Menu2dCanvasLeft extends React.Component {
   componentDidMount() {
     const {filteredInventory} = this.props;
 
@@ -630,19 +645,10 @@ class Menu2dCanvas extends React.Component {
 
   domNode() {
     return ReactDOM.findDOMNode(this);
-  } 
-
-  getStyles() {
-    return {
-      position: 'absolute',
-      top: 40,
-      left: (MENU_WIDTH - MENU_CANVAS_WIDTH) / 2,
-      pointerEvents: 'all',
-    };
   }
 
   render() {
-    return <div style={this.getStyles()} />;
+    return <div />;
   }
 }
 
@@ -658,10 +664,10 @@ class Menu3d extends React.Component {
   }
 
   getDragStyles() {
-    const {dragState} = this.props;
+    const {dragCoords} = this.props;
 
-    if (dragState) {
-      const {x, y} = dragState;
+    if (dragCoords) {
+      const {x, y} = dragCoords;
       return {
         position: 'absolute',
         x,
@@ -793,6 +799,10 @@ class Menu3dLeft extends React.Component {
     } else {
       menuEngine.selectItem(null);
     }
+  };
+
+  onDragStart = e => {
+    console.log('drag start');
 
     e.preventDefault();
   };
@@ -812,7 +822,7 @@ class Menu3dLeft extends React.Component {
   }
 
   render() {
-    return <div style={this.getStyles()} onMouseDown={this.onMouseDown} />;
+    return <div style={this.getStyles()} onMouseDown={this.onMouseDown} onDragStart={this.onDragStart} draggable />;
   }
 }
 
@@ -836,8 +846,8 @@ class Menu3dDrag extends React.Component {
   }
 
   componentDidMount() {
-    const width = MENU_CANVAS_DRAG_WIDTH;
-    const height = MENU_CANVAS_DRAG_WIDTH;
+    const width = MENU_CANVAS_WIDTH;
+    const height = MENU_CANVAS_WIDTH;
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
@@ -861,10 +871,19 @@ class Menu3dDrag extends React.Component {
       object: null,
     };
 
-    this.updateItems(this.props);
+    this.updateItem(this.props);
   }
 
-  updateItems(props) {
+  componentWillReceiveProps(nextProps) {
+    const {tab: newDragState} = nextProps;
+    const {tab: oldDragState} = this.props;
+
+    if (newDragState !== oldDragState) {
+      this.updateItem(nextProps);
+    }
+  }
+
+  updateItem(props) {
     const {_menu: menu} = this;
     const {scene, object: oldObject} = menu;
 
@@ -872,10 +891,9 @@ class Menu3dDrag extends React.Component {
       scene.remove(oldObject);
     }
 
-    const {dragState} = props;
-    if (dragState) {
-      const {item} = dragState;
-      const newObject = _renderItem(item);
+    const {dragItem} = props;
+    if (dragItem) {
+      const newObject = _renderItem(dragItem);
       scene.add(newObject);
       menu.object = newObject;
     } else {
