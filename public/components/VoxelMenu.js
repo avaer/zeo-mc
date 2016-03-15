@@ -777,7 +777,7 @@ class Menu3dLeft extends React.Component {
     return x + y * 4;
   }
 
-  onMouseDown = e => {
+  getEventInventoryIndexIndex(e) {
     const {pageX, pageY} = e;
     const domNode = this.domNode();
     const domNodeOffset = $(domNode).offset();
@@ -788,9 +788,13 @@ class Menu3dLeft extends React.Component {
     const height = $(domNode).height();
     const x = floor((relativeX / width) * 4);
     const y = floor((relativeY / height) * 4);
-
-    const {filteredInventory} = this.props;
     const inventoryIndex = this.getInventoryIndex(x, y);
+    return inventoryIndex;
+  }
+
+  onMouseDown = e => {
+    const {filteredInventory} = this.props;
+    const inventoryIndex = this.getEventInventoryIndexIndex(e);
     const item = filteredInventory.get(inventoryIndex);
     const {engines} = this.props;
     const menuEngine = engines.getEngine('menu');
@@ -802,7 +806,17 @@ class Menu3dLeft extends React.Component {
   };
 
   onDragStart = e => {
-    console.log('drag start');
+    const {filteredInventory} = this.props;
+    const inventoryIndex = this.getEventInventoryIndexIndex(e);
+    const item = filteredInventory.get(inventoryIndex);
+    const {engines} = this.props;
+    const menuEngine = engines.getEngine('menu');
+    if (item) {
+      const {pageX: x, pageY: y} = e;
+      menuEngine.startDrag({inventoryIndex, x, y});
+
+      console.log('drag start', {inventoryIndex, x, y});
+    }
 
     e.preventDefault();
   };
