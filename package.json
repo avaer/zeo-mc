@@ -24,6 +24,7 @@
     "webpack": "^1.12.2",
     "webpack-dev-server": "^1.12.1",
 
+    "spdy": "",
     "express": "",
     "mime": "",
     "st": "",
