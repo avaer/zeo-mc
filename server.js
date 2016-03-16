@@ -1,5 +1,6 @@
 const path = require('path');
 
+const spdy = require('spdy');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const webpackConfig = require('./webpack.config');
@@ -34,6 +35,11 @@ u.parallel(cb => {
     hot: true,
     historyApiFallback: true
   });
+  webpackDevServer.listeningApp = spdy.createServer({
+    cert: c.cert,
+    key: c.privateKey,
+  }, webpackDevServer.app);
+
   webpackDevServer.use(function(req, res, next) {
     res.promise = function(p) {
       p.then(function(result) {
