@@ -1,5 +1,5 @@
 {
-  "hostname": "kazmer.io",
+  "hostname": "localhost.kazmer.io",
   "port": 443,
   "dataDirectory": "./data"
 }

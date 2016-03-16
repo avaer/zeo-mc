@@ -7,7 +7,7 @@ module.exports = {
   devtool: 'eval',
   entry: {
     'bundle': [
-      'webpack-dev-server/client?http://HOSTNAME:PORT',
+      'webpack-dev-server/client?https://HOSTNAME:PORT',
       'webpack/hot/only-dev-server'
     ].concat(
       glob.sync('./public/include/*/index.js')
