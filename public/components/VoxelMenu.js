@@ -216,7 +216,7 @@ class MenuTab extends React.Component {
     };
   }
 
-  getBorderSideStyles(side) {
+  getBorderHorizontalStyles(side) {
     const {selected, first, last} = this.props;
 
     return {
@@ -293,9 +293,8 @@ class MenuTab extends React.Component {
         selected={selected}
         hovered={hovered}
       />
-      <div style={this.getBorderSideStyles('left')} />
-      <div style={this.getBorderSideStyles('right')} />
-      {/*<div style={this.getBorderVerticalStyles('top')} />*/}
+      <div style={this.getBorderHorizontalStyles('left')} />
+      <div style={this.getBorderHorizontalStyles('right')} />
       <div style={this.getBorderVerticalStyles('bottom')} />
     </div>;
   }
