@@ -31,12 +31,21 @@ function _initPlayerState(state) {
   ['block', 'item', 'structure', 'weapon', 'materia'].forEach(type => {
     const numItems = MIN_ITEMS + floor(random() * (MAX_ITEMS - MIN_ITEMS));
     for (let i = 0; i < numItems; i++) {
-      const name = randomWord.noun();
+      const variant = (() => {
+        if (type === 'block') {
+          const blockName = BLOCKS.BASIC[floor(random() * BLOCKS.BASIC.length)];
+          const variant = BLOCKS.BLOCKS[blockName];
+          return variant;
+        } else {
+          const variant = randomWord.noun();
+          return variant;
+        }
+      })();
       const count = MIN_ITEM_COUNT + floor(random() * (MAX_ITEM_COUNT - MIN_ITEM_COUNT));
       const description = ITEM_DESCRIPTION;
       const item = new Item({
         type,
-        name,
+        variant,
         count,
         description
       });

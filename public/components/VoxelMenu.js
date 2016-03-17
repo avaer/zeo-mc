@@ -4,7 +4,7 @@ import Immutable from 'immutable';
 import THREE from 'three';
 import murmur from 'murmurhash-js';
 
-import {GRADIENTS} from '../resources/index';
+import {BLOCKS, GRADIENTS} from '../resources/index';
 import {KEYS} from '../utils/input/index';
 import {FRAME_RATE, MENU_TIME} from '../constants/index';
 
@@ -361,10 +361,7 @@ class FontAwesome extends React.Component {
 
 class MenuInfo extends React.Component {
   getStyles() {
-    const {item} = this.props;
-
     return {
-      display: item ? null : 'none',
       position: 'absolute',
       bottom: 0,
       left: 0,
@@ -398,17 +395,18 @@ class MenuInfo extends React.Component {
   }
 
   render() {
-    const item = this.props.item || {};
-    const {
-      name = '',
-    } = item;
+    const {item} = this.props;
 
-    return <div style={this.getStyles()}>
-      <div style={this.getWrapperStyles()}>
-        <div style={this.getHeadingStyles()}>{_capitalize(name)}</div>
-        <div style={this.getParagraphStyles()}>Final Fantasy VII is a role-playing video game developed and published by Square (now Square Enix) for the PlayStation platform.</div>
-      </div>
-    </div>;
+    if (item) {
+      return <div style={this.getStyles()}>
+        <div style={this.getWrapperStyles()}>
+          <div style={this.getHeadingStyles()}>{_itemName(item)}</div>
+          <div style={this.getParagraphStyles()}>Final Fantasy VII is a role-playing video game developed and published by Square (now Square Enix) for the PlayStation platform.</div>
+        </div>
+      </div>;
+    } else {
+      return null;
+    }
   }
 }
 
@@ -1045,7 +1043,13 @@ function _getRightStyles({open, solid}) {
   };
 }
 
-function _makeCubeGeometry(gradient) {
+function _makeCubeGeometry() {
+  const cubeGeometry = new THREE.CubeGeometry(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
+  const bufferGeometry = new THREE.BufferGeometry().fromGeometry(cubeGeometry);
+  return bufferGeometry;
+}
+
+function _makeCubeGradientGeometry(gradient) {
   const {colors} = gradient;
 
   const cubeGeometry = new THREE.CubeGeometry(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
@@ -1099,19 +1103,46 @@ const CUBE_FULL_MATERIALS = [
 ];
 
 function _renderItem(item) {
-  const {name, count} = item;
+  const {type, count} = item;
 
-  const gradient = GRADIENTS[murmur(name) % GRADIENTS.length];
-  const geometry = _makeCubeGeometry(gradient);
   const mesh = (() => {
-    if (count < 5) {
+    function emptyMesh() {
+      const geometry = _makeCubeGeometry();
       const material = CUBE_EMPTY_MATERIAL;
       const mesh = new THREE.Mesh(geometry, material);
       return mesh;
-    } else {
+    }
+
+    function blockMesh() {
+      const {variant} = item;
+      // XXX finish this
+      const geometry = _makeCubeGeometry();
+      const material = CUBE_EMPTY_MATERIAL;
+      const mesh = new THREE.Mesh(geometry, material);
+      return mesh;
+    }
+
+    function materiaMesh() {
+      const {variant} = item;
+      const hash = murmur(variant);
+      const gradient = GRADIENTS[hash % GRADIENTS.length];
+      const geometry = _makeCubeGradientGeometry(gradient);
       const materials = CUBE_FULL_MATERIALS;
       const mesh = THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
       return mesh;
+    }
+
+    if (count < 5) {
+      return emptyMesh();
+    } else {
+      switch (type) {
+        case 'block':
+          return blockMesh();
+        case 'materia':
+          return materiaMesh();
+        default: // XXX finish this
+          return materiaMesh();
+      }
     }
   })();
 
@@ -1169,6 +1200,35 @@ function _renderPlaceholderObjects(inventory) {
     result.push(mesh);
   });
   return result;
+}
+
+function _itemName(item) {
+  const {type, variant} = item;
+
+  switch (type) {
+    case 'block':
+      return _blockName(variant);
+    case 'materia':
+      return _materiaName(variant);
+    default: // XXX finish this
+      return '<unknown>'
+  }
+}
+
+function _blockName(variant) {
+  const index = variant - 1;
+  const faces = BLOCKS.MATERIALS[index];
+  const material = faces[0];
+  const name = _capitalize(
+    material
+      .replace(/_/g, ' ')
+      .replace(/(top|stage|[\s0-9])+$/g, '')
+  );
+  return name;
+}
+
+function _materiaName(variant) {
+  return _capitalize(variant);
 }
 
 function _capitalize(s) {

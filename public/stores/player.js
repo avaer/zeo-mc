@@ -6,7 +6,7 @@ export default class Player extends Immutable.Record({
 
 class Item extends Immutable.Record({
   type: '',
-  name: '',
+  variant: null,
   count: 0
 }) {}
 
