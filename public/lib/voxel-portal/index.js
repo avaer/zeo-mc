@@ -1,15 +1,18 @@
+const TEXTURE_WIDTH = 512;
+const TEXTURE_HEIGHT = 1024;
+
 function VoxelPortal(game) {
   const {scene, camera, THREE} = game;
   const {width, height} = game;
 
-  const target1 = new THREE.WebGLRenderTarget(width, height, {
-    // minFilter: THREE.LinearFilter,
-    // magFilter: THREE.NearestFilter,
+  const target1 = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.NearestFilter,
     format: THREE.RGBFormat
   });
-  const target2 = new THREE.WebGLRenderTarget(width, height, {
-    // minFilter: THREE.LinearFilter,
-    // magFilter: THREE.NearestFilter,
+  const target2 = new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.NearestFilter,
     format: THREE.RGBFormat
   });
   const screenScene = new THREE.Scene();
