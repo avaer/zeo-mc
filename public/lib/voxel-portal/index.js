@@ -14,8 +14,12 @@ function voxelPortal(game) {
 }
 
 function _makePortalMesh(color, THREE) {
-  const geometry = new THREE.PlaneGeometry(1, 2);
-  geometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.5, 0, 0));
+  const geometry = (() => {
+    const planeGeometry = new THREE.PlaneGeometry(1, 2);
+    planeGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0.5, 0, 0));
+    const bufferGeometry = new THREE.BufferGeometry().fromGeometry(planeGeometry);
+    return bufferGeometry;
+  })();
   const material = new THREE.MeshLambertMaterial({color});
   const mesh = new THREE.Mesh(geometry, material);
   return mesh;
