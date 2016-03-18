@@ -9,6 +9,7 @@ var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
 var voxelControl = require('../voxel-control/index')
 var voxelView = require('../voxel-view/index')
+var voxelPortal = require('../voxel-portal/index');
 var THREE = require('three')
 var Stats = require('./lib/stats')
 var Detector = require('./lib/detector')
@@ -79,6 +80,7 @@ function Game(opts) {
   })
   this.view.bindToScene(this.scene)
   this.camera = this.view.getCamera()
+  this.portal = voxelPortal(this)
   if (!opts.lightsDisabled) this.addLights(this.scene)
   
   this.fogScale = opts.fogScale || 32
@@ -808,6 +810,7 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
 }
 
 Game.prototype.render = function(delta) {
+  this.portal.render();
   this.view.render(this.scene)
 }
 

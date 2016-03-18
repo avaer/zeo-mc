@@ -12,7 +12,6 @@ import voxelPlayer from '../lib/voxel-player/index';
 import voxelWalk from '../lib/voxel-walk/index';
 import voxelHighlight from '../lib/voxel-highlight/index';
 import voxelConstruct from '../lib/voxel-construct/index';
-import voxelPortal from '../lib/voxel-portal/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
@@ -139,11 +138,8 @@ export default class Voxels extends React.Component {
         sky(15);
       }, 15);
 
-      // game.camera.position.set(INITIAL_POSITION[0], INITIAL_POSITION[1], INITIAL_POSITION[2]);
-
       avatar = voxelPlayer(game)('api/img/textures/avatar/player.png');
       avatar.position.set(INITIAL_POSITION[0], INITIAL_POSITION[1], INITIAL_POSITION[2]);
-      // avatar.yaw.position.set(2, 14, 4);
       avatar.possess();
       game.on('tick', function(dt) {
         voxelWalk.render(avatar);
@@ -219,8 +215,6 @@ export default class Voxels extends React.Component {
           end: 3 * 1000
         },
       });
-
-      voxelPortal(game);
 
       function initControls() {
         let holdValue = null;
