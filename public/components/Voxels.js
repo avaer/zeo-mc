@@ -12,6 +12,7 @@ import voxelPlayer from '../lib/voxel-player/index';
 import voxelWalk from '../lib/voxel-walk/index';
 import voxelHighlight from '../lib/voxel-highlight/index';
 import voxelConstruct from '../lib/voxel-construct/index';
+import voxelPortal from '../lib/voxel-portal/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
@@ -218,6 +219,8 @@ export default class Voxels extends React.Component {
           end: 3 * 1000
         },
       });
+
+      voxelPortal(game);
 
       function initControls() {
         let holdValue = null;

@@ -16,8 +16,7 @@ function View(three, opts) {
   this.nearPlane = opts.nearPlane || 1
   this.farPlane = opts.farPlane || 10000
   this.skyColor = opts.skyColor || 0xBFD1E5
-  this.ortho = opts.ortho
-  this.camera = this.ortho?(new THREE.OrthographicCamera(this.width/-2, this.width/2, this.height/2, this.height/-2, this.nearPlane, this.farPlane)):(new THREE.PerspectiveCamera(this.fov, this.aspectRatio, this.nearPlane, this.farPlane))
+  this.camera = new THREE.PerspectiveCamera(this.fov, this.aspectRatio, this.nearPlane, this.farPlane)
   this.camera.lookAt(new THREE.Vector3(0, 0, 0))
 
   if (!process.browser) return
