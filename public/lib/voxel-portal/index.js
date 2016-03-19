@@ -1,5 +1,5 @@
-const TEXTURE_WIDTH = 512;
-const TEXTURE_HEIGHT = 1024;
+const TEXTURE_WIDTH = 256;
+const TEXTURE_HEIGHT = 512;
 
 function VoxelPortal(game) {
   const {scene, camera, THREE} = game;
