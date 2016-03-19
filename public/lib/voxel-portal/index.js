@@ -70,9 +70,11 @@ function VoxelPortal(game) {
   const redPortalMesh = _makePortalMesh({texture: targets.blue2}, THREE);
   redPortalMesh.position.set(0, 14, -4);
   scene.add(redPortalMesh);
+window.redPortalMesh = redPortalMesh;
   const bluePortalMesh = _makePortalMesh({texture: targets.red2}, THREE);
   bluePortalMesh.position.set(-3, 14, -2);
   bluePortalMesh.rotation.set(0, Math.PI / 2, 0);
+window.bluePortalMesh = bluePortalMesh;
   scene.add(bluePortalMesh);
 
   const portalRenderers = [
@@ -110,8 +112,7 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   const {width, height, scene, camera, view, THREE} = game;
 
   const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
-  portalCamera.matrixAutoUpdate = false;
-  camera.add(portalCamera);
+  // portalCamera.matrixAutoUpdate = false;
 window.portalCamera = portalCamera;
 
   const screenScene = (() => {
@@ -132,18 +133,32 @@ window.portalCamera = portalCamera;
   })();
   screenScene.add(screenCamera);
 
-  const positionDelta = targetPortalMesh.position.clone().sub(sourcePortalMesh.position);
-  const positionDeltaMatrix = new THREE.Matrix4().makeTranslation(positionDelta.x, positionDelta.y, positionDelta.z);
-  const rotationDelta = new THREE.Euler().setFromVector3(targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3()));
-  const rotationDeltaMatrix = new THREE.Matrix4().makeRotationFromEuler(rotationDelta);
-  const deltaMatrix = positionDeltaMatrix.clone().multiply(rotationDeltaMatrix);
-  portalCamera.matrix.copy(deltaMatrix);
+  const positionDelta = sourcePortalMesh.position.clone().sub(targetPortalMesh.position);
+  // const positionDeltaMatrix = new THREE.Matrix4().makeTranslation(positionDelta.x, positionDelta.y, positionDelta.z);
+  const rotationDelta = sourcePortalMesh.rotation.toVector3().sub(targetPortalMesh.rotation.toVector3());
+  // const rotationDeltaMatrix = new THREE.Matrix4().makeRotationFromEuler(rotationDelta);
+  /* const deltaMatrix = positionDeltaMatrix.clone().multiply(rotationDeltaMatrix);
+  portalCamera.matrix.copy(deltaMatrix); */
+
+  let oldPosition;
+  let oldRotation;
 
   function updatePortalCamera() {
-    // update portalCamera matrices
+    if (!portalCamera.parent) {
+      camera.add(portalCamera);
+      portalCamera.yaw = portalCamera.parent.parent.parent.parent.parent.parent.parent;
+    }
+
+    oldPosition = portalCamera.yaw.position.clone();
+    oldRotation = portalCamera.yaw.rotation.clone();
+
+    portalCamera.yaw.position.add(positionDelta);
+    portalCamera.yaw.rotation.setFromVector3(portalCamera.yaw.rotation.toVector3().add(rotationDelta));
+
+    /* // update portalCamera matrices
     portalCamera.updateProjectionMatrix();
     portalCamera.updateMatrixWorld();
-    portalCamera.matrixWorldInverse.getInverse(portalCamera.matrixWorld);
+    portalCamera.matrixWorldInverse.getInverse(portalCamera.matrixWorld); */
 
     // reflecting a vector:
     // http://www.3dkingdoms.com/weekly/weekly.php?a=2
@@ -188,9 +203,15 @@ window.portalCamera = portalCamera;
     view.renderer.render(screenScene, screenCamera, target2, false)
   }
 
+  function resetPortalCamera() {
+    portalCamera.yaw.position.copy(oldPosition);
+    portalCamera.yaw.rotation.copy(oldRotation);
+  }
+
   return function() {
     updatePortalCamera();
     renderTargets();
+    resetPortalCamera();
   };
 }
 

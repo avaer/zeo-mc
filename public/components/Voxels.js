@@ -139,6 +139,7 @@ export default class Voxels extends React.Component {
       }, 15);
 
       avatar = voxelPlayer(game)('api/img/textures/avatar/player.png');
+window.avatar = avatar;
       avatar.position.set(INITIAL_POSITION[0], INITIAL_POSITION[1], INITIAL_POSITION[2]);
       avatar.possess();
       game.on('tick', function(dt) {
@@ -152,9 +153,9 @@ export default class Voxels extends React.Component {
           voxelWalk.startWalking();
         }
       });
-      avatar.forces.x = 0;;
-      avatar.forces.y = 0;;
-      avatar.forces.z = 0;;
+      avatar.forces.x = 0;
+      avatar.forces.y = 0;
+      avatar.forces.z = 0;
 
       const clouds = voxelClouds({
         game,
