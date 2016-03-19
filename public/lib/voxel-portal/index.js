@@ -113,7 +113,9 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
 
   const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
   // portalCamera.matrixAutoUpdate = false;
-window.portalCamera = portalCamera;
+if (!window.portalCamera) {
+  window.portalCamera = portalCamera;
+}
 
   const screenScene = (() => {
     const screenScene = new THREE.Scene();
@@ -133,12 +135,17 @@ window.portalCamera = portalCamera;
   })();
   screenScene.add(screenCamera);
 
-  const positionDelta = sourcePortalMesh.position.clone().sub(targetPortalMesh.position);
+  const positionDelta = targetPortalMesh.position.clone().sub(sourcePortalMesh.position);
   // const positionDeltaMatrix = new THREE.Matrix4().makeTranslation(positionDelta.x, positionDelta.y, positionDelta.z);
-  const rotationDelta = sourcePortalMesh.rotation.toVector3().sub(targetPortalMesh.rotation.toVector3());
+  const rotationDelta = targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3()).add(new THREE.Vector3(0, -Math.PI, 0));
   // const rotationDeltaMatrix = new THREE.Matrix4().makeRotationFromEuler(rotationDelta);
   /* const deltaMatrix = positionDeltaMatrix.clone().multiply(rotationDeltaMatrix);
   portalCamera.matrix.copy(deltaMatrix); */
+
+if (!window.positionDelta) {
+  window.positionDelta = positionDelta;
+  window.rotationDelta = rotationDelta;
+}
 
   let oldPosition;
   let oldRotation;
