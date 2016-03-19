@@ -1,7 +1,7 @@
 const SIZE = 1;
 
 const TEXTURE_WIDTH = 256;
-const TEXTURE_HEIGHT = 512;
+const TEXTURE_HEIGHT = TEXTURE_WIDTH * 2;
 
 const portalShader = {
 
@@ -184,8 +184,8 @@ window.portalCamera = portalCamera;
   }
 
   function renderTargets() {
-    view.renderer.render(scene, portalCamera, target1, true);
-    view.renderer.render(screenScene, screenCamera, target2, true)
+    view.renderer.render(scene, portalCamera, target1, false);
+    view.renderer.render(screenScene, screenCamera, target2, false)
   }
 
   return function() {
