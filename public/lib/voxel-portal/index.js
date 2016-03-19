@@ -135,15 +135,15 @@ if (!window.portalCamera) {
   })();
   screenScene.add(screenCamera);
 
-  const positionDelta = targetPortalMesh.position.clone().sub(sourcePortalMesh.position);
+  // const positionDelta = targetPortalMesh.position.clone().sub(sourcePortalMesh.position);
   // const positionDeltaMatrix = new THREE.Matrix4().makeTranslation(positionDelta.x, positionDelta.y, positionDelta.z);
-  const rotationDelta = targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3()).add(new THREE.Vector3(0, -Math.PI, 0));
+  const rotationDelta = targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3());
   // const rotationDeltaMatrix = new THREE.Matrix4().makeRotationFromEuler(rotationDelta);
   /* const deltaMatrix = positionDeltaMatrix.clone().multiply(rotationDeltaMatrix);
   portalCamera.matrix.copy(deltaMatrix); */
 
-if (!window.positionDelta) {
-  window.positionDelta = positionDelta;
+if (!window.rotationDelta) {
+  // window.positionDelta = positionDelta;
   window.rotationDelta = rotationDelta;
 }
 
@@ -159,7 +159,14 @@ if (!window.positionDelta) {
     oldPosition = portalCamera.yaw.position.clone();
     oldRotation = portalCamera.yaw.rotation.clone();
 
-    portalCamera.yaw.position.add(positionDelta);
+    const vectorToSource = sourcePortalMesh.position.clone().sub(portalCamera.yaw.position);
+    const rotatedVectorToSource = vectorToSource.clone()
+      .applyAxisAngle(new THREE.Vector3(1, 0, 0), rotationDelta.x)
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationDelta.y)
+      .applyAxisAngle(new THREE.Vector3(0, 0, 1), rotationDelta.z);
+    const targetPosition = targetPortalMesh.position.clone().sub(rotatedVectorToSource);
+
+    portalCamera.yaw.position.copy(targetPosition);
     portalCamera.yaw.rotation.setFromVector3(portalCamera.yaw.rotation.toVector3().add(rotationDelta));
 
     /* // update portalCamera matrices
