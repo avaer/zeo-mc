@@ -68,16 +68,16 @@ function VoxelPortal(game) {
   };
 
   const redPortalMesh = _makePortalMesh({texture: targets.blue2}, THREE);
-  redPortalMesh.position.set(0 + SIZE / 2, 14, -4);
+  redPortalMesh.position.set(0, 14, -4);
   scene.add(redPortalMesh);
   const bluePortalMesh = _makePortalMesh({texture: targets.red2}, THREE);
-  bluePortalMesh.position.set(-3 + SIZE / 2, 14, -2);
+  bluePortalMesh.position.set(-3, 14, -2);
   bluePortalMesh.rotation.set(0, Math.PI / 2, 0);
   scene.add(bluePortalMesh);
 
   const portalRenderers = [
-    _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.red1, targets.red2, game),
-    _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.blue1, targets.blue2, game),
+    _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.red1, targets.red2, game),
+    _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue1, targets.blue2, game),
   ];
 
   this._portalRenderers = portalRenderers;
@@ -110,7 +110,9 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   const {width, height, scene, camera, view, THREE} = game;
 
   const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
+  portalCamera.matrixAutoUpdate = false;
   camera.add(portalCamera);
+window.portalCamera = portalCamera;
 
   const screenScene = (() => {
     const screenScene = new THREE.Scene();
@@ -130,13 +132,14 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   })();
   screenScene.add(screenCamera);
 
+  const positionDelta = targetPortalMesh.position.clone().sub(sourcePortalMesh.position);
+  const positionDeltaMatrix = new THREE.Matrix4().makeTranslation(positionDelta.x, positionDelta.y, positionDelta.z);
+  const rotationDelta = new THREE.Euler().setFromVector3(targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3()));
+  const rotationDeltaMatrix = new THREE.Matrix4().makeRotationFromEuler(rotationDelta);
+  const deltaMatrix = positionDeltaMatrix.clone().multiply(rotationDeltaMatrix);
+  portalCamera.matrix.copy(deltaMatrix);
+
   function updatePortalCamera() {
-    const positionDelta = targetPortalMesh.position.clone().sub(sourcePortalMesh.position);
-    const rotationDelta = targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3());
-
-    portalCamera.position.copy(positionDelta);
-    portalCamera.rotation.setFromVector3(rotationDelta);
-
     // update portalCamera matrices
     portalCamera.updateProjectionMatrix();
     portalCamera.updateMatrixWorld();
@@ -196,6 +199,7 @@ function _makePortalMesh(spec, THREE) {
 
   const geometry = (() => {
     const planeGeometry = new THREE.PlaneGeometry(SIZE, SIZE * 2);
+    planeGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(SIZE / 2, 0, 0));
     const bufferGeometry = new THREE.BufferGeometry().fromGeometry(planeGeometry);
     return bufferGeometry;
   })();
