@@ -76,8 +76,8 @@ function VoxelPortal(game) {
   scene.add(bluePortalMesh);
 
   const portalRenderers = [
-    _makePortalRenderer(bluePortalMesh, targets.red1, targets.red2, game),
-    _makePortalRenderer(redPortalMesh, targets.blue1, targets.blue2, game),
+    _makePortalRenderer(redPortalMesh, targets.red1, targets.red2, game),
+    _makePortalRenderer(bluePortalMesh, targets.blue1, targets.blue2, game),
   ];
 
   this._portalRenderers = portalRenderers;
@@ -109,7 +109,7 @@ function _sgn(a) {
 function _makePortalRenderer(sourcePortalMesh, target1, target2, game) {
   const {width, height, scene, camera, view, THREE} = game;
 
-  const portalCamera = new THREE.PerspectiveCamera();
+  const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
 
   const screenScene = (() => {
     const screenScene = new THREE.Scene();
@@ -133,20 +133,29 @@ function _makePortalRenderer(sourcePortalMesh, target1, target2, game) {
     // reflecting a vector:
     // http://www.3dkingdoms.com/weekly/weekly.php?a=2
 
-    // update sourcePortalMesh matrices
-    sourcePortalMesh.updateMatrix();
-
     // copy portalCamera from main camera
-    portalCamera.copy(camera);
+    const positionVector = new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld);
+    portalCamera.position.copy(positionVector);
+
+    const upVector = camera.up.clone().applyMatrix4(camera.matrixWorld);
+    portalCamera.up.copy(upVector);
+
+    const rotationMatrix = new THREE.Matrix4().extractRotation(camera.matrixWorld);
+    const quaternion = new THREE.Quaternion().setFromRotationMatrix(rotationMatrix);
+    const lookAtVector = new THREE.Vector3(0, 0, -1).applyQuaternion(quaternion);
+    portalCamera.lookAt(lookAtVector);
     // update portalCamera matrices
     portalCamera.updateProjectionMatrix();
     portalCamera.updateMatrixWorld();
     portalCamera.matrixWorldInverse.getInverse(portalCamera.matrixWorld);
 
-    // XXX
     /* // now update projection matrix with new clip plane
     // implementing code from: http://www.terathon.com/code/oblique.html
     // paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
+
+    // update sourcePortalMesh matrices
+    sourcePortalMesh.updateMatrix();
+
     const rotationMatrix = new THREE.Matrix4().extractRotation(sourcePortalMesh.matrix);
     const N = new THREE.Vector3(0, 0, -1).applyMatrix4(rotationMatrix);
 
@@ -176,7 +185,7 @@ function _makePortalRenderer(sourcePortalMesh, target1, target2, game) {
   }
 
   function renderTargets() {
-    view.renderer.render(scene, portalCamera, target1, true);
+    view.renderer.render(scene, camera, target1, true);
     view.renderer.render(screenScene, screenCamera, target2, true)
   }
 
