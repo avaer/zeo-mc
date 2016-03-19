@@ -153,29 +153,37 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
     portalCamera.yaw.position.copy(targetViewPosition);
     portalCamera.yaw.rotation.setFromVector3(portalCamera.yaw.rotation.toVector3().add(rotationDelta));
 
-    /* // update portalCamera matrices
+    // update portalCamera matrices
     portalCamera.updateProjectionMatrix();
     portalCamera.updateMatrixWorld();
-    portalCamera.matrixWorldInverse.getInverse(portalCamera.matrixWorld); */
+    portalCamera.matrixWorldInverse.getInverse(portalCamera.matrixWorld);
 
     // reflecting a vector:
     // http://www.3dkingdoms.com/weekly/weekly.php?a=2
 
-    /* // now update projection matrix with new clip plane
+    // now update projection matrix with new clip plane
     // implementing code from: http://www.terathon.com/code/oblique.html
     // paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
 
-    // update sourcePortalMesh matrices
+    /* // update sourcePortalMesh matrices
     sourcePortalMesh.updateMatrix();
+    sourcePortalMesh.updateMatrixWorld();
+    targetPortalMesh.updateMatrix();
+    targetPortalMesh.updateMatrixWorld(); */
 
-    const rotationMatrix = new THREE.Matrix4().extractRotation(sourcePortalMesh.matrix);
-    const N = new THREE.Vector3(0, 0, -1).applyMatrix4(rotationMatrix);
+    // const rotationMatrix = new THREE.Matrix4().extractRotation(targetPortalMesh.matrix);
+    // .applyMatrix4(rotationMatrix);
+
+    const N = new THREE.Vector3(-1, 0, 0)
+      /* .applyAxisAngle(new THREE.Vector3(1, 0, 0), sourcePortalMesh.rotation.x)
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), sourcePortalMesh.rotation.y)
+      .applyAxisAngle(new THREE.Vector3(0, 0, 1), sourcePortalMesh.rotation.z); */
 
     const clipPlane = new THREE.Plane();
-    clipPlane.setFromNormalAndCoplanarPoint(N, sourcePortalMesh.position);
+    clipPlane.setFromNormalAndCoplanarPoint(N, vectorToTarget/*.clone().add(new THREE.Vector3(0, 0, -10))*/);
     clipPlane.applyMatrix4(portalCamera.matrixWorldInverse);
 
-    const clipPlane2 = new THREE.Vector4(clipPlane.normal.x, clipPlane.normal.y, clipPlane.normal.z, clipPlane.constant);
+    const clipPlane2 = new THREE.Vector4(clipPlane.normal.x, clipPlane.normal.y, clipPlane.normal.z, -Math.abs(vectorToTarget.x));
 
     const {projectionMatrix} = portalCamera;
 
@@ -186,13 +194,13 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
     q.w = (1.0 + projectionMatrix.elements[10]) / portalCamera.projectionMatrix.elements[14];
 
     // Calculate the scaled plane vector
-    const c = new THREE.Vector4().multiplyScalar(2.0 / clipPlane2.dot(q));
+    const c = clipPlane2.multiplyScalar(2.0 / clipPlane2.dot(q));
 
     // Replace the third row of the projection matrix
     projectionMatrix.elements[2] = c.x;
     projectionMatrix.elements[6] = c.y;
     projectionMatrix.elements[10] = c.z + 1.0;
-    projectionMatrix.elements[14] = c.w; */
+    projectionMatrix.elements[14] = c.w;
 
   }
 
