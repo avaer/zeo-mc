@@ -76,8 +76,8 @@ function VoxelPortal(game) {
   scene.add(bluePortalMesh);
 
   const portalRenderers = [
-    _makePortalRenderer(redPortalMesh, targets.red1, targets.red2, game),
-    _makePortalRenderer(bluePortalMesh, targets.blue1, targets.blue2, game),
+    _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.red1, targets.red2, game),
+    _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.blue1, targets.blue2, game),
   ];
 
   this._portalRenderers = portalRenderers;
@@ -106,7 +106,7 @@ function _sgn(a) {
   return (0.0);
 }
 
-function _makePortalRenderer(sourcePortalMesh, target1, target2, game) {
+function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target2, game) {
   const {width, height, scene, camera, view, THREE} = game;
 
   const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
@@ -131,6 +131,17 @@ function _makePortalRenderer(sourcePortalMesh, target1, target2, game) {
   screenScene.add(screenCamera);
 
   function updatePortalCamera() {
+    const positionDelta = targetPortalMesh.position.clone().sub(sourcePortalMesh.position);
+    const rotationDelta = targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3());
+
+    portalCamera.position.copy(positionDelta);
+    portalCamera.rotation.setFromVector3(rotationDelta);
+
+    // update portalCamera matrices
+    portalCamera.updateProjectionMatrix();
+    portalCamera.updateMatrixWorld();
+    portalCamera.matrixWorldInverse.getInverse(portalCamera.matrixWorld);
+
     // reflecting a vector:
     // http://www.3dkingdoms.com/weekly/weekly.php?a=2
 
