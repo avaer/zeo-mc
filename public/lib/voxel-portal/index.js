@@ -81,8 +81,8 @@ function VoxelPortal(game) {
     _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue1, targets.blue2, game, false),
   ];
   const portalTickers = [
-    _makePortalTicker(redPortalMesh, game),
-    _makePortalTicker(bluePortalMesh, game),
+    _makePortalTicker(redPortalMesh, bluePortalMesh, game),
+    _makePortalTicker(bluePortalMesh, redPortalMesh, game),
   ];
 
   this._portalRenderers = portalRenderers;
@@ -284,24 +284,23 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   };
 }
 
-function _makePortalTicker(portalMesh, game) {
-  const {inner} = portalMesh;
+function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
+  const {inner: sourcePortalInner} = sourcePortalMesh;
   const {THREE} = game;
 
   const plane = (() => {
     const normal = new THREE.Vector3(0, 0, -1);
     normal
-      .applyAxisAngle(new THREE.Vector3(1, 0, 0), portalMesh.rotation.x)
-      .applyAxisAngle(new THREE.Vector3(0, 1, 0), portalMesh.rotation.y)
-      .applyAxisAngle(new THREE.Vector3(0, 0, 1), portalMesh.rotation.z);
-    const point = portalMesh.position;
+      .applyAxisAngle(new THREE.Vector3(1, 0, 0), sourcePortalMesh.rotation.x)
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), sourcePortalMesh.rotation.y)
+      .applyAxisAngle(new THREE.Vector3(0, 0, 1), sourcePortalMesh.rotation.z);
+    const point = sourcePortalMesh.position;
     const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(normal, point);
     return plane;
   })();
   const raycaster = new THREE.Raycaster();
-  // raycaster.near = 0;
-  // raycaster.far = 32;
-  // raycaster.linePrecision = 10000;
+  const positionDelta = new THREE.Vector3().subVectors(targetPortalMesh.position, sourcePortalMesh.position);
+  const rotationDelta = sourcePortalMesh.rotation.toVector3().sub(targetPortalMesh.rotation.toVector3());
 
   function _getPlayerPosition() {
     const yaw = game.controls.target().avatar;
@@ -313,7 +312,7 @@ function _makePortalTicker(portalMesh, game) {
     const ray = new THREE.Vector3().subVectors(end, start);
     const direction = ray.clone().normalize();
     raycaster.set(start, direction);
-    const intersections = raycaster.intersectObject(inner);
+    const intersections = raycaster.intersectObject(sourcePortalInner);
     if (intersections.length > 0) {
       const rayLength = ray.length();
       return intersections.some(intersection => {
@@ -340,26 +339,33 @@ function _makePortalTicker(portalMesh, game) {
     } */
   }
 
-  function _getSide(point) {
-    const distanceToPoint = plane.distanceToPoint(point);
-    const front = distanceToPoint < 0;
-    return front;
+  function _movePlayerPosition(positionDelta, rotationDelta) {
+    const target = game.controls.target();
+    const {avatar: yaw, velocity, acceleration} = target;
+
+    yaw.position.add(positionDelta);
+    yaw.rotation.setFromVector3(yaw.rotation.toVector3().add(rotationDelta));
+
+    velocity
+      .applyAxisAngle(new THREE.Vector3(1, 0, 0), rotationDelta.x)
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationDelta.y)
+      .applyAxisAngle(new THREE.Vector3(0, 0, 1), rotationDelta.z);
+
+    acceleration
+      .applyAxisAngle(new THREE.Vector3(1, 0, 0), rotationDelta.x)
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationDelta.y)
+      .applyAxisAngle(new THREE.Vector3(0, 0, 1), rotationDelta.z);
   }
 
   let prevPlayerPosition = null;
-if (!window.portalMesh) {
-  window.portalMesh = portalMesh;
-  window.getPlayerPosition = _getPlayerPosition;
-  window.getSide = _getSide;
-}
 
   return function() {
     const nextPlayerPosition = _getPlayerPosition();
 
     if (prevPlayerPosition !== null) {
       if (_passesThroughPortal(prevPlayerPosition, nextPlayerPosition)) {
-        // XXX
         console.log('passed through', prevPlayerPosition.x, prevPlayerPosition.y, prevPlayerPosition.z, nextPlayerPosition.x, nextPlayerPosition.y, nextPlayerPosition.z);
+        _movePlayerPosition(positionDelta, rotationDelta);
       }
     }
 
