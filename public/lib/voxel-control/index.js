@@ -169,6 +169,10 @@ proto.tick = function(dt) {
     this.onhold('greenapple');
   } else if (this.state.flare) {
     this.onhold('flare');
+  } else if (this.state.portala) {
+    this.onhold('portala');
+  } else if (this.state.portalb) {
+    this.onhold('portalb');
   }
 }
 

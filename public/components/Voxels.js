@@ -12,6 +12,7 @@ import voxelPlayer from '../lib/voxel-player/index';
 import voxelWalk from '../lib/voxel-walk/index';
 import voxelHighlight from '../lib/voxel-highlight/index';
 import voxelConstruct from '../lib/voxel-construct/index';
+import voxelPortal from '../lib/voxel-portal/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
@@ -112,6 +113,8 @@ export default class Voxels extends React.Component {
         textureLoader.loadTextures([
           'items/greenapple',
           'items/flare',
+          'items/portala',
+          'items/portalb',
         ], pend);
       })();
     };
@@ -216,6 +219,8 @@ export default class Voxels extends React.Component {
         },
       });
 
+      const voxelPortalInstance = voxelPortal(game);
+
       function initControls() {
         let holdValue = null;
 
@@ -238,20 +243,22 @@ export default class Voxels extends React.Component {
         }
 
         game.on('fire', () => {
-          // try throw
+          // try use item
           if (holdValue !== null) {
             const {type} = holdValue;
             if (type === 'item') {
               const {value} = holdValue;
-              console.log('throw item', value); // XXX
+              if (value !== 'portala' && value !== 'portalb') {
+                console.log('use item', value); // XXX
 
-              stopHolding();
+                stopHolding();
 
-              return;
+                return;
+              }
             }
           }
 
-          // try pickup/place
+          // try pickup/place/portal
           const cp = game.cameraPosition();
           const cv = game.cameraVector();
           const hit = game.raycastVoxels(cp, cv, CHUNK_SIZE);
@@ -272,6 +279,19 @@ export default class Voxels extends React.Component {
                 stopHolding();
 
                 return;
+              } else if (type === 'item') {
+                const {value} = holdValue;
+                const {adjacent: position} = hit;
+
+                if (value === 'portala') {
+                  voxelPortalInstance.setPortal('a', position);
+
+                  return;
+                } else if (value === 'portalb') {
+                  voxelPortalInstance.setPortal('b', position);
+
+                  return;
+                }
               }
             }
           }

@@ -1,8 +1,4 @@
-// import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
-
 const SIZE = 1;
-// const OFFSET = [-1.5, 1.5, 0];
-// const OFFSET = [0, 1.5, 1];
 const OFFSET = [0, 1.35, 1.1];
 const ROTATION = [0, Math.PI/2, 0];
 const SCALE = 0.075;
@@ -27,8 +23,6 @@ function voxelSpriteMesher(data, textureLoader, THREE) {
 
           const imageData = textureLoader.getImageData(texture);
           const {data: pixelData, width, height} = imageData;
-
-          console.log('got image data', {pixelData, width, height}); // XXX
 
           function getPixel(x, y) {
             const index = (x + y * width) * BYTES_PER_PIXEL;

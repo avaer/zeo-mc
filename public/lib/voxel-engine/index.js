@@ -9,7 +9,6 @@ var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
 var voxelControl = require('../voxel-control/index')
 var voxelView = require('../voxel-view/index')
-var voxelPortal = require('../voxel-portal/index');
 var THREE = require('three')
 var THREECSG = require('three-js-csg');
 var Stats = require('./lib/stats')
@@ -82,7 +81,6 @@ function Game(opts) {
   })
   this.view.bindToScene(this.scene)
   this.camera = this.view.getCamera()
-  this.portal = voxelPortal(this)
   if (!opts.lightsDisabled) this.addLights(this.scene)
   
   this.fogScale = opts.fogScale || 32
@@ -407,6 +405,8 @@ Game.prototype.defaultButtons = {
   '<control>': 'alt',
   'Q': 'greenapple',
   'E': 'flare',
+  'Z': 'portala',
+  'C': 'portalb',
 }
 
 // used in methods that have identity function(pos) {}
@@ -792,8 +792,6 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
     this.items[i].tick(delta)
   }
 
-  this.portal.tick();
-
   const oldWorldTick = this.getWorldTick(oldWorldTime);
   const newWorldTick = this.getWorldTick(newWorldTime);
   if (newWorldTick !== oldWorldTick) {
@@ -814,8 +812,11 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
 }
 
 Game.prototype.render = function(delta) {
-  this.portal.render();
+  this.emit('prerender');
+
   this.view.render(this.scene)
+
+  this.emit('postrender');
 }
 
 Game.prototype.initializeTimer = function(rate) {

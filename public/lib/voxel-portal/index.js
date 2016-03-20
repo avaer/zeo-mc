@@ -84,6 +84,8 @@ function VoxelPortal(game) {
 
   this._portalRenderers = portalRenderers;
   this._portalTickers = portalTickers;
+
+  this.listen();
 }
 VoxelPortal.prototype = {
   render: function() {
@@ -96,6 +98,14 @@ VoxelPortal.prototype = {
   tick: function() {
     const {_portalTickers: portalTickers} = this;
     portalTickers();
+  },
+  listen: function() {
+    game.on('prerender', () => {
+      this.render();
+    });
+    game.on('tick', () => {
+      this.tick();
+    });
   },
 };
 
@@ -231,10 +241,10 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
     // const rotationMatrix = new THREE.Matrix4().extractRotation(targetPortalMesh.matrix);
     // .applyMatrix4(rotationMatrix);
 
-    const N = new THREE.Vector3(-1, 0, 0)
-      /* .applyAxisAngle(new THREE.Vector3(1, 0, 0), sourcePortalMesh.rotation.x)
+    const N = new THREE.Vector3(0, 0, -1)
+      .applyAxisAngle(new THREE.Vector3(1, 0, 0), sourcePortalMesh.rotation.x)
       .applyAxisAngle(new THREE.Vector3(0, 1, 0), sourcePortalMesh.rotation.y)
-      .applyAxisAngle(new THREE.Vector3(0, 0, 1), sourcePortalMesh.rotation.z); */
+      .applyAxisAngle(new THREE.Vector3(0, 0, 1), sourcePortalMesh.rotation.z);
 
     const clipPlane = new THREE.Plane();
     clipPlane.setFromNormalAndCoplanarPoint(N, vectorToTarget/*.clone().add(new THREE.Vector3(0, 0, -10))*/);
