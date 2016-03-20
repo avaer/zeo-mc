@@ -1,4 +1,5 @@
 const SIZE = 1;
+const BORDER_SIZE = 0.1;
 
 const TEXTURE_WIDTH = 256;
 const TEXTURE_HEIGHT = TEXTURE_WIDTH * 2;
@@ -67,10 +68,10 @@ function VoxelPortal(game) {
     blue2: _makeRenderTarget(THREE),
   };
 
-  const redPortalMesh = _makePortalMesh({texture: targets.blue2}, THREE);
+  const redPortalMesh = _makePortalMesh({texture: targets.blue2, portalColor: 0xFDA232}, game);
   redPortalMesh.position.set(0 + SIZE / 2, 14, -4);
   scene.add(redPortalMesh);
-  const bluePortalMesh = _makePortalMesh({texture: targets.red2}, THREE);
+  const bluePortalMesh = _makePortalMesh({texture: targets.red2, portalColor: 0x188EFA}, game);
   bluePortalMesh.position.set(-3, 14, -3 + SIZE / 2);
   bluePortalMesh.rotation.set(0, Math.PI / 2, 0);
   scene.add(bluePortalMesh);
@@ -221,26 +222,52 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   };
 }
 
-function _makePortalMesh(spec, THREE) {
-  const {texture} = spec;
+function _makePortalMesh(spec, game) {
+  const {texture, portalColor} = spec;
+  const {THREE, THREECSG} = game;
 
-  const geometry = (() => {
-    const planeGeometry = new THREE.PlaneGeometry(SIZE, SIZE * 2);
-    const bufferGeometry = new THREE.BufferGeometry().fromGeometry(planeGeometry);
-    return bufferGeometry;
+  const object = new THREE.Object3D();
+  const inner = (() => {
+    const geometry = (() => {
+      const planeGeometry = new THREE.PlaneGeometry(SIZE, SIZE * 2);
+      const bufferGeometry = new THREE.BufferGeometry().fromGeometry(planeGeometry);
+      return bufferGeometry;
+    })();
+    const material = (() => {
+      const shaderUniforms = THREE.UniformsUtils.clone(portalShader.uniforms);
+      const shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: shaderUniforms,
+        vertexShader: portalShader.vertexShader,
+        fragmentShader: portalShader.fragmentShader
+      });
+      shaderMaterial.uniforms.diffuseSampler.value = texture;
+      return shaderMaterial;
+    })();
+    const mesh = new THREE.Mesh(geometry, material);
+    return mesh;
   })();
-  const material = (() => {
-    const shaderUniforms = THREE.UniformsUtils.clone(portalShader.uniforms);
-    const shaderMaterial = new THREE.ShaderMaterial({
-      uniforms: shaderUniforms,
-      vertexShader: portalShader.vertexShader,
-      fragmentShader: portalShader.fragmentShader
-    });
-    shaderMaterial.uniforms.diffuseSampler.value = texture;
-    return shaderMaterial;
+  object.add(inner);
+  const outer = (() => {
+    const geometry = (() => {
+      const outerGeometry = new THREE.BoxGeometry(SIZE + BORDER_SIZE * 2, SIZE * 2 + BORDER_SIZE * 2, BORDER_SIZE);
+      const outerCSG = new THREECSG(outerGeometry);
+
+      const innerGeometry = new THREE.BoxGeometry(SIZE, SIZE * 2, BORDER_SIZE);
+      const innerCSG = new THREECSG(innerGeometry);
+
+      const holeCSG = outerCSG.subtract(innerCSG);
+      const holeGeometry = holeCSG.toGeometry();
+
+      const bufferGeometry = new THREE.BufferGeometry().fromGeometry(holeGeometry);
+      return bufferGeometry;
+    })();
+    const material = new THREE.MeshBasicMaterial({color: portalColor});
+    const mesh = new THREE.Mesh(geometry, material);
+    return mesh;
   })();
-  const mesh = new THREE.Mesh(geometry, material);
-  return mesh;
+  object.add(outer);
+
+  return object;
 }
 
 function voxelPortal(game) {

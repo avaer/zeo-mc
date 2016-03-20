@@ -11,6 +11,7 @@ var voxelControl = require('../voxel-control/index')
 var voxelView = require('../voxel-view/index')
 var voxelPortal = require('../voxel-portal/index');
 var THREE = require('three')
+var THREECSG = require('three-js-csg');
 var Stats = require('./lib/stats')
 var Detector = require('./lib/detector')
 var inherits = require('inherits')
@@ -47,6 +48,7 @@ function Game(opts) {
   this.configureChunkLoading(opts)
   this.setDimensions(opts)
   this.THREE = THREE
+  this.THREECSG = THREECSG(THREE);
   this.vector = vector
   this.glMatrix = glMatrix
   this.arrayType = opts.arrayType || Uint8Array
