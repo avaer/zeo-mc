@@ -5,6 +5,7 @@ const TEXTURE_WIDTH = 256;
 const TEXTURE_HEIGHT = TEXTURE_WIDTH * 2;
 
 const PORTAL_NAMES = ['red', 'blue'];
+const PORTAL_POLYGON_OFFSET = -0.25;
 
 const portalShader = {
 
@@ -161,7 +162,7 @@ function _makePortalMesh(spec, game) {
       });
       shaderMaterial.uniforms.textureMap.value = texture;
       shaderMaterial.polygonOffset = true;
-      shaderMaterial.polygonOffsetFactor = -0.25;
+      shaderMaterial.polygonOffsetFactor = PORTAL_POLYGON_OFFSET;
       return shaderMaterial;
     })();
     const mesh = new THREE.Mesh(geometry, material);
