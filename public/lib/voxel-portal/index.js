@@ -128,7 +128,7 @@ VoxelPortal.prototype = {
 
     const bothPortalsEnabled = this.bothPortalsEnabled();
     PORTAL_NAMES.forEach(portalName => {
-      portalMesh.inner.visible = bothPortalsEnabled;
+      portalMeshes[portalName].inner.visible = bothPortalsEnabled;
     });
   },
   listen: function() {
