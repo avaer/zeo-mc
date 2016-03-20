@@ -792,6 +792,8 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
     this.items[i].tick(delta)
   }
 
+  this.portal.tick();
+
   const oldWorldTick = this.getWorldTick(oldWorldTime);
   const newWorldTick = this.getWorldTick(newWorldTime);
   if (newWorldTick !== oldWorldTick) {

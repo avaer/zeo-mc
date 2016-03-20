@@ -80,18 +80,80 @@ function VoxelPortal(game) {
     _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.red1, targets.red2, game, true),
     _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue1, targets.blue2, game, false),
   ];
+  const portalTickers = [
+    _makePortalTicker(redPortalMesh, game),
+    _makePortalTicker(bluePortalMesh, game),
+  ];
 
   this._portalRenderers = portalRenderers;
+  this._portalTickers = portalTickers;
 }
 VoxelPortal.prototype = {
-  render() {
+  render: function() {
     const {_portalRenderers: portalRenderers} = this;
 
     portalRenderers.forEach(portalRenderer => {
       portalRenderer();
     });
-  }
+  },
+  tick: function() {
+    const {_portalTickers: portalTickers} = this;
+
+    portalTickers.forEach(portalTicker => {
+      portalTicker();
+    });
+  },
 };
+
+function _makePortalMesh(spec, game) {
+  const {texture, portalColor} = spec;
+  const {THREE, THREECSG} = game;
+
+  const object = new THREE.Object3D();
+  const inner = (() => {
+    const geometry = (() => {
+      const planeGeometry = new THREE.PlaneGeometry(SIZE, SIZE * 2);
+      const bufferGeometry = new THREE.BufferGeometry().fromGeometry(planeGeometry);
+      return bufferGeometry;
+    })();
+    const material = (() => {
+      const shaderUniforms = THREE.UniformsUtils.clone(portalShader.uniforms);
+      const shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: shaderUniforms,
+        vertexShader: portalShader.vertexShader,
+        fragmentShader: portalShader.fragmentShader
+      });
+      shaderMaterial.uniforms.diffuseSampler.value = texture;
+      return shaderMaterial;
+    })();
+    const mesh = new THREE.Mesh(geometry, material);
+    return mesh;
+  })();
+  object.add(inner);
+  object.inner = inner;
+  const outer = (() => {
+    const geometry = (() => {
+      const outerGeometry = new THREE.BoxGeometry(SIZE + BORDER_SIZE * 2, SIZE * 2 + BORDER_SIZE * 2, BORDER_SIZE);
+      const outerCSG = new THREECSG(outerGeometry);
+
+      const innerGeometry = new THREE.BoxGeometry(SIZE, SIZE * 2, BORDER_SIZE);
+      const innerCSG = new THREECSG(innerGeometry);
+
+      const holeCSG = outerCSG.subtract(innerCSG);
+      const holeGeometry = holeCSG.toGeometry();
+
+      const bufferGeometry = new THREE.BufferGeometry().fromGeometry(holeGeometry);
+      return bufferGeometry;
+    })();
+    const material = new THREE.MeshBasicMaterial({color: portalColor});
+    const mesh = new THREE.Mesh(geometry, material);
+    return mesh;
+  })();
+  object.add(outer);
+  object.outer = outer;
+
+  return object;
+}
 
 function _makeRenderTarget(THREE) {
   return new THREE.WebGLRenderTarget(TEXTURE_WIDTH, TEXTURE_HEIGHT, {
@@ -222,52 +284,87 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   };
 }
 
-function _makePortalMesh(spec, game) {
-  const {texture, portalColor} = spec;
-  const {THREE, THREECSG} = game;
+function _makePortalTicker(portalMesh, game) {
+  const {inner} = portalMesh;
+  const {THREE} = game;
 
-  const object = new THREE.Object3D();
-  const inner = (() => {
-    const geometry = (() => {
-      const planeGeometry = new THREE.PlaneGeometry(SIZE, SIZE * 2);
-      const bufferGeometry = new THREE.BufferGeometry().fromGeometry(planeGeometry);
-      return bufferGeometry;
-    })();
-    const material = (() => {
-      const shaderUniforms = THREE.UniformsUtils.clone(portalShader.uniforms);
-      const shaderMaterial = new THREE.ShaderMaterial({
-        uniforms: shaderUniforms,
-        vertexShader: portalShader.vertexShader,
-        fragmentShader: portalShader.fragmentShader
+  const plane = (() => {
+    const normal = new THREE.Vector3(0, 0, -1);
+    normal
+      .applyAxisAngle(new THREE.Vector3(1, 0, 0), portalMesh.rotation.x)
+      .applyAxisAngle(new THREE.Vector3(0, 1, 0), portalMesh.rotation.y)
+      .applyAxisAngle(new THREE.Vector3(0, 0, 1), portalMesh.rotation.z);
+    const point = portalMesh.position;
+    const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(normal, point);
+    return plane;
+  })();
+  const raycaster = new THREE.Raycaster();
+  // raycaster.near = 0;
+  // raycaster.far = 32;
+  // raycaster.linePrecision = 10000;
+
+  function _getPlayerPosition() {
+    const yaw = game.controls.target().avatar;
+    const position = yaw.position.clone();
+    return position;
+  }
+
+  function _passesThroughPortal(start, end) {
+    const ray = new THREE.Vector3().subVectors(end, start);
+    const direction = ray.clone().normalize();
+    raycaster.set(start, direction);
+    const intersections = raycaster.intersectObject(inner);
+    if (intersections.length > 0) {
+      const rayLength = ray.length();
+      return intersections.some(intersection => {
+        return intersection.distance < rayLength;
       });
-      shaderMaterial.uniforms.diffuseSampler.value = texture;
-      return shaderMaterial;
-    })();
-    const mesh = new THREE.Mesh(geometry, material);
-    return mesh;
-  })();
-  object.add(inner);
-  const outer = (() => {
-    const geometry = (() => {
-      const outerGeometry = new THREE.BoxGeometry(SIZE + BORDER_SIZE * 2, SIZE * 2 + BORDER_SIZE * 2, BORDER_SIZE);
-      const outerCSG = new THREECSG(outerGeometry);
+    } else {
+      return false;
+    }
 
-      const innerGeometry = new THREE.BoxGeometry(SIZE, SIZE * 2, BORDER_SIZE);
-      const innerCSG = new THREECSG(innerGeometry);
+    /* const prevSide = getSide(prevPlayerPosition);
+    const nextSide = getSide(nextPlayerPosition);
 
-      const holeCSG = outerCSG.subtract(innerCSG);
-      const holeGeometry = holeCSG.toGeometry();
+    if (prevSide && !nextSide) {
+      const diffLine = new THREE.Line(start, end);
+      const intersectionPoint = plane.intersectLine(diffLine);
+      if (intersectionPoint) {
+        const portalBoundingBox = _getPortalBoundingBox();
+        return _isPointInBoundingBox(intersectionPoint, portalBoundingBox);
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    } */
+  }
 
-      const bufferGeometry = new THREE.BufferGeometry().fromGeometry(holeGeometry);
-      return bufferGeometry;
-    })();
-    const material = new THREE.MeshBasicMaterial({color: portalColor});
-    const mesh = new THREE.Mesh(geometry, material);
-    return mesh;
-  })();
-  object.add(outer);
+  function _getSide(point) {
+    const distanceToPoint = plane.distanceToPoint(point);
+    const front = distanceToPoint < 0;
+    return front;
+  }
 
-  return object;
+  let prevPlayerPosition = null;
+if (!window.portalMesh) {
+  window.portalMesh = portalMesh;
+  window.getPlayerPosition = _getPlayerPosition;
+  window.getSide = _getSide;
+}
+
+  return function() {
+    const nextPlayerPosition = _getPlayerPosition();
+
+    if (prevPlayerPosition !== null) {
+      if (_passesThroughPortal(prevPlayerPosition, nextPlayerPosition)) {
+        // XXX
+        console.log('passed through', prevPlayerPosition.x, prevPlayerPosition.y, prevPlayerPosition.z, nextPlayerPosition.x, nextPlayerPosition.y, nextPlayerPosition.z);
+      }
+    }
+
+    prevPlayerPosition = nextPlayerPosition;
+  };
 }
 
 function voxelPortal(game) {
