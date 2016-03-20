@@ -1,6 +1,13 @@
+import {SPRITES} from '../../resources/index';
+
 const SIZE = 1;
-const OFFSET = [0, 1.35, 1.1];
-const ROTATION = [0, Math.PI/2, 0];
+
+const ITEM_OFFSET = [0, 1.35, 1.1];
+const WEAPON_OFFSET = [-1.5, 1.225, 0.5];
+
+const ITEM_ROTATION = [0, Math.PI/2, 0];
+const WEAPON_ROTATION = [0, 0, 0];
+
 const SCALE = 0.075;
 const BYTES_PER_PIXEL = 4;
 const CUBE_VERTICES = 108;
@@ -12,9 +19,10 @@ function voxelSpriteMesher(data, textureLoader, THREE) {
     const object = new THREE.Object3D();
 
     for (let i = 0; i < numFaces; i++) {
+      const item = facesData[i];
+
       const mesh = (() => {
         const geometry = (() => {
-          const item = facesData[i];
           const textureUrl = textureLoader.getTextureUrl('items/' + item);
           const texture = textureLoader.getCachedTexture(textureUrl);
           if (!texture) {
@@ -90,8 +98,22 @@ function voxelSpriteMesher(data, textureLoader, THREE) {
         })();
         const material = getPixelMaterial(THREE);
         const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(OFFSET[0], OFFSET[1], OFFSET[2]);
-        mesh.rotation.set(ROTATION[0], ROTATION[1], ROTATION[2]);
+
+        const isWeapon = Boolean(SPRITES.WEAPONS[item]);
+        if (!isWeapon) {
+          mesh.position.set(ITEM_OFFSET[0], ITEM_OFFSET[1], ITEM_OFFSET[2]);
+        } else {
+          mesh.position.set(WEAPON_OFFSET[0], WEAPON_OFFSET[1], WEAPON_OFFSET[2]);
+        }
+
+        if (!isWeapon) {
+          mesh.rotation.set(ITEM_ROTATION[0], ITEM_ROTATION[1], ITEM_ROTATION[2]);
+        } else {
+          mesh.rotation.set(WEAPON_ROTATION[0], WEAPON_ROTATION[1], WEAPON_ROTATION[2]);
+        }
+
+window.mesh = mesh;
+
         mesh.scale.set(SCALE, SCALE, SCALE);
         return mesh;
       })();
