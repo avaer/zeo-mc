@@ -113,8 +113,8 @@ export default class Voxels extends React.Component {
         textureLoader.loadTextures([
           'items/greenapple',
           'items/flare',
-          'items/portala',
-          'items/portalb',
+          'items/portalred',
+          'items/portalblue',
         ], pend);
       })();
     };
@@ -248,7 +248,7 @@ export default class Voxels extends React.Component {
             const {type} = holdValue;
             if (type === 'item') {
               const {value} = holdValue;
-              if (value !== 'portala' && value !== 'portalb') {
+              if (value !== 'portalred' && value !== 'portalblue') {
                 console.log('use item', value); // XXX
 
                 stopHolding();
@@ -281,14 +281,14 @@ export default class Voxels extends React.Component {
                 return;
               } else if (type === 'item') {
                 const {value} = holdValue;
-                const {adjacent: position} = hit;
+                const {adjacent: position, normal} = hit;
 
-                if (value === 'portala') {
-                  voxelPortalInstance.setPortal('a', position);
+                if (value === 'portalred') {
+                  voxelPortalInstance.setPortal('red', position, normal);
 
                   return;
-                } else if (value === 'portalb') {
-                  voxelPortalInstance.setPortal('b', position);
+                } else if (value === 'portalblue') {
+                  voxelPortalInstance.setPortal('blue', position, normal);
 
                   return;
                 }

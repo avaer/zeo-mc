@@ -4,6 +4,8 @@ const BORDER_SIZE = 0.1;
 const TEXTURE_WIDTH = 256;
 const TEXTURE_HEIGHT = TEXTURE_WIDTH * 2;
 
+const PORTAL_NAMES = ['red', 'blue'];
+
 const portalShader = {
 
   uniforms: {
@@ -61,19 +63,24 @@ function VoxelPortal(game) {
   };
 
   const redPortalMesh = _makePortalMesh({texture: targets.blue2, portalColor: 0xFDA232}, game);
-  redPortalMesh.position.set(0 + SIZE / 2, 14, -4);
+  redPortalMesh.position.set(0 + SIZE / 2, 14, -4); // XXX
   scene.add(redPortalMesh);
   const bluePortalMesh = _makePortalMesh({texture: targets.red2, portalColor: 0x188EFA}, game);
-  bluePortalMesh.position.set(-3, 14, -3 + SIZE / 2);
+  bluePortalMesh.position.set(-3, 14, -3 + SIZE / 2); // XXX
   bluePortalMesh.rotation.set(0, Math.PI / 2, 0);
   scene.add(bluePortalMesh);
+  const portalMeshes = {
+    red: redPortalMesh,
+    blue: bluePortalMesh
+  };
 
   const portalRenderers = [
     _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.red1, targets.red2, game, true),
     _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue1, targets.blue2, game, false),
   ];
-  const portalTickers = _makePortalTickers(redPortalMesh, bluePortalMesh, game);
+  const portalTickers = _makePortalTickers(redPortalMesh, bluePortalMesh, this, game);
 
+  this._portalMeshes = portalMeshes;
   this._portalRenderers = portalRenderers;
   this._portalTickers = portalTickers;
 
@@ -90,6 +97,38 @@ VoxelPortal.prototype = {
   tick: function() {
     const {_portalTickers: portalTickers} = this;
     portalTickers();
+  },
+  bothPortalsEnabled: function() {
+    const {_portalMeshes: portalMeshes} = this;
+    return PORTAL_NAMES.every(portalName => portalMeshes[portalName].visible);
+  },
+  setPortal: function(side, position, normal) {
+    const {_portalMeshes: portalMeshes} = this;
+    const portalMesh = portalMeshes[side];
+
+    console.log('set portal', side, position, normal, portalMesh); // XXX
+
+    const [positionX, positionY, positionZ] = position;
+    const [normalX, normalY, normalZ] = normal;
+    if (normalZ === 1) {
+      portalMesh.position.set(positionX + 0.5, positionY + 1, positionZ);
+      portalMesh.rotation.set(0, (Math.PI / 2) * 0, 0);
+    } else if (normalX === 1) {
+      portalMesh.position.set(positionX, positionY + 1, positionZ + 0.5);
+      portalMesh.rotation.set(0, (Math.PI / 2) * 1, 0);
+    } else if (normalZ === -1) {
+      portalMesh.position.set(positionX + 0.5, positionY + 1, positionZ + 1);
+      portalMesh.rotation.set(0, (Math.PI / 2) * 2, 0);
+    } else if (normalX === -1) {
+      portalMesh.position.set(positionX + 1, positionY + 1, positionZ + 0.5);
+      portalMesh.rotation.set(0, (Math.PI / 2) * 3, 0);
+    }
+    portalMesh.visible = true;
+
+    const bothPortalsEnabled = this.bothPortalsEnabled();
+    PORTAL_NAMES.forEach(portalName => {
+      portalMesh.inner.visible = bothPortalsEnabled;
+    });
   },
   listen: function() {
     game.on('prerender', () => {
@@ -109,6 +148,7 @@ function _makePortalMesh(spec, game) {
   const inner = (() => {
     const geometry = (() => {
       const planeGeometry = new THREE.PlaneGeometry(SIZE, SIZE * 2);
+      // planeGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0, 0, BORDER_SIZE/2));
       const bufferGeometry = new THREE.BufferGeometry().fromGeometry(planeGeometry);
       return bufferGeometry;
     })();
@@ -123,6 +163,7 @@ function _makePortalMesh(spec, game) {
       return shaderMaterial;
     })();
     const mesh = new THREE.Mesh(geometry, material);
+    mesh.visible = false;
     return mesh;
   })();
   object.add(inner);
@@ -147,6 +188,8 @@ function _makePortalMesh(spec, game) {
   })();
   object.add(outer);
   object.outer = outer;
+
+  object.visible = false;
 
   return object;
 }
@@ -188,7 +231,9 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   })();
   screenScene.add(screenCamera);
 
-  const rotationDelta = targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3());
+  function _getRotationDelta() {
+    return targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3());
+  }
 
   let oldPosition;
   let oldRotation;
@@ -203,6 +248,7 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
     oldRotation = portalCamera.yaw.rotation.clone();
 
     const vectorToTarget = targetPortalMesh.position.clone().sub(portalCamera.yaw.position);
+    const rotationDelta = _getRotationDelta();
     const rotatedVectorToTarget = vectorToTarget.clone()
       .applyAxisAngle(new THREE.Vector3(1, 0, 0), rotationDelta.x)
       .applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationDelta.y)
@@ -280,7 +326,7 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   };
 }
 
-function _makePortalTickers(sourcePortalMesh, targetPortalMesh, game) {
+function _makePortalTickers(sourcePortalMesh, targetPortalMesh, voxelPortal, game) {
   let epoch = 0;
   let lastPassThroughEpoch = 0;
   let prevPlayerPosition = null;
@@ -297,18 +343,20 @@ function _makePortalTickers(sourcePortalMesh, targetPortalMesh, game) {
   ];
 
   return function() {
-    const nextPlayerPosition = _getPlayerPosition();
-    tickers.forEach(ticker => {
-      const epochDiff = epoch - lastPassThroughEpoch;
-      if (epochDiff >= 2) {
-        const passedThrough = ticker(prevPlayerPosition, nextPlayerPosition);
-        if (passedThrough) {
-          lastPassThroughEpoch = epoch;
+    if (voxelPortal.bothPortalsEnabled()) {
+      const nextPlayerPosition = _getPlayerPosition();
+      tickers.forEach(ticker => {
+        const epochDiff = epoch - lastPassThroughEpoch;
+        if (epochDiff >= 2) {
+          const passedThrough = ticker(prevPlayerPosition, nextPlayerPosition);
+          if (passedThrough) {
+            lastPassThroughEpoch = epoch;
+          }
         }
-      }
-    });
-    prevPlayerPosition = nextPlayerPosition;
-    epoch++;
+      });
+      prevPlayerPosition = nextPlayerPosition;
+      epoch++;
+    }
   };
 }
 
@@ -327,8 +375,14 @@ function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
     return plane;
   })();
   const raycaster = new THREE.Raycaster();
-  const positionDelta = new THREE.Vector3().subVectors(targetPortalMesh.position, sourcePortalMesh.position);
-  const rotationDelta = sourcePortalMesh.rotation.toVector3().sub(targetPortalMesh.rotation.toVector3());
+
+  function _getPositionDelta() {
+    return new THREE.Vector3().subVectors(targetPortalMesh.position, sourcePortalMesh.position);
+  }
+
+  function _getRotationDelta() {
+    return sourcePortalMesh.rotation.toVector3().sub(targetPortalMesh.rotation.toVector3());
+  }
 
   function _passesThroughPortal(start, end) {
     const ray = new THREE.Vector3().subVectors(end, start);
@@ -354,6 +408,8 @@ function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
   return function(prevPlayerPosition, nextPlayerPosition) {
     if (prevPlayerPosition !== null) {
       if (_passesThroughPortal(prevPlayerPosition, nextPlayerPosition)) {
+        const positionDelta = _getPositionDelta();
+        const rotationDelta = _getRotationDelta();
         _movePlayerPosition(positionDelta, rotationDelta);
         return true;
       } else {

@@ -405,8 +405,8 @@ Game.prototype.defaultButtons = {
   '<control>': 'alt',
   'Q': 'greenapple',
   'E': 'flare',
-  'Z': 'portala',
-  'C': 'portalb',
+  'Z': 'portalred',
+  'C': 'portalblue',
 }
 
 // used in methods that have identity function(pos) {}

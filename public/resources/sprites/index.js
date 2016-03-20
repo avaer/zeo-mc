@@ -1,6 +1,6 @@
 const WEAPON_NAMES = [
-  'portala',
-  'portalb',
+  'portalred',
+  'portalblue',
 ];
 
 export const WEAPONS = (() => {
