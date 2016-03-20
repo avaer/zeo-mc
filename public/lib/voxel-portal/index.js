@@ -57,18 +57,13 @@ function VoxelPortal(game) {
   const {width, height} = game;
 
   const targets = {
-    red1: _makeRenderTarget(THREE),
-    red2: _makeRenderTarget(THREE),
-    blue1: _makeRenderTarget(THREE),
-    blue2: _makeRenderTarget(THREE),
+    red: _makeRenderTarget(THREE),
+    blue: _makeRenderTarget(THREE),
   };
 
-  const redPortalMesh = _makePortalMesh({texture: targets.blue2, portalColor: 0xFDA232}, game);
-  redPortalMesh.position.set(0 + SIZE / 2, 14, -4); // XXX
+  const redPortalMesh = _makePortalMesh({texture: targets.blue, portalColor: 0xFDA232}, game);
   scene.add(redPortalMesh);
-  const bluePortalMesh = _makePortalMesh({texture: targets.red2, portalColor: 0x188EFA}, game);
-  bluePortalMesh.position.set(-3, 14, -3 + SIZE / 2); // XXX
-  bluePortalMesh.rotation.set(0, Math.PI / 2, 0);
+  const bluePortalMesh = _makePortalMesh({texture: targets.red, portalColor: 0x188EFA}, game);
   scene.add(bluePortalMesh);
   const portalMeshes = {
     red: redPortalMesh,
@@ -76,8 +71,8 @@ function VoxelPortal(game) {
   };
 
   const portalRenderers = [
-    _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.red1, targets.red2, game, true),
-    _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue1, targets.blue2, game, false),
+    _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.red, this, game),
+    _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue, this, game),
   ];
   const portalTickers = _makePortalTickers(redPortalMesh, bluePortalMesh, this, game);
 
@@ -211,28 +206,10 @@ function _sgn(a) {
   return (0.0);
 }
 
-function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target2, game, first) {
+function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPortal, game) {
   const {width, height, scene, camera, view, THREE} = game;
 
   const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
-
-  const screenScene = (() => {
-    const screenScene = new THREE.Scene();
-
-    const screenGeometry = new THREE.PlaneGeometry(width, height);
-    const screenMaterial = new THREE.MeshBasicMaterial({map: target1});
-    const quad = new THREE.Mesh(screenGeometry, screenMaterial);
-    screenScene.add(quad);
-
-    return screenScene;
-  })();
-
-  const screenCamera = (() => {
-    const screenCamera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, -10000, 10000);
-    screenCamera.position.z = 1;
-    return screenCamera;
-  })();
-  screenScene.add(screenCamera);
 
   function _getRotationDelta() {
     return targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3());
@@ -240,6 +217,17 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
 
   let oldPosition;
   let oldRotation;
+
+  function hidePortals() {
+    sourcePortalMesh.inner.visible = false;
+    targetPortalMesh.inner.visible = false;
+  }
+
+  function showPortals() {
+    const bothPortalsEnabled = voxelPortal.bothPortalsEnabled();
+    sourcePortalMesh.inner.visible = bothPortalsEnabled;
+    targetPortalMesh.inner.visible = bothPortalsEnabled;
+  }
 
   function updatePortalCamera() {
     if (!portalCamera.parent) {
@@ -312,9 +300,8 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
 
   }
 
-  function renderTargets() {
-    view.renderer.render(scene, portalCamera, target1, true);
-    view.renderer.render(screenScene, screenCamera, target2, true);
+  function renderPortal() {
+    view.renderer.render(scene, portalCamera, target, true);
   }
 
   function resetPortalCamera() {
@@ -323,9 +310,11 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   }
 
   return function() {
+    hidePortals();
     updatePortalCamera();
-    renderTargets();
+    renderPortal();
     resetPortalCamera();
+    showPortals();
   };
 }
 
