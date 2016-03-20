@@ -359,21 +359,9 @@ function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
   }
 
   function _movePlayerPosition(positionDelta, rotationDelta) {
-    const target = game.controls.target();
-    const {avatar: yaw, velocity, acceleration} = target;
-
+    const yaw = game.controls.target().avatar;
     yaw.position.add(positionDelta);
     yaw.rotation.setFromVector3(yaw.rotation.toVector3().add(rotationDelta));
-
-    velocity
-      .applyAxisAngle(new THREE.Vector3(1, 0, 0), rotationDelta.x)
-      .applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationDelta.y)
-      .applyAxisAngle(new THREE.Vector3(0, 0, 1), rotationDelta.z);
-
-    acceleration
-      .applyAxisAngle(new THREE.Vector3(1, 0, 0), rotationDelta.x)
-      .applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationDelta.y)
-      .applyAxisAngle(new THREE.Vector3(0, 0, 1), rotationDelta.z);
   }
 
   return function(prevPlayerPosition, nextPlayerPosition) {
