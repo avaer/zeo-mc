@@ -71,8 +71,8 @@ function VoxelPortal(game) {
   };
 
   const portalRenderers = [
-    _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.red, this, game),
-    _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue, this, game),
+    _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.red, this, game, true),
+    _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue, this, game, false),
   ];
   const portalTickers = _makePortalTickers(redPortalMesh, bluePortalMesh, this, game);
 
@@ -224,10 +224,11 @@ function _sgn(a) {
   return (0.0);
 }
 
-function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPortal, game) {
+function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPortal, game, first) {
   const {width, height, scene, camera, view, THREE} = game;
 
   const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
+  const frustum = new THREE.Frustum();
 
   function _getRotationDelta() {
     return targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3());
@@ -235,6 +236,20 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
 
   let oldPosition;
   let oldRotation;
+
+  function getPortalScreenProjection() {
+    const {inner} = sourcePortalMesh;
+    if (inner.visible) {
+      frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+      if (frustum.intersectsObject(inner)) {
+        return {};
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
 
   function hidePortals() {
     sourcePortalMesh.inner.visible = false;
@@ -330,11 +345,17 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
   }
 
   return function() {
-    hidePortals();
-    updatePortalCamera();
-    renderPortal();
-    resetPortalCamera();
-    showPortals();
+    const portalScreenProjection = getPortalScreenProjection();
+if (first) { // XXX
+window.portalScreenProjection = portalScreenProjection;
+}
+    if (portalScreenProjection) {
+      hidePortals();
+      updatePortalCamera();
+      renderPortal();
+      resetPortalCamera();
+      showPortals();
+    }
   };
 }
 
