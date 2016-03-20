@@ -186,6 +186,24 @@ function _makePortalMesh(spec, game) {
   })();
   object.add(outer);
   object.outer = outer;
+  const back = (() => {
+    const geometry = (() => {
+      const {geometry: innerGeometry} = inner;
+      const bufferGeometry = innerGeometry.clone();
+      bufferGeometry.applyMatrix(new THREE.Matrix4().makeRotationY(Math.PI));
+      return bufferGeometry;
+    })();
+    const material = (() => {
+      const basicMaterial = new THREE.MeshBasicMaterial({color: portalColor});
+      basicMaterial.side = THREE.DoubleSide;
+      return basicMaterial;
+    })();
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.visible = false;
+    return mesh;
+  })();
+  object.add(back);
+  object.back = back;
 
   object.visible = false;
 
@@ -221,12 +239,14 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
   function hidePortals() {
     sourcePortalMesh.inner.visible = false;
     targetPortalMesh.inner.visible = false;
+    sourcePortalMesh.back.visible = false;
   }
 
   function showPortals() {
     const bothPortalsEnabled = voxelPortal.bothPortalsEnabled();
     sourcePortalMesh.inner.visible = bothPortalsEnabled;
     targetPortalMesh.inner.visible = bothPortalsEnabled;
+    sourcePortalMesh.back.visible = bothPortalsEnabled;
   }
 
   function updatePortalCamera() {
