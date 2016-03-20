@@ -14,23 +14,28 @@ const portalShader = {
     textureMap: {
       type: "t",
       value: null
+    },
+
+    clipBox: {
+      type: "4fv",
+      value: new Float32Array([0,0,1,1])
     }
 
   },
 
   vertexShader: [
 
-    "varying vec4 vUv;",
+    "varying vec4 texCoord;",
 
     "void main() {",
 
     "vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
     "vec4 position = projectionMatrix * mvPosition;",
 
-    "vUv = position;",
-    "vUv.xy = 0.5*vUv.xy + 0.5*vUv.w;",
-
+    "texCoord = position;",
+    "texCoord.xy = 0.5*texCoord.xy + 0.5*texCoord.w;",
     "gl_Position = position;",
+
     "}"
 
   ].join("\n"),
@@ -38,19 +43,26 @@ const portalShader = {
   fragmentShader: [
 
     "uniform sampler2D textureMap;",
-
-    "varying vec4 vUv;",
+    "uniform vec4 clipBox;",
+    "varying vec4 texCoord;",
 
     "void main() {",
+    
+    "vec2 vUv = texCoord.st / texCoord.q;",
+    "if (vUv.x >= clipBox[0] && vUv.y >= clipBox[1] && vUv.x <= clipBox[2] && vUv.y <= clipBox[3]) {",
+    "  vec4 color = texture2D(textureMap, vUv);",
+    "  gl_FragColor = color;",
+    "} else {",
+    "  discard;",
+    "}",
 
-    "vec4 color = texture2DProj(textureMap, vUv);",
-
-    "gl_FragColor = color;",
     "}"
 
   ].join("\n")
 
 };
+
+const {min, max} = Math;
 
 function VoxelPortal(game) {
   const {scene, camera, THREE} = game;
@@ -227,22 +239,49 @@ function _sgn(a) {
 function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPortal, game, first) {
   const {width, height, scene, camera, view, THREE} = game;
 
+  const widthHalf = width / 2;
+  const heightHalf = height / 2;
   const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
   const frustum = new THREE.Frustum();
+
+  let oldPosition;
+  let oldRotation;
 
   function _getRotationDelta() {
     return targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3());
   }
 
-  let oldPosition;
-  let oldRotation;
+  function getObjectWorldBoundingBox(object) {
+    return new THREE.Box3().setFromObject(object);
+  }
+
+  function getObjectScreenBoundingBox(object, camera) {
+    const worldBoundingBox = getObjectWorldBoundingBox(object);
+    const min = getScreenProjection(worldBoundingBox.max, camera);
+    const max = getScreenProjection(worldBoundingBox.min, camera);
+    return [min[0], min[1], max[0], max[1]];
+  }
+
+  function getScreenProjection(worldPosition, camera) {
+    const vector = new THREE.Vector3().copy(worldPosition);
+    vector.project(camera);
+    vector.x = clip((vector.x * 0.5) + 0.5);
+    vector.y = clip(-(vector.y * 0.5) + 0.5);
+    return [vector.x, vector.y];
+  }
+
+  function clip(v) {
+    return min(max(v, 0), 1);
+  }
 
   function getPortalScreenProjection() {
-    const {inner} = targetPortalMesh;
-    if (inner.visible) {
+    const {inner: targetPortalInner} = targetPortalMesh;
+    if (targetPortalInner.visible) {
       frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-      if (frustum.intersectsObject(inner)) {
-        return {};
+      if (frustum.intersectsObject(targetPortalInner)) {
+        const {inner: sourcePortalInner} = sourcePortalMesh;
+        const screenBoundingBox = getObjectScreenBoundingBox(sourcePortalInner, camera);
+        return screenBoundingBox;
       } else {
         return null;
       }
@@ -347,6 +386,11 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
   return function() {
     const portalScreenProjection = getPortalScreenProjection();
     if (portalScreenProjection) {
+if (first) { // XXX
+  window.firstProjection = [portalScreenProjection.min[0], portalScreenProjection.min[1], portalScreenProjection.max[0], portalScreenProjection.max[1]];
+} else {
+  window.secondProjection = [portalScreenProjection.min[0], portalScreenProjection.min[1], portalScreenProjection.max[0], portalScreenProjection.max[1]];
+}
       hidePortals();
       updatePortalCamera();
       renderPortal();
