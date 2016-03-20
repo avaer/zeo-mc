@@ -7,11 +7,8 @@ const TEXTURE_HEIGHT = TEXTURE_WIDTH * 2;
 const portalShader = {
 
   uniforms: {
-    /* diffuseColor: {
-      type: "c",
-      value: new THREE.Color(0xffdea2)
-    }, */
-    diffuseSampler: {
+
+    textureMap: {
       type: "t",
       value: null
     }
@@ -20,35 +17,30 @@ const portalShader = {
 
   vertexShader: [
 
-    "varying vec4 texCoord;",
+    "varying vec4 vUv;",
 
     "void main() {",
 
     "vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
-    "texCoord = projectionMatrix * mvPosition;",
-    // "texCoord.x *= -1.0;",
-    "texCoord.xy = 0.5*texCoord.xy + 0.5*texCoord.w;",
+    "vec4 position = projectionMatrix * mvPosition;",
 
-    "gl_Position = projectionMatrix * mvPosition;",
+    "vUv = position;",
+    "vUv.xy = 0.5*vUv.xy + 0.5*vUv.w;",
+
+    "gl_Position = position;",
     "}"
 
   ].join("\n"),
 
   fragmentShader: [
 
-    // "uniform vec3 diffuseColor;",
-    "uniform sampler2D diffuseSampler;",
+    "uniform sampler2D textureMap;",
 
-    "varying vec4 texCoord;",
+    "varying vec4 vUv;",
 
     "void main() {",
 
-    "vec4 uv = texCoord;",
-    /* "vec4 color = vec4(diffuseColor, 1.0);",
-    "color = texture2DProj(diffuseSampler, uv);",
-    "color = color * vec4(diffuseColor, 1.0) + vec4(diffuseColor, 1.0) * 0.1;", */
-
-    "vec4 color = texture2DProj(diffuseSampler, uv);",
+    "vec4 color = texture2DProj(textureMap, vUv);",
 
     "gl_FragColor = color;",
     "}"
@@ -127,7 +119,7 @@ function _makePortalMesh(spec, game) {
         vertexShader: portalShader.vertexShader,
         fragmentShader: portalShader.fragmentShader
       });
-      shaderMaterial.uniforms.diffuseSampler.value = texture;
+      shaderMaterial.uniforms.textureMap.value = texture;
       return shaderMaterial;
     })();
     const mesh = new THREE.Mesh(geometry, material);
