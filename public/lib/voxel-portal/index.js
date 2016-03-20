@@ -160,6 +160,8 @@ function _makePortalMesh(spec, game) {
         fragmentShader: portalShader.fragmentShader
       });
       shaderMaterial.uniforms.textureMap.value = texture;
+      shaderMaterial.polygonOffset = true;
+      shaderMaterial.polygonOffsetFactor = -0.25;
       return shaderMaterial;
     })();
     const mesh = new THREE.Mesh(geometry, material);
