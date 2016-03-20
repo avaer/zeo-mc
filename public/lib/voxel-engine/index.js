@@ -513,8 +513,19 @@ Game.prototype.collideTerrain = function(other, bbox, vec, resting) {
   var axes = ['x', 'y', 'z']
   var vec3 = [vec.x, vec.y, vec.z]
   this.collideVoxels(bbox, vec3, function hit(axis, tile, coords, dir, edge) {
-    if (!tile) return
-    if (Math.abs(vec3[axis]) < Math.abs(edge)) return
+    if (!tile) return false
+    if (Math.abs(vec3[axis]) < Math.abs(edge)) return false
+
+    if (axis === 2 && dir === -1) {
+      console.log('collide z = -1', coords);
+    } else if (axis === 0 && dir === -1) {
+      console.log('collide x = -1', coords);
+    } else if (axis === 2 && dir === 1) {
+      console.log('collide z = 1', coords);
+    } else if (axis === 0 && dir === 1) {
+      console.log('collide x = 1', coords);
+    }
+
     vec3[axis] = vec[axes[axis]] = edge
     other.acceleration[axes[axis]] = 0
     resting[axes[axis]] = dir
