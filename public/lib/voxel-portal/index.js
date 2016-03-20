@@ -281,20 +281,21 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
 function _makePortalTickers(sourcePortalMesh, targetPortalMesh, game) {
   let epoch = 0;
   let lastPassThroughEpoch = 0;
-
   let prevPlayerPosition = null;
-  const getPlayerPosition = () => {
+
+  function _getPlayerPosition() {
     const yaw = game.controls.target().avatar;
     const position = yaw.position.clone();
     return position;
-  };
+  }
+
   const tickers = [
     _makePortalTicker(sourcePortalMesh, targetPortalMesh, game),
     _makePortalTicker(targetPortalMesh, sourcePortalMesh, game),
   ];
 
   return function() {
-    const nextPlayerPosition = getPlayerPosition();
+    const nextPlayerPosition = _getPlayerPosition();
     tickers.forEach(ticker => {
       const epochDiff = epoch - lastPassThroughEpoch;
       if (epochDiff >= 2) {
@@ -340,22 +341,6 @@ function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
     } else {
       return false;
     }
-
-    /* const prevSide = getSide(prevPlayerPosition);
-    const nextSide = getSide(nextPlayerPosition);
-
-    if (prevSide && !nextSide) {
-      const diffLine = new THREE.Line(start, end);
-      const intersectionPoint = plane.intersectLine(diffLine);
-      if (intersectionPoint) {
-        const portalBoundingBox = _getPortalBoundingBox();
-        return _isPointInBoundingBox(intersectionPoint, portalBoundingBox);
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    } */
   }
 
   function _movePlayerPosition(positionDelta, rotationDelta) {
@@ -367,9 +352,7 @@ function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
   return function(prevPlayerPosition, nextPlayerPosition) {
     if (prevPlayerPosition !== null) {
       if (_passesThroughPortal(prevPlayerPosition, nextPlayerPosition)) {
-        console.log('passed through', prevPlayerPosition.x, prevPlayerPosition.y, prevPlayerPosition.z, nextPlayerPosition.x, nextPlayerPosition.y, nextPlayerPosition.z);
         _movePlayerPosition(positionDelta, rotationDelta);
-
         return true;
       } else {
         return false;
