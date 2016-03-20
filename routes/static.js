@@ -3,6 +3,11 @@ const url = require('url');
 
 const st = require('st');
 
+const stFavicon = st({
+  path: path.join(__dirname, '..'),
+  url: '/'
+});
+stFavicon.url = '/favicon.ico';
 const stJs = st({
   path: path.join(__dirname, '..', 'public', 'js'),
   url: '/js'
@@ -14,7 +19,7 @@ const stImg = st({
 });
 stImg.url = '/img/:path*';
 
-const stMounts = [stJs, stImg];
+const stMounts = [stFavicon, stJs, stImg];
 
 const routes = stMounts.map(stMount => ({
   path: stMount.url,
