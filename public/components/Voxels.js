@@ -298,12 +298,13 @@ export default class Voxels extends React.Component {
         });
 
         game.on('hold', variant => {
-          if (!holdValue) {
-            console.log('spawn item', variant); // XXX
-            const type = 'item';
-            const value = {type, value: variant};
-            startHolding(value);
+          if (holdValue) {
+            stopHolding();
           }
+
+          const type = 'item';
+          const value = {type, value: variant};
+          startHolding(value);
         });
       }
       initControls();
