@@ -61,9 +61,9 @@ function VoxelPortal(game) {
     blue: _makeRenderTarget(THREE),
   };
 
-  const redPortalMesh = _makePortalMesh({texture: targets.blue, portalColor: 0xFDA232}, game);
+  const redPortalMesh = _makePortalMesh({texture: targets.red, portalColor: 0xFDA232}, game);
   scene.add(redPortalMesh);
-  const bluePortalMesh = _makePortalMesh({texture: targets.red, portalColor: 0x188EFA}, game);
+  const bluePortalMesh = _makePortalMesh({texture: targets.blue, portalColor: 0x188EFA}, game);
   scene.add(bluePortalMesh);
   const portalMeshes = {
     red: redPortalMesh,
@@ -71,8 +71,8 @@ function VoxelPortal(game) {
   };
 
   const portalRenderers = [
-    _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.red, this, game, true),
-    _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue, this, game, false),
+    _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.blue, this, game, true),
+    _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.red, this, game, false),
   ];
   const portalTickers = _makePortalTickers(redPortalMesh, bluePortalMesh, this, game);
 
@@ -238,7 +238,7 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
   let oldRotation;
 
   function getPortalScreenProjection() {
-    const {inner} = sourcePortalMesh;
+    const {inner} = targetPortalMesh;
     if (inner.visible) {
       frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
       if (frustum.intersectsObject(inner)) {
@@ -296,22 +296,22 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
     // implementing code from: http://www.terathon.com/code/oblique.html
     // paper explaining this technique: http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
 
-    /* // update sourcePortalMesh matrices
-    sourcePortalMesh.updateMatrix();
-    sourcePortalMesh.updateMatrixWorld();
-    targetPortalMesh.updateMatrix();
-    targetPortalMesh.updateMatrixWorld(); */
-
     // const rotationMatrix = new THREE.Matrix4().extractRotation(targetPortalMesh.matrix);
     // .applyMatrix4(rotationMatrix);
 
-    const N = new THREE.Vector3(0, 0, -1)
+    // update sourcePortalMesh matrices
+    // sourcePortalMesh.updateMatrix();
+    // sourcePortalMesh.updateMatrixWorld();
+    // targetPortalMesh.updateMatrix();
+    // targetPortalMesh.updateMatrixWorld();
+
+    /* const N = new THREE.Vector3(0, 0, -1)
       .applyAxisAngle(new THREE.Vector3(1, 0, 0), sourcePortalMesh.rotation.x)
       .applyAxisAngle(new THREE.Vector3(0, 1, 0), sourcePortalMesh.rotation.y)
       .applyAxisAngle(new THREE.Vector3(0, 0, 1), sourcePortalMesh.rotation.z);
 
     const clipPlane = new THREE.Plane();
-    clipPlane.setFromNormalAndCoplanarPoint(N, vectorToTarget/*.clone().add(new THREE.Vector3(0, 0, -10))*/);
+    clipPlane.setFromNormalAndCoplanarPoint(N, vectorToTarget);
     clipPlane.applyMatrix4(portalCamera.matrixWorldInverse);
 
     const clipPlane2 = new THREE.Vector4(clipPlane.normal.x, clipPlane.normal.y, clipPlane.normal.z, -Math.abs(vectorToTarget.x));
@@ -331,7 +331,7 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
     projectionMatrix.elements[2] = c.x;
     projectionMatrix.elements[6] = c.y;
     projectionMatrix.elements[10] = c.z + 1.0;
-    projectionMatrix.elements[14] = c.w;
+    projectionMatrix.elements[14] = c.w; */
 
   }
 
@@ -346,9 +346,6 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
 
   return function() {
     const portalScreenProjection = getPortalScreenProjection();
-if (first) { // XXX
-window.portalScreenProjection = portalScreenProjection;
-}
     if (portalScreenProjection) {
       hidePortals();
       updatePortalCamera();
