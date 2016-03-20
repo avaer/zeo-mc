@@ -80,10 +80,7 @@ function VoxelPortal(game) {
     _makePortalRenderer(redPortalMesh, bluePortalMesh, targets.red1, targets.red2, game, true),
     _makePortalRenderer(bluePortalMesh, redPortalMesh, targets.blue1, targets.blue2, game, false),
   ];
-  const portalTickers = [
-    _makePortalTicker(redPortalMesh, bluePortalMesh, game),
-    _makePortalTicker(bluePortalMesh, redPortalMesh, game),
-  ];
+  const portalTickers = _makePortalTickers(redPortalMesh, bluePortalMesh, game);
 
   this._portalRenderers = portalRenderers;
   this._portalTickers = portalTickers;
@@ -98,10 +95,7 @@ VoxelPortal.prototype = {
   },
   tick: function() {
     const {_portalTickers: portalTickers} = this;
-
-    portalTickers.forEach(portalTicker => {
-      portalTicker();
-    });
+    portalTickers();
   },
 };
 
@@ -284,6 +278,37 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target1, target
   };
 }
 
+function _makePortalTickers(sourcePortalMesh, targetPortalMesh, game) {
+  let epoch = 0;
+  let lastPassThroughEpoch = 0;
+
+  let prevPlayerPosition = null;
+  const getPlayerPosition = () => {
+    const yaw = game.controls.target().avatar;
+    const position = yaw.position.clone();
+    return position;
+  };
+  const tickers = [
+    _makePortalTicker(sourcePortalMesh, targetPortalMesh, game),
+    _makePortalTicker(targetPortalMesh, sourcePortalMesh, game),
+  ];
+
+  return function() {
+    const nextPlayerPosition = getPlayerPosition();
+    tickers.forEach(ticker => {
+      const epochDiff = epoch - lastPassThroughEpoch;
+      if (epochDiff >= 2) {
+        const passedThrough = ticker(prevPlayerPosition, nextPlayerPosition);
+        if (passedThrough) {
+          lastPassThroughEpoch = epoch;
+        }
+      }
+    });
+    prevPlayerPosition = nextPlayerPosition;
+    epoch++;
+  };
+}
+
 function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
   const {inner: sourcePortalInner} = sourcePortalMesh;
   const {THREE} = game;
@@ -301,12 +326,6 @@ function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
   const raycaster = new THREE.Raycaster();
   const positionDelta = new THREE.Vector3().subVectors(targetPortalMesh.position, sourcePortalMesh.position);
   const rotationDelta = sourcePortalMesh.rotation.toVector3().sub(targetPortalMesh.rotation.toVector3());
-
-  function _getPlayerPosition() {
-    const yaw = game.controls.target().avatar;
-    const position = yaw.position.clone();
-    return position;
-  }
 
   function _passesThroughPortal(start, end) {
     const ray = new THREE.Vector3().subVectors(end, start);
@@ -357,19 +376,19 @@ function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
       .applyAxisAngle(new THREE.Vector3(0, 0, 1), rotationDelta.z);
   }
 
-  let prevPlayerPosition = null;
-
-  return function() {
-    const nextPlayerPosition = _getPlayerPosition();
-
+  return function(prevPlayerPosition, nextPlayerPosition) {
     if (prevPlayerPosition !== null) {
       if (_passesThroughPortal(prevPlayerPosition, nextPlayerPosition)) {
         console.log('passed through', prevPlayerPosition.x, prevPlayerPosition.y, prevPlayerPosition.z, nextPlayerPosition.x, nextPlayerPosition.y, nextPlayerPosition.z);
         _movePlayerPosition(positionDelta, rotationDelta);
-      }
-    }
 
-    prevPlayerPosition = nextPlayerPosition;
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
   };
 }
 
