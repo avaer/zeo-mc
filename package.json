@@ -49,6 +49,7 @@
     "spatial-events": "0.0.1",
     "spatial-trigger": "0.0.0",
     "three": "0.74.0",
+    "three-effectcomposer": "0.0.1",
     "tic": "0.2.1",
     "voxel-physical": "0.0.10",
     "voxel-raycast": "0.2.1",
