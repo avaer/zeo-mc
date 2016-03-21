@@ -5,7 +5,9 @@ const TEXTURE_WIDTH = 256;
 const TEXTURE_HEIGHT = TEXTURE_WIDTH * 2;
 
 const PORTAL_NAMES = ['red', 'blue'];
-const PORTAL_POLYGON_OFFSET = -0.25;
+const PORTAL_POLYGON_OFFSET = -0.5;
+
+const PORTAL_FRAME_RATE = 50;
 
 const portalShader = {
 
@@ -14,11 +16,6 @@ const portalShader = {
     textureMap: {
       type: "t",
       value: null
-    },
-
-    clipBox: {
-      type: "4fv",
-      value: new Float32Array([0,0,1,1])
     }
 
   },
@@ -43,18 +40,11 @@ const portalShader = {
   fragmentShader: [
 
     "uniform sampler2D textureMap;",
-    "uniform vec4 clipBox;",
     "varying vec4 texCoord;",
 
     "void main() {",
     
-    "vec2 vUv = texCoord.st / texCoord.q;",
-    "if (vUv.x >= clipBox[0] && vUv.y >= clipBox[1] && vUv.x <= clipBox[2] && vUv.y <= clipBox[3]) {",
-    "  vec4 color = texture2D(textureMap, vUv);",
-    "  gl_FragColor = color;",
-    "} else {",
-    "  discard;",
-    "}",
+    "gl_FragColor = texture2DProj(textureMap, texCoord);",
 
     "}"
 
@@ -62,7 +52,7 @@ const portalShader = {
 
 };
 
-const {min, max} = Math;
+const {min, max, abs} = Math;
 
 function VoxelPortal(game) {
   const {scene, camera, THREE} = game;
@@ -88,6 +78,7 @@ function VoxelPortal(game) {
   ];
   const portalTickers = _makePortalTickers(redPortalMesh, bluePortalMesh, this, game);
 
+  this._game = game;
   this._portalMeshes = portalMeshes;
   this._portalRenderers = portalRenderers;
   this._portalTickers = portalTickers;
@@ -98,9 +89,12 @@ VoxelPortal.prototype = {
   render: function() {
     const {_portalRenderers: portalRenderers} = this;
 
-    portalRenderers.forEach(portalRenderer => {
-      portalRenderer();
-    });
+    const bothPortalsEnabled = this.bothPortalsEnabled();
+    const numPortalsInFrustum = this.numPortalsInFrustum();
+    const now = new Date();
+    const opts = {bothPortalsEnabled, numPortalsInFrustum, now};
+    portalRenderers[0](opts);
+    portalRenderers[1](opts);
   },
   tick: function() {
     const {_portalTickers: portalTickers} = this;
@@ -109,6 +103,13 @@ VoxelPortal.prototype = {
   bothPortalsEnabled: function() {
     const {_portalMeshes: portalMeshes} = this;
     return PORTAL_NAMES.every(portalName => portalMeshes[portalName].visible);
+  },
+  numPortalsInFrustum: function() {
+    const {_portalMeshes: portalMeshes, _game: game} = this;
+    const {camera} = game;
+    const redPortalInView = _objectInFrustum(portalMeshes.red.inner, camera);
+    const bluePortalInView = _objectInFrustum(portalMeshes.blue.inner, camera);
+    return (+redPortalInView) + (+bluePortalInView);
   },
   setPortal: function(side, position, normal) {
     const {_portalMeshes: portalMeshes} = this;
@@ -242,10 +243,10 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
   const widthHalf = width / 2;
   const heightHalf = height / 2;
   const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
-  const frustum = new THREE.Frustum();
 
   let oldPosition;
   let oldRotation;
+  let lastRenderTime = new Date(0);
 
   function _getRotationDelta() {
     return targetPortalMesh.rotation.toVector3().sub(sourcePortalMesh.rotation.toVector3());
@@ -255,11 +256,15 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
     return new THREE.Box3().setFromObject(object);
   }
 
-  function getObjectScreenBoundingBox(object, camera) {
-    const worldBoundingBox = getObjectWorldBoundingBox(object);
-    const min = getScreenProjection(worldBoundingBox.max, camera);
-    const max = getScreenProjection(worldBoundingBox.min, camera);
-    return [min[0], min[1], max[0], max[1]];
+  function getObjectScreenProjection(object, camera) {
+    if (_objectInFrustum(object, camera)) {
+      const worldBoundingBox = getObjectWorldBoundingBox(object);
+      const minProjection = getScreenProjection(worldBoundingBox.min, camera);
+      const maxProjection = getScreenProjection(worldBoundingBox.max, camera);
+      return [minProjection[0], minProjection[1], maxProjection[0], maxProjection[1]];
+    } else {
+      return null;
+    }
   }
 
   function getScreenProjection(worldPosition, camera) {
@@ -274,33 +279,34 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
     return min(max(v, 0), 1);
   }
 
-  function getPortalScreenProjection() {
-    const {inner: targetPortalInner} = targetPortalMesh;
-    if (targetPortalInner.visible) {
-      frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-      if (frustum.intersectsObject(targetPortalInner)) {
-        const {inner: sourcePortalInner} = sourcePortalMesh;
-        const screenBoundingBox = getObjectScreenBoundingBox(sourcePortalInner, camera);
-        return screenBoundingBox;
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
+  function getScissorFromScreenProjection(screenProjection) {
+    const clipWidth = abs(screenProjection[2] - screenProjection[0]) * TEXTURE_WIDTH;
+    const clipHeight = abs(screenProjection[3] - screenProjection[1]) * TEXTURE_HEIGHT;
+
+    const x = max((min(screenProjection[0], screenProjection[2]) * TEXTURE_WIDTH) - (clipWidth / 2), 0);
+    const y = max((1 - max(screenProjection[1], screenProjection[3])) * TEXTURE_HEIGHT - (clipHeight / 2), 0);
+    const width = min(clipWidth * 2, TEXTURE_WIDTH);
+    const height = min(clipHeight * 2, TEXTURE_HEIGHT);
+    
+    return new THREE.Vector4(x, y, width, height);
   }
+
+  /* function getUvProjectionFromScreenProjection(screenProjection) {
+    return new Float32Array([screenProjection[0], 1 - screenProjection[1], screenProjection[2], 1 - screenProjection[3]]);
+  } */
 
   function hidePortals() {
     sourcePortalMesh.inner.visible = false;
     targetPortalMesh.inner.visible = false;
+    sourcePortalMesh.outer.visible = false;
     sourcePortalMesh.back.visible = false;
   }
 
   function showPortals() {
-    const bothPortalsEnabled = voxelPortal.bothPortalsEnabled();
-    sourcePortalMesh.inner.visible = bothPortalsEnabled;
-    targetPortalMesh.inner.visible = bothPortalsEnabled;
-    sourcePortalMesh.back.visible = bothPortalsEnabled;
+    sourcePortalMesh.inner.visible = true;
+    targetPortalMesh.inner.visible = true;
+    sourcePortalMesh.outer.visible = true;
+    sourcePortalMesh.back.visible = true;
   }
 
   function updatePortalCamera() {
@@ -371,11 +377,39 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
     projectionMatrix.elements[6] = c.y;
     projectionMatrix.elements[10] = c.z + 1.0;
     projectionMatrix.elements[14] = c.w; */
-
   }
 
   function renderPortal() {
-    view.renderer.render(scene, portalCamera, target, true);
+    // view.renderer.setViewport(0, 0, 10, 10);
+    // view.renderer.setScissor(0, 0, 10, 10);
+    // view.renderer.setScissorTest(true);
+
+    // target.viewport = new THREE.Vector4(0, 0, 10, 10);
+
+    const {inner: targetPortalInner} = targetPortalMesh;
+    const screenProjection = getObjectScreenProjection(targetPortalInner, portalCamera);
+    if (screenProjection !== null) {
+      const scissor = getScissorFromScreenProjection(screenProjection);
+      target.scissor.copy(scissor);
+      target.scissorTest = true;
+
+      view.renderer.alpha = false;
+      view.renderer.precision = 'lowp';
+      view.renderer.antialias = false;
+      view.renderer.sortObjects = false;
+      view.renderer.stencil = false;
+
+      view.renderer.render(scene, portalCamera, target, true);
+
+      view.renderer.alpha = true;
+      view.renderer.precision = 'highp';
+      view.renderer.antialias = true;
+      view.renderer.sortObjects = true;
+      view.renderer.stencil = true;
+
+      // view.renderer.setViewport(0, 0, width, height);
+      // view.renderer.setScissorTest(false);
+    }
   }
 
   function resetPortalCamera() {
@@ -383,19 +417,20 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
     portalCamera.yaw.rotation.copy(oldRotation);
   }
 
-  return function() {
-    const portalScreenProjection = getPortalScreenProjection();
-    if (portalScreenProjection) {
-if (first) { // XXX
-  window.firstProjection = [portalScreenProjection.min[0], portalScreenProjection.min[1], portalScreenProjection.max[0], portalScreenProjection.max[1]];
-} else {
-  window.secondProjection = [portalScreenProjection.min[0], portalScreenProjection.min[1], portalScreenProjection.max[0], portalScreenProjection.max[1]];
-}
+  return function(opts) {
+    const {bothPortalsEnabled, numPortalsInFrustum, now} = opts;
+    if (
+      bothPortalsEnabled &&
+      numPortalsInFrustum > 0 &&
+      (+now - +lastRenderTime) > (PORTAL_FRAME_RATE * numPortalsInFrustum)
+    ) {
       hidePortals();
       updatePortalCamera();
       renderPortal();
       resetPortalCamera();
       showPortals();
+
+      lastRenderTime = now;
     }
   };
 }
@@ -493,6 +528,12 @@ function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
       return false;
     }
   };
+}
+
+function _objectInFrustum(object, camera) {
+  const frustum = new THREE.Frustum();
+  frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+  return frustum.intersectsObject(object);
 }
 
 function voxelPortal(game) {
