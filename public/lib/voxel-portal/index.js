@@ -256,17 +256,6 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
     return new THREE.Box3().setFromObject(object);
   }
 
-  function getObjectScreenProjection(object, camera) {
-    if (_objectInFrustum(object, camera)) {
-      const worldBoundingBox = getObjectWorldBoundingBox(object);
-      const minProjection = getScreenProjection(worldBoundingBox.min, camera);
-      const maxProjection = getScreenProjection(worldBoundingBox.max, camera);
-      return [minProjection[0], minProjection[1], maxProjection[0], maxProjection[1]];
-    } else {
-      return null;
-    }
-  }
-
   function getScreenProjection(worldPosition, camera) {
     const vector = new THREE.Vector3().copy(worldPosition);
     vector.project(camera);
@@ -387,12 +376,7 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
     // target.viewport = new THREE.Vector4(0, 0, 10, 10);
 
     const {inner: targetPortalInner} = targetPortalMesh;
-    const screenProjection = getObjectScreenProjection(targetPortalInner, portalCamera);
-    if (screenProjection !== null) {
-      const scissor = getScissorFromScreenProjection(screenProjection);
-      target.scissor.copy(scissor);
-      target.scissorTest = true;
-
+    if (_objectInFrustum(targetPortalInner, portalCamera)) {
       view.renderer.alpha = false;
       view.renderer.precision = 'lowp';
       view.renderer.antialias = false;
