@@ -58,7 +58,7 @@ function VoxelPortal(game) {
   const {scene, camera, THREE} = game;
   const {width, height} = game;
 
-  const targets = {
+  const targets = { // XXX need to update these on resize
     red: _makeRenderTarget(THREE),
     blue: _makeRenderTarget(THREE),
   };
@@ -114,8 +114,6 @@ VoxelPortal.prototype = {
   setPortal: function(side, position, normal) {
     const {_portalMeshes: portalMeshes} = this;
     const portalMesh = portalMeshes[side];
-
-    console.log('set portal', side, position, normal, portalMesh); // XXX
 
     const [positionX, positionY, positionZ] = position;
     const direction = (() => {
@@ -209,9 +207,6 @@ VoxelPortal.prototype = {
         })();
         if (normalVector !== null) {
           const positionVector = new THREE.Vector3().fromArray(position);
-
-          console.log('check collision', [positionVector.x, positionVector.y, positionVector.z], [normalVector.x, normalVector.y, normalVector.z], {position, axis, direction}); // XXX
-
           const passesThroughSomeBase =
             passesThroughBase(positionVector, normalVector, portalMeshes.red.bases[0]) ||
             passesThroughBase(positionVector, normalVector, portalMeshes.red.bases[1]) ||
