@@ -16,6 +16,7 @@ class VoxelTextureLoader {
 
   getTexture(url, offset) {
     offset = offset || null;
+    const {_THREE: THREE} = this;
 
     const key = this.getKey(url, offset);
 

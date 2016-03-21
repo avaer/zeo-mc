@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import {is} from 'immutable';
+import THREE from 'three';
 import voxelEngine from '../lib/voxel-engine/index';
 import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
 import voxelTextureLoader from '../lib/voxel-texture-loader/index';
