@@ -380,14 +380,22 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
       view.renderer.alpha = false;
       view.renderer.precision = 'lowp';
       view.renderer.antialias = false;
+      // view.renderer.autoClear = false;
+      view.renderer.autoClearColor = false;
+      // view.renderer.autoClearDepth = false;
+      view.renderer.autoClearStencil = false;
       view.renderer.sortObjects = false;
       view.renderer.stencil = false;
 
-      view.renderer.render(scene, portalCamera, target, true);
+      view.renderer.render(scene, portalCamera, target, false);
 
       view.renderer.alpha = true;
       view.renderer.precision = 'highp';
       view.renderer.antialias = true;
+      // view.renderer.autoClear = true;
+      view.renderer.autoClearColor = true;
+      // view.renderer.autoClearDepth = true;
+      view.renderer.autoClearStencil = true;
       view.renderer.sortObjects = true;
       view.renderer.stencil = true;
 
