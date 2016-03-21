@@ -58,7 +58,7 @@ function VoxelPortal(game) {
   const {scene, camera, THREE} = game;
   const {width, height} = game;
 
-  const targets = { // XXX need to update these on resize
+  const targets = {
     red: _makeRenderTarget(THREE),
     blue: _makeRenderTarget(THREE),
   };
@@ -322,8 +322,8 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
 
   const widthHalf = width / 2;
   const heightHalf = height / 2;
-  const portalCamera = new THREE.PerspectiveCamera(view.fov, view.aspectRatio, view.nearPlane, view.farPlane);
 
+  let portalCamera = null;
   let oldPosition;
   let oldRotation;
   let lastRenderTime = new Date(0);
@@ -379,10 +379,15 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
   }
 
   function updatePortalCamera() {
-    if (!portalCamera.parent) {
+    if (!portalCamera) {
+      portalCamera = new THREE.PerspectiveCamera();
+      portalCamera.yaw = camera.parent.parent.parent.parent.parent.parent;
       camera.add(portalCamera);
-      portalCamera.yaw = portalCamera.parent.parent.parent.parent.parent.parent.parent;
     }
+    portalCamera.fov = view.fov;
+    portalCamera.aspect = view.aspectRatio;
+    portalCamera.near = view.nearPlane;
+    portalCamera.far = view.farPlane;
 
     oldPosition = portalCamera.yaw.position.clone();
     oldRotation = portalCamera.yaw.rotation.clone();
