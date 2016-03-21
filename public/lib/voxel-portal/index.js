@@ -118,20 +118,66 @@ VoxelPortal.prototype = {
     console.log('set portal', side, position, normal, portalMesh); // XXX
 
     const [positionX, positionY, positionZ] = position;
-    const [normalX, normalY, normalZ] = normal;
-    if (normalZ === 1) {
-      portalMesh.position.set(positionX + 0.5, positionY + 1, positionZ);
-      portalMesh.rotation.set(0, (Math.PI / 2) * 0, 0);
-    } else if (normalX === 1) {
-      portalMesh.position.set(positionX, positionY + 1, positionZ + 0.5);
-      portalMesh.rotation.set(0, (Math.PI / 2) * 1, 0);
-    } else if (normalZ === -1) {
-      portalMesh.position.set(positionX + 0.5, positionY + 1, positionZ + 1);
-      portalMesh.rotation.set(0, (Math.PI / 2) * 2, 0);
-    } else if (normalX === -1) {
-      portalMesh.position.set(positionX + 1, positionY + 1, positionZ + 0.5);
-      portalMesh.rotation.set(0, (Math.PI / 2) * 3, 0);
+    const direction = (() => {
+      const [normalX, normalY, normalZ] = normal;
+      if (normalZ === 1) {
+        return 0;
+      } else if (normalX === 1) {
+        return 1;
+      } else if (normalZ === -1) {
+        return 2;
+      } else if (normalX === -1) {
+        return 3;
+      } else {
+        return 0;
+      }
+    })();
+    switch (direction) {
+      case 0:
+        portalMesh.position.set(positionX + 0.5, positionY + 1, positionZ);
+        portalMesh.rotation.set(0, (Math.PI / 2) * 0, 0);
+        break;
+      case 1:
+        portalMesh.position.set(positionX, positionY + 1, positionZ + 0.5);
+        portalMesh.rotation.set(0, (Math.PI / 2) * 1, 0);
+        break;
+      case 2:
+        portalMesh.position.set(positionX + 0.5, positionY + 1, positionZ + 1);
+        portalMesh.rotation.set(0, (Math.PI / 2) * 2, 0);
+        break;
+      case 3:
+        portalMesh.position.set(positionX + 1, positionY + 1, positionZ + 0.5);
+        portalMesh.rotation.set(0, (Math.PI / 2) * 3, 0);
+        break;
     }
+    const bases = (() => {
+      const positionVector = (() => {
+        const result = new THREE.Vector3().fromArray(position);
+        switch (direction) {
+          case 0:
+            result.add(new THREE.Vector3(0, 0, -2));
+            break;
+          case 1:
+            result.add(new THREE.Vector3(-2, 0, 0));
+            break;
+          case 2:
+            result.add(new THREE.Vector3(0, 0, 2));
+            break;
+          case 3:
+            result.add(new THREE.Vector3(2, 0, 0));
+            break;
+        }
+        return result;
+      })();
+      const normalVector = new THREE.Vector3().fromArray(normal);
+      const bottomBase = new THREE.Vector3().addVectors(positionVector, normalVector);
+      const topBase = new THREE.Vector3().addVectors(bottomBase, new THREE.Vector3(0, 1, 0));
+      bottomBase.normal = normalVector;
+      topBase.normal = normalVector;
+      const bases = [bottomBase, topBase];
+      return bases;
+    })();
+    portalMesh.bases = bases;
     portalMesh.visible = true;
 
     const bothPortalsEnabled = this.bothPortalsEnabled();
@@ -140,6 +186,45 @@ VoxelPortal.prototype = {
     });
   },
   listen: function() {
+    const {_portalMeshes: portalMeshes} = this;
+
+    game.addCollisionTest((position, axis, direction) => {
+      function passesThroughBase(positionVector, normalVector, base) {
+        return positionVector.equals(base) && normalVector.equals(base.normal);
+      }
+
+      if (this.bothPortalsEnabled()) {
+        const normalVector = (() => {
+          if (axis === 2 && direction === -1) {
+            return new THREE.Vector3(0, 0, 1);
+          } else if (axis === 0 && direction === -1) {
+            return new THREE.Vector3(1, 0, 0);
+          } else if (axis === 2 && direction === 1) {
+            return new THREE.Vector3(0, 0, -1);
+          } else if (axis === 0 && direction === 1) {
+            return new THREE.Vector3(-1, 0, 0);
+          } else {
+            return null;
+          }
+        })();
+        if (normalVector !== null) {
+          const positionVector = new THREE.Vector3().fromArray(position);
+
+          console.log('check collision', [positionVector.x, positionVector.y, positionVector.z], [normalVector.x, normalVector.y, normalVector.z], {position, axis, direction}); // XXX
+
+          const passesThroughSomeBase =
+            passesThroughBase(positionVector, normalVector, portalMeshes.red.bases[0]) ||
+            passesThroughBase(positionVector, normalVector, portalMeshes.red.bases[1]) ||
+            passesThroughBase(positionVector, normalVector, portalMeshes.blue.bases[0]) ||
+            passesThroughBase(positionVector, normalVector, portalMeshes.blue.bases[1]);
+          return !passesThroughSomeBase;
+        } else {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    });
     game.on('prerender', () => {
       this.render();
     });

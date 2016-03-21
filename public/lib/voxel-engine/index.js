@@ -92,6 +92,7 @@ function Game(opts) {
     [Infinity, Infinity, Infinity],
     [-Infinity, -Infinity, -Infinity]
   )
+  this.collisionTests = []
   
   this.timer = this.initializeTimer(opts.tickFPS || 16)
   // this.paused = false
@@ -512,19 +513,10 @@ Game.prototype.collideTerrain = function(other, bbox, vec, resting) {
   var self = this
   var axes = ['x', 'y', 'z']
   var vec3 = [vec.x, vec.y, vec.z]
-  this.collideVoxels(bbox, vec3, function hit(axis, tile, coords, dir, edge) {
+  this.collideVoxels(bbox, vec3, (axis, tile, coords, dir, edge) => {
     if (!tile) return false
     if (Math.abs(vec3[axis]) < Math.abs(edge)) return false
-
-    if (axis === 2 && dir === -1) {
-      console.log('collide z = -1', coords);
-    } else if (axis === 0 && dir === -1) {
-      console.log('collide x = -1', coords);
-    } else if (axis === 2 && dir === 1) {
-      console.log('collide z = 1', coords);
-    } else if (axis === 0 && dir === 1) {
-      console.log('collide x = 1', coords);
-    }
+    if (!this.collisionTests.every(test => test(coords, axis, dir))) return false
 
     vec3[axis] = vec[axes[axis]] = edge
     other.acceleration[axes[axis]] = 0
@@ -532,6 +524,10 @@ Game.prototype.collideTerrain = function(other, bbox, vec, resting) {
     other.friction[axes[(axis + 1) % 3]] = other.friction[axes[(axis + 2) % 3]] = axis === 1 ? self.friction  : 1
     return true
   })
+}
+
+Game.prototype.addCollisionTest = function(fn) {
+  this.collisionTests.push(fn)
 }
 
 // # Three.js specific methods
