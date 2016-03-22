@@ -1,7 +1,7 @@
 import {MATERIAL_FRAMES} from '../../constants/index';
 
-const PARTICLE_SIZE = 50;
-const PARTICLE_SCALE = 5;
+const PARTICLE_SIZE = 100;
+const PARTICLE_SCALE = 10;
 
 function VoxelParticleShader(opts) {
   const {game, textureLoader} = opts;
@@ -87,6 +87,8 @@ function VoxelParticleShader(opts) {
         THREE.ShaderChunk[ "map_particle_fragment" ],
         THREE.ShaderChunk[ "color_fragment" ],
         THREE.ShaderChunk[ "alphatest_fragment" ],
+
+        'if (diffuseColor.a < 0.5) discard;',
 
         "outgoingLight = diffuseColor.rgb;",
 
