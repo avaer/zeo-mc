@@ -1,12 +1,14 @@
 var voxel = require('../voxel/index')
 var voxelBlockRenderer = require('../voxel-block-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
+var voxelParticleRenderer = require('../voxel-particle-renderer/index')
 var voxelModelRenderer = require('../voxel-model-renderer/index')
 var voxelRaycast = require('../voxel-raycast/index')
 var voxelAsync = require('../voxel-async/index')
 var voxelUtils = require('../voxel-utils/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
+var voxelParticleShader = require('../voxel-particle-shader/index')
 var voxelControl = require('../voxel-control/index')
 var voxelView = require('../voxel-view/index')
 var THREE = require('three')
@@ -113,6 +115,10 @@ function Game(opts) {
   this.planeShader = voxelPlaneShader({
     game: this,
     atlas: this.atlas
+  });
+  this.particleShader = voxelParticleShader({
+    game: this,
+    textureLoader: this.textureLoader
   });
   
   self.chunkRegion.on('change', function(newChunk) {
@@ -656,13 +662,14 @@ Game.prototype.showChunk = function(chunk) {
 
     mesh.blocksNeedUpdate = true;
     mesh.planesNeedUpdate = true;
+    mesh.particlesNeedUpdate = true;
     mesh.modelsNeedUpdate = true;
 
     const bounds = this.voxels.getBounds(chunk.position[0], chunk.position[1], chunk.position[2]);
     mesh.position.set(bounds[0][0], bounds[0][1], bounds[0][2]);
   }
 
-  const {blocksNeedUpdate, planesNeedUpdate, modelsNeedUpdate} = mesh;
+  const {blocksNeedUpdate, planesNeedUpdate, particlesNeedUpdate, modelsNeedUpdate} = mesh;
 
   const worldTick = this.getWorldTick();
 
@@ -708,6 +715,28 @@ Game.prototype.showChunk = function(chunk) {
       mesh.planeMesh = null;
     }
     mesh.planesNeedUpdate = false;
+  }
+
+  if (particlesNeedUpdate) {
+    const particleMesh = (() => {
+      const particleMesh = voxelParticleRenderer(chunk, THREE);
+      if (particleMesh) {
+        particleMesh.material = this.particleShader.material;
+        return particleMesh;
+      } else {
+        return null;
+      }
+    })();
+    if (mesh.particleMesh) {
+      mesh.remove(mesh.particleMesh);
+    }
+    if (particleMesh) {
+      mesh.add(particleMesh);
+      mesh.particleMesh = particleMesh;
+    } else {
+      mesh.particleMesh = null;
+    }
+    mesh.particlesNeedUpdate = false;
   }
 
   if (modelsNeedUpdate) {
@@ -793,6 +822,7 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   if (newWorldTick !== oldWorldTick) {
     this.blockShader.setFrame(newWorldTick);
     this.planeShader.setFrame(newWorldTick);
+    this.particleShader.setFrame(newWorldTick);
   }
 
   if (this.pendingChunks.length) this.loadPendingChunks()

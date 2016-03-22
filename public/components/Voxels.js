@@ -110,6 +110,7 @@ export default class Voxels extends React.Component {
           THREE
         });
         textureLoader.loadTextures([
+          'particles/rain',
           'items/greenapple',
           'items/flare',
         ], pend);

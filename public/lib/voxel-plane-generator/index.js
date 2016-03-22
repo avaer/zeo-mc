@@ -6,7 +6,7 @@ const {BLOCKS} = Blocks;
 const {VEGETATIONS, WEATHERS, EFFECTS} = Planes;
 
 function voxelPlaneGenerator() {
-  return function({vegetations, weathers, effects}, dims) {
+  return function({vegetations, effects}, dims) {
     const vertices = [];
     const faces = [];
 
@@ -71,7 +71,6 @@ function voxelPlaneGenerator() {
     }
 
     handlePlanes(vegetations, VEGETATIONS);
-    handlePlanes(weathers, WEATHERS);
     handlePlanes(effects, EFFECTS);
 
     return {vertices, faces};
