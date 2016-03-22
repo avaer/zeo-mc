@@ -202,7 +202,7 @@ function _getCubeMaterial(textureName, uv, textureLoader, THREE) {
       const texture = textureLoader.getTexture(textureUrl, uv[i], THREE);
       const submaterial = new THREE.MeshLambertMaterial({
         map: texture,
-        side: THREE.FrontSide,
+        // side: THREE.FrontSide,
         transparent: true,
         fog: true
       });
@@ -214,52 +214,6 @@ function _getCubeMaterial(textureName, uv, textureLoader, THREE) {
 
     return material;
   }
-}
-
-const textureCache = new Map();
-function _getTexture(url, offset, THREE) {
-  const textureKey = url + '-' + offset.join(',');
-
-  const cachedTexture = textureCache.get(textureKey);
-  if (cachedTexture) {
-    return cachedTexture;
-  } else {
-    const img = new Image();
-    img.src = url;
-    const texture = new THREE.Texture();
-    img.onload = () => {
-      const croppedImage = _cropImage(img, offset);
-      croppedImage.onload = () => {
-        texture.image = croppedImage;
-        texture.needsUpdate = true;
-      };
-    };
-
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestFilter;
-
-    textureCache.set(textureKey, texture);
-
-    return texture;
-  }
-}
-
-function _cropImage(img, offset) {
-  const startX = offset[0];
-  const startY = offset[1];
-  const width = offset[2] - offset[0];
-  const height = offset[3] - offset[1];
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext('2d');
-  context.drawImage(img, startX, startY, width, height, 0, 0, width, height);
-  const dataUrl = canvas.toDataURL();
-
-  const newImg = new Image();
-  newImg.src = dataUrl;
-  return newImg;
 }
 
 module.exports = voxelModelRenderer;

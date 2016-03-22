@@ -26,7 +26,6 @@ function voxelBlockShader(opts) {
       THREE.UniformsLib[ "lightmap" ],
       THREE.UniformsLib[ "emissivemap" ],
       THREE.UniformsLib[ "fog" ],
-      THREE.UniformsLib[ "ambient" ],
       THREE.UniformsLib[ "lights" ],
 
       {
@@ -141,7 +140,6 @@ function voxelBlockShader(opts) {
     THREE.ShaderChunk[ "emissivemap_pars_fragment" ],
     THREE.ShaderChunk[ "envmap_pars_fragment" ],
     THREE.ShaderChunk[ "bsdfs" ],
-    THREE.ShaderChunk[ "ambient_pars" ],
     THREE.ShaderChunk[ "lights_pars" ],
     THREE.ShaderChunk[ "fog_pars_fragment" ],
     THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
@@ -253,7 +251,7 @@ function voxelBlockShader(opts) {
       // 'if (vTransparent > 0.9 && texelColor.a < 0.5) discard;',
       'if (texelColor.a < 0.5) discard;',
 
-      'texelColor.xyz = inputToLinear(texelColor.xyz);',
+      // 'texelColor = mapTexelToLinear(texelColor);',
 
       'diffuseColor *= texelColor;',
 
@@ -292,16 +290,16 @@ function voxelBlockShader(opts) {
 
       THREE.ShaderChunk[ "envmap_fragment" ],
 
+    "	gl_FragColor = vec4( outgoingLight, diffuseColor.a );",
+
       THREE.ShaderChunk[ "linear_to_gamma_fragment" ],
 
       THREE.ShaderChunk[ "fog_fragment" ],
 
-    "	gl_FragColor = vec4( outgoingLight, diffuseColor.a );",
-
     "}"
-  ].join("\n")
-    //depthWrite: false,
-    //depthTest: false
+  ].join("\n"),
+    // depthWrite: false,
+    // depthTest: false,
   };
   materialParams.uniforms.tileMap.value = this.atlas.getTexture();
 

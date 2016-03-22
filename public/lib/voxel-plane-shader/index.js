@@ -25,7 +25,6 @@ function voxelPlaneShader(opts) {
       THREE.UniformsLib[ "lightmap" ],
       THREE.UniformsLib[ "emissivemap" ],
       THREE.UniformsLib[ "fog" ],
-      THREE.UniformsLib[ "ambient" ],
       THREE.UniformsLib[ "lights" ],
 
       {
@@ -135,7 +134,6 @@ function voxelPlaneShader(opts) {
       THREE.ShaderChunk[ "emissivemap_pars_fragment" ],
       THREE.ShaderChunk[ "envmap_pars_fragment" ],
       THREE.ShaderChunk[ "bsdfs" ],
-      THREE.ShaderChunk[ "ambient_pars" ],
       THREE.ShaderChunk[ "lights_pars" ],
       THREE.ShaderChunk[ "fog_pars_fragment" ],
       THREE.ShaderChunk[ "shadowmap_pars_fragment" ],
@@ -164,7 +162,7 @@ function voxelPlaneShader(opts) {
 
         'if (texelColor.a < 0.5) discard;',
 
-        'texelColor.xyz = inputToLinear(texelColor.xyz);',
+        // 'texelColor = mapTexelToLinear(texelColor);',
 
         'diffuseColor *= texelColor;',
         // end custom
@@ -201,15 +199,17 @@ function voxelPlaneShader(opts) {
 
         THREE.ShaderChunk[ "envmap_fragment" ],
 
+      "	gl_FragColor = vec4( outgoingLight, diffuseColor.a );",
+
         THREE.ShaderChunk[ "linear_to_gamma_fragment" ],
 
         THREE.ShaderChunk[ "fog_fragment" ],
 
-      "	gl_FragColor = vec4( outgoingLight, diffuseColor.a );",
-
       "}"
 
-    ].join( "\n" )
+    ].join( "\n" ),
+    // depthWrite: false,
+    // depthTest: false,
   };
   materialParams.uniforms.tileMap.value = this.atlas.getTexture();
 
