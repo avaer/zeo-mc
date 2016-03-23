@@ -1,18 +1,16 @@
-var resources = require('../../resources/index');
-var BLOCKS = resources.BLOCKS;
-var voxelBlockRenderer = require('../voxel-block-renderer/index');
-var voxelAsync = require('../voxel-async/index');
-var voxel = require('../voxel/index');
+const resources = require('../../resources/index');
+const BLOCKS = resources.BLOCKS;
+const voxelBlockRenderer = require('../voxel-block-renderer/index');
+const voxelAsync = require('../voxel-async/index');
+const voxel = require('../voxel/index');
 
-var Alea = require('alea');
-var FastSimplexNoise = require('fast-simplex-noise');
+const indev = require('indev');
 
-var constants = require('../../constants/index');
-var DEFAULT_SEED = constants.DEFAULT_SEED;
-var CLOUD_VALUE = BLOCKS.BLOCKS['water_still_0'];
+const constants = require('../../constants/index');
+const DEFAULT_SEED = constants.DEFAULT_SEED;
+const CLOUD_VALUE = BLOCKS.BLOCKS['water_still_0'];
 
-var round = Math.round;
-var random = Math.random;
+const {random} = Math;
 
 function Clouds(opts) {
   if (!(this instanceof Clouds)) return new Clouds(opts || {});
@@ -32,15 +30,15 @@ function Clouds(opts) {
   });
   this.clouds = [];
   this.generator = (() => {
-    var rng = new Alea(DEFAULT_SEED);
-    var noise = new FastSimplexNoise({
+    const noise = indev({
+      seed: DEFAULT_SEED
+    }).simplex({
       min: 0,
       max: 1,
       frequency: 0.05,
       octaves: 10,
-      random: rng
     });
-    var offset = Number.MAX_SAFE_INTEGER / 2;
+    const offset = Number.MAX_SAFE_INTEGER / 2;
 
     return (x, y, i) => {
       const noiseN = noise.in2D(x + (i * this.size) + offset, y + (i * this.size) + offset);
@@ -97,7 +95,7 @@ Clouds.prototype._position = function(cloud) {
 };
 
 function rand(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+  return Math.floor(random() * (max - min + 1) + min);
 }
 
 function distanceTo(a, b) {

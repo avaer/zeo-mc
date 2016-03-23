@@ -35,8 +35,7 @@
     "voxel-trajectory": "",
 
     "murmurhash-js": "",
-    "alea": "",
-    "fast-simplex-noise": "",
+    "indev": "",
     "aabb-3d": "0.0.0",
     "collide-3d-tilemap": "0.0.1",
     "gl-matrix": "2.0.0",
