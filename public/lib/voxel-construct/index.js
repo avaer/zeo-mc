@@ -1,6 +1,3 @@
-var funstance = require('funstance');
-var EventEmitter = require('events').EventEmitter;
-
 var voxelBlockMesher = require('../voxel-block-mesher/index');
 
 function VoxelConstruct(game, opts) {

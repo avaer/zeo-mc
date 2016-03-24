@@ -1,7 +1,5 @@
-import Alea from 'alea';
-import FastSimplexNoise from 'fast-simplex-noise';
-import FastUniformNoise from '../fast-uniform-noise/index';
 import voxelUtils from '../voxel-utils/index';
+import indev from 'indev';
 
 import * as resources from '../../resources/index';
 const BLOCKS = resources.BLOCKS.BLOCKS;
@@ -124,141 +122,125 @@ function voxelTerrain(opts) {
   const chunkSize = opts.chunkSize || 32;
   const vu = voxelUtils({chunkSize});
 
-  const rng = new Alea(opts.seed);
-  const terrainNoise = new FastSimplexNoise({
+  const indevGenerator = indev({
+    seed: opts.seed
+  });
+  const terrainNoise = indevGenerator.simplex({
     min: TERRAIN_FLOOR,
     max: TERRAIN_CEILING,
     frequency: TERRAIN_FREQUENCY,
     octaves: TERRAIN_OCTAVES,
-    random: rng
   });
 
-  const treeNoise = new FastSimplexNoise({
+  const treeNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: 1,
     octaves: 2,
-    random: rng
   });
-  const treeLeafNoise = new FastSimplexNoise({
+  const treeLeafNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: 0.5,
     octaves: 1,
-    random: rng
   });
 
-  const crustBedrockNoise = new FastSimplexNoise({
+  const crustBedrockNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: DIRT_FREQUENCY,
     octaves: DIRT_OCTAVES,
-    random: rng
   });
-  const crustCoreNoise = new FastSimplexNoise({
+  const crustCoreNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: DIRT_FREQUENCY,
     octaves: DIRT_OCTAVES,
-    random: rng
   });
-  const crustMantleNoise = new FastSimplexNoise({
+  const crustMantleNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: DIRT_FREQUENCY,
     octaves: DIRT_OCTAVES,
-    random: rng
   });
-  const crustCrustNoise = new FastSimplexNoise({
+  const crustCrustNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: DIRT_FREQUENCY,
     octaves: DIRT_OCTAVES,
-    random: rng
   });
 
-  const riverNoise = new FastSimplexNoise({
+  const riverNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: RIVER_FREQUENCY,
     octaves: RIVER_OCTAVES,
-    random: rng
   });
 
-  const riverTypeNoise = new FastUniformNoise({
+  const riverTypeNoise = indevGenerator.uniform({
     min: 0,
     max: 1,
     frequency: RIVER_TYPE_FREQUENCY,
     octaves: RIVER_TYPE_OCTAVES,
-    random: rng
   });
 
-  const caveNoise = new FastSimplexNoise({
+  const caveNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: CAVE_FREQUENCY,
     octaves: CAVE_OCTAVES,
-    random: rng
   });
 
-  const vegetationNoise = new FastSimplexNoise({
+  const vegetationNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: VEGETATION_FREQUENCY,
     octaves: VEGETATION_OCTAVES,
-    random: rng
   });
-  const vegetationTypeNoise = new FastUniformNoise({
+  const vegetationTypeNoise = indevGenerator.uniform({
     min: 0,
     max: 1,
     frequency: VEGETATION_TYPE_FREQUENCY,
     octaves: VEGETATION_TYPE_OCTAVES,
-    random: rng
   });
 
-  const entityNoise = new FastSimplexNoise({
+  const entityNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: ENTITY_FREQUENCY,
     octaves: ENTITY_OCTAVES,
-    random: rng
   });
-  const entityTypeNoise = new FastUniformNoise({
+  const entityTypeNoise = indevGenerator.uniform({
     min: 0,
     max: 1,
     frequency: ENTITY_TYPE_FREQUENCY,
     octaves: ENTITY_TYPE_OCTAVES,
-    random: rng
   });
 
-  const weatherNoise = new FastSimplexNoise({
+  const weatherNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: WEATHER_FREQUENCY,
     octaves: WEATHER_OCTAVES,
-    random: rng
   });
-  const weatherTypeNoise = new FastUniformNoise({
+  const weatherTypeNoise = indevGenerator.uniform({
     min: 0,
     max: 1,
     frequency: WEATHER_TYPE_FREQUENCY,
     octaves: WEATHER_TYPE_OCTAVES,
-    random: rng
   });
 
-  const effectNoise = new FastSimplexNoise({
+  const effectNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
     frequency: EFFECT_FREQUENCY,
     octaves: EFFECT_OCTAVES,
-    random: rng
   });
-  const effectTypeNoise = new FastUniformNoise({
+  const effectTypeNoise = indevGenerator.uniform({
     min: 0,
     max: 1,
     frequency: EFFECT_TYPE_FREQUENCY,
     octaves: EFFECT_TYPE_OCTAVES,
-    random: rng
   });
 
   return function generateChunk(position) {
