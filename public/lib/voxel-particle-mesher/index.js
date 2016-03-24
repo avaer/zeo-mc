@@ -1,3 +1,6 @@
+const POINTS_PER_VERTEX = 20;
+const POINTS_SIZE = 0.0125;
+
 function voxelParticleMesher(data, THREE) {
   const {vertices: verticesData} = data;
   const numVertices = verticesData.length;
@@ -22,13 +25,15 @@ function voxelParticleMesher(data, THREE) {
 
 voxelParticleMesher.getVertices = function(verticesData) {
   const numVertices = verticesData.length;
-  const result = new Float32Array(numVertices * 3);
+  const result = new Float32Array(numVertices * POINTS_PER_VERTEX * 3);
 
   for (let i = 0; i < numVertices; i++) {
     const vertex = verticesData[i];
-    result[i * 3 + 0] = vertex[0];
-    result[i * 3 + 1] = vertex[1];
-    result[i * 3 + 2] = vertex[2];
+    for (let j = 0; j < POINTS_PER_VERTEX; j++) {
+      result[i * POINTS_PER_VERTEX * 3 + j * 3 + 0] = vertex[0];
+      result[i * POINTS_PER_VERTEX * 3 + j * 3 + 1] = vertex[1] - (j * POINTS_SIZE);
+      result[i * POINTS_PER_VERTEX * 3 + j * 3 + 2] = vertex[2];
+    }
   }
 
   return result;

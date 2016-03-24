@@ -7,11 +7,11 @@ function voxelParticleGenerator() {
   return function({weathers}, dims) {
     const vertices = [];
 
-    for (let i in weathers) {
-      const weather = weathers[i];
+    for (let k in weathers) {
+      const weather = weathers[k];
       if (weather !== null) {
         const [x, y, z/*, value*/] = weather;
-        vertices.push([x, y + 1, z]);
+        vertices.push([x + 0.5, y + 1, z + 0.5]);
       }
     }
 

@@ -1,6 +1,6 @@
 import {MATERIAL_FRAMES} from '../../constants/index';
 
-const PARTICLE_SIZE = 100;
+const PARTICLE_SIZE = 15;
 const PARTICLE_SCALE = 10;
 
 function VoxelParticleShader(opts) {
@@ -64,10 +64,6 @@ function VoxelParticleShader(opts) {
 
     fragmentShader: [
 
-      // begin custom
-      "#define USE_MAP",
-      // end custom
-
       "uniform vec3 diffuse;",
       "uniform float opacity;",
 
@@ -88,7 +84,9 @@ function VoxelParticleShader(opts) {
         THREE.ShaderChunk[ "color_fragment" ],
         THREE.ShaderChunk[ "alphatest_fragment" ],
 
-        'if (diffuseColor.a < 0.5) discard;',
+        // begin custom
+        // 'if (diffuseColor.a < 0.5) discard;',
+        // end custom
 
         "outgoingLight = diffuseColor.rgb;",
 
@@ -107,7 +105,9 @@ function VoxelParticleShader(opts) {
   };
   materialParams.uniforms.size.value = PARTICLE_SIZE;
   materialParams.uniforms.scale.value = PARTICLE_SCALE;
-  materialParams.uniforms.map.value = this.textureLoader.getTexture(this.textureLoader.getTextureUrl('particles/rain'));
+  materialParams.uniforms.diffuse.value = new THREE.Color(0x3e5eb8);
+  // materialParams.uniforms.opacity.value = 0.9;
+  // materialParams.uniforms.map.value = this.textureLoader.getTexture(this.textureLoader.getTextureUrl('particles/rain'));
 
   this.material = new THREE.ShaderMaterial(materialParams);
 }
