@@ -55,7 +55,7 @@ function Game(opts) {
   this.chunkSize = opts.chunkSize || 32
 
   this.worldTickRate = opts.worldTickRate || 10
-  this.worldTickTime = 1000 / this.worldTickRate;
+  this.worldTickTime = 1000 / this.worldTickRate
   this.particleTickRate = opts.particleTickRate || 100
   this.particleTickTime = 1000 / this.particleTickRate;
   

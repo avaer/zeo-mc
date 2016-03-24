@@ -6,16 +6,16 @@ const {WEATHERS} = Planes;
 function voxelParticleGenerator() {
   return function({weathers}, dims) {
     const vertices = [];
+    const offsets = [];
 
-    for (let k in weathers) {
-      const weather = weathers[k];
-      if (weather !== null) {
-        const [x, y, z/*, value*/] = weather;
-        vertices.push([x + 0.5, y, z + 0.5]);
-      }
+    for (let i = 0; i < weathers.length; i++) {
+      const weather = weathers[i];
+      const [x, y, z, offset/*, value*/] = weather;
+      vertices.push([x, y, z]);
+      offsets.push(offset);
     }
 
-    return {vertices};
+    return {vertices, offsets};
   };
 }
 

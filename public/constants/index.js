@@ -24,7 +24,7 @@ export const TREE_TEXTURES = [
 
 export const FACE_VERTICES = 6;
 export const MATERIAL_FRAMES = 28;
-export const PARTICLE_FRAMES = 64;
+export const PARTICLE_FRAMES = 160;
 export const FRAME_UV_ATTRIBUTE_SIZE = 4;
 export const FRAME_UVS_PER_ATTRIBUTE = FRAME_UV_ATTRIBUTE_SIZE / 2;
 export const FRAME_UV_ATTRIBUTES = MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTE_SIZE;

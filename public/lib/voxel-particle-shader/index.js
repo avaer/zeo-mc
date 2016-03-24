@@ -34,6 +34,7 @@ function VoxelParticleShader(opts) {
       "#define USE_SIZEATTENUATION",
 
       "uniform float frame;",
+      "attribute float offset;",
       // end custom
 
       "uniform float size;",
@@ -50,7 +51,7 @@ function VoxelParticleShader(opts) {
         THREE.ShaderChunk[ "begin_vertex" ],
 
         // begin custom
-        "transformed.y += " + CHUNK_SIZE.toFixed(1) + " * (1.0 - frame / " + PARTICLE_FRAMES.toFixed(1) + ");",
+        "transformed.y += " + CHUNK_SIZE.toFixed(1) + " * (1.0 - (mod(frame + offset * " + PARTICLE_FRAMES.toFixed(1) + ", " + PARTICLE_FRAMES.toFixed(1) + ") / " + PARTICLE_FRAMES.toFixed(1) + "));",
         // end custom
 
         THREE.ShaderChunk[ "project_vertex" ],

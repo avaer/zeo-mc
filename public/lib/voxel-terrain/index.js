@@ -79,9 +79,12 @@ const ENTITY_RATE = 0.16;
 
 const WEATHER_FREQUENCY = 0.001;
 const WEATHER_OCTAVES = 2;
+const WEATHER_RATE = 0.3;
 const WEATHER_TYPE_FREQUENCY = 0.02;
 const WEATHER_TYPE_OCTAVES = 2;
-const WEATHER_RATE = 0.3;
+const WEATHER_DENSITY_FREQUENCY = 1;
+const WEATHER_DENSITY_OCTAVES = 4;
+const WEATHER_DENSITY = 0.3;
 
 const EFFECT_FREQUENCY = 0.5;
 const EFFECT_OCTAVES = 8;
@@ -230,6 +233,23 @@ function voxelTerrain(opts) {
     octaves: WEATHER_TYPE_OCTAVES,
   });
 
+  function _makeWeatherDensityNoise() {
+    return indevGenerator.uniform({
+      min: 0,
+      max: 1,
+      frequency: WEATHER_DENSITY_FREQUENCY,
+      octaves: WEATHER_DENSITY_OCTAVES,
+    });
+  }
+
+  const weatherDensityNoise = _makeWeatherDensityNoise();
+  const weatherPositionNoises = {
+    x: _makeWeatherDensityNoise(),
+    // y: _makeWeatherDensityNoise(),
+    z: _makeWeatherDensityNoise()
+  };
+  const weatherOffsetNoise = _makeWeatherDensityNoise();
+
   const effectNoise = indevGenerator.simplex({
     min: 0,
     max: 1,
@@ -254,7 +274,7 @@ function voxelTerrain(opts) {
 
     const voxels = new Int16Array(chunkSize * chunkSize * chunkSize);
     const vegetations = {};
-    const weathers = {};
+    const weathers = [];
     const effects = {};
     const entities = {};
 
@@ -482,7 +502,23 @@ function voxelTerrain(opts) {
       if (weatherNoiseN < WEATHER_RATE) {
         const weatherTypeNoiseN = weatherTypeNoise.in2D(x, z);
         const weather = floor(weatherTypeNoiseN * WEATHERS.length) + 1;
-        setWeather(x, y, z, weather);
+        const weatherDensityNoiseN = weatherDensityNoise.in2D(x, z);
+        const numPoints = floor(weatherDensityNoiseN * WEATHER_DENSITY * chunkSize);
+        for (let i = 0; i < numPoints; i++) {
+          const px = x + i / numPoints;
+          const pz = z + i / numPoints;
+          const weatherPositionNoiseXN = weatherPositionNoises.x.in2D(px, pz);
+          // const weatherPositionNoiseYN = weatherPositionNoises.y.in2D(px, pz);
+          const weatherPositionNoiseZN = weatherPositionNoises.z.in2D(px, pz);
+          const weatherOffsetNoiseN = weatherOffsetNoise.in2D(px, pz);
+          setWeather(
+            x + weatherPositionNoiseXN,
+            y,
+            z + weatherPositionNoiseZN,
+            weatherOffsetNoiseN,
+            weather
+          );
+        }
       }
     }
 
@@ -531,11 +567,11 @@ function voxelTerrain(opts) {
       vegetations[idx] = [x, y, z, value];
     }
 
-    function setWeather(x, y, z, value) {
-      const idxSpec = vu.getIndexSpec(x, y, z);
-      const [,,,idx] = idxSpec;
-      [x, y, z] = idxSpec;
-      weathers[idx] = [x, y, z, value];
+    function setWeather(x, y, z, offset, value) {
+      x = vu.snapCoordinate(x);
+      y = vu.snapCoordinate(y);
+      z = vu.snapCoordinate(z);
+      weathers.push([x, y, z, offset, value]);
     }
 
     function setEffect(x, y, z, value) {
