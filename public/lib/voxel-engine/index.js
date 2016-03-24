@@ -53,8 +53,11 @@ function Game(opts) {
   this.arrayType = opts.arrayType || Uint8Array
   this.cubeSize = 1 // backwards compat
   this.chunkSize = opts.chunkSize || 32
-  this.tickRate = opts.tickRate || 10
-  this.tickTime = 1000 / this.tickRate;
+
+  this.worldTickRate = opts.worldTickRate || 10
+  this.worldTickTime = 1000 / this.worldTickRate;
+  this.particleTickRate = opts.particleTickRate || 100
+  this.particleTickTime = 1000 / this.particleTickRate;
   
   // chunkDistance and removeDistance should not be set to the same thing
   // as it causes lag when you go back and forth on a chunk boundary
@@ -822,7 +825,12 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
   if (newWorldTick !== oldWorldTick) {
     this.blockShader.setFrame(newWorldTick);
     this.planeShader.setFrame(newWorldTick);
-    this.particleShader.setFrame(newWorldTick);
+  }
+
+  const oldParticleTick = this.getParticleTick(oldWorldTime);
+  const newParticleTick = this.getParticleTick(newWorldTime);
+  if (newParticleTick !== oldParticleTick) {
+    this.particleShader.setFrame(newParticleTick);
   }
 
   if (this.pendingChunks.length) this.loadPendingChunks()
@@ -883,8 +891,13 @@ Game.prototype.initializeTimer = function(rate) {
 Game.prototype.getWorldTick = function(worldTime) {
   worldTime === undefined && ({worldTime} = this);
 
-  const worldTick = floor(worldTime / this.tickTime);
-  return worldTick;
+  return floor(worldTime / this.worldTickTime);
+}
+
+Game.prototype.getParticleTick = function(worldTime) {
+  worldTime === undefined && ({worldTime} = this);
+
+  return floor(worldTime / this.particleTickTime);
 }
 
 Game.prototype.initializeRendering = function(opts) {

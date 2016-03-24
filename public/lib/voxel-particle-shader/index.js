@@ -1,4 +1,4 @@
-import {MATERIAL_FRAMES} from '../../constants/index';
+import {CHUNK_SIZE, PARTICLE_FRAMES} from '../../constants/index';
 
 const PARTICLE_SIZE = 15;
 const PARTICLE_SCALE = 10;
@@ -23,15 +23,17 @@ function VoxelParticleShader(opts) {
       THREE.UniformsLib[ "fog" ],
 
       {
-        frame: {type: 'i', value: 0}
+        frame: {type: 'f', value: 0}
       }
 
     ] ),
 
-    vertexShader: [
+    vertexShader: window.vertexShader = [
 
       // begin custom
       "#define USE_SIZEATTENUATION",
+
+      "uniform float frame;",
       // end custom
 
       "uniform float size;",
@@ -46,6 +48,11 @@ function VoxelParticleShader(opts) {
 
         THREE.ShaderChunk[ "color_vertex" ],
         THREE.ShaderChunk[ "begin_vertex" ],
+
+        // begin custom
+        "transformed.y += " + CHUNK_SIZE.toFixed(1) + " * (1.0 - frame / " + PARTICLE_FRAMES.toFixed(1) + ");",
+        // end custom
+
         THREE.ShaderChunk[ "project_vertex" ],
 
         "#ifdef USE_SIZEATTENUATION",
@@ -113,7 +120,7 @@ function VoxelParticleShader(opts) {
 }
 
 VoxelParticleShader.prototype.setFrame = function(frame) {
-  frame = frame % MATERIAL_FRAMES;
+  frame = frame % PARTICLE_FRAMES;
   this.material.uniforms.frame.value = frame;
 }
 

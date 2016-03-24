@@ -11,7 +11,7 @@ function voxelParticleGenerator() {
       const weather = weathers[k];
       if (weather !== null) {
         const [x, y, z/*, value*/] = weather;
-        vertices.push([x + 0.5, y + 1, z + 0.5]);
+        vertices.push([x + 0.5, y, z + 0.5]);
       }
     }
 
