@@ -5,20 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm install && nodemon index.js"
+    "start": "node index.js"
   },
   "author": "Jonathan Huang",
   "license": "MIT",
   "dependencies": {
-    "babel": "^5.8.23",
-    "bluebird": "^2.10.0",
     "express": "^4.13.3",
     "express-graphql": "^0.3.0",
     "graphql": "^0.4.4",
     "knex": "^0.8.6",
-    "nodemon": "^1.5.1",
     "ramda": "^0.17.1",
-    "shortid": "^2.2.2",
     "sqlite3": "^3.1.0"
   }
 }
