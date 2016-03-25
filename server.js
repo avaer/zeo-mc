@@ -1,5 +1,6 @@
 const path = require('path');
 
+const express = require('express');
 const spdy = require('spdy');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
@@ -32,24 +33,14 @@ u.parallel(cb => {
     hot: true,
     historyApiFallback: true
   });
+
+  const webpackDevServerApp = webpackDevServer.app;
+
+  const app = express();
   webpackDevServer.listeningApp = spdy.createServer({
     cert: c.cert,
     key: c.privateKey,
-  }, webpackDevServer.app);
-
-  webpackDevServer.use(function(req, res, next) {
-    res.promise = function(p) {
-      p.then(function(result) {
-        res.json(result);
-      }).catch(function(err) {
-        res.statusCode = 500;
-        res.send(err);
-      });
-    };
-
-    next();
-  });
-
+  }, app);
   const streamPrefix = path.join(API_PREFIX, '/stream');
   const streamApp = streams.app({
     prefix: streamPrefix
@@ -57,15 +48,17 @@ u.parallel(cb => {
   streamApp.attach(webpackDevServer.listeningApp, {
     path: streamPrefix
   });
-
   const routesApp = routes.app();
-  webpackDevServer.use(API_PREFIX, routesApp);
+  app.use(API_PREFIX, routesApp);
+  app.all('*', (req, res, next) => {
+    webpackDevServerApp(req, res, next);
+  });
 
   webpackDevServer.listen(c.port, null, function (err, result) {
-    if (err) {
+    if (!err) {
+      console.log('Listening at :' + c.port);
+    } else {
       console.log(err);
     }
-
-    console.log('Listening at :' + c.port);
   });
 }));
