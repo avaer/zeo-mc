@@ -9,11 +9,21 @@ const api = {
     const app = express();
 
     allRoutes.forEach(route => {
-      const method = route.method || 'get';
+      const methods = (() => {
+        if (route.method) {
+          return [route.method];
+        } else if (route.methods) {
+          return route.methods;
+        } else {
+          return ['get'];
+        }
+      })();
       const path = route.path;
       const handler = Array.isArray(route.handler) ? route.handler : [ route.handler ];
 
-      app[method](path, handler);
+      methods.forEach(method => {
+        app[method](path, handler);
+      });
     });
 
     return app;
