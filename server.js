@@ -6,7 +6,6 @@ const WebpackDevServer = require('webpack-dev-server');
 const webpackConfig = require('./webpack.config');
 
 const config = require('./lib/config');
-const worlds = require('./lib/worlds-instance');
 const u = require('./lib/js-utils');
 const routes = require('./routes/index.js');
 const streams = require('./streams/index.js');
@@ -15,8 +14,6 @@ const API_PREFIX = '/api';
 
 u.parallel(cb => {
   config.bootstrap(cb);
-}, cb => {
-  worlds.onready(cb);
 }, u.ok(() => {
   const c = config.get();
 

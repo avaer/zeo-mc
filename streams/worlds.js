@@ -1,10 +1,8 @@
-const worlds = require('../lib/worlds-instance');
-
 const worldStreams = [
   {
     path: /^\/worlds\/([^\/]+)$/,
     handler: c => {
-      const id = c.params[1];
+      /* const id = c.params[1];
       const world = worlds.getWorld(id);
 
       if (world) {
@@ -33,7 +31,7 @@ const worldStreams = [
           code: 'ENOENT'
         });
         c.close();
-      }
+      } */
     }
   }
 ];
