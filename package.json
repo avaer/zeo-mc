@@ -67,7 +67,13 @@
     "node-forge": "",
     "cheerio": "",
     "website-scraper": "",
-    "random-word-generator": ""
+    "random-word-generator": "",
+
+    "express-graphql": "",
+    "graphql": "",
+    "knex": "",
+    "ramda": "",
+    "sqlite3": ""
   },
   "devDependencies": {
     "should": ""
