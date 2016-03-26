@@ -10,10 +10,8 @@ export default class LoginEngine extends Engine {
     const session = localStorage.getItem('session');
 
     if (session) {
-      // XXX log in with session here
-      const loginState = this.getState('login').set('loggingIn', true);
       return {
-        'login': loginState
+        'login': this.getState('login').set('loggingIn', true)
       };
     } else {
       return null;
@@ -24,30 +22,7 @@ export default class LoginEngine extends Engine {
     this.updateState('login', state => state
       .set('loggingIn', true));
 
-    const _succeedLogin = data => {
-      const {user, session} = data;
-
-      console.log('successfully logged in', {user, session}); // XXX
-
-      localStorage.setItem('session', session);
-
-      this.updateState('login', state => state
-        .set('user', user)
-        .set('session', session)
-        .set('loggedIn', true)
-        .set('loggingIn', false)
-        .set('error', null));
-    };
-
-    const _failLogin = err => {
-      console.log('error logging in', JSON.stringify(String(err))); // XXX
-
-      this.updateState('login', state => state
-        .set('loggingIn', false)
-        .set('error', String(err)));
-    };
-
-    _getGraphQl('login', {
+    _getGraphQl('mutation', 'login', {
       username,
       password,
     }, {
@@ -57,20 +32,62 @@ export default class LoginEngine extends Engine {
       session: true
     }).then(data => {
       if (data && data.login) {
-        _succeedLogin(data.login);
+        this.succeedLogin(data.login);
       } else {
-        _failLogin('Invalid username or password');
+        this.failLogin('Invalid username or password');
       }
-    }).catch(_failLogin);
+    }).catch(err => { this.failLogin(err); });
   }
 
   loginWithSession({session}) {
-    // XXX
+    _getGraphQl('query', 'login', {
+      username,
+      password,
+    }, {
+      user: {
+        id: true,
+      },
+      session: true
+    }).then(data => {
+      if (data && data.login) {
+        this.succeedLogin(data.login);
+      } else {
+        this.failLogin('Invalid username or password');
+      }
+    }).catch(err => { this.failLogin(err); });
+  }
+
+  succeedLogin(data) {
+    const {user, session} = data;
+
+    console.log('successfully logged in', {user, session}); // XXX
+
+    localStorage.setItem('session', session);
+
+    this.updateState('login', state => state
+      .set('user', user)
+      .set('session', session)
+      .set('loggedIn', true)
+      .set('loggingIn', false)
+      .set('error', null));
+  }
+
+  failLogin(err) {
+    console.log('error logging in', JSON.stringify(String(err))); // XXX
+
+    this.updateState('login', state => state
+      .set('loggingIn', false)
+      .set('error', String(err)));
+  }
+
+  clearError() {
+    this.updateState('login', state => state
+      .set('error', null));
   }
 }
 
-function _getGraphQl(method, args, fields) {
-  const query = _makeGraphQlQuery(method, args, fields);
+function _getGraphQl(type, method, args, fields) {
+  const query = _makeGraphQlQuery(type, method, args, fields);
   const body = JSON.stringify({query});
 
   return fetch('/api/graphql', { // XXX sync this with the backend
@@ -94,7 +111,7 @@ function _getGraphQl(method, args, fields) {
   });
 }
 
-function _makeGraphQlQuery(method, args, fields) {
+function _makeGraphQlQuery(type, method, args, fields) {
   function _stringifyMethod(method) {
     return method;
   }
@@ -114,7 +131,7 @@ function _makeGraphQlQuery(method, args, fields) {
     return acc.join(', ');
   }
 
-  return 'query { ' + _stringifyMethod(method) + '(' + _stringifyArgs(args) + ') { ' + _stringifyFields(fields) + ' } }';
+  return type + ' { ' + _stringifyMethod(method) + '(' + _stringifyArgs(args) + ') { ' + _stringifyFields(fields) + ' } }';
 }
 
 function _jsonParse(s) {

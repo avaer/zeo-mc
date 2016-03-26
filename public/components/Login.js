@@ -29,6 +29,17 @@ export default class Login extends React.Component {
     submitButtonActive: false,
   };
 
+  componentWillUpdate(nextProps) {
+    const {props: prevProps} = this;
+    if (nextProps.error && !prevProps.error) {
+      requestAnimationFrame(() => {
+        const {username: usernameInput} = this.refs;
+        usernameInput.focus();
+        usernameInput.select();
+      });
+    }
+  }
+
   getWrapperStyles() {
     return {
       display: 'flex',
@@ -120,6 +131,7 @@ export default class Login extends React.Component {
 
     return {
       padding: 13,
+      marginBottom: 20,
       border: '2px solid ' + (!submitButtonSpecial ? DARK_COLOR : 'transparent'),
       backgroundColor: !submitButtonSpecial ? 'transparent' : !submitButtonActive ? '#ff2d55' : '#c70024',
       fontFamily: LOGIN_FONT,
@@ -132,11 +144,24 @@ export default class Login extends React.Component {
     };
   }
 
+  getErrorStyles() {
+    const {error} = this.props;
+    return {
+      padding: 10,
+      backgroundColor: '#ff9500',
+      fontSize: '12px',
+      color: 'white',
+      visibility: error ? null : 'hidden',
+    };
+  }
+
   onUsernameChange(e) {
     const username = e.target.value;
     this.setState({
       username
     });
+
+    this.clearError();
   }
 
   onPasswordChange(e) {
@@ -144,6 +169,14 @@ export default class Login extends React.Component {
     this.setState({
       password
     });
+
+    this.clearError();
+  }
+
+  clearError() {
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    loginEngine.clearError();
   }
 
   onUsernameInputFocus() {
@@ -223,6 +256,7 @@ export default class Login extends React.Component {
             type='text'
             style={this.getUsernameInputStyles()}
             value={this.state.username}
+            ref='username'
             onChange={this.onUsernameChange}
             onFocus={this.onUsernameInputFocus}
             onBlur={this.onUsernameInputBlur}
@@ -234,6 +268,7 @@ export default class Login extends React.Component {
             type='password'
             style={this.getPasswordInputStyles()}
             value={this.state.password}
+            ref='password'
             onChange={this.onPasswordChange}
             onFocus={this.onPasswordInputFocus}
             onBlur={this.onPasswordInputBlur}
@@ -241,6 +276,7 @@ export default class Login extends React.Component {
         </label>
         <button
           style={this.getSubmitButtonStyles()}
+          ref='submit'
           onMouseOver={this.onSubmitButtonMouseOver}
           onMouseOut={this.onSubmitButtonMouseOut}
           onFocus={this.onSubmitButtonFocus}
@@ -249,6 +285,7 @@ export default class Login extends React.Component {
           onMouseUp={this.onSubmitButtonMouseUp}
           onClick={this.onSubmitButtonClick}
         >Login</button>
+        <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>
       </div>
     </div>;
   }
