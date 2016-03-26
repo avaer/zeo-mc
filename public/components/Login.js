@@ -29,15 +29,23 @@ export default class Login extends React.Component {
     submitButtonActive: false,
   };
 
+  componentDidMount(nextProps) {
+    this.selectUsernameInput();
+  }
+
   componentWillUpdate(nextProps) {
     const {props: prevProps} = this;
     if (nextProps.error && !prevProps.error) {
-      requestAnimationFrame(() => {
-        const {username: usernameInput} = this.refs;
-        usernameInput.focus();
-        usernameInput.select();
-      });
+      this.selectUsernameInput();
     }
+  }
+
+  selectUsernameInput() {
+    const {username: usernameInput} = this.refs;
+    setTimeout(() => {
+      usernameInput.focus();
+      usernameInput.select();
+    });
   }
 
   getWrapperStyles() {
