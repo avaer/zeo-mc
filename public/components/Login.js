@@ -5,6 +5,8 @@ const DARK_COLOR = '#333';
 const LIGHT_COLOR = '#CCC';
 
 export default class Login extends React.Component {
+  onUsernameChange = this.onUsernameChange.bind(this);
+  onPasswordChange = this.onPasswordChange.bind(this);
   onUsernameInputFocus = this.onUsernameInputFocus.bind(this);
   onUsernameInputBlur = this.onUsernameInputBlur.bind(this);
   onPasswordInputFocus = this.onPasswordInputFocus.bind(this);
@@ -18,6 +20,8 @@ export default class Login extends React.Component {
   onSubmitButtonClick = this.onSubmitButtonClick.bind(this);
 
   state = {
+    username: '',
+    password: '',
     usernameInputFocused: false,
     passwordInputFocused: false,
     submitButtonHovered: false,
@@ -82,7 +86,6 @@ export default class Login extends React.Component {
 
   getUsernameInputStyles() {
     const {usernameInputFocused} = this.state;
-    console.log({usernameInputFocused});
     return {
       display: 'block',
       height: 30,
@@ -127,6 +130,20 @@ export default class Login extends React.Component {
       cursor: 'pointer',
       transition: 'all 0.1s ease-out',
     };
+  }
+
+  onUsernameChange(e) {
+    const username = e.target.value;
+    this.setState({
+      username
+    });
+  }
+
+  onPasswordChange(e) {
+    const password = e.target.value;
+    this.setState({
+      password
+    });
   }
 
   onUsernameInputFocus() {
@@ -190,7 +207,10 @@ export default class Login extends React.Component {
   }
 
   onSubmitButtonClick() {
-    console.log('submit button click');
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    const {username, password} = this.state;
+    loginEngine.loginWithUsernamePassword({username, password});
   }
 
   render() {
@@ -199,11 +219,25 @@ export default class Login extends React.Component {
         <h1 style={this.getHeadingStyles()}>Sign in</h1>
         <label style={this.getUsernameLabelStyles()}>
           <div style={this.getLabelTextStyles()}>Username</div>
-          <input type='text' style={this.getUsernameInputStyles()} onFocus={this.onUsernameInputFocus} onBlur={this.onUsernameInputBlur} />
+          <input
+            type='text'
+            style={this.getUsernameInputStyles()}
+            value={this.state.username}
+            onChange={this.onUsernameChange}
+            onFocus={this.onUsernameInputFocus}
+            onBlur={this.onUsernameInputBlur}
+          />
         </label>
         <label style={this.getPasswordLabelStyles()}>
           <div style={this.getLabelTextStyles()}>Password</div>
-          <input type='password' style={this.getPasswordInputStyles()} onFocus={this.onPasswordInputFocus} onBlur={this.onPasswordInputBlur} />
+          <input
+            type='password'
+            style={this.getPasswordInputStyles()}
+            value={this.state.password}
+            onChange={this.onPasswordChange}
+            onFocus={this.onPasswordInputFocus}
+            onBlur={this.onPasswordInputBlur}
+          />
         </label>
         <button
           style={this.getSubmitButtonStyles()}
