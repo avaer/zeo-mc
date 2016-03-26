@@ -89,11 +89,13 @@ Engines.Engine = Engine;
 module.exports = Engines;
 
 const Window = require('./window');
+const Login = require('./login');
 const Menu = require('./menu');
 const Player = require('./player');
 
 const ENGINES = [
   Window,
+  Login,
   Menu,
   Player,
 ];
