@@ -18,6 +18,7 @@ export default class Login extends React.Component {
   onLoginButtonClick = this.onLoginButtonClick.bind(this);
   onStartCreateAccountButtonClick = this.onStartCreateAccountButtonClick.bind(this);
   onEndCreateAccountButtonClick = this.onEndCreateAccountButtonClick.bind(this);
+  onCreateAccountButtonClick = this.onCreateAccountButtonClick.bind(this);
 
   state = {
     username: '',
@@ -241,6 +242,14 @@ export default class Login extends React.Component {
     this.selectUsernameInput();
   }
 
+  onCreateAccountButtonClick() {
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    const {username, password, gender} = this.state;
+    loginEngine.createAccount(username, password, gender);
+    loginEngine.clearError();
+  }
+
   render() {
     return <div style={this.getWrapperStyles()}>
       <form style={this.getContainerStyles()} onSubmit={this.onLoginButtonClick}>
@@ -314,7 +323,7 @@ export default class Login extends React.Component {
           <Button onClick={this.onStartCreateAccountButtonClick}>Create Account</Button>
         </div> : null}
         {this.props.creatingAccount ? <div style={this.getButtonsStyles()}>
-          <Button onClick={this.onCreateAccountButtonClick} submit>Create Account</Button>
+          <Button onClick={this.onCreateAccountButtonClick}>Create Account</Button>
           <Button onClick={this.onEndCreateAccountButtonClick}>Cancel</Button>
         </div> : null}
         <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>

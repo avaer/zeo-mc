@@ -3,6 +3,8 @@ import React from 'react';
 import Button from './Button';
 
 const LOGIN_FONT = '\'Press Start 2P\', cursive';
+const DARK_COLOR = '#333';
+const LIGHT_COLOR = '#CCC';
 
 export default class Enter extends React.Component {
   componentDidMount(nextProps) {
@@ -176,9 +178,11 @@ export default class Enter extends React.Component {
   }
 
   render() {
+console.log('enter props', this.props);
+
     return <div style={this.getWrapperStyles()}>
       <div style={this.getContainerStyles()}>
-        <h1 style={this.getHeadingStyles()}>Choose a world</h1>
+        <h1 style={this.getHeadingStyles()}>Choose world</h1>
         <Worlds worlds={this.props.worlds} />
         <Button onClick={this.onSubmitButtonClick}>Create world</Button>
         <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>
@@ -190,19 +194,62 @@ export default class Enter extends React.Component {
 class Worlds extends React.Component {
   getWorldsStyles() {
     return {
-      // XXX
+      marginBottom: 20,
+      border: '2px solid ' + DARK_COLOR,
+      borderRadius: 3,
+      padding: 10,
+      width: '100%',
+      height: 300,
     };
   }
 
   render() {
+    const {worlds} = this.props;
+
     return <div style={this.getWorldsStyles()}>
-      {this.props.worlds.map(world => <World world={world} key={world.worldname} />)}
+      {worlds.size === 0 ?
+        <World key={null}/>
+      :
+        worlds.map(world => <World world={world} key={world.worldname} />)
+      }
     </div>;
   }
 }
 
 class World extends React.Component {
+  getStyles() {
+    const {world} = this.props;
+
+    return {
+      display: 'flex',
+      color: world ? DARK_COLOR : LIGHT_COLOR,
+    };
+  }
+
+  getIconStyles() {
+    const {world} = this.props;
+
+    return {
+      display: world ? null : 'none',
+      width: 30,
+      height: 30,
+      marginRight: 10,
+      border: '2px solid ' + DARK_COLOR,
+    };
+  }
+
+  getTextStyles() {
+    return {
+      fontSize: '13px',
+    };
+  }
+
   render() {
-    return <div />;
+    const {world} = this.props;
+    
+    return <div style={this.getStyles()}>
+      <div style={this.getIconStyles()} />
+      <div style={this.getTextStyles()}>{world ? world.name : '<no worlds>'}</div>
+    </div>
   }
 }

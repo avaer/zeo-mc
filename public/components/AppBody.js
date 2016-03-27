@@ -13,7 +13,7 @@ export default class AppBody extends React.Component {
     const {stores, engines} = this.props;
     const {window: windowState, login: loginState, menu: menuState, player: playerState} = stores;
     const {width, height, devicePixelRatio, pathname} = windowState;
-    const {loggedIn, loggingIn, creatingAccount, entered, entering, error: loginError} = loginState;
+    const {loggedIn, loggingIn, creatingAccount, entered, entering, worlds: loginWorlds, error: loginError} = loginState;
     const live = loggedIn && entered;
     const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab, itemIndex: menuItemIndex, dragItemIndex: menuDragItemIndex, dragCoords: menuDragCoords} = menuState;
     const {inventory} = playerState;
@@ -30,6 +30,7 @@ export default class AppBody extends React.Component {
     const enterProps = {
       entered,
       entering,
+      worlds: loginWorlds,
       error: loginError,
 
       engines,
