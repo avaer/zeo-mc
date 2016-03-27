@@ -10,6 +10,7 @@ var voxelPlaneShader = require('../voxel-plane-shader/index')
 var voxelControl = require('../voxel-control/index')
 var voxelView = require('../voxel-view/index')
 var THREE = require('three')
+var THREECSG = require('three-js-csg');
 var Stats = require('./lib/stats')
 var Detector = require('./lib/detector')
 var inherits = require('inherits')
@@ -46,6 +47,7 @@ function Game(opts) {
   this.configureChunkLoading(opts)
   this.setDimensions(opts)
   this.THREE = THREE
+  this.THREECSG = THREECSG(THREE);
   this.vector = vector
   this.glMatrix = glMatrix
   this.arrayType = opts.arrayType || Uint8Array
@@ -90,6 +92,7 @@ function Game(opts) {
     [Infinity, Infinity, Infinity],
     [-Infinity, -Infinity, -Infinity]
   )
+  this.collisionTests = []
   
   this.timer = this.initializeTimer(opts.tickFPS || 16)
   // this.paused = false
@@ -403,6 +406,8 @@ Game.prototype.defaultButtons = {
   '<control>': 'alt',
   'Q': 'greenapple',
   'E': 'flare',
+  'Z': 'portalred',
+  'C': 'portalblue',
 }
 
 // used in methods that have identity function(pos) {}
@@ -508,15 +513,21 @@ Game.prototype.collideTerrain = function(other, bbox, vec, resting) {
   var self = this
   var axes = ['x', 'y', 'z']
   var vec3 = [vec.x, vec.y, vec.z]
-  this.collideVoxels(bbox, vec3, function hit(axis, tile, coords, dir, edge) {
-    if (!tile) return
-    if (Math.abs(vec3[axis]) < Math.abs(edge)) return
+  this.collideVoxels(bbox, vec3, (axis, tile, coords, dir, edge) => {
+    if (!tile) return false
+    if (Math.abs(vec3[axis]) < Math.abs(edge)) return false
+    if (!this.collisionTests.every(test => test(coords, axis, dir))) return false
+
     vec3[axis] = vec[axes[axis]] = edge
     other.acceleration[axes[axis]] = 0
     resting[axes[axis]] = dir
     other.friction[axes[(axis + 1) % 3]] = other.friction[axes[(axis + 2) % 3]] = axis === 1 ? self.friction  : 1
     return true
   })
+}
+
+Game.prototype.addCollisionTest = function(fn) {
+  this.collisionTests.push(fn)
 }
 
 // # Three.js specific methods
@@ -808,7 +819,11 @@ Game.prototype.tick = function(delta, oldWorldTime, newWorldTime) {
 }
 
 Game.prototype.render = function(delta) {
+  this.emit('prerender');
+
   this.view.render(this.scene)
+
+  this.emit('postrender');
 }
 
 Game.prototype.initializeTimer = function(rate) {

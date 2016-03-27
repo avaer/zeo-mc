@@ -12,6 +12,7 @@ import voxelPlayer from '../lib/voxel-player/index';
 import voxelWalk from '../lib/voxel-walk/index';
 import voxelHighlight from '../lib/voxel-highlight/index';
 import voxelConstruct from '../lib/voxel-construct/index';
+import voxelPortal from '../lib/voxel-portal/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
@@ -112,6 +113,8 @@ export default class Voxels extends React.Component {
         textureLoader.loadTextures([
           'items/greenapple',
           'items/flare',
+          'items/portalred',
+          'items/portalblue',
         ], pend);
       })();
     };
@@ -138,11 +141,8 @@ export default class Voxels extends React.Component {
         sky(15);
       }, 15);
 
-      // game.camera.position.set(INITIAL_POSITION[0], INITIAL_POSITION[1], INITIAL_POSITION[2]);
-
       avatar = voxelPlayer(game)('api/img/textures/avatar/player.png');
       avatar.position.set(INITIAL_POSITION[0], INITIAL_POSITION[1], INITIAL_POSITION[2]);
-      // avatar.yaw.position.set(2, 14, 4);
       avatar.possess();
       game.on('tick', function(dt) {
         voxelWalk.render(avatar);
@@ -155,9 +155,9 @@ export default class Voxels extends React.Component {
           voxelWalk.startWalking();
         }
       });
-      avatar.forces.x = 0;;
-      avatar.forces.y = 0;;
-      avatar.forces.z = 0;;
+      avatar.forces.x = 0;
+      avatar.forces.y = 0;
+      avatar.forces.z = 0;
 
       const clouds = voxelClouds({
         game,
@@ -219,6 +219,8 @@ export default class Voxels extends React.Component {
         },
       });
 
+      const voxelPortalInstance = voxelPortal(game);
+
       function initControls() {
         let holdValue = null;
 
@@ -241,20 +243,22 @@ export default class Voxels extends React.Component {
         }
 
         game.on('fire', () => {
-          // try throw
+          // try use item
           if (holdValue !== null) {
             const {type} = holdValue;
             if (type === 'item') {
               const {value} = holdValue;
-              console.log('throw item', value); // XXX
+              if (value !== 'portalred' && value !== 'portalblue') {
+                console.log('use item', value); // XXX
 
-              stopHolding();
+                stopHolding();
 
-              return;
+                return;
+              }
             }
           }
 
-          // try pickup/place
+          // try pickup/place/portal
           const cp = game.cameraPosition();
           const cv = game.cameraVector();
           const hit = game.raycastVoxels(cp, cv, CHUNK_SIZE);
@@ -275,18 +279,32 @@ export default class Voxels extends React.Component {
                 stopHolding();
 
                 return;
+              } else if (type === 'item') {
+                const {value} = holdValue;
+                const {adjacent: position, normal} = hit;
+
+                if (value === 'portalred') {
+                  voxelPortalInstance.setPortal('red', position, normal);
+
+                  return;
+                } else if (value === 'portalblue') {
+                  voxelPortalInstance.setPortal('blue', position, normal);
+
+                  return;
+                }
               }
             }
           }
         });
 
         game.on('hold', variant => {
-          if (!holdValue) {
-            console.log('spawn item', variant); // XXX
-            const type = 'item';
-            const value = {type, value: variant};
-            startHolding(value);
+          if (holdValue) {
+            stopHolding();
           }
+
+          const type = 'item';
+          const value = {type, value: variant};
+          startHolding(value);
         });
       }
       initControls();
