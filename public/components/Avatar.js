@@ -5,11 +5,11 @@ const LIGHT_COLOR = '#CCC';
 
 export default class Avatar extends React.Component {
   getStyles() {
-    const {special} = this.props;
+    const {size, special} = this.props;
     return {
       position: 'relative',
-      width: '100%',
-      height: '100%',
+      width: size,
+      height: size,
       border: '2px solid ' + (special ? DARK_COLOR : LIGHT_COLOR),
       boxSizing: 'border-box',
     };

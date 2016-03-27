@@ -63,7 +63,6 @@ export default class Login extends React.Component {
   getContainerStyles() {
     return {
       width: 400,
-      // height: 200,
     };
   }
 
@@ -75,10 +74,9 @@ export default class Login extends React.Component {
 
   getAvatarStyles() {
     return {
-      position: 'absolute',
-      width: 34,
-      height: 34,
-      marginTop: 15,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     };
   }
 
@@ -86,6 +84,7 @@ export default class Login extends React.Component {
     return {
       display: 'block',
       paddingBottom: 20,
+      cursor: 'text',
     };
   }
 
@@ -94,7 +93,7 @@ export default class Login extends React.Component {
       marginBottom: 10,
       color: !focused ? LIGHT_COLOR : DARK_COLOR,
       fontSize: '13px',
-      cursor: 'text',
+      WebkitUserSelect: 'none',
     };
   }
 
@@ -142,6 +141,7 @@ export default class Login extends React.Component {
   getRadioLabelTextStyles() {
     return {
       fontSize: '13px',
+      WebkitUserSelect: 'none',
     };
   }
 
@@ -246,6 +246,14 @@ export default class Login extends React.Component {
       <form style={this.getContainerStyles()} onSubmit={this.onLoginButtonClick}>
         {!this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>Sign in</h1> : null}
         {this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>New account</h1> : null}
+        {this.props.creatingAccount ? <Avatar
+          type='user'
+          style={this.getAvatarStyles()}
+          gender={this.state.gender}
+          value={this.state.username || (this.state.gender === 'male' ? 'avaert' : 'zo')}
+          size={50}
+          special
+        /> : null}
         {this.props.creatingAccount ? <div style={this.getLabelStyles()}>
           <div style={this.getLabelTextStyles({focused: true})}>Gender</div>
           <div style={this.getRadioLabelsStyles()}>
@@ -273,13 +281,6 @@ export default class Login extends React.Component {
             </label>
           </div>
         </div> : null}
-        {this.props.creatingAccount ? <Avatar
-          type='user'
-          style={this.getAvatarStyles()}
-          gender={this.state.gender}
-          value={this.state.username || (this.state.gender === 'male' ? 'avaert' : 'zo')}
-          special
-        /> : null}
         <Label style={this.getLabelStyles()}>
           {({focused, onFocus, onBlur}) => <div>
             <div style={this.getLabelTextStyles({focused})} key='label'>Username</div>
