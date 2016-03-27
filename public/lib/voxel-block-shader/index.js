@@ -3,8 +3,7 @@ import {MATERIAL_FRAMES} from '../../constants/index';
 
 const {floor, ceil, round} = Math;
 
-function voxelBlockShader(opts) {
-  if (!(this instanceof voxelBlockShader)) return new voxelBlockShader(opts || {});
+function VoxelBlockShader(opts) {
   const {game, atlas} = opts;
 
   this.game = game;
@@ -306,7 +305,7 @@ function voxelBlockShader(opts) {
   this.material = new THREE.ShaderMaterial(materialParams);
 }
 
-voxelBlockShader.prototype.setFrame = function(frame) {
+VoxelBlockShader.prototype.setFrame = function(frame) {
   frame = frame % MATERIAL_FRAMES;
   this.material.uniforms.frame.value = frame;
 }
@@ -332,7 +331,7 @@ function colorArrayToValue(a) {
     a[2] * 255
   );
 }
-voxelBlockShader.colorArrayToValue = colorArrayToValue;
+VoxelBlockShader.colorArrayToValue = colorArrayToValue;
 
 function colorValueToArray(v) {
   return [
@@ -341,7 +340,7 @@ function colorValueToArray(v) {
     (v % 255) / 255
   ];
 }
-voxelBlockShader.colorValueToArray = colorValueToArray;
+VoxelBlockShader.colorValueToArray = colorValueToArray;
 
 function _range(a, b) {
   const l = b - a;
@@ -350,6 +349,10 @@ function _range(a, b) {
     result[i] = a + i;
   }
   return result;
+}
+
+function voxelBlockShader(opts) {
+  return new VoxelBlockShader(opts);
 }
 
 module.exports = voxelBlockShader;
