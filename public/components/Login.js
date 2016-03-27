@@ -1,5 +1,7 @@
 import React from 'react';
 
+import Button from './Button';
+
 const LOGIN_FONT = '\'Press Start 2P\', cursive';
 const DARK_COLOR = '#333';
 const LIGHT_COLOR = '#CCC';
@@ -11,22 +13,21 @@ export default class Login extends React.Component {
   onUsernameInputBlur = this.onUsernameInputBlur.bind(this);
   onPasswordInputFocus = this.onPasswordInputFocus.bind(this);
   onPasswordInputBlur = this.onPasswordInputBlur.bind(this);
-  onSubmitButtonMouseOver = this.onSubmitButtonMouseOver.bind(this);
-  onSubmitButtonMouseOut = this.onSubmitButtonMouseOut.bind(this);
-  onSubmitButtonFocus = this.onSubmitButtonFocus.bind(this);
-  onSubmitButtonBlur = this.onSubmitButtonBlur.bind(this);
-  onSubmitButtonMouseDown = this.onSubmitButtonMouseDown.bind(this);
-  onSubmitButtonMouseUp = this.onSubmitButtonMouseUp.bind(this);
-  onSubmitButtonClick = this.onSubmitButtonClick.bind(this);
+  onLoginButtonClick = this.onLoginButtonClick.bind(this);
+  onStartCreateAccountButtonClick = this.onStartCreateAccountButtonClick.bind(this);
+  onEndCreateAccountButtonClick = this.onEndCreateAccountButtonClick.bind(this);
 
   state = {
     username: '',
     password: '',
     usernameInputFocused: false,
     passwordInputFocused: false,
-    submitButtonHovered: false,
-    submitButtonFocused: false,
-    submitButtonActive: false,
+    loginButtonHovered: false,
+    loginButtonFocused: false,
+    loginButtonActive: false,
+    createButtonHovered: false,
+    createButtonFocused: false,
+    createButtonActive: false,
   };
 
   componentDidMount(nextProps) {
@@ -133,22 +134,10 @@ export default class Login extends React.Component {
     };
   }
 
-  getSubmitButtonStyles() {
-    const {submitButtonHovered, submitButtonFocused, submitButtonActive} = this.state;
-    const submitButtonSpecial = submitButtonHovered || submitButtonFocused;
-
+  getButtonsStyles() {
     return {
-      padding: 13,
+      display: 'flex',
       marginBottom: 20,
-      border: '2px solid ' + (!submitButtonSpecial ? DARK_COLOR : 'transparent'),
-      backgroundColor: !submitButtonSpecial ? 'transparent' : !submitButtonActive ? '#ff2d55' : '#c70024',
-      fontFamily: LOGIN_FONT,
-      color: !submitButtonSpecial ? DARK_COLOR : 'white',
-      fontSize: '13px',
-      lineHeight: 1,
-      outline: 'none',
-      cursor: 'pointer',
-      transition: 'all 0.1s ease-out',
     };
   }
 
@@ -211,53 +200,49 @@ export default class Login extends React.Component {
     });
   }
 
-  onSubmitButtonMouseOver() {
-    this.setState({
-      submitButtonHovered: true
-    });
-  }
-
-  onSubmitButtonMouseOut() {
-    this.setState({
-      submitButtonHovered: false
-    });
-  }
-
-  onSubmitButtonFocus() {
-    this.setState({
-      submitButtonFocused: true
-    });
-  }
-
-  onSubmitButtonBlur() {
-    this.setState({
-      submitButtonFocused: false
-    });
-  }
-
-  onSubmitButtonMouseDown() {
-    this.setState({
-      submitButtonActive: true
-    });
-  }
-
-  onSubmitButtonMouseUp() {
-    this.setState({
-      submitButtonActive: false
-    });
-  }
-
-  onSubmitButtonClick() {
+  onLoginButtonClick(e) {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     const {username, password} = this.state;
     loginEngine.loginWithUsernamePassword({username, password});
+
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  onStartCreateAccountButtonClick() {
+    this.setState({
+      username: '',
+      password: '',
+    });
+
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    loginEngine.startCreateAccount();
+    loginEngine.clearError();
+
+    this.selectUsernameInput();
+  }
+
+  onEndCreateAccountButtonClick() {
+    this.setState({
+      username: '',
+      password: '',
+    });
+
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    loginEngine.endCreateAccount();
+    loginEngine.clearError();
+
+    this.selectUsernameInput();
   }
 
   render() {
     return <div style={this.getWrapperStyles()}>
-      <div style={this.getContainerStyles()}>
-        <h1 style={this.getHeadingStyles()}>Sign in</h1>
+      <form style={this.getContainerStyles()} onSubmit={this.onLoginButtonClick}>
+        {!this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>Sign in</h1> : null}
+        {this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>New account</h1> : null}
         <label style={this.getUsernameLabelStyles()}>
           <div style={this.getLabelTextStyles()}>Username</div>
           <input
@@ -282,19 +267,16 @@ export default class Login extends React.Component {
             onBlur={this.onPasswordInputBlur}
           />
         </label>
-        <button
-          style={this.getSubmitButtonStyles()}
-          ref='submit'
-          onMouseOver={this.onSubmitButtonMouseOver}
-          onMouseOut={this.onSubmitButtonMouseOut}
-          onFocus={this.onSubmitButtonFocus}
-          onBlur={this.onSubmitButtonBlur}
-          onMouseDown={this.onSubmitButtonMouseDown}
-          onMouseUp={this.onSubmitButtonMouseUp}
-          onClick={this.onSubmitButtonClick}
-        >Login</button>
+        {!this.props.creatingAccount ? <div style={this.getButtonsStyles()}>
+          <Button onClick={this.onLoginButtonClick} submit>Login</Button>
+          <Button onClick={this.onStartCreateAccountButtonClick}>Create Account</Button>
+        </div> : null}
+        {this.props.creatingAccount ? <div style={this.getButtonsStyles()}>
+          <Button onClick={this.onCreateAccountButtonClick} submit>Create Account</Button>
+          <Button onClick={this.onEndCreateAccountButtonClick}>Cancel</Button>
+        </div> : null}
         <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>
-      </div>
+      </form>
     </div>;
   }
 }

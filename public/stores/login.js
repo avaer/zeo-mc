@@ -5,5 +5,8 @@ export default class Login extends Immutable.Record({
   session: null,
   loggedIn: false,
   loggingIn: false,
+  creatingAccount: false,
+  entered: false,
+  entering: false,
   error: null,
 }) {}

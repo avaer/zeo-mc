@@ -84,6 +84,16 @@ export default class LoginEngine extends Engine {
     this.updateState('login', state => state
       .set('error', null));
   }
+
+  startCreateAccount() {
+    this.updateState('login', state => state
+      .set('creatingAccount', true));
+  }
+
+  endCreateAccount() {
+    this.updateState('login', state => state
+      .set('creatingAccount', false));
+  }
 }
 
 function _getGraphQl(type, method, args, fields) {
