@@ -1,5 +1,8 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
+import Label from './Label';
+import Input from './Input';
 import Button from './Button';
 import Avatar from './Avatar';
 
@@ -8,12 +11,10 @@ const DARK_COLOR = '#333';
 const LIGHT_COLOR = '#CCC';
 
 export default class Login extends React.Component {
+  setUsernameInput = this.setUsernameInput.bind(this);
+  setPasswordInput = this.setPasswordInput.bind(this);
   onUsernameChange = this.onUsernameChange.bind(this);
   onPasswordChange = this.onPasswordChange.bind(this);
-  onUsernameInputFocus = this.onUsernameInputFocus.bind(this);
-  onUsernameInputBlur = this.onUsernameInputBlur.bind(this);
-  onPasswordInputFocus = this.onPasswordInputFocus.bind(this);
-  onPasswordInputBlur = this.onPasswordInputBlur.bind(this);
   onLoginButtonClick = this.onLoginButtonClick.bind(this);
   onStartCreateAccountButtonClick = this.onStartCreateAccountButtonClick.bind(this);
   onEndCreateAccountButtonClick = this.onEndCreateAccountButtonClick.bind(this);
@@ -23,13 +24,9 @@ export default class Login extends React.Component {
     password: '',
     usernameInputFocused: false,
     passwordInputFocused: false,
-    loginButtonHovered: false,
-    loginButtonFocused: false,
-    loginButtonActive: false,
-    createButtonHovered: false,
-    createButtonFocused: false,
-    createButtonActive: false,
   };
+  usernameInput = null;
+  passwordInput = null;
 
   componentDidMount(nextProps) {
     this.selectUsernameInput();
@@ -43,8 +40,8 @@ export default class Login extends React.Component {
   }
 
   selectUsernameInput() {
-    const {username: usernameInput} = this.refs;
     setTimeout(() => {
+      const usernameInput = ReactDOM.findDOMNode(this.usernameInput);
       usernameInput.focus();
       usernameInput.select();
     });
@@ -86,62 +83,20 @@ export default class Login extends React.Component {
     };
   }
 
-  getLabelTextStyles() {
+  getLabelStyles() {
+    return {
+      display: 'block',
+      paddingBottom: 30,
+    };
+  }
+
+  getLabelTextStyles({focused}) {
+    console.log('label text styles', {focused});
     return {
       marginBottom: 10,
-    };
-  }
-
-  getUsernameLabelStyles() {
-    const {usernameInputFocused} = this.state;
-    return {
-      display: 'block',
-      paddingBottom: 30,
-      color: !usernameInputFocused ? LIGHT_COLOR : DARK_COLOR,
+      color: !focused ? LIGHT_COLOR : DARK_COLOR,
       fontSize: '13px',
       cursor: 'text',
-    };
-  }
-
-  getPasswordLabelStyles() {
-    const {passwordInputFocused} = this.state;
-    return {
-      display: 'block',
-      paddingBottom: 30,
-      color: !passwordInputFocused ? LIGHT_COLOR : DARK_COLOR,
-      fontSize: '13px',
-      cursor: 'text',
-    };
-  }
-
-  getUsernameInputStyles() {
-    const {usernameInputFocused} = this.state;
-    return {
-      display: 'block',
-      height: 32,
-      width: '100%',
-      border: 0,
-      borderBottom: '2px solid ' + (!usernameInputFocused ? LIGHT_COLOR : DARK_COLOR),
-      fontFamily: LOGIN_FONT,
-      fontSize: '13px',
-      textAlign: 'center',
-      outline: 'none',
-    };
-  }
-
-  getPasswordInputStyles() {
-    const {passwordInputFocused} = this.state;
-    return {
-      display: 'block',
-      height: 32,
-      width: '100%',
-      border: 0,
-      borderBottom: '2px solid ' + (!passwordInputFocused ? LIGHT_COLOR : DARK_COLOR),
-      fontFamily: LOGIN_FONT,
-      fontSize: '13px',
-      lineHeight: '30px',
-      textAlign: 'center',
-      outline: 'none',
     };
   }
 
@@ -161,6 +116,14 @@ export default class Login extends React.Component {
       color: 'white',
       visibility: error ? null : 'hidden',
     };
+  }
+
+  setUsernameInput(usernameInput) {
+    this.usernameInput = usernameInput;
+  }
+
+  setPasswordInput(passwordInput) {
+    this.passwordInput = passwordInput;
   }
 
   onUsernameChange(e) {
@@ -185,18 +148,6 @@ export default class Login extends React.Component {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     loginEngine.clearError();
-  }
-
-  onUsernameInputFocus() {
-    this.setState({
-      usernameInputFocused: true
-    });
-  }
-
-  onUsernameInputBlur() {
-    this.setState({
-      usernameInputFocused: false
-    });
   }
 
   onPasswordInputFocus() {
@@ -261,30 +212,34 @@ export default class Login extends React.Component {
           value={this.state.username}
           special
         /> : null}
-        <label style={this.getUsernameLabelStyles()}>
-          <div style={this.getLabelTextStyles()}>Username</div>
-          <input
-            type='text'
-            style={this.getUsernameInputStyles()}
-            value={this.state.username}
-            ref='username'
-            onChange={this.onUsernameChange}
-            onFocus={this.onUsernameInputFocus}
-            onBlur={this.onUsernameInputBlur}
-          />
-        </label>
-        <label style={this.getPasswordLabelStyles()}>
-          <div style={this.getLabelTextStyles()}>Password</div>
-          <input
-            type='password'
-            style={this.getPasswordInputStyles()}
-            value={this.state.password}
-            ref='password'
-            onChange={this.onPasswordChange}
-            onFocus={this.onPasswordInputFocus}
-            onBlur={this.onPasswordInputBlur}
-          />
-        </label>
+        <Label style={this.getLabelStyles()}>
+          {({focused, onFocus, onBlur}) => <div>
+            <div style={this.getLabelTextStyles({focused})} key='label'>Username</div>
+            <Input
+              value={this.state.username}
+              focused={focused}
+              ref={this.setUsernameInput}
+              onChange={this.onUsernameChange}
+              onFocus={onFocus}
+              onBlur={onBlur}
+              key='input'
+            />
+          </div>}
+        </Label>
+        <Label style={this.getLabelStyles()}>
+          {({focused, onFocus, onBlur}) => <div>
+            <div style={this.getLabelTextStyles({focused})} key='label'>Password</div>
+            <Input
+              value={this.state.password}
+              focused={focused}
+              ref={this.setPasswordInput}
+              onChange={this.onPasswordChange}
+              onFocus={onFocus}
+              onBlur={onBlur}
+              key='input'
+            />
+          </div>}
+        </Label>
         {!this.props.creatingAccount ? <div style={this.getButtonsStyles()}>
           <Button onClick={this.onLoginButtonClick} submit>Login</Button>
           <Button onClick={this.onStartCreateAccountButtonClick}>Create Account</Button>
