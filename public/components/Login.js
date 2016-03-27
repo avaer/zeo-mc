@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Button from './Button';
+import Avatar from './Avatar';
 
 const LOGIN_FONT = '\'Press Start 2P\', cursive';
 const DARK_COLOR = '#333';
@@ -76,6 +77,15 @@ export default class Login extends React.Component {
     };
   }
 
+  getAvatarStyles() {
+    return {
+      position: 'absolute',
+      width: 34,
+      height: 34,
+      marginTop: 15,
+    };
+  }
+
   getLabelTextStyles() {
     return {
       marginBottom: 10,
@@ -108,7 +118,7 @@ export default class Login extends React.Component {
     const {usernameInputFocused} = this.state;
     return {
       display: 'block',
-      height: 30,
+      height: 32,
       width: '100%',
       border: 0,
       borderBottom: '2px solid ' + (!usernameInputFocused ? LIGHT_COLOR : DARK_COLOR),
@@ -123,6 +133,7 @@ export default class Login extends React.Component {
     const {passwordInputFocused} = this.state;
     return {
       display: 'block',
+      height: 32,
       width: '100%',
       border: 0,
       borderBottom: '2px solid ' + (!passwordInputFocused ? LIGHT_COLOR : DARK_COLOR),
@@ -243,6 +254,13 @@ export default class Login extends React.Component {
       <form style={this.getContainerStyles()} onSubmit={this.onLoginButtonClick}>
         {!this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>Sign in</h1> : null}
         {this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>New account</h1> : null}
+        {this.props.creatingAccount ? <Avatar
+          type='user'
+          style={this.getAvatarStyles()}
+          gender='female'
+          value={this.state.username}
+          special
+        /> : null}
         <label style={this.getUsernameLabelStyles()}>
           <div style={this.getLabelTextStyles()}>Username</div>
           <input
