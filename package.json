@@ -73,6 +73,8 @@
 
     "avatar-generator": "",
     "retricon-without-canvas": "",
+    "delaunay-fast": "",
+    "colorbrewer": "",
 
     "express-graphql": "",
     "graphql": "",

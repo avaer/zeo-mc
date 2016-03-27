@@ -5,6 +5,7 @@ import Label from './Label';
 import Input from './Input';
 import Button from './Button';
 import Avatar from './Avatar';
+import Identity from './Identity';
 
 const LOGIN_FONT = '\'Press Start 2P\', cursive';
 const DARK_COLOR = '#333';
@@ -70,6 +71,14 @@ export default class Login extends React.Component {
   getHeadingStyles() {
     return {
       margin: '0 0 40px 0',
+    };
+  }
+
+  getIdentityStyles() {
+    return {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     };
   }
 
@@ -255,6 +264,11 @@ export default class Login extends React.Component {
       <form style={this.getContainerStyles()} onSubmit={this.onLoginButtonClick}>
         {!this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>Sign in</h1> : null}
         {this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>New account</h1> : null}
+        {!this.props.creatingAccount ? <Identity
+          style={this.getIdentityStyles()}
+          size={50}
+          special
+        /> : null}
         {this.props.creatingAccount ? <Avatar
           type='user'
           style={this.getAvatarStyles()}
