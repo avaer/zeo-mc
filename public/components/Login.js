@@ -22,8 +22,7 @@ export default class Login extends React.Component {
   state = {
     username: '',
     password: '',
-    usernameInputFocused: false,
-    passwordInputFocused: false,
+    gender: 'male',
   };
   usernameInput = null;
   passwordInput = null;
@@ -86,17 +85,63 @@ export default class Login extends React.Component {
   getLabelStyles() {
     return {
       display: 'block',
-      paddingBottom: 30,
+      paddingBottom: 20,
     };
   }
 
   getLabelTextStyles({focused}) {
-    console.log('label text styles', {focused});
     return {
       marginBottom: 10,
       color: !focused ? LIGHT_COLOR : DARK_COLOR,
       fontSize: '13px',
       cursor: 'text',
+    };
+  }
+
+  getRadioLabelsStyles() {
+    return {
+      display: 'flex',
+      paddingTop: 10,
+    };
+  }
+
+  getRadioLabelStyles() {
+    return {
+      display: 'flex',
+      marginRight: 20,
+      cursor: 'pointer',
+    };
+  }
+
+  getRadioInputStyles() {
+    return {
+      display: 'block',
+      WebkitAppearance: 'none',
+      width: 12,
+      height: 12,
+      margin: '0 10px 0 0',
+      backgroundColor: 'white',
+      border: '2px solid ' + DARK_COLOR,
+      outline: 'none',
+      boxSizing: 'border-box',
+    };
+  }
+
+  getRadioInputCheckboxStyles({checked}) {
+    return {
+      position: 'absolute',
+      marginTop: 3,
+      marginLeft: 3,
+      height: 6,
+      width: 6,
+      backgroundColor: '#4cd964',
+      visibility: checked ? null : 'hidden',
+    };
+  }
+
+  getRadioLabelTextStyles() {
+    return {
+      fontSize: '13px',
     };
   }
 
@@ -126,6 +171,14 @@ export default class Login extends React.Component {
     this.passwordInput = passwordInput;
   }
 
+  onGenderChange(gender) {
+    return () => {
+      this.setState({
+        gender
+      });
+    };
+  }
+
   onUsernameChange(e) {
     const username = e.target.value;
     this.setState({
@@ -148,18 +201,6 @@ export default class Login extends React.Component {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     loginEngine.clearError();
-  }
-
-  onPasswordInputFocus() {
-    this.setState({
-      passwordInputFocused: true
-    });
-  }
-
-  onPasswordInputBlur() {
-    this.setState({
-      passwordInputFocused: false
-    });
   }
 
   onLoginButtonClick(e) {
@@ -205,11 +246,38 @@ export default class Login extends React.Component {
       <form style={this.getContainerStyles()} onSubmit={this.onLoginButtonClick}>
         {!this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>Sign in</h1> : null}
         {this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>New account</h1> : null}
+        {this.props.creatingAccount ? <div style={this.getLabelStyles()}>
+          <div style={this.getLabelTextStyles({focused: true})}>Gender</div>
+          <div style={this.getRadioLabelsStyles()}>
+            <label style={this.getRadioLabelStyles()}>
+              <div style={this.getRadioInputCheckboxStyles({checked: this.state.gender === 'male'})} />
+              <input
+                type='radio'
+                name='gender'
+                style={this.getRadioInputStyles()}
+                checked={this.state.gender === 'male'}
+                onChange={this.onGenderChange('male')}
+              />
+              <span style={this.getRadioLabelTextStyles()}>Male</span>
+            </label>
+            <label style={this.getRadioLabelStyles()}>
+              <div style={this.getRadioInputCheckboxStyles({checked: this.state.gender === 'female'})} />
+              <input
+                type='radio'
+                name='gender'
+                style={this.getRadioInputStyles()}
+                checked={this.state.gender === 'female'}
+                onChange={this.onGenderChange('female')}
+              />
+              <span style={this.getRadioLabelTextStyles()}>Female</span>
+            </label>
+          </div>
+        </div> : null}
         {this.props.creatingAccount ? <Avatar
           type='user'
           style={this.getAvatarStyles()}
-          gender='female'
-          value={this.state.username}
+          gender={this.state.gender}
+          value={this.state.username || (this.state.gender === 'male' ? 'avaert' : 'zo')}
           special
         /> : null}
         <Label style={this.getLabelStyles()}>
