@@ -71,6 +71,7 @@ export default class Login extends React.Component {
   getHeadingStyles() {
     return {
       margin: '0 0 40px 0',
+      color: DARK_COLOR,
     };
   }
 

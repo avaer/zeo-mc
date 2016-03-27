@@ -50,6 +50,7 @@ export default class Enter extends React.Component {
   getHeadingStyles() {
     return {
       margin: '0 0 40px 0',
+      color: DARK_COLOR,
     };
   }
 
