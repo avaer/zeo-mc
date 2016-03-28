@@ -16,7 +16,8 @@ export default class Enter extends React.Component {
   onSeedChange = this.onSeedChange.bind(this);
   onFormSubmit = this.onFormSubmit.bind(this);
   onStartCreateWorldButtonClick = this.onStartCreateWorldButtonClick.bind(this);
-  onEndCreateWorldButtonClick = this.onEndCreateWorldButtonClick.bind(this);
+  onCancelButtonClick = this.onCancelButtonClick.bind(this);
+  onBackButtonClick = this.onBackButtonClick.bind(this);
   onCreateWorldButtonClick = this.onCreateWorldButtonClick.bind(this);
   onWorldEnter = this.onWorldEnter.bind(this);
   onWorldDelete = this.onWorldDelete.bind(this);
@@ -199,10 +200,16 @@ export default class Enter extends React.Component {
     loginEngine.startCreateWorld();
   }
 
-  onEndCreateWorldButtonClick() {
+  onCancelButtonClick() {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
-    loginEngine.endCreateWorld();
+    loginEngine.back();
+  }
+
+  onBackButtonClick() {
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    loginEngine.back();
   }
 
   onCreateWorldButtonClick(e) {
@@ -277,10 +284,11 @@ export default class Enter extends React.Component {
         </div>
         {!this.props.creatingWorld ? <div style={this.getButtonsStyles()}>
           <Button onClick={this.onStartCreateWorldButtonClick} submit>Create world</Button>
+          <Button onClick={this.onBackButtonClick} submit>Back</Button>
         </div> : null}
         {this.props.creatingWorld ? <div style={this.getButtonsStyles()}>
           <Button onClick={this.onCreateWorldButtonClick} submit>Create</Button>
-          <Button onClick={this.onEndCreateWorldButtonClick}>Cancel</Button>
+          <Button onClick={this.onCancelButtonClick}>Cancel</Button>
         </div> : null}
         <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>
       </form>

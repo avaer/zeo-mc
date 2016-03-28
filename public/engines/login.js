@@ -86,10 +86,10 @@ export default class LoginEngine extends Engine {
       .set('creatingAccount', true));
   }
 
-  endCreateAccount() {
+  /* endCreateAccount() {
     this.updateState('login', state => state
       .set('creatingAccount', false));
-  }
+  } */
 
   createAccount({username, password, gender}) { // XXX port this to the backend
     this.updateState('login', state => state
@@ -103,10 +103,10 @@ export default class LoginEngine extends Engine {
       .set('creatingWorld', true));
   }
 
-  endCreateWorld() {
+  /* endCreateWorld() {
     this.updateState('login', state => state
       .set('creatingWorld', false));
-  }
+  } */
 
   createWorld({worldname, seed}) { // XXX port this to the backend
     this.updateState('login', state => state
@@ -134,6 +134,35 @@ export default class LoginEngine extends Engine {
   quickload(worldname) {
     this.updateState('login', state => state
       .set('mode', 'live'));
+  }
+
+  back() {
+    this.updateState('login', state => {
+      const {mode, user, world, creatingAccount, creatingWorld} = state;
+      if (mode === 'quickload') {
+        return state;
+      } if (mode === 'login') {
+        if (creatingAccount) {
+          return state.set('creatingAccount', false);
+        } else {
+          return state;
+        }
+      } else if (mode === 'enter') {
+        if (creatingWorld) {
+          return state.set('creatingWorld', false);
+        } else {
+          if (user && world) { // XXX make this go back to a user-only non-enterable quickload screen
+            return state.set('mode', 'quickload');
+          } else {
+            return state.set('mode', 'login');
+          }
+        }
+      } else if (mode === 'live') {
+        return state.set('mode', 'quickload');
+      } else {
+        return state;
+      }
+    });
   }
 }
 
