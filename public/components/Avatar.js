@@ -30,15 +30,8 @@ export default class Avatar extends React.Component {
   }
 
   getImageUrl() {
-    const {type} = this.props;
-    if (type === 'user') {
-      const {gender, value} = this.props;
-      return '/api/img/users/' + gender + '/' + value;
-    } else if (type === 'world') {
-      return '';
-    } else {
-      return null;
-    }
+    const {gender, value} = this.props;
+    return '/api/img/users/' + gender + '/' + value;
   }
 
   render() {

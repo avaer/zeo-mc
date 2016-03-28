@@ -2,6 +2,7 @@ import React from 'react';
 
 import Login from './Login';
 import Enter from './Enter';
+import Quickload from './Quickload';
 import VoxelScene from './VoxelScene';
 import VoxelMenu from './VoxelMenu';
 
@@ -13,14 +14,11 @@ export default class AppBody extends React.Component {
     const {stores, engines} = this.props;
     const {window: windowState, login: loginState, menu: menuState, player: playerState} = stores;
     const {width, height, devicePixelRatio, pathname} = windowState;
-    const {loggedIn, loggingIn, creatingAccount, entered, entering, creatingWorld, worlds: loginWorlds, error: loginError} = loginState;
-    const live = loggedIn && entered;
+    const {mode, creatingAccount, creatingWorld, user: loginUser, world: loginWorld, worlds: loginWorlds, error: loginError} = loginState;
     const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab, itemIndex: menuItemIndex, dragItemIndex: menuDragItemIndex, dragCoords: menuDragCoords} = menuState;
     const {inventory} = playerState;
 
     const loginProps = {
-      loggedIn,
-      loggingIn,
       creatingAccount,
       error: loginError,
 
@@ -28,14 +26,22 @@ export default class AppBody extends React.Component {
     };
 
     const enterProps = {
-      entered,
-      entering,
       creatingWorld,
       worlds: loginWorlds,
       error: loginError,
 
       engines,
     };
+
+    const quickloadProps = {
+      user: loginUser,
+      world: loginWorld,
+      // error: loginError,
+
+      engines,
+    };
+
+    console.log('quickload props', quickloadProps);
 
     const voxelSceneProps = {
       width,
@@ -65,11 +71,13 @@ export default class AppBody extends React.Component {
 
     return (
       <div className='app-body'>
-        {/* <Avatar value='zoe'/> */}
-        {!loggedIn ? <Login {...loginProps} /> : null}
-        {loggedIn && !entered ? <Enter {...enterProps} /> : null}
-        {live ? <VoxelScene {...voxelSceneProps} /> : null}
-        {live ? <VoxelMenu {...voxelMenuProps} /> : null}
+        {mode === 'login' ? <Login {...loginProps} /> : null}
+        {mode === 'enter' ? <Enter {...enterProps} /> : null}
+        {mode === 'quickload' ? <Quickload {...quickloadProps} /> : null}
+        {mode === 'live' ? <div>
+          <VoxelScene {...voxelSceneProps} />
+          <VoxelMenu {...voxelMenuProps} />
+        </div> : null}
       </div>
     );
   }

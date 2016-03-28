@@ -6,7 +6,6 @@ import Input from './Input';
 import Button from './Button';
 import Identity from './Identity';
 
-const LOGIN_FONT = '\'Press Start 2P\', cursive';
 const DARK_COLOR = '#333';
 const LIGHT_COLOR = '#CCC';
 
@@ -19,6 +18,7 @@ export default class Enter extends React.Component {
   onStartCreateWorldButtonClick = this.onStartCreateWorldButtonClick.bind(this);
   onEndCreateWorldButtonClick = this.onEndCreateWorldButtonClick.bind(this);
   onCreateWorldButtonClick = this.onCreateWorldButtonClick.bind(this);
+  onWorldEnter = this.onWorldEnter.bind(this);
   onWorldDelete = this.onWorldDelete.bind(this);
 
   state = {
@@ -75,7 +75,6 @@ export default class Enter extends React.Component {
   getContainerStyles() {
     return {
       width: 400,
-      // height: 200,
     };
   }
 
@@ -110,58 +109,6 @@ export default class Enter extends React.Component {
     };
   }
 
-  /* getUsernameLabelStyles() {
-    const {usernameInputFocused} = this.state;
-    return {
-      display: 'block',
-      paddingBottom: 30,
-      color: !usernameInputFocused ? LIGHT_COLOR : DARK_COLOR,
-      fontSize: '13px',
-      cursor: 'text',
-    };
-  }
-
-  getPasswordLabelStyles() {
-    const {passwordInputFocused} = this.state;
-    return {
-      display: 'block',
-      paddingBottom: 30,
-      color: !passwordInputFocused ? LIGHT_COLOR : DARK_COLOR,
-      fontSize: '13px',
-      cursor: 'text',
-    };
-  }
-
-  getUsernameInputStyles() {
-    const {usernameInputFocused} = this.state;
-    return {
-      display: 'block',
-      height: 30,
-      width: '100%',
-      border: 0,
-      borderBottom: '2px solid ' + (!usernameInputFocused ? LIGHT_COLOR : DARK_COLOR),
-      fontFamily: LOGIN_FONT,
-      fontSize: '13px',
-      textAlign: 'center',
-      outline: 'none',
-    };
-  }
-
-  getPasswordInputStyles() {
-    const {passwordInputFocused} = this.state;
-    return {
-      display: 'block',
-      width: '100%',
-      border: 0,
-      borderBottom: '2px solid ' + (!passwordInputFocused ? LIGHT_COLOR : DARK_COLOR),
-      fontFamily: LOGIN_FONT,
-      fontSize: '13px',
-      lineHeight: '30px',
-      textAlign: 'center',
-      outline: 'none',
-    };
-  } */
-
   getButtonsStyles() {
     return {
       display: 'flex',
@@ -172,10 +119,6 @@ export default class Enter extends React.Component {
   getIdentityStyles() {
     return {
       display: 'flex',
-      // width: 50,
-      // height: 50,
-      // marginRight: 10,
-      // border: '2px solid ' + DARK_COLOR,
       alignItems: 'center',
       justifyContent: 'center',
     };
@@ -274,6 +217,12 @@ export default class Enter extends React.Component {
     }
   }
 
+  onWorldEnter(worldname) {
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    loginEngine.enterWorld(worldname);
+  }
+
   onWorldDelete(worldname) {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
@@ -287,6 +236,7 @@ export default class Enter extends React.Component {
         {this.props.creatingWorld ? <h1 style={this.getHeadingStyles()}>New world</h1> : null}
         {!this.props.creatingWorld ? <Worlds
           worlds={this.props.worlds}
+          onWorldEnter={this.onWorldEnter}
           onWorldDelete={this.onWorldDelete}
         /> : null}
         <div style={this.getCreateWorldFormStyles()}>
@@ -359,6 +309,7 @@ class Worlds extends React.Component {
       :
         worlds.map(world => <World
           world={world}
+          onEnter={this.props.onWorldEnter}
           onDelete={this.props.onWorldDelete}
           key={world.worldname}
         />)
@@ -368,6 +319,7 @@ class Worlds extends React.Component {
 }
 
 class World extends React.Component {
+  onClick = this.onClick.bind(this);
   onMouseOver = this.onMouseOver.bind(this);
   onMouseOut = this.onMouseOut.bind(this);
   onDeleteButtonClick = this.onDeleteButtonClick.bind(this);
@@ -398,8 +350,6 @@ class World extends React.Component {
       height: 30,
       marginRight: 10,
       border: '2px solid ' + DARK_COLOR,
-      // alignItems: 'center',
-      // justifyContent: 'center',
     };
   } 
 
@@ -417,6 +367,14 @@ class World extends React.Component {
       display: world ? null : 'none',
       margin: '3px 0',
     };
+  }
+
+  onClick() {
+    const {world, onEnter} = this.props;
+    if (world) {
+      const {worldname} = world;
+      onEnter(worldname);
+    }
   }
 
   onMouseOver() {
@@ -443,7 +401,7 @@ class World extends React.Component {
   render() {
     const {world} = this.props;
     
-    return <div style={this.getStyles()} onMouseOver={this.onMouseOver} onMouseOut={this.onMouseOut}>
+    return <div style={this.getStyles()} onClick={this.onClick} onMouseOver={this.onMouseOver} onMouseOut={this.onMouseOut}>
       <Identity
         style={this.getIdentityStyles()}
         size={30}

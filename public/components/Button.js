@@ -19,15 +19,33 @@ export default class Button extends React.Component {
   };
 
   getStyles() {
-    const {small} = this.props;
+    const {primary, small} = this.props;
     const {hovered, focused, active} = this.state;
-    const special = hovered || focused;
+    const special = primary || hovered || focused;
 
     return {
       padding: !small ? 13 : 5,
       marginRight: 10,
       border: '2px solid ' + (!special ? DARK_COLOR : 'transparent'),
-      backgroundColor: !special ? 'transparent' : !active ? '#ff2d55' : '#c70024',
+      backgroundColor: (() => {
+        if (primary) {
+          if (active) {
+            return '#219c35';
+          } else if (hovered) {
+            return '#2ac644';
+          } else {
+            return '#4cd964';
+          }
+        } else if (special) {
+          if (active) {
+            return '#c70024';
+          } else {
+            return '#ff2d55';
+          }
+        } else {
+          return 'transparent';
+        }
+      })(),
       fontFamily: LOGIN_FONT,
       color: !special ? DARK_COLOR : 'white',
       fontSize: '13px',
@@ -46,7 +64,8 @@ export default class Button extends React.Component {
 
   onMouseOut() {
     this.setState({
-      hovered: false
+      hovered: false,
+      active: false,
     });
   }
 

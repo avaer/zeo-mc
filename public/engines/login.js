@@ -12,7 +12,7 @@ export default class LoginEngine extends Engine {
 
     if (session) {
       return {
-        'login': this.getState('login').set('loggingIn', true)
+        'login': this.getState('login')
       };
     } else {
       return null;
@@ -20,9 +20,6 @@ export default class LoginEngine extends Engine {
   }
 
   loginWithUsernamePassword({username, password}) {
-    this.updateState('login', state => state
-      .set('loggingIn', true));
-
     _getGraphQl('mutation', 'login', {
       username,
       password,
@@ -68,8 +65,7 @@ export default class LoginEngine extends Engine {
     this.updateState('login', state => state
       .set('user', user)
       .set('session', session)
-      .set('loggedIn', true)
-      .set('loggingIn', false)
+      .set('mode', 'enter')
       .set('error', null));
   }
 
@@ -77,7 +73,6 @@ export default class LoginEngine extends Engine {
     console.log('error logging in', JSON.stringify(String(err))); // XXX
 
     this.updateState('login', state => state
-      .set('loggingIn', false)
       .set('error', String(err)));
   }
 
@@ -98,8 +93,8 @@ export default class LoginEngine extends Engine {
 
   createAccount({username, password, gender}) { // XXX port this to the backend
     this.updateState('login', state => state
-      .set('loggedIn', true)
-      .set('loggingIn', false)
+      .set('user', {username, gender})
+      .set('mode', 'enter')
       .set('creatingAccount', false));
   }
 
@@ -128,6 +123,17 @@ export default class LoginEngine extends Engine {
   deleteWorld(worldname) { // XXX port this to the backend
     this.updateState('login', state => state
       .update('worlds', worlds => worlds.filter(world => world.worldname !== worldname)));
+  }
+
+  enterWorld(worldname) { // XXX port this to the backend
+    this.updateState('login', state => state
+      .set('world', {worldname})
+      .set('mode', 'quickload'));
+  }
+
+  quickload(worldname) {
+    this.updateState('login', state => state
+      .set('mode', 'live'));
   }
 }
 

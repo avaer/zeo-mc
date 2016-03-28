@@ -256,7 +256,7 @@ export default class Login extends React.Component {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     const {username, password, gender} = this.state;
-    loginEngine.createAccount(username, password, gender);
+    loginEngine.createAccount({username, password, gender});
     loginEngine.clearError();
 
     if (e) {
@@ -271,10 +271,9 @@ export default class Login extends React.Component {
         {!this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>Sign in</h1> : null}
         {this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>New account</h1> : null}
         {this.props.creatingAccount ? <Avatar
-          type='user'
           style={this.getAvatarStyles()}
           gender={this.state.gender}
-          value={this.state.username || (this.state.gender === 'male' ? 'avaert' : 'zo')}
+          value={this.state.username || (this.state.gender === 'male' ? 'avaert' : 'u')}
           size={50}
           special
         /> : null}
