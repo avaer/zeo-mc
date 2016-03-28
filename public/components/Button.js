@@ -19,11 +19,12 @@ export default class Button extends React.Component {
   };
 
   getStyles() {
+    const {small} = this.props;
     const {hovered, focused, active} = this.state;
     const special = hovered || focused;
 
     return {
-      padding: 13,
+      padding: !small ? 13 : 5,
       marginRight: 10,
       border: '2px solid ' + (!special ? DARK_COLOR : 'transparent'),
       backgroundColor: !special ? 'transparent' : !active ? '#ff2d55' : '#c70024',
@@ -74,16 +75,18 @@ export default class Button extends React.Component {
   }
 
   render() {
-    return <button
-      type={this.props.submit ? 'submit' : 'button'}
-      style={this.getStyles()}
-      onMouseOver={this.onMouseOver}
-      onMouseOut={this.onMouseOut}
-      onFocus={this.onFocus}
-      onBlur={this.onBlur}
-      onMouseDown={this.onMouseDown}
-      onMouseUp={this.onMouseUp}
-      onClick={this.props.onClick}
-    >{this.props.children}</button>
+    return <div style={this.props.style}>
+      <button
+        type={this.props.submit ? 'submit' : 'button'}
+        style={this.getStyles()}
+        onMouseOver={this.onMouseOver}
+        onMouseOut={this.onMouseOut}
+        onFocus={this.onFocus}
+        onBlur={this.onBlur}
+        onMouseDown={this.onMouseDown}
+        onMouseUp={this.onMouseUp}
+        onClick={this.props.onClick}
+      >{this.props.children}</button>
+    </div>;
   }
 }

@@ -252,12 +252,17 @@ export default class Login extends React.Component {
     this.selectUsernameInput();
   }
 
-  onCreateAccountButtonClick() {
+  onCreateAccountButtonClick(e) {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     const {username, password, gender} = this.state;
     loginEngine.createAccount(username, password, gender);
     loginEngine.clearError();
+
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }
 
   render() {

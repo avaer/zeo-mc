@@ -19,6 +19,7 @@ export default class Enter extends React.Component {
   onStartCreateWorldButtonClick = this.onStartCreateWorldButtonClick.bind(this);
   onEndCreateWorldButtonClick = this.onEndCreateWorldButtonClick.bind(this);
   onCreateWorldButtonClick = this.onCreateWorldButtonClick.bind(this);
+  onWorldDelete = this.onWorldDelete.bind(this);
 
   state = {
     worldName: '',
@@ -261,11 +262,22 @@ export default class Enter extends React.Component {
     loginEngine.endCreateWorld();
   }
 
-  onCreateWorldButtonClick() {
+  onCreateWorldButtonClick(e) {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     const {worldname, seed} = this.state;
     loginEngine.createWorld({worldname, seed});
+
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+
+  onWorldDelete(worldname) {
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    loginEngine.deleteWorld(worldname);
   }
 
   render() {
@@ -273,7 +285,10 @@ export default class Enter extends React.Component {
       <form style={this.getContainerStyles()} onSubmit={this.onFormSubmit}>
         {!this.props.creatingWorld ? <h1 style={this.getHeadingStyles()}>Choose world</h1> : null}
         {this.props.creatingWorld ? <h1 style={this.getHeadingStyles()}>New world</h1> : null}
-        {!this.props.creatingWorld ? <Worlds worlds={this.props.worlds} /> : null}
+        {!this.props.creatingWorld ? <Worlds
+          worlds={this.props.worlds}
+          onWorldDelete={this.onWorldDelete}
+        /> : null}
         <div style={this.getCreateWorldFormStyles()}>
           <Identity
             style={this.getIdentityStyles()}
@@ -314,7 +329,7 @@ export default class Enter extends React.Component {
           <Button onClick={this.onStartCreateWorldButtonClick} submit>Create world</Button>
         </div> : null}
         {this.props.creatingWorld ? <div style={this.getButtonsStyles()}>
-          <Button onClick={this.onStartCreateWorldButtonClick} submit>Create</Button>
+          <Button onClick={this.onCreateWorldButtonClick} submit>Create</Button>
           <Button onClick={this.onEndCreateWorldButtonClick}>Cancel</Button>
         </div> : null}
         <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>
@@ -329,7 +344,7 @@ class Worlds extends React.Component {
       marginBottom: 20,
       border: '2px solid ' + DARK_COLOR,
       borderRadius: 3,
-      padding: 10,
+      padding: 5,
       width: '100%',
       height: 300,
     };
@@ -342,19 +357,35 @@ class Worlds extends React.Component {
       {worlds.size === 0 ?
         <World key={null}/>
       :
-        worlds.map(world => <World world={world} key={world.worldname} />)
+        worlds.map(world => <World
+          world={world}
+          onDelete={this.props.onWorldDelete}
+          key={world.worldname}
+        />)
       }
     </div>;
   }
 }
 
 class World extends React.Component {
+  onMouseOver = this.onMouseOver.bind(this);
+  onMouseOut = this.onMouseOut.bind(this);
+  onDeleteButtonClick = this.onDeleteButtonClick.bind(this);
+
+  state = {
+    hovered: false,
+  };
+
   getStyles() {
     const {world} = this.props;
+    const {hovered} = this.state;
 
     return {
       display: 'flex',
+      padding: 5,
       color: world ? DARK_COLOR : LIGHT_COLOR,
+      backgroundColor: (world && hovered) ? '#EEE' : 'transparent',
+      cursor: world ? 'pointer' : null,
     };
   }
 
@@ -375,20 +406,56 @@ class World extends React.Component {
   getTextStyles() {
     return {
       fontSize: '13px',
+      lineHeight: '34px',
+      flex: 1,
     };
+  }
+
+  getDeleteButtonStyles() {
+    const {world} = this.props;
+    return {
+      display: world ? null : 'none',
+      margin: '3px 0',
+    };
+  }
+
+  onMouseOver() {
+    this.setState({
+      hovered: true
+    });
+  }
+
+  onMouseOut() {
+    this.setState({
+      hovered: false
+    });
+  }
+
+  onDeleteButtonClick(e) {
+    const {world, onDelete} = this.props;
+    const {worldname} = world;
+    onDelete(worldname);
+
+    e.preventDefault();
+    e.stopPropagation();
   }
 
   render() {
     const {world} = this.props;
     
-    return <div style={this.getStyles()}>
+    return <div style={this.getStyles()} onMouseOver={this.onMouseOver} onMouseOut={this.onMouseOut}>
       <Identity
         style={this.getIdentityStyles()}
-        size={50}
+        size={30}
         value={world ? world.worldname : null}
         special
       />
       <div style={this.getTextStyles()}>{world ? world.worldname : '<no worlds>'}</div>
+      <Button
+        style={this.getDeleteButtonStyles()}
+        onClick={this.onDeleteButtonClick}
+        small
+      >delete</Button>
     </div>
   }
 }

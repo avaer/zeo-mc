@@ -2,6 +2,7 @@ import Immutable from 'immutable';
 
 import Engines from './index';
 const {Engine} = Engines;
+import {World} from '../stores/login';
 
 export default class LoginEngine extends Engine {
   static NAME = 'login';
@@ -95,7 +96,7 @@ export default class LoginEngine extends Engine {
       .set('creatingAccount', false));
   }
 
-  createAccount({username, password, gender}) {
+  createAccount({username, password, gender}) { // XXX port this to the backend
     this.updateState('login', state => state
       .set('loggedIn', true)
       .set('loggingIn', false)
@@ -112,9 +113,21 @@ export default class LoginEngine extends Engine {
       .set('creatingWorld', false));
   }
 
-  createWorld({worldname, seed}) {
+  createWorld({worldname, seed}) { // XXX port this to the backend
     this.updateState('login', state => state
+      .update('worlds', worlds => {
+        if (!worlds.some(world => world.worldname === worldname)) {
+          return worlds.push(new World({worldname, seed}));
+        } else {
+          return worlds;
+        }
+      })
       .set('creatingWorld', false));
+  }
+
+  deleteWorld(worldname) { // XXX port this to the backend
+    this.updateState('login', state => state
+      .update('worlds', worlds => worlds.filter(world => world.worldname !== worldname)));
   }
 }
 
