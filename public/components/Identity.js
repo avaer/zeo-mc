@@ -1,6 +1,6 @@
 import React from 'react';
 
-import polygen from '../lib/polygen';
+import polygen from 'polygen';
 
 const {floor, random} = Math;
 
