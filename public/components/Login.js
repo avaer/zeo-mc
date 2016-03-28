@@ -5,7 +5,6 @@ import Label from './Label';
 import Input from './Input';
 import Button from './Button';
 import Avatar from './Avatar';
-import Identity from './Identity';
 
 const LOGIN_FONT = '\'Press Start 2P\', cursive';
 const DARK_COLOR = '#333';
@@ -17,6 +16,7 @@ export default class Login extends React.Component {
   onUsernameChange = this.onUsernameChange.bind(this);
   onPasswordChange = this.onPasswordChange.bind(this);
   onLoginButtonClick = this.onLoginButtonClick.bind(this);
+  onFormSubmit = this.onFormSubmit.bind(this);
   onStartCreateAccountButtonClick = this.onStartCreateAccountButtonClick.bind(this);
   onEndCreateAccountButtonClick = this.onEndCreateAccountButtonClick.bind(this);
   onCreateAccountButtonClick = this.onCreateAccountButtonClick.bind(this);
@@ -72,14 +72,6 @@ export default class Login extends React.Component {
     return {
       margin: '0 0 40px 0',
       color: DARK_COLOR,
-    };
-  }
-
-  getIdentityStyles() {
-    return {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
     };
   }
 
@@ -214,11 +206,19 @@ export default class Login extends React.Component {
     loginEngine.clearError();
   }
 
-  onLoginButtonClick(e) {
+  onLoginButtonClick() {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     const {username, password} = this.state;
     loginEngine.loginWithUsernamePassword({username, password});
+  }
+
+  onFormSubmit(e) {
+    if (!this.props.creatingAccount) {
+      this.onLoginButtonClick();
+    } else {
+      this.onCreateAccountButtonClick();
+    }
 
     e.preventDefault();
     e.stopPropagation();
@@ -262,14 +262,9 @@ export default class Login extends React.Component {
 
   render() {
     return <div style={this.getWrapperStyles()}>
-      <form style={this.getContainerStyles()} onSubmit={this.onLoginButtonClick}>
+      <form style={this.getContainerStyles()} onSubmit={this.onFormSubmit}>
         {!this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>Sign in</h1> : null}
         {this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>New account</h1> : null}
-        {!this.props.creatingAccount ? <Identity
-          style={this.getIdentityStyles()}
-          size={50}
-          special
-        /> : null}
         {this.props.creatingAccount ? <Avatar
           type='user'
           style={this.getAvatarStyles()}
@@ -338,7 +333,7 @@ export default class Login extends React.Component {
           <Button onClick={this.onStartCreateAccountButtonClick}>Create Account</Button>
         </div> : null}
         {this.props.creatingAccount ? <div style={this.getButtonsStyles()}>
-          <Button onClick={this.onCreateAccountButtonClick}>Create Account</Button>
+          <Button onClick={this.onCreateAccountButtonClick} submit>Create Account</Button>
           <Button onClick={this.onEndCreateAccountButtonClick}>Cancel</Button>
         </div> : null}
         <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>

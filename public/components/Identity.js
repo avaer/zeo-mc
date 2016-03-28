@@ -22,17 +22,24 @@ export default class Identity extends React.Component {
     this.refreshUrl();
   }
 
-  componentWillReceiveProps() {
-    // XXX
+  componentWillReceiveProps(nextProps) {
+    const {props: prevProps} = this;
+    if (nextProps.value !== prevProps.value) {
+      this.refreshUrl(nextProps);
+    }
   }
 
-  refreshUrl() {
+  refreshUrl(props) {
+    props = props || this.props;
+
+    const {value} = props;
     const url = polygen({
       size: SIZE,
       minPoints: MIN_POINTS,
       maxPoints: MAX_POINTS,
       numCells: NUM_CELLS,
       variance: VARIANCE,
+      seed: value
     }).dataUrl();
 
     this.setState({

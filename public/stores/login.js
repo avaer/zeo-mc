@@ -8,6 +8,7 @@ export default class Login extends Immutable.Record({
   creatingAccount: false,
   entered: false,
   entering: false,
+  creatingWorld: false,
   worlds: Immutable.List(),
   error: null,
 }) {}

@@ -1,29 +1,56 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
+import Label from './Label';
+import Input from './Input';
 import Button from './Button';
+import Identity from './Identity';
 
 const LOGIN_FONT = '\'Press Start 2P\', cursive';
 const DARK_COLOR = '#333';
 const LIGHT_COLOR = '#CCC';
 
 export default class Enter extends React.Component {
-  componentDidMount(nextProps) {
-    this.selectUsernameInput();
+  setWorldnameInput = this.setWorldnameInput.bind(this);
+  setSeedInput = this.setSeedInput.bind(this);
+  onWorldnameChange = this.onWorldnameChange.bind(this);
+  onSeedChange = this.onSeedChange.bind(this);
+  onFormSubmit = this.onFormSubmit.bind(this);
+  onStartCreateWorldButtonClick = this.onStartCreateWorldButtonClick.bind(this);
+  onCreateWorldButtonClick = this.onCreateWorldButtonClick.bind(this);
+
+  state = {
+    worldName: '',
+    seed: '',
+  };
+  worldnameInput = null;
+  seedInput = null;
+
+  componentDidMount() {
+    this.selectWorldnameInput();
   }
 
   componentWillUpdate(nextProps) {
     const {props: prevProps} = this;
     if (nextProps.error && !prevProps.error) {
-      this.selectUsernameInput();
+      this.selectWorldnameInput();
     }
   }
 
-  selectUsernameInput() {
-    const {username: usernameInput} = this.refs;
+  selectWorldnameInput() {
     setTimeout(() => {
-      usernameInput.focus();
-      usernameInput.select();
-    });
+      const worldnameInput = ReactDOM.findDOMNode(this.worldnameInput);
+      worldnameInput.focus();
+      worldnameInput.select();
+    }, 1000);
+  }
+
+  setWorldnameInput(worldnameInput) {
+    this.worldnameInput = worldnameInput;
+  }
+
+  setSeedInput(seedInput) {
+    this.seedInput = seedInput;
   }
 
   getWrapperStyles() {
@@ -54,13 +81,31 @@ export default class Enter extends React.Component {
     };
   }
 
-  getLabelTextStyles() {
+  getCreateWorldFormStyles() {
+    const {creatingWorld} = this.props;
     return {
-      marginBottom: 10,
+      display: creatingWorld ? null : 'none',
     };
   }
 
-  getUsernameLabelStyles() {
+  getLabelStyles() {
+    return {
+      display: 'block',
+      paddingBottom: 20,
+      cursor: 'text',
+    };
+  }
+
+  getLabelTextStyles({focused}) {
+    return {
+      marginBottom: 10,
+      color: !focused ? LIGHT_COLOR : DARK_COLOR,
+      fontSize: '13px',
+      WebkitUserSelect: 'none',
+    };
+  }
+
+  /* getUsernameLabelStyles() {
     const {usernameInputFocused} = this.state;
     return {
       display: 'block',
@@ -110,6 +155,25 @@ export default class Enter extends React.Component {
       textAlign: 'center',
       outline: 'none',
     };
+  } */
+
+  getButtonsStyles() {
+    return {
+      display: 'flex',
+      marginBottom: 20,
+    };
+  }
+
+  getIdentityStyles() {
+    return {
+      display: 'flex',
+      // width: 50,
+      // height: 50,
+      // marginRight: 10,
+      // border: '2px solid ' + DARK_COLOR,
+      alignItems: 'center',
+      justifyContent: 'center',
+    };
   }
 
   getErrorStyles() {
@@ -123,7 +187,25 @@ export default class Enter extends React.Component {
     };
   }
 
-  onUsernameChange(e) {
+  onWorldnameChange(e) {
+    const worldname = e.target.value;
+    this.setState({
+      worldname
+    });
+
+    this.clearError();
+  }
+
+  onSeedChange(e) {
+    const seed = e.target.value;
+    this.setState({
+      seed
+    });
+
+    this.clearError();
+  }
+
+  /* onUsernameChange(e) {
     const username = e.target.value;
     this.setState({
       username
@@ -139,7 +221,7 @@ export default class Enter extends React.Component {
     });
 
     this.clearError();
-  }
+  } */
 
   clearError() {
     const {engines} = this.props;
@@ -147,47 +229,81 @@ export default class Enter extends React.Component {
     loginEngine.clearError();
   }
 
-  onUsernameInputFocus() {
-    this.setState({
-      usernameInputFocused: true
-    });
+  onFormSubmit(e) {
+    if (!this.props.creatingWorld) {
+      this.onStartCreateWorldButtonClick();
+    } else {
+      this.onCreateWorldButtonClick();
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
   }
 
-  onUsernameInputBlur() {
-    this.setState({
-      usernameInputFocused: false
-    });
-  }
-
-  onPasswordInputFocus() {
-    this.setState({
-      passwordInputFocused: true
-    });
-  }
-
-  onPasswordInputBlur() {
-    this.setState({
-      passwordInputFocused: false
-    });
-  }
-
-  onSubmitButtonClick() {
+  onStartCreateWorldButtonClick() {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
-    const {username, password} = this.state;
-    loginEngine.loginWithUsernamePassword({username, password});
+    loginEngine.startCreateWorld();
+  }
+
+  onCreateWorldButtonClick() {
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    const {worldname, seed} = this.state;
+    loginEngine.createWorld({worldname, seed});
   }
 
   render() {
-console.log('enter props', this.props);
-
     return <div style={this.getWrapperStyles()}>
-      <div style={this.getContainerStyles()}>
-        <h1 style={this.getHeadingStyles()}>Choose world</h1>
-        <Worlds worlds={this.props.worlds} />
-        <Button onClick={this.onSubmitButtonClick}>Create world</Button>
+      <form style={this.getContainerStyles()} onSubmit={this.onFormSubmit}>
+        {!this.props.creatingWorld ? <h1 style={this.getHeadingStyles()}>Choose world</h1> : null}
+        {this.props.creatingWorld ? <h1 style={this.getHeadingStyles()}>New world</h1> : null}
+        {!this.props.creatingWorld ? <Worlds worlds={this.props.worlds} /> : null}
+        <div style={this.getCreateWorldFormStyles()}>
+          <Identity
+            style={this.getIdentityStyles()}
+            size={50}
+            value={this.state.worldname}
+            special
+          />
+          <Label style={this.getLabelStyles()}>
+            {({focused, onFocus, onBlur}) => <div>
+              <div style={this.getLabelTextStyles({focused})} key='label'>World name</div>
+              <Input
+                value={this.state.worldname}
+                focused={focused}
+                ref={this.setWorldnameInput}
+                onChange={this.onWorldnameChange}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                key='input'
+              />
+            </div>}
+          </Label>
+          <Label style={this.getLabelStyles()}>
+            {({focused, onFocus, onBlur}) => <div>
+              <div style={this.getLabelTextStyles({focused})} key='label'>Seed</div>
+              <Input
+                value={this.state.seed}
+                focused={focused}
+                ref={this.setSeedInput}
+                onChange={this.onSeedChange}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                key='input'
+              />
+            </div>}
+          </Label>
+        </div>
+        {!this.props.creatingWorld ? <div style={this.getButtonsStyles()}>
+          <Button onClick={this.onStartCreateWorldButtonClick} submit>Create world</Button>
+        </div> : null}
+        {this.props.creatingWorld ? <div style={this.getButtonsStyles()}>
+          <Button onClick={this.onStartCreateWorldButtonClick} submit>Create world</Button>
+          <Button onClick={this.onEndCreateWorldButtonClick}>Cancel</Button>
+        </div> : null}
         <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>
-      </div>
+      </form>
     </div>;
   }
 }
@@ -227,17 +343,19 @@ class World extends React.Component {
     };
   }
 
-  getIconStyles() {
+  getIdentityStyles() {
     const {world} = this.props;
 
     return {
-      display: world ? null : 'none',
+      display: world ? 'block' : 'none',
       width: 30,
       height: 30,
       marginRight: 10,
       border: '2px solid ' + DARK_COLOR,
+      // alignItems: 'center',
+      // justifyContent: 'center',
     };
-  }
+  } 
 
   getTextStyles() {
     return {
@@ -249,8 +367,13 @@ class World extends React.Component {
     const {world} = this.props;
     
     return <div style={this.getStyles()}>
-      <div style={this.getIconStyles()} />
-      <div style={this.getTextStyles()}>{world ? world.name : '<no worlds>'}</div>
+      <Identity
+        style={this.getIdentityStyles()}
+        size={50}
+        value={world ? world.worldname : null}
+        special
+      />
+      <div style={this.getTextStyles()}>{world ? world.worldname : '<no worlds>'}</div>
     </div>
   }
 }

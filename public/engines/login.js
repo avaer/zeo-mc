@@ -101,6 +101,21 @@ export default class LoginEngine extends Engine {
       .set('loggingIn', false)
       .set('creatingAccount', false));
   }
+
+  startCreateWorld() {
+    this.updateState('login', state => state
+      .set('creatingWorld', true));
+  }
+
+  endCreateWorld() {
+    this.updateState('login', state => state
+      .set('creatingWorld', false));
+  }
+
+  createWorld({worldname, seed}) {
+    this.updateState('login', state => state
+      .set('creatingWorld', false));
+  }
 }
 
 function _getGraphQl(type, method, args, fields) {
