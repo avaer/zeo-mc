@@ -9,6 +9,7 @@ const MIN_POINTS = 5;
 const MAX_POINTS = 10;
 const NUM_CELLS = 3;
 const VARIANCE = 0.25;
+const DEFAULT_SEED = 'world';
 
 const DARK_COLOR = '#333';
 const LIGHT_COLOR = '#CCC';
@@ -39,7 +40,7 @@ export default class Identity extends React.Component {
       maxPoints: MAX_POINTS,
       numCells: NUM_CELLS,
       variance: VARIANCE,
-      seed: value
+      seed: value || DEFAULT_SEED,
     }).dataUrl();
 
     this.setState({

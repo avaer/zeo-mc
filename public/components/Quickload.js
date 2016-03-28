@@ -11,6 +11,10 @@ const DARK_COLOR = '#333';
 const LIGHT_COLOR = '#CCC';
 
 export default class Enter extends React.Component {
+  onChangeUserButtonClick = this.onChangeUserButtonClick.bind(this);
+  onChangeWorldButtonClick = this.onChangeWorldButtonClick.bind(this);
+  onEnterButtonClick = this.onEnterButtonClick.bind(this);
+
   getWrapperStyles() {
     return {
       display: 'flex',
@@ -93,23 +97,6 @@ export default class Enter extends React.Component {
     };
   }
 
-  /* getLabelStyles() {
-    return {
-      display: 'block',
-      paddingBottom: 20,
-      cursor: 'text',
-    };
-  }
-
-  getLabelTextStyles({focused}) {
-    return {
-      marginBottom: 10,
-      color: !focused ? LIGHT_COLOR : DARK_COLOR,
-      fontSize: '13px',
-      WebkitUserSelect: 'none',
-    };
-  } */
-
   getButtonsStyles() {
     return {
       display: 'flex',
@@ -117,86 +104,17 @@ export default class Enter extends React.Component {
     };
   }
 
-  /* getErrorStyles() {
-    const {error} = this.props;
-    return {
-      padding: 10,
-      backgroundColor: '#ff9500',
-      fontSize: '12px',
-      color: 'white',
-      visibility: error ? null : 'hidden',
-    };
-  }
-
-  onWorldnameChange(e) {
-    const worldname = e.target.value;
-    this.setState({
-      worldname
-    });
-
-    this.clearError();
-  }
-
-  onSeedChange(e) {
-    const seed = e.target.value;
-    this.setState({
-      seed
-    });
-
-    this.clearError();
-  }
-
-  clearError() {
+  onChangeUserButtonClick() {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
-    loginEngine.clearError();
+    loginEngine.changeUser();
   }
 
-  onFormSubmit(e) {
-    if (!this.props.creatingWorld) {
-      this.onStartCreateWorldButtonClick();
-    } else {
-      this.onCreateWorldButtonClick();
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  onStartCreateWorldButtonClick() {
-    this.setState({
-      worldname: '',
-      seed: '',
-    });
-
+  onChangeWorldButtonClick() {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
-    loginEngine.startCreateWorld();
+    loginEngine.changeWorld();
   }
-
-  onEndCreateWorldButtonClick() {
-    const {engines} = this.props;
-    const loginEngine = engines.getEngine('login');
-    loginEngine.endCreateWorld();
-  }
-
-  onCreateWorldButtonClick(e) {
-    const {engines} = this.props;
-    const loginEngine = engines.getEngine('login');
-    const {worldname, seed} = this.state;
-    loginEngine.createWorld({worldname, seed});
-
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }
-
-  onWorldDelete(worldname) {
-    const {engines} = this.props;
-    const loginEngine = engines.getEngine('login');
-    loginEngine.deleteWorld(worldname);
-  } */
 
   onEnterButtonClick() {
     const {engines} = this.props;
@@ -231,7 +149,7 @@ export default class Enter extends React.Component {
               special
             />
             <div style={this.getCardRowTextStyles()}>{this.props.world.worldname}</div>
-            <Button onClick={this.onChooseWorldButtonClick} small>Choose world</Button>
+            <Button onClick={this.onChangeWorldButtonClick} small>Choose world</Button>
           </div>
           <div style={this.getCardRowStyles()}>
             <Button onClick={this.onEnterButtonClick} primary small>Enter</Button>

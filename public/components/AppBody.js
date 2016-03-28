@@ -41,8 +41,6 @@ export default class AppBody extends React.Component {
       engines,
     };
 
-    console.log('quickload props', quickloadProps);
-
     const voxelSceneProps = {
       width,
       height,
