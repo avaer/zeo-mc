@@ -306,7 +306,7 @@ export default class Enter extends React.Component {
           <Button onClick={this.onStartCreateWorldButtonClick} submit>Create world</Button>
         </div> : null}
         {this.props.creatingWorld ? <div style={this.getButtonsStyles()}>
-          <Button onClick={this.onStartCreateWorldButtonClick} submit>Create world</Button>
+          <Button onClick={this.onStartCreateWorldButtonClick} submit>Create</Button>
           <Button onClick={this.onEndCreateWorldButtonClick}>Cancel</Button>
         </div> : null}
         <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>
