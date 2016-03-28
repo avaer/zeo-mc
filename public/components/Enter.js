@@ -33,7 +33,10 @@ export default class Enter extends React.Component {
 
   componentWillUpdate(nextProps) {
     const {props: prevProps} = this;
-    if (nextProps.error && !prevProps.error) {
+    if (
+      (nextProps.creatingWorld && !prevProps.creatingWorld) ||
+      (nextProps.error && !prevProps.error)
+    ) {
       this.selectWorldnameInput();
     }
   }
@@ -43,7 +46,7 @@ export default class Enter extends React.Component {
       const worldnameInput = ReactDOM.findDOMNode(this.worldnameInput);
       worldnameInput.focus();
       worldnameInput.select();
-    }, 1000);
+    });
   }
 
   setWorldnameInput(worldnameInput) {
@@ -242,6 +245,11 @@ export default class Enter extends React.Component {
   }
 
   onStartCreateWorldButtonClick() {
+    this.setState({
+      worldname: '',
+      seed: '',
+    });
+
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     loginEngine.startCreateWorld();
