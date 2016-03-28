@@ -1,0 +1,33 @@
+{
+  "name": "polygen",
+  "version": "0.0.1",
+  "description": "Polygon art generated from a random seed",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modulesio/polygen.git"
+  },
+  "keywords": [
+    "polygon",
+    "art",
+    "random",
+    "generate",
+    "seed",
+    "canvas"
+  ],
+  "author": "a@modules.io",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/modulesio/polygen/issues"
+  },
+  "homepage": "https://github.com/modulesio/polygen#readme",
+  "dependencies": {
+    "alea": "0.0.9",
+    "canvas": "^1.3.12",
+    "colorbrewer": "^1.0.0",
+    "delaunay-fast": "^1.0.1"
+  }
+}
