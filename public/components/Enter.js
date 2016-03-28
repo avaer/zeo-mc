@@ -17,6 +17,7 @@ export default class Enter extends React.Component {
   onSeedChange = this.onSeedChange.bind(this);
   onFormSubmit = this.onFormSubmit.bind(this);
   onStartCreateWorldButtonClick = this.onStartCreateWorldButtonClick.bind(this);
+  onEndCreateWorldButtonClick = this.onEndCreateWorldButtonClick.bind(this);
   onCreateWorldButtonClick = this.onCreateWorldButtonClick.bind(this);
 
   state = {
@@ -244,6 +245,12 @@ export default class Enter extends React.Component {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     loginEngine.startCreateWorld();
+  }
+
+  onEndCreateWorldButtonClick() {
+    const {engines} = this.props;
+    const loginEngine = engines.getEngine('login');
+    loginEngine.endCreateWorld();
   }
 
   onCreateWorldButtonClick() {
