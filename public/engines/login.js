@@ -94,7 +94,7 @@ export default class LoginEngine extends Engine {
   createAccount({username, password, gender}) { // XXX port this to the backend
     this.updateState('login', state => state
       .set('user', {username, gender})
-      .set('mode', 'enter')
+      .set('mode', 'mainMenu')
       .set('creatingAccount', false));
   }
 
@@ -122,16 +122,27 @@ export default class LoginEngine extends Engine {
 
   deleteWorld(worldname) { // XXX port this to the backend
     this.updateState('login', state => state
+      .update('world', world => world.worldname !== worldname ? world : null)
       .update('worlds', worlds => worlds.filter(world => world.worldname !== worldname)));
   }
 
-  enterWorld(worldname) { // XXX port this to the backend
+  selectWorld(worldname) { // XXX port this to the backend
     this.updateState('login', state => state
       .set('world', {worldname})
-      .set('mode', 'quickload'));
+      .set('mode', 'mainMenu'));
   }
 
-  quickload(worldname) {
+  changeUser(mode) {
+    this.updateState('login', state => state
+      .set('mode', 'login'));
+  }
+
+  changeWorld(mode) {
+    this.updateState('login', state => state
+      .set('mode', 'enter'));
+  }
+
+  play(worldname) {
     this.updateState('login', state => state
       .set('mode', 'live'));
   }
@@ -139,26 +150,22 @@ export default class LoginEngine extends Engine {
   back() {
     this.updateState('login', state => {
       const {mode, user, world, creatingAccount, creatingWorld} = state;
-      if (mode === 'quickload') {
+      if (mode === 'mainMenu') {
         return state;
       } if (mode === 'login') {
         if (creatingAccount) {
           return state.set('creatingAccount', false);
         } else {
-          return state;
+          return state.set('mode', 'mainMenu');
         }
       } else if (mode === 'enter') {
         if (creatingWorld) {
           return state.set('creatingWorld', false);
         } else {
-          if (user && world) { // XXX make this go back to a user-only non-enterable quickload screen
-            return state.set('mode', 'quickload');
-          } else {
-            return state.set('mode', 'login');
-          }
+          return state.set('mode', 'mainMenu');
         }
       } else if (mode === 'live') {
-        return state.set('mode', 'quickload');
+        return state.set('mode', 'mainMenu');
       } else {
         return state;
       }

@@ -4,7 +4,7 @@ export default class Login extends Immutable.Record({
   user: null,
   session: null,
   world: null,
-  mode: 'login',
+  mode: 'mainMenu',
   creatingAccount: false,
   creatingWorld: false,
   worlds: Immutable.List(),

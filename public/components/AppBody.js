@@ -1,8 +1,8 @@
 import React from 'react';
 
+import MainMenu from './MainMenu';
 import Login from './Login';
 import Enter from './Enter';
-import Quickload from './Quickload';
 import VoxelScene from './VoxelScene';
 import VoxelMenu from './VoxelMenu';
 
@@ -33,7 +33,7 @@ export default class AppBody extends React.Component {
       engines,
     };
 
-    const quickloadProps = {
+    const mainMenuProps = {
       user: loginUser,
       world: loginWorld,
       // error: loginError,
@@ -69,9 +69,9 @@ export default class AppBody extends React.Component {
 
     return (
       <div className='app-body'>
+        {mode === 'mainMenu' ? <MainMenu {...mainMenuProps} /> : null}
         {mode === 'login' ? <Login {...loginProps} /> : null}
         {mode === 'enter' ? <Enter {...enterProps} /> : null}
-        {mode === 'quickload' ? <Quickload {...quickloadProps} /> : null}
         {mode === 'live' ? <div>
           <VoxelScene {...voxelSceneProps} />
           <VoxelMenu {...voxelMenuProps} />

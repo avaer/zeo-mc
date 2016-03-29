@@ -227,7 +227,7 @@ export default class Enter extends React.Component {
   onWorldEnter(worldname) {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
-    loginEngine.enterWorld(worldname);
+    loginEngine.selectWorld(worldname);
   }
 
   onWorldDelete(worldname) {
@@ -284,7 +284,7 @@ export default class Enter extends React.Component {
         </div>
         {!this.props.creatingWorld ? <div style={this.getButtonsStyles()}>
           <Button onClick={this.onStartCreateWorldButtonClick} submit>Create world</Button>
-          <Button onClick={this.onBackButtonClick} submit>Back</Button>
+          <Button onClick={this.onBackButtonClick}>Back</Button>
         </div> : null}
         {this.props.creatingWorld ? <div style={this.getButtonsStyles()}>
           <Button onClick={this.onCreateWorldButtonClick} submit>Create</Button>
