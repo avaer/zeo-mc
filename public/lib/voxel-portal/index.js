@@ -107,12 +107,15 @@ VoxelPortal.prototype = {
   numPortalsInFrustum: function() {
     const {_portalMeshes: portalMeshes, _game: game} = this;
     const {camera, THREE} = game;
+
     const redPortalInView = _objectInFrustum(portalMeshes.red.inner, camera, THREE);
     const bluePortalInView = _objectInFrustum(portalMeshes.blue.inner, camera, THREE);
     return (+redPortalInView) + (+bluePortalInView);
   },
   setPortal: function(side, position, normal) {
-    const {_portalMeshes: portalMeshes} = this;
+    const {_portalMeshes: portalMeshes, _game: game} = this;
+    const {THREE} = game;
+
     const portalMesh = portalMeshes[side];
 
     const [positionX, positionY, positionZ] = position;
@@ -184,7 +187,8 @@ VoxelPortal.prototype = {
     });
   },
   listen: function() {
-    const {_portalMeshes: portalMeshes} = this;
+    const {_portalMeshes: portalMeshes, _game: game} = this;
+    const {THREE} = game;
 
     game.addCollisionTest((position, axis, direction) => {
       function passesThroughBase(positionVector, normalVector, base) {
