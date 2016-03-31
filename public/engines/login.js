@@ -60,7 +60,7 @@ export default class LoginEngine extends Engine {
   succeedLogin(data) {
     const {user, session} = data;
 
-    console.log('successfully logged in', {user, session}); // XXX
+    console.log('successfully logged in', {user, session});
 
     localStorage.setItem('session', session);
 
@@ -74,13 +74,34 @@ export default class LoginEngine extends Engine {
   succeedCreateAccount(data) {
     const {user, session} = data;
 
-    console.log('successfully created account', {user, session}); // XXX
+    console.log('successfully created account', {user, session});
 
     localStorage.setItem('session', session);
 
     this.updateState('login', state => state
       .set('user', user)
       .set('session', session)
+      .set('mode', 'mainMenu')
+      .set('error', null));
+  }
+
+  succeedCreateWorld(data) {
+    const {worldname, seed} = data;
+
+    console.log('successfully created world', {worldname, seed});
+
+    this.updateState('login', state => state
+      .set('mode', 'mainMenu')
+      .set('error', null));
+  }
+
+  succeedDeleteWorld(data) {
+    const {worldname} = data;
+
+    console.log('successfully deleted world', worldname);
+
+    this.updateState('login', state => state
+      .update('world', world => world.worldname !== worldname ? world : null)
       .set('mode', 'mainMenu')
       .set('error', null));
   }
@@ -116,35 +137,49 @@ export default class LoginEngine extends Engine {
       if (data && data.createAccount) {
         this.succeedCreateAccount(data.createAccount);
       } else {
-        this.fail('Invalid username or password');
+        this.fail('Failed to create account');
       }
     }).catch(err => { this.fail(err); });
   }
+
+  // XXX implement worlds querying
 
   startCreateWorld() {
     this.updateState('login', state => state
       .set('creatingWorld', true));
   }
 
-  createWorld({worldname, seed}) { // XXX port this to the backend
-    this.updateState('login', state => state
-      .update('worlds', worlds => {
-        if (!worlds.some(world => world.worldname === worldname)) {
-          return worlds.push(new World({worldname, seed}));
-        } else {
-          return worlds;
-        }
-      })
-      .set('creatingWorld', false));
+  createWorld({worldname, seed}) {
+    _getGraphQl('mutation', 'createWorld', {
+      worldname,
+      seed,
+    }, {
+      world: {
+        worldname: true,
+        seed: true,
+      },
+    }).then(data => {
+      if (data && data.createWorld) {
+        this.succeedCreateWorld(data.createWorld);
+      } else {
+        this.fail('Failed to create world');
+      }
+    }).catch(err => { this.fail(err); });
   }
 
-  deleteWorld(worldname) { // XXX port this to the backend
-    this.updateState('login', state => state
-      .update('world', world => world.worldname !== worldname ? world : null)
-      .update('worlds', worlds => worlds.filter(world => world.worldname !== worldname)));
+  deleteWorld(worldname) {
+    _getGraphQl('mutation', 'deleteWorld', {
+      worldname,
+    }, {}).then(data => {
+      if (data && data.deleteWorld) {
+        this.succeedDeleteWorld(data.deleteWorld);
+      } else {
+        this.fail('Failed to delete world');
+      }
+    }).catch(err => { this.fail(err); });
   }
 
-  selectWorld(worldname) { // XXX port this to the backend
+  selectWorld(worldname) { // XXX part of implementing worlds querying
     this.updateState('login', state => state
       .set('world', {worldname})
       .set('mode', 'mainMenu'));
@@ -195,7 +230,7 @@ function _getGraphQl(type, method, args, fields) {
   const query = _makeGraphQlQuery(type, method, args, fields);
   const body = JSON.stringify({query});
 
-  return fetch('/api/graphql', { // XXX sync this with the backend
+  return fetch('/api/graphql', { // XXX sync this URL with the backend listening
     method: 'post',
     headers: {
       'Accept': 'application/json',
