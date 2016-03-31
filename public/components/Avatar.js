@@ -1,5 +1,7 @@
 import React from 'react';
 
+import configJson from '../../config/index.json';
+
 const DARK_COLOR = '#333';
 const LIGHT_COLOR = '#CCC';
 
@@ -31,7 +33,7 @@ export default class Avatar extends React.Component {
 
   getImageUrl() {
     const {gender, value} = this.props;
-    return '/api/img/users/' + gender + '/' + value;
+    return configJson.apiPrefix + '/img/users/' + gender + '/' + value;
   }
 
   render() {

@@ -18,6 +18,7 @@ import * as voxelAsync from '../lib/voxel-async/index';
 import * as inputUtils from '../utils/input/index';
 import {CHUNK_SIZE, CHUNK_DISTANCE, FRAME_RATE, WORLD_TICK_RATE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
 import {BLOCKS, PLANES, MODELS} from '../resources/index';
+import configJson from '../../config/index.json';
 
 window.BLOCKS = BLOCKS; // XXX remove this when we no longer need to support making models manually
 window.PLANES = PLANES;
@@ -58,7 +59,7 @@ export default class VoxelScene extends React.Component {
 
     const loadTextureAtlas = cb => {
       function getTexturePath(texture) {
-        return './api/img/textures/blocks/' + texture + '.png';
+        return configJson.apiPrefix + '/img/textures/blocks/' + texture + '.png';
       }
 
       function getTextureImage(texture, cb) {
@@ -95,7 +96,7 @@ export default class VoxelScene extends React.Component {
         });
 
         textureLoader = voxelTextureLoader({
-          getTextureUrl: texture => '/api/img/textures/' + texture + '.png',
+          getTextureUrl: texture => configJson.apiPrefix + '/img/textures/' + texture + '.png',
           THREE
         });
         textureLoader.loadTextures([

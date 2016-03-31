@@ -3,6 +3,7 @@ import Immutable from 'immutable';
 import Engines from './index';
 const {Engine} = Engines;
 import {Worlds, World} from '../stores/login';
+import configJson from '../../config/index.json';
 
 export default class LoginEngine extends Engine {
   static NAME = 'login';
@@ -254,7 +255,7 @@ function _getGraphQl(type, method, args, fields) {
   const query = _makeGraphQlQuery(type, method, args, fields);
   const body = JSON.stringify({query});
 
-  return fetch('/api/graphql', { // XXX sync this URL with the backend listening
+  return fetch(configJson.apiPrefix + '/graphql', {
     method: 'post',
     headers: {
       'Accept': 'application/json',

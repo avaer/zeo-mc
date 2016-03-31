@@ -1,5 +1,6 @@
 {
   "hostname": "localhost.kazmer.io",
   "port": 7000,
-  "dataDirectory": "./data"
+  "dataDirectory": "./data",
+  "apiPrefix": "/api"
 }
