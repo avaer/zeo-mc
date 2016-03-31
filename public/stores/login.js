@@ -11,6 +11,10 @@ export default class Login extends Immutable.Record({
   error: null,
 }) {}
 
+export const Worlds = {
+  create: worlds => Immutable.List(worlds.map(world => new World(world)))
+};
+
 export class World extends Immutable.Record({
   worldname: '',
   seed: '',

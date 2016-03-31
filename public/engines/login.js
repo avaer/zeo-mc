@@ -2,7 +2,7 @@ import Immutable from 'immutable';
 
 import Engines from './index';
 const {Engine} = Engines;
-import {World} from '../stores/login';
+import {Worlds, World} from '../stores/login';
 
 export default class LoginEngine extends Engine {
   static NAME = 'login';
@@ -67,6 +67,17 @@ export default class LoginEngine extends Engine {
     this.updateState('login', state => state
       .set('user', user)
       .set('session', session)
+      .set('mode', 'mainMenu')
+      .set('error', null));
+  }
+
+  succeedGetWorlds(data) {
+    const {worlds} = data;
+
+    console.log('successfully got worlds', {worlds});
+
+    this.updateState('login', state => state
+      .set('worlds', Worlds.create(worlds))
       .set('mode', 'mainMenu')
       .set('error', null));
   }
@@ -142,7 +153,20 @@ export default class LoginEngine extends Engine {
     }).catch(err => { this.fail(err); });
   }
 
-  // XXX implement worlds querying
+  getWorlds() { // XXX hook this in during initialization
+    _getGraphQl('query', 'worlds', {}, {
+      world: {
+        worldname: true,
+        seed: true,
+      },
+    }).then(data => {
+      if (data && data.worlds) {
+        this.succeedGetWorlds(data.worlds);
+      } else {
+        this.fail('Failed to get worlds');
+      }
+    }).catch(err => { this.fail(err); });
+  }
 
   startCreateWorld() {
     this.updateState('login', state => state
@@ -179,7 +203,7 @@ export default class LoginEngine extends Engine {
     }).catch(err => { this.fail(err); });
   }
 
-  selectWorld(worldname) { // XXX part of implementing worlds querying
+  selectWorld(worldname) {
     this.updateState('login', state => state
       .set('world', {worldname})
       .set('mode', 'mainMenu'));
