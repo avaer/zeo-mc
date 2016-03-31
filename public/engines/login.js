@@ -32,9 +32,9 @@ export default class LoginEngine extends Engine {
       if (data && data.login) {
         this.succeedLogin(data.login);
       } else {
-        this.failLogin('Invalid username or password');
+        this.fail('Invalid username or password');
       }
-    }).catch(err => { this.failLogin(err); });
+    }).catch(err => { this.fail(err); });
   }
 
   loginWithSession({session}) {
@@ -44,15 +44,17 @@ export default class LoginEngine extends Engine {
     }, {
       user: {
         id: true,
+        username: true,
+        gender: true,
       },
       session: true
     }).then(data => {
       if (data && data.login) {
         this.succeedLogin(data.login);
       } else {
-        this.failLogin('Invalid username or password');
+        this.fail('Invalid username or password');
       }
-    }).catch(err => { this.failLogin(err); });
+    }).catch(err => { this.fail(err); });
   }
 
   succeedLogin(data) {
@@ -65,13 +67,25 @@ export default class LoginEngine extends Engine {
     this.updateState('login', state => state
       .set('user', user)
       .set('session', session)
-      .set('mode', 'enter')
+      .set('mode', 'mainMenu')
       .set('error', null));
   }
 
-  failLogin(err) {
-    console.log('error logging in', JSON.stringify(String(err))); // XXX
+  succeedCreateAccount(data) {
+    const {user, session} = data;
 
+    console.log('successfully created account', {user, session}); // XXX
+
+    localStorage.setItem('session', session);
+
+    this.updateState('login', state => state
+      .set('user', user)
+      .set('session', session)
+      .set('mode', 'mainMenu')
+      .set('error', null));
+  }
+
+  fail(err) {
     this.updateState('login', state => state
       .set('error', String(err)));
   }
@@ -86,27 +100,31 @@ export default class LoginEngine extends Engine {
       .set('creatingAccount', true));
   }
 
-  /* endCreateAccount() {
-    this.updateState('login', state => state
-      .set('creatingAccount', false));
-  } */
-
-  createAccount({username, password, gender}) { // XXX port this to the backend
-    this.updateState('login', state => state
-      .set('user', {username, gender})
-      .set('mode', 'mainMenu')
-      .set('creatingAccount', false));
+  createAccount({username, password, gender}) {
+    _getGraphQl('mutation', 'createAccount', {
+      username,
+      password,
+      gender,
+    }, {
+      user: {
+        id: true,
+        username: true,
+        gender: true,
+      },
+      session: true
+    }).then(data => {
+      if (data && data.createAccount) {
+        this.succeedCreateAccount(data.createAccount);
+      } else {
+        this.fail('Invalid username or password');
+      }
+    }).catch(err => { this.fail(err); });
   }
 
   startCreateWorld() {
     this.updateState('login', state => state
       .set('creatingWorld', true));
   }
-
-  /* endCreateWorld() {
-    this.updateState('login', state => state
-      .set('creatingWorld', false));
-  } */
 
   createWorld({worldname, seed}) { // XXX port this to the backend
     this.updateState('login', state => state
