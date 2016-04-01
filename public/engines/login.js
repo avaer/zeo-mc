@@ -9,15 +9,57 @@ export default class LoginEngine extends Engine {
   static NAME = 'login';
 
   init() {
-    const session = localStorage.getItem('session');
+    let pending = 2;
+    const pend = () => {
+      if (--pending === 0) {
+        this.updateState(state => state
+          .set('loading', false));
+      }
+    };
 
+    const handleError = err => {
+      console.warn(err);
+      pend();
+    };
+
+    // log in existing setting
+    const session = localStorage.getItem('session');
     if (session) {
-      return {
-        'login': this.getState('login')
-      };
-    } else {
-      return null;
+      _getGraphQl('mutation', 'login', {
+        session,
+      }, {
+        user: {
+          id: true,
+        },
+        session: true
+      }).then(data => {
+        if (data && data.login) {
+          this.succeedLogin(data.login);
+
+          pend();
+        } else {
+          handleError('Failed to re-use session');
+        }
+      }).catch(handleError);
     }
+
+    // fetch worlds
+    _getGraphQl('query', 'worlds', {}, {
+      world: {
+        worldname: true,
+        seed: true,
+      },
+    }).then(data => {
+      if (data) {
+        this.succeedGetWorlds(data);
+
+        pend();
+      } else {
+        handleError('Failed to fetch worlds');
+      }
+    }).catch(handleError);
+
+    return null;
   }
 
   loginWithUsernamePassword({username, password}) {
