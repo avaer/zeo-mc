@@ -22,14 +22,16 @@ export default class LoginEngine extends Engine {
       pend();
     };
 
-    // log in existing setting
+    // log in existing session
     const session = localStorage.getItem('session');
     if (session) {
-      _getGraphQl('mutation', 'login', {
+      _getGraphQl('query', 'login', {
         session,
       }, {
         user: {
           id: true,
+          username: true,
+          gender: true,
         },
         session: true
       }).then(data => {
@@ -38,7 +40,7 @@ export default class LoginEngine extends Engine {
 
           pend();
         } else {
-          handleError('Failed to re-use session');
+          handleError('Invalid session');
         }
       }).catch(handleError);
     }
@@ -84,10 +86,9 @@ export default class LoginEngine extends Engine {
     }
   }
 
-  loginWithSession({session}) {
+  /* loginWithSession({session}) {
     _getGraphQl('query', 'login', {
-      username,
-      password,
+      session,
     }, {
       user: {
         id: true,
@@ -99,10 +100,10 @@ export default class LoginEngine extends Engine {
       if (data && data.login) {
         this.succeedLogin(data.login);
       } else {
-        this.fail('Invalid username or password');
+        this.fail('Invalid session');
       }
     }).catch(err => { this.fail(err); });
-  }
+  } */
 
   succeedLogin(data) {
     const {user, session} = data;
