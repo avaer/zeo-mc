@@ -5,7 +5,6 @@ import THREE from 'three';
 import voxelEngine from '../lib/voxel-engine/index';
 import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
 import voxelTextureLoader from '../lib/voxel-texture-loader/index';
-import voxelTerrain from '../lib/voxel-terrain/index';
 import voxelSky from '../lib/voxel-sky/index';
 import voxelClouds from '../lib/voxel-clouds/index';
 import voxelPlayer from '../lib/voxel-player/index';

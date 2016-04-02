@@ -49,8 +49,9 @@ const RIVER_SAND_THRESHOLDS = (() => {
   for (let k in RIVER_SAND_RATES) {
     const v = RIVER_SAND_RATES[k];
     acc += v;
+
     const threshold = {
-      name: k,
+      value: BLOCKS[k],
       threshold: acc / total
     };
     result.push(threshold);
@@ -114,11 +115,19 @@ const TREE_DIRECTIONS = (function() {
   return result;
 })();
 
-const min = Math.min;
-const abs = Math.abs;
-const floor = Math.floor;
-const pow = Math.pow;
-const sqrt = Math.sqrt;
+const BEDROCK_VALUE = BLOCKS['bedrock'];
+const LAVA_VALUE = BLOCKS['lava_still'];
+const OBSIDIAN_VALUE = BLOCKS['obsidian'];
+const STONE_VALUE = BLOCKS['stone'];
+const DIRT_VALUE = BLOCKS['dirt'];
+const GRASS_VALUE = BLOCKS['grass_top_plains'];
+const WATER_VALUE = BLOCKS['water_still'];
+const LOG_VALUE = BLOCKS['log_big_oak'];
+const LEAVES_VALUE = BLOCKS['leaves_big_oak_plains'];
+
+const FULL_VALUE = 255;
+
+const {min, abs, floor, sqrt, pow} = Math;
 
 function voxelTerrain(opts) {
   opts = opts || {};
@@ -272,7 +281,8 @@ function voxelTerrain(opts) {
     const endY = startY + chunkSize;
     const endZ = startZ + chunkSize;
 
-    const voxels = new Int16Array(chunkSize * chunkSize * chunkSize);
+    const voxels = new Uint16Array(chunkSize * chunkSize * chunkSize);
+    const depths = new Uint8Array(chunkSize * chunkSize * chunkSize);
     const vegetations = {};
     const weathers = [];
     const effects = {};
@@ -318,7 +328,7 @@ function voxelTerrain(opts) {
 
     function genLand(x, y, z) {
       if (!isRiverSurface(x, y, z) && !isCaveSurface(x, y, z)) {
-        setVoxel(x, y, z, BLOCKS['grass_top_plains']);
+        setVoxel(x, y, z, GRASS_VALUE);
       }
     }
 
@@ -343,15 +353,15 @@ function voxelTerrain(opts) {
         if (y < coreThreshold || !isCave(x, y, z)) {
           const material = (() => {
             if (y < bedrockThreshold) {
-              return BLOCKS['bedrock'];
+              return BEDROCK_VALUE;
             } else if (y < coreThreshold) {
-              return BLOCKS['lava_still'];
+              return LAVA_VALUE;
             } else if (y < mantleThreshold) {
-              return BLOCKS['obsidian'];
+              return OBSIDIAN_VALUE;
             } else if (y < crustThreshold) {
-              return BLOCKS['stone'];
+              return STONE_VALUE;
             } else {
-              return BLOCKS['dirt'];
+              return DIRT_VALUE;
             }
           })();
 
@@ -366,25 +376,25 @@ function voxelTerrain(opts) {
 
         const material = (() => {
           if (riverNoiseN < RIVER_RATE) {
-            return BLOCKS['water_still'];
+            return WATER_VALUE;
           } else if (riverNoiseN < (RIVER_RATE * (1 + SHORE_RATE))) {
             const riverTypeNoiseN = riverTypeNoise.in2D(x, z);
-            const riverThresholdName = (() => {
+            const riverThresholdValue = (() => {
               for (let i = 0; i < RIVER_SAND_THRESHOLDS.length; i++) {
                 const riverThreshold = RIVER_SAND_THRESHOLDS[i];
-                const {name, threshold} = riverThreshold;
+                const {value, threshold} = riverThreshold;
                 if (riverTypeNoiseN < threshold) {
-                  return name;
+                  return value;
                 }
               }
               return null;
             })();
-            if (riverThresholdName !== null) {
-              return BLOCKS[riverThresholdName];
+            if (riverThresholdValue !== null) {
+              return riverThresholdValue;
             } else {
               const lastRiverThreshold = RIVER_SAND_THRESHOLDS[RIVER_SAND_THRESHOLDS.length - 1];
-              const lastRiverThresholdName = lastRiverThreshold.name;
-              return BLOCKS[lastRiverThresholdName];
+              const {value: lastRiverThresholdValue} = lastRiverThreshold;
+              return lastRiverThresholdValue;
             }
           } else {
             return null;
@@ -392,8 +402,11 @@ function voxelTerrain(opts) {
         })();
         if (material !== null) {
           setVoxel(x, y, z, material);
+          if (material === WATER_VALUE) {
+            setDepth(x, y, z, FULL_VALUE)
+          }
 
-          if (y === h && material === BLOCKS['water_still'] && startY <= SEA_LEVEL && endY > SEA_LEVEL) {
+          if (y === h && material === WATER_VALUE && startY <= SEA_LEVEL && endY > SEA_LEVEL) {
             riverSurfaces.push([x, h, z]);
           }
         }
@@ -407,8 +420,8 @@ function voxelTerrain(opts) {
         const riverSurface = riverSurfaces[i];
         const [x, h, z] = riverSurface;
         for (let y = h; y <= riverSurfacesMedianHeight; y++) {
-          const river = BLOCKS['water_still'];
-          setVoxel(x, y, z, river);
+          setVoxel(x, y, z, WATER_VALUE);
+          setDepth(x, y, z, FULL_VALUE);
         }
       }
     }
@@ -437,7 +450,7 @@ function voxelTerrain(opts) {
         for (var i = 0; i < height; i++) {
           var pos = position();
           pos.y = y + i;
-          setVoxelInside(pos.x, pos.y, pos.z, BLOCKS['log_big_oak']);
+          setVoxelInside(pos.x, pos.y, pos.z, LOG_VALUE);
 
           if (i >= base) {
             var leafSets = {};
@@ -461,7 +474,7 @@ function voxelTerrain(opts) {
                 var idx = vu.getIndex(pos.x + d.x, pos.y + d.y, pos.z + d.z);
                 return !!leafSets[idx];
               })) {
-                setVoxelInside(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
+                setVoxelInside(pos.x, pos.y, pos.z, LEAVES_VALUE);
               }
             });
           }
@@ -471,7 +484,7 @@ function voxelTerrain(opts) {
         pos.y = y + i;
         var tipTreeLeafN = treeLeafNoise.in3D(pos.x, pos.y, pos.z);
         if (tipTreeLeafN < TREE_LEAF_RATE) {
-          setVoxelInside(pos.x, pos.y, pos.z, BLOCKS['leaves_big_oak_plains']);
+          setVoxelInside(pos.x, pos.y, pos.z, LEAVES_VALUE);
         }
       }
     }
@@ -560,6 +573,11 @@ function voxelTerrain(opts) {
       voxels[idx] = value;
     }
 
+    function setDepth(x, y, z, depth) {
+      const idx = vu.getIndex(x, y, z);
+      depths[idx] = depth;
+    }
+
     function setVegetation(x, y, z, value) {
       const idxSpec = vu.getIndexSpec(x, y, z);
       const [,,,idx] = idxSpec;
@@ -611,6 +629,7 @@ function voxelTerrain(opts) {
       position,
       dims,
       voxels,
+      depths,
       vegetations,
       entities,
       weathers,
