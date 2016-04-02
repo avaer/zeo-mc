@@ -146,7 +146,7 @@ class VoxelWorldTicker {
         const outIndex = voxelUtils.getIndex(x, y, z)
         const outValue = voxels[outIndex];
         if (outValue === WATER_VALUE) {
-          const canPourDown () => {
+          const canPourDown = () => {
             if (isInChunkBounds(x, y - 1, z)) {
               const bottomIndex = voxelUtils.getIndex(x, y - 1, z);
               const bottomValue = voxels[bottomIndex];
