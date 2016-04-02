@@ -13,6 +13,8 @@ class VoxelWorldTicker {
   }
 
   tick(ticks) {
+    return; // XXX unlock this
+
     const chunk = this._game.getChunkAtPosition([0, 0, 0]); // XXX iterate over all chunks here
     if (chunk) {
       const chunks = [chunk];
