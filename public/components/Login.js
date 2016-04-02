@@ -161,7 +161,8 @@ export default class Login extends React.Component {
     return {
       padding: 10,
       backgroundColor: '#ff9500',
-      fontSize: '12px',
+      fontSize: '10px',
+      lineHeight: 2,
       color: 'white',
       visibility: error ? null : 'hidden',
     };
@@ -211,6 +212,7 @@ export default class Login extends React.Component {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     const {username, password} = this.state;
+    loginEngine.clearError();
     loginEngine.loginWithUsernamePassword({username, password});
   }
 
@@ -263,8 +265,8 @@ export default class Login extends React.Component {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     const {username, password, gender} = this.state;
-    loginEngine.createAccount({username, password, gender});
     loginEngine.clearError();
+    loginEngine.createAccount({username, password, gender});
 
     if (e) {
       e.preventDefault();

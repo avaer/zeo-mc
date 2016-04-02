@@ -63,21 +63,25 @@ export default class LoginEngine extends Engine {
   }
 
   loginWithUsernamePassword({username, password}) {
-    _getGraphQl('mutation', 'login', {
-      username,
-      password,
-    }, {
-      user: {
-        id: true,
-      },
-      session: true
-    }).then(data => {
-      if (data && data.login) {
-        this.succeedLogin(data.login);
-      } else {
-        this.fail('Invalid username or password');
-      }
-    }).catch(err => { this.fail(err); });
+    if (username && password) {
+      _getGraphQl('mutation', 'login', {
+        username,
+        password,
+      }, {
+        user: {
+          id: true,
+        },
+        session: true
+      }).then(data => {
+        if (data && data.login) {
+          this.succeedLogin(data.login);
+        } else {
+          this.fail('Invalid username or password');
+        }
+      }).catch(err => { this.fail(err); });
+    } else {
+      this.fail('Username and password are required');
+    }
   }
 
   loginWithSession({session}) {
@@ -176,24 +180,28 @@ export default class LoginEngine extends Engine {
   }
 
   createAccount({username, password, gender}) {
-    _getGraphQl('mutation', 'createAccount', {
-      username,
-      password,
-      gender,
-    }, {
-      user: {
-        id: true,
-        username: true,
-        gender: true,
-      },
-      session: true
-    }).then(data => {
-      if (data && data.createAccount) {
-        this.succeedCreateAccount(data.createAccount);
-      } else {
-        this.fail('Failed to create account');
-      }
-    }).catch(err => { this.fail(err); });
+    if (username && password && gender) {
+      _getGraphQl('mutation', 'createAccount', {
+        username,
+        password,
+        gender,
+      }, {
+        user: {
+          id: true,
+          username: true,
+          gender: true,
+        },
+        session: true
+      }).then(data => {
+        if (data && data.createAccount) {
+          this.succeedCreateAccount(data.createAccount);
+        } else {
+          this.fail('Failed to create account');
+        }
+      }).catch(err => { this.fail(err); });
+    } else {
+      this.fail('Username and password are required');
+    }
   }
 
   getWorlds() { // XXX hook this in during initialization
@@ -217,21 +225,25 @@ export default class LoginEngine extends Engine {
   }
 
   createWorld({worldname, seed}) {
-    _getGraphQl('mutation', 'createWorld', {
-      worldname,
-      seed,
-    }, {
-      world: {
-        worldname: true,
-        seed: true,
-      },
-    }).then(data => {
-      if (data && data.createWorld) {
-        this.succeedCreateWorld(data.createWorld);
-      } else {
-        this.fail('Failed to create world');
-      }
-    }).catch(err => { this.fail(err); });
+    if (worldname && seed) {
+      _getGraphQl('mutation', 'createWorld', {
+        worldname,
+        seed,
+      }, {
+        world: {
+          worldname: true,
+          seed: true,
+        },
+      }).then(data => {
+        if (data && data.createWorld) {
+          this.succeedCreateWorld(data.createWorld);
+        } else {
+          this.fail('Failed to create world');
+        }
+      }).catch(err => { this.fail(err); });
+    } else {
+      this.fail('Worldname and seed are required');
+    }
   }
 
   deleteWorld(worldname) {

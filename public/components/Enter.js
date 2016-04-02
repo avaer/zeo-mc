@@ -130,7 +130,8 @@ export default class Enter extends React.Component {
     return {
       padding: 10,
       backgroundColor: '#ff9500',
-      fontSize: '12px',
+      fontSize: '10px',
+      lineHeight: 2,
       color: 'white',
       visibility: error ? null : 'hidden',
     };
