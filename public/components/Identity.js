@@ -1,53 +1,11 @@
 import React from 'react';
 
-import polygen from 'polygen';
-
 const {floor, random} = Math;
-
-const SIZE = 128;
-const MIN_POINTS = 5;
-const MAX_POINTS = 10;
-const NUM_CELLS = 3;
-const VARIANCE = 0.25;
-const DEFAULT_SEED = 'world';
 
 const DARK_COLOR = '#333';
 const LIGHT_COLOR = '#CCC';
 
 export default class Identity extends React.Component {
-  state = {
-    url: ''
-  };
-
-  componentWillMount() {
-    this.refreshUrl();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const {props: prevProps} = this;
-    if (nextProps.value !== prevProps.value) {
-      this.refreshUrl(nextProps);
-    }
-  }
-
-  refreshUrl(props) {
-    props = props || this.props;
-
-    const {value} = props;
-    const url = polygen({
-      size: SIZE,
-      minPoints: MIN_POINTS,
-      maxPoints: MAX_POINTS,
-      numCells: NUM_CELLS,
-      variance: VARIANCE,
-      seed: value || DEFAULT_SEED,
-    }).dataUrl();
-
-    this.setState({
-      url
-    });
-  }
-
   getStyles() {
     const {size, special} = this.props;
     return {
@@ -60,7 +18,6 @@ export default class Identity extends React.Component {
   }
 
   getImageStyles() {
-    const {url} = this.state;
     return {
       position: 'absolute',
       top: 0,
@@ -68,10 +25,15 @@ export default class Identity extends React.Component {
       left: 0,
       right: 0,
       backgroundColor: DARK_COLOR,
-      backgroundImage: 'url(\'' + url + '\')',
+      backgroundImage: 'url(\'' + this.getImageUrl() + '\')',
       backgroundSize: 'cover',
       imageRendering: 'pixelated',
     };
+  }
+
+  getImageUrl() {
+    const {gender, value} = this.props;
+    return configJson.apiPrefix + '/img/worlds/' + value;
   }
 
   render() {

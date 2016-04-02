@@ -250,7 +250,7 @@ export default class Enter extends React.Component {
           <Identity
             style={this.getIdentityStyles()}
             size={50}
-            value={this.state.worldname}
+            value={this.state.worldname || 'world'}
             special
           />
           <Label style={this.getLabelStyles()}>
