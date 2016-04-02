@@ -14,12 +14,12 @@ export default class AppBody extends React.Component {
     const {stores, engines} = this.props;
     const {window: windowState, login: loginState, menu: menuState, player: playerState} = stores;
     const {width, height, devicePixelRatio, pathname} = windowState;
-    const {mode, creatingAccount, creatingWorld, user: loginUser, world: loginWorld, worlds: loginWorlds, error: loginError} = loginState;
+    const {mode, creatingUser, creatingWorld, user: loginUser, world: loginWorld, worlds: loginWorlds, error: loginError} = loginState;
     const {open: menuOpen, lastOpenTime: menuLastOpenTime, tab: menuTab, itemIndex: menuItemIndex, dragItemIndex: menuDragItemIndex, dragCoords: menuDragCoords} = menuState;
     const {inventory} = playerState;
 
     const loginProps = {
-      creatingAccount,
+      creatingUser,
       error: loginError,
 
       engines,

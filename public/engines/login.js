@@ -129,10 +129,10 @@ export default class LoginEngine extends Engine {
       .set('error', null));
   }
 
-  succeedCreateAccount(data) {
+  succeedCreateUser(data) {
     const {user, session} = data;
 
-    console.log('successfully created account', {user, session});
+    console.log('successfully created user', {user, session});
 
     localStorage.setItem('session', session);
 
@@ -174,14 +174,14 @@ export default class LoginEngine extends Engine {
       .set('error', null));
   }
 
-  startCreateAccount() {
+  startCreateUser() {
     this.updateState('login', state => state
-      .set('creatingAccount', true));
+      .set('creatingUser', true));
   }
 
-  createAccount({username, password, gender}) {
+  createUser({username, password, gender}) {
     if (username && password && gender) {
-      _getGraphQl('mutation', 'createAccount', {
+      _getGraphQl('mutation', 'createUser', {
         username,
         password,
         gender,
@@ -193,8 +193,8 @@ export default class LoginEngine extends Engine {
         },
         session: true
       }).then(data => {
-        if (data && data.createAccount) {
-          this.succeedCreateAccount(data.createAccount);
+        if (data && data.createUser) {
+          this.succeedCreateUser(data.createUser);
         } else {
           this.fail('Failed to create account');
         }
@@ -281,12 +281,12 @@ export default class LoginEngine extends Engine {
 
   back() {
     this.updateState('login', state => {
-      const {mode, user, world, creatingAccount, creatingWorld} = state;
+      const {mode, user, world, creatingUser, creatingWorld} = state;
       if (mode === 'mainMenu') {
         return state;
       } if (mode === 'login') {
-        if (creatingAccount) {
-          return state.set('creatingAccount', false);
+        if (creatingUser) {
+          return state.set('creatingUser', false);
         } else {
           return state.set('mode', 'mainMenu');
         }

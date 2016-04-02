@@ -17,10 +17,10 @@ export default class Login extends React.Component {
   onPasswordChange = this.onPasswordChange.bind(this);
   onLoginButtonClick = this.onLoginButtonClick.bind(this);
   onFormSubmit = this.onFormSubmit.bind(this);
-  onStartCreateAccountButtonClick = this.onStartCreateAccountButtonClick.bind(this);
+  onStartCreateUserButtonClick = this.onStartCreateUserButtonClick.bind(this);
   onCancelButtonClick = this.onCancelButtonClick.bind(this);
   onBackButtonClick = this.onBackButtonClick.bind(this);
-  onCreateAccountButtonClick = this.onCreateAccountButtonClick.bind(this);
+  onCreateUserButtonClick = this.onCreateUserButtonClick.bind(this);
 
   state = {
     username: '',
@@ -217,17 +217,17 @@ export default class Login extends React.Component {
   }
 
   onFormSubmit(e) {
-    if (!this.props.creatingAccount) {
+    if (!this.props.creatingUser) {
       this.onLoginButtonClick();
     } else {
-      this.onCreateAccountButtonClick();
+      this.onCreateUserButtonClick();
     }
 
     e.preventDefault();
     e.stopPropagation();
   }
 
-  onStartCreateAccountButtonClick() {
+  onStartCreateUserButtonClick() {
     this.setState({
       username: '',
       password: '',
@@ -235,7 +235,7 @@ export default class Login extends React.Component {
 
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
-    loginEngine.startCreateAccount();
+    loginEngine.startCreateUser();
     loginEngine.clearError();
 
     this.selectUsernameInput();
@@ -261,12 +261,12 @@ export default class Login extends React.Component {
     this.selectUsernameInput();
   }
 
-  onCreateAccountButtonClick(e) {
+  onCreateUserButtonClick(e) {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
     const {username, password, gender} = this.state;
     loginEngine.clearError();
-    loginEngine.createAccount({username, password, gender});
+    loginEngine.createUser({username, password, gender});
 
     if (e) {
       e.preventDefault();
@@ -277,16 +277,16 @@ export default class Login extends React.Component {
   render() {
     return <div style={this.getWrapperStyles()}>
       <form style={this.getContainerStyles()} onSubmit={this.onFormSubmit}>
-        {!this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>Sign in</h1> : null}
-        {this.props.creatingAccount ? <h1 style={this.getHeadingStyles()}>New account</h1> : null}
-        {this.props.creatingAccount ? <Avatar
+        {!this.props.creatingUser ? <h1 style={this.getHeadingStyles()}>Sign in</h1> : null}
+        {this.props.creatingUser ? <h1 style={this.getHeadingStyles()}>New account</h1> : null}
+        {this.props.creatingUser ? <Avatar
           style={this.getAvatarStyles()}
           gender={this.state.gender}
           value={this.state.username || (this.state.gender === 'male' ? 'avaert' : 'u')}
           size={50}
           special
         /> : null}
-        {this.props.creatingAccount ? <div style={this.getLabelStyles()}>
+        {this.props.creatingUser ? <div style={this.getLabelStyles()}>
           <div style={this.getLabelTextStyles({focused: true})}>Gender</div>
           <div style={this.getRadioLabelsStyles()}>
             <label style={this.getRadioLabelStyles()}>
@@ -341,13 +341,13 @@ export default class Login extends React.Component {
             />
           </div>}
         </Label>
-        {!this.props.creatingAccount ? <div style={this.getButtonsStyles()}>
+        {!this.props.creatingUser ? <div style={this.getButtonsStyles()}>
           <Button onClick={this.onLoginButtonClick} submit>Login</Button>
-          <Button onClick={this.onStartCreateAccountButtonClick}>New Account</Button>
+          <Button onClick={this.onStartCreateUserButtonClick}>New User</Button>
           <Button onClick={this.onBackButtonClick}>Back</Button>
         </div> : null}
-        {this.props.creatingAccount ? <div style={this.getButtonsStyles()}>
-          <Button onClick={this.onCreateAccountButtonClick} submit>Create Account</Button>
+        {this.props.creatingUser ? <div style={this.getButtonsStyles()}>
+          <Button onClick={this.onCreateUserButtonClick} submit>Create User</Button>
           <Button onClick={this.onCancelButtonClick}>Cancel</Button>
         </div> : null}
         <div style={this.getErrorStyles()}>{'> ' + (this.props.error || null)}</div>
