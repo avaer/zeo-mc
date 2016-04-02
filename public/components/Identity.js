@@ -1,5 +1,7 @@
 import React from 'react';
 
+import configJson from '../../config/index.json';
+
 const {floor, random} = Math;
 
 const DARK_COLOR = '#333';
