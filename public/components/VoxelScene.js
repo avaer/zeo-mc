@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import {is} from 'immutable';
 import THREE from 'three';
+
 import voxelEngine from '../lib/voxel-engine/index';
 import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
 import voxelTextureLoader from '../lib/voxel-texture-loader/index';
@@ -15,8 +16,9 @@ import voxelPortal from '../lib/voxel-portal/index';
 import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
-import {CHUNK_SIZE, CHUNK_DISTANCE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
+import {CHUNK_SIZE, CHUNK_DISTANCE, FRAME_RATE, WORLD_TICK_RATE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
 import {BLOCKS, PLANES, MODELS} from '../resources/index';
+import configJson from '../../config/index.json';
 
 window.BLOCKS = BLOCKS; // XXX remove this when we no longer need to support making models manually
 window.PLANES = PLANES;
@@ -35,23 +37,7 @@ const INITIAL_CHUNK_POSITIONS = (() => {
   return result;
 })();
 
-class Crosshair extends React.Component {
-  render() {
-    const style = {
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      margin: '-2px 0 0 -2px',
-      width: '4px',
-      height: '4px',
-      backgroundColor: '#d00'
-    };
-
-    return <div style={style} />;
-  }
-}
-
-export default class Voxels extends React.Component {
+export default class VoxelScene extends React.Component {
   componentWillMount() {
     const {seed} = this.props;
     const chunkSize = CHUNK_SIZE;
@@ -59,17 +45,21 @@ export default class Voxels extends React.Component {
 
     voxelAsync.init(voxelAsyncOpts);
 
+    this._game = null;
+
     this._workers = _makeWorkers(voxelAsyncOpts);
     this._workerIndex = 0;
     this._pendingGenerates = new Map();
   }
 
   componentDidMount() {
+    const {width, height, engines} = this.props;
+
     let atlas, textureLoader, game, avatar;
 
     const loadTextureAtlas = cb => {
       function getTexturePath(texture) {
-        return './api/img/textures/blocks/' + texture + '.png';
+        return configJson.apiPrefix + '/img/textures/blocks/' + texture + '.png';
       }
 
       function getTextureImage(texture, cb) {
@@ -106,7 +96,7 @@ export default class Voxels extends React.Component {
         });
 
         textureLoader = voxelTextureLoader({
-          getTextureUrl: texture => '/api/img/textures/' + texture + '.png',
+          getTextureUrl: texture => configJson.apiPrefix + '/img/textures/' + texture + '.png',
           THREE
         });
         textureLoader.loadTextures([
@@ -121,15 +111,20 @@ export default class Voxels extends React.Component {
 
     const initializeGame = cb => {
       game = voxelEngine({
+        width,
+        height,
         atlas,
         textureLoader,
         generateChunks: false,
         chunkSize: CHUNK_SIZE,
         chunkDistance: CHUNK_DISTANCE,
+        frameRate: FRAME_RATE,
+        worldTickRate: WORLD_TICK_RATE,
         lightsDisabled: true,
         gravity: GRAVITY,
         statsDisabled: true
       });
+      this._game = game;
       window.game = game;
 
       const sky = voxelSky({
@@ -297,6 +292,16 @@ export default class Voxels extends React.Component {
           }
         });
 
+        let lastMenu = new Date(0);
+        game.on('menu', () => {
+          const now = new Date();
+          if (((+now - +lastMenu) / 1000) >= 0.1) {
+            const menuEngine = engines.getEngine('menu');
+            menuEngine.toggleOpen();
+          }
+          lastMenu = now;
+        });
+
         game.on('hold', variant => {
           if (holdValue) {
             stopHolding();
@@ -328,6 +333,15 @@ export default class Voxels extends React.Component {
     }
 
     step([loadTextureAtlas, initializeGame, generateInitialChunks, startGame]);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const {width: newWidth, height: newHeight} = nextProps;
+    const {width: oldWidth, height: oldHeight} = this.props;
+
+    if (newWidth !== oldWidth || newHeight !== oldHeight) {
+      this._game.resize(newWidth, newHeight);
+    }
   }
 
   shouldComponentUpdate() {
@@ -425,6 +439,22 @@ function _makeWorkers(workerOpts) {
     })();
   }
   return workers;
+}
+
+class Crosshair extends React.Component {
+  render() {
+    const style = {
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      margin: '-2px 0 0 -2px',
+      width: '4px',
+      height: '4px',
+      backgroundColor: '#d00'
+    };
+
+    return <div style={style} />;
+  }
 }
 
 function _positionKey(position) {

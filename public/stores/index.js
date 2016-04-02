@@ -1,11 +1,13 @@
 import Immutable from 'immutable';
 
 import Window from './window';
-import Ui from './ui';
-import World from './world';
+import Login from './login';
+import Menu from './menu';
+import Player from './player';
 
 export default class Stores extends Immutable.Record({
   window: new Window(),
-  ui: new Ui(),
-  world: new World()
+  login: new Login(),
+  menu: new Menu(),
+  player: new Player(),
 }) {}

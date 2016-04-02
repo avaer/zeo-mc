@@ -106,13 +106,16 @@ VoxelPortal.prototype = {
   },
   numPortalsInFrustum: function() {
     const {_portalMeshes: portalMeshes, _game: game} = this;
-    const {camera} = game;
-    const redPortalInView = _objectInFrustum(portalMeshes.red.inner, camera);
-    const bluePortalInView = _objectInFrustum(portalMeshes.blue.inner, camera);
+    const {camera, THREE} = game;
+
+    const redPortalInView = _objectInFrustum(portalMeshes.red.inner, camera, THREE);
+    const bluePortalInView = _objectInFrustum(portalMeshes.blue.inner, camera, THREE);
     return (+redPortalInView) + (+bluePortalInView);
   },
   setPortal: function(side, position, normal) {
-    const {_portalMeshes: portalMeshes} = this;
+    const {_portalMeshes: portalMeshes, _game: game} = this;
+    const {THREE} = game;
+
     const portalMesh = portalMeshes[side];
 
     const [positionX, positionY, positionZ] = position;
@@ -184,7 +187,8 @@ VoxelPortal.prototype = {
     });
   },
   listen: function() {
-    const {_portalMeshes: portalMeshes} = this;
+    const {_portalMeshes: portalMeshes, _game: game} = this;
+    const {THREE} = game;
 
     game.addCollisionTest((position, axis, direction) => {
       function passesThroughBase(positionVector, normalVector, base) {
@@ -461,7 +465,7 @@ function _makePortalRenderer(sourcePortalMesh, targetPortalMesh, target, voxelPo
     // target.viewport = new THREE.Vector4(0, 0, 10, 10);
 
     const {inner: targetPortalInner} = targetPortalMesh;
-    if (_objectInFrustum(targetPortalInner, portalCamera)) {
+    if (_objectInFrustum(targetPortalInner, portalCamera, THREE)) {
       view.renderer.alpha = false;
       view.renderer.precision = 'lowp';
       view.renderer.antialias = false;
@@ -607,7 +611,7 @@ function _makePortalTicker(sourcePortalMesh, targetPortalMesh, game) {
   };
 }
 
-function _objectInFrustum(object, camera) {
+function _objectInFrustum(object, camera, THREE) {
   const frustum = new THREE.Frustum();
   frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
   return frustum.intersectsObject(object);

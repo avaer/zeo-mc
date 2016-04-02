@@ -11,8 +11,6 @@ const u = require('./lib/js-utils');
 const routes = require('./routes/index.js');
 const streams = require('./streams/index.js');
 
-const API_PREFIX = '/api';
-
 u.parallel(cb => {
   config.bootstrap(cb);
 }, u.ok(() => {
@@ -41,7 +39,7 @@ u.parallel(cb => {
     cert: c.cert,
     key: c.privateKey,
   }, app);
-  const streamPrefix = path.join(API_PREFIX, '/stream');
+  const streamPrefix = path.join(c.apiPrefix, '/stream');
   const streamApp = streams.app({
     prefix: streamPrefix
   });
@@ -49,7 +47,7 @@ u.parallel(cb => {
     path: streamPrefix
   });
   const routesApp = routes.app();
-  app.use(API_PREFIX, routesApp);
+  app.use(c.apiPrefix, routesApp);
   app.all('*', (req, res, next) => {
     webpackDevServerApp(req, res, next);
   });

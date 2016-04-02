@@ -4,6 +4,48 @@ const {floor} = Math;
 
 const BLOCK_TEXTURES = require('./block-textures');
 
+const BASIC_BLOCK_TEXTURES = (() => {
+  const index = {};
+  for (let texture in BLOCK_TEXTURES) {
+    if (!/door|double_plant|dropper|fire|flower|itemframe|rain|redstone_dust|sapling|tallgrass|torch/.test(texture)) {
+      texture = texture.replace(/^grass_side_/, 'grass_top_');
+      if (!/^(?:leaves|log|planks)_jungle$/.test(texture)) {
+        texture = texture.replace(/_(?:forest|jungle|overlay|plains|snowed)$/, '_forest');
+      }
+      if (/^anvil_top_/.test(texture)) {
+        texture = texture.replace(/^anvil_top_.*$/, 'anvil_base');
+      } else if (/^mushroom_block/.test(texture)) {
+        // nothing
+      } else if (/^piston_/.test(texture)) {
+        texture = texture.replace(/^piston_.*$/, 'piston_top_normal');
+      } else if (/^rail_/.test(texture)) {
+        texture = texture.replace(/_(?:powered|turned)$/, '');
+      } else if (/^stone_[^_]+_smooth$/.test(texture)) {
+        texture = texture.replace(/_smooth$/, '');
+      } else if (/^stonebrick_/.test(texture)) {
+        texture = texture.replace(/_(?:carved|cracked)$/, '');
+      } else {
+        texture = texture.replace(/_(?:top|side|end|bottom|inner|inside|outside|carved|normal|smooth)$/, '_top');
+      }
+      texture = texture.replace(/_(?:horizontal|vertical)$/, '_horizontal');
+      if (/^sponge_/.test(texture)) {
+        texture = texture.replace(/_wet$/, '');
+      } else {
+        texture = texture.replace(/_wet$/, '_dry');
+      }
+      texture = texture.replace(/_off$/, '_on');
+      texture = texture.replace(/^sea_lantern_[0-9]+$/, 'sea_lantern_0');
+      texture = texture.replace(/_stage_[0-9]+$/, '_stage_0');
+      texture = texture.replace(/_flow_[0-9]+$/, '_flow');
+      texture = texture.replace(/_still_[0-9]+$/, '_still');
+      texture = texture.replace(/^snow[0-9]+$/, 'snow');
+
+      index[texture] = true;
+    }
+  }
+  return Object.keys(index);
+})();
+
 const MULTI_BLOCK_TEXTURES = (() => {
   const result = {};
   [''].concat(BIOME_TEXTURES).forEach(biomeTexture => {
@@ -87,6 +129,17 @@ export const MATERIALS = (() => {
   }
   return result;
 })();
+
+export const BASIC = BASIC_BLOCK_TEXTURES;
+
+// XXX only for verification
+BASIC.forEach(blockName => {
+  const block = BLOCKS[blockName];
+  if (!block) {
+    window.BLOCKS = BLOCKS;
+    throw new Error('missing block: ' + blockName);
+  }
+});
 
 export const FRAMES = (() => {
   const result = {};

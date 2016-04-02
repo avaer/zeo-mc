@@ -48,7 +48,10 @@ function Game(opts) {
   this.generateChunks = opts.generateChunks
   this.setConfigurablePositions(opts)
   this.configureChunkLoading(opts)
-  this.setDimensions(opts)
+  // this.setDimensions(opts)
+  this.width = opts.width
+  this.height = opts.height
+
   this.THREE = THREE
   this.THREECSG = THREECSG(THREE);
   this.vector = vector
@@ -57,10 +60,12 @@ function Game(opts) {
   this.cubeSize = 1 // backwards compat
   this.chunkSize = opts.chunkSize || 32
 
+  this.frameRate = opts.frameRate || 60
+  this.frameTime = 1000 / this.frameRate
   this.worldTickRate = opts.worldTickRate || 10
   this.worldTickTime = 1000 / this.worldTickRate
   this.particleTickRate = opts.particleTickRate || 100
-  this.particleTickTime = 1000 / this.particleTickRate;
+  this.particleTickTime = 1000 / this.particleTickRate
   
   // chunkDistance and removeDistance should not be set to the same thing
   // as it causes lag when you go back and forth on a chunk boundary
@@ -100,7 +105,7 @@ function Game(opts) {
   )
   this.collisionTests = []
   
-  this.timer = this.initializeTimer(opts.tickFPS || 16)
+  this.timer = this.initializeTimer(this.frameTime)
   // this.paused = false
 
   this.spatial = new SpatialEventEmitter
@@ -420,6 +425,7 @@ Game.prototype.defaultButtons = {
   '<space>': 'jump',
   '<shift>': 'crouch',
   '<control>': 'alt',
+  '<tab>': 'menu',
   'Q': 'greenapple',
   'E': 'flare',
   'Z': 'portalred',
@@ -440,7 +446,7 @@ Game.prototype.setConfigurablePositions = function(opts) {
   this.worldOrigin = wo || [0, 0, 0]
 }
 
-Game.prototype.setDimensions = function(opts) {
+/* Game.prototype.setDimensions = function(opts) {
   if (opts.container) this.container = opts.container
   if (opts.container && opts.container.clientHeight) {
     this.height = opts.container.clientHeight
@@ -452,7 +458,7 @@ Game.prototype.setDimensions = function(opts) {
   } else {
     this.width = typeof window === "undefined" ? 1 : window.innerWidth
   }
-}
+} */
 
 Game.prototype.notCapable = function(opts) {
   var self = this
@@ -478,7 +484,7 @@ Game.prototype.notCapableMessage = function() {
   return wrapper
 }
 
-Game.prototype.onWindowResize = function() {
+/* Game.prototype.onWindowResize = function() {
   var width = window.innerWidth
   var height = window.innerHeight
   if (this.container) {
@@ -486,7 +492,11 @@ Game.prototype.onWindowResize = function() {
     height = this.container.clientHeight
   }
   this.view.resizeWindow(width, height)
-}
+} */
+
+Game.prototype.resize = function(width, height) {
+  this.view.resizeWindow(width, height);
+};
 
 // # Physics/collision related methods
 
@@ -822,8 +832,12 @@ Game.prototype.onControlOptOut = function() {
   this.optout = true
 }
 
-Game.prototype.onFire = function(state) {
+Game.prototype.onFire = function() {
   this.emit('fire')
+}
+
+Game.prototype.onMenu = function() {
+  this.emit('menu')
 }
 
 Game.prototype.onHold = function(item) {
@@ -929,7 +943,7 @@ Game.prototype.initializeRendering = function(opts) {
 
   if (!opts.statsDisabled) self.addStats()
 
-  window.addEventListener('resize', self.onWindowResize.bind(self), false)
+  // window.addEventListener('resize', self.onWindowResize.bind(self), false)
 
   requestAnimationFrame(window).on('data', function(dt) {
     self.emit('prerender', dt)
@@ -961,6 +975,7 @@ Game.prototype.hookupControls = function(buttons, opts) {
   opts = opts || {}
   opts.controls = opts.controls || {}
   opts.controls.onfire = this.onFire.bind(this)
+  opts.controls.onmenu = this.onMenu.bind(this)
   opts.controls.onhold = this.onHold.bind(this)
   opts.controls.discreteFire = true
   this.controls = voxelControl(buttons, opts.controls)

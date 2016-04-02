@@ -28,6 +28,7 @@ function Control(state, opts) {
   this.fire_rate = opts.fireRate || 0
   this.needs_discrete_fire = opts.discreteFire || false
   this.onfire = opts.onfire || noop
+  this.onmenu = opts.onmenu || noop
   this.onhold = opts.onhold || noop
   this.firing = 0
 
@@ -164,6 +165,10 @@ proto.tick = function(dt) {
   this.state.x_rotation_accum =
   this.state.y_rotation_accum =
   this.state.z_rotation_accum = 0
+
+  if (this.state.menu) {
+    this.onmenu();
+  }
 
   if (this.state.greenapple) {
     this.onhold('greenapple');

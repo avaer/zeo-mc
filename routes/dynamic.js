@@ -1,12 +1,16 @@
 const path = require('path');
 const url = require('url');
 
-// const mime = require('mime');
 const avatarGenerator = require('avatar-generator');
 const avatarGeneratorInstance = avatarGenerator();
-const retricon = require('retricon-without-canvas');
+const polygen = require('polygen');
 
 const SIZE = 16;
+const MIN_POINTS = 5;
+const MAX_POINTS = 10;
+const NUM_CELLS = 3;
+const VARIANCE = 0.25;
+const DEFAULT_SEED = 'world';
 
 const routes = [
   {
@@ -21,7 +25,14 @@ const routes = [
     path: '/img/worlds/:path*',
     handler: (req, res, next) => {
       res.type('image/png');
-      retricon(req.params.path, {pixelSize: 1}).pngStream().pipe(res);
+      polygen({
+        size: SIZE,
+        minPoints: MIN_POINTS,
+        maxPoints: MAX_POINTS,
+        numCells: NUM_CELLS,
+        variance: VARIANCE,
+        seed: req.params.path,
+      }).stream().pipe(res);
     }
   }
 ];
