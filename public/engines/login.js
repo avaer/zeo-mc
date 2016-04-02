@@ -86,6 +86,14 @@ export default class LoginEngine extends Engine {
     }
   }
 
+  logout() {
+    localStorage.removeItem('session');
+
+    this.updateState('login', state => state
+      .set('user', null)
+      .set('session', null));
+  }
+
   /* loginWithSession({session}) {
     _getGraphQl('query', 'login', {
       session,

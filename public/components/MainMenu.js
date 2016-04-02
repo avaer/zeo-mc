@@ -107,6 +107,7 @@ export default class Enter extends React.Component {
   onChangeUserButtonClick() {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
+    loginEngine.logout();
     loginEngine.changeUser();
   }
 
