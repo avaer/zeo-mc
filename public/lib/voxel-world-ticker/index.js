@@ -107,28 +107,6 @@ class VoxelWorldTicker {
       const {nodes: inNodes} = inHeap;
       const {nodes: outNodes} = outHeap;
 
-      /* function canPourIn(maxDepth) {
-        let currentDepth = 0;
-        for (let i = 0; i < outNodes.length; i++) {
-          const outPosition = outNodes[i];
-          const [x, y, z] = outPosition;
-          const outIndex = voxelUtils.getIndex(x, y, z);
-          const outValue = voxels[outIndex];
-          if (outValue === WATER_VALUE) {
-            const outDepth = depths[outIndex];
-            const needDepth = maxDepth - currentDepth;
-            const takeDepth = min(outDepth, needDepth);
-
-            currentDepth += takeDepth;
-
-            if (currentDepth >= maxDepth) {
-              break;
-            }
-          }
-        }
-        return currentDepth;
-      } */
-
       function pourIn(maxDepth) {
         let currentDepth = 0;
         let outPosition;
@@ -298,12 +276,6 @@ class VoxelWorldTicker {
           const value = voxels[index];
           return value === WATER_VALUE;
         });
-
-        if (!window.startPosition) { // XXX
-          window.startPosition = startPosition;
-          window.blobFrontier = blobFrontier;
-          console.log('got blob frontier');
-        }
 
         tickBlobFrontier(blobFrontier, voxels, depths);
       }
