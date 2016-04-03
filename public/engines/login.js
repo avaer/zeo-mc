@@ -136,7 +136,8 @@ export default class LoginEngine extends Engine {
   }
 
   succeedCreateWorld(data) {
-    const {worldname, seed} = data;
+    const {world} = data;
+    const {worldname, seed} = world;
 
     console.log('successfully created world', {worldname, seed});
 
@@ -208,8 +209,10 @@ export default class LoginEngine extends Engine {
         worldname,
         seed,
       }, {
-        worldname: true,
-        seed: true,
+        world: {
+          worldname: true,
+          seed: true,
+        }
       }).then(data => {
         if (data && data.createWorld) {
           this.succeedCreateWorld(data.createWorld);
