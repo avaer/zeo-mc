@@ -111,7 +111,8 @@ export default class LoginEngine extends Engine {
 
     this.updateState('login', state => state
       .set('user', null)
-      .set('session', null));
+      .set('session', null)
+      .set('world', null));
   }
 
   succeedLogin(data) {
