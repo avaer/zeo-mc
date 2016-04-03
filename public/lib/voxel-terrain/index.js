@@ -305,16 +305,8 @@ function voxelTerrain(opts) {
     }
 
     function forEachPointOutside(fn) {
-      for (
-        let x = startX - CHUNK_OUTSIDE_SIZE;
-        x < endX + CHUNK_OUTSIDE_SIZE;
-        x = ((x + 1) === startX) ? endX : (x + 1)
-      ) {
-        for (
-          let z = startZ;
-          z < endZ + CHUNK_OUTSIDE_SIZE;
-          z = ((z + 1) === startZ) ? endZ : (z + 1)
-        ) {
+      for (let x = startX - CHUNK_OUTSIDE_SIZE; x < endX + CHUNK_OUTSIDE_SIZE; x++) {
+        for (let z = startZ - CHUNK_OUTSIDE_SIZE; z < endZ + CHUNK_OUTSIDE_SIZE; z++) {
           fn(x, z);
         }
       }
@@ -327,7 +319,6 @@ function voxelTerrain(opts) {
         genDirt(x, h, z);
         genRivers(x, h, z);
         if (!isRiverSurface(x, h, z) && !isCaveSurface(x, h, z)) {
-          genTrees(x, h, z);
           genVegetation(x, h, z);
           genEntities(x, h, z);
           genWeather(x, h, z);
@@ -338,16 +329,12 @@ function voxelTerrain(opts) {
 
         genDirt(x, h, z);
         genRivers(x, h, z);
-      } else if (startY === chunkSize) {
-        if (!isRiverSurface(x, h, z) && !isCaveSurface(x, h, z)) {
-          genTrees(x, h, z);
-        }
       }
     }
 
     function genPointOutside(x, z) {
       let h = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
-      if (h === TERRAIN_FLOOR || (h >= startY && h < endY)) {
+      if ((h === TERRAIN_FLOOR) || (h >= startY && h < endY) || (startY === chunkSize)) {
         if (!isRiverSurface(x, h, z) && !isCaveSurface(x, h, z)) {
           genTrees(x, h, z);
         }
@@ -355,7 +342,7 @@ function voxelTerrain(opts) {
     }
 
     function postProcessPoints() {
-      postRiv();
+      postRivers();
     }
 
     function genLand(x, y, z) {
@@ -445,7 +432,7 @@ function voxelTerrain(opts) {
       }
     }
 
-    function postRiv() {
+    function postRivers() {
       // XXX coalesce this into pools and smooth individually for each
       const riverSurfacesMedianHeight = riverSurfaces.map(riverSurface => riverSurface[1]).sort()[floor(riverSurfaces.length * RIVER_SURFACE_MEDIAN_FACTOR)];
       for (let i = 0; i < riverSurfaces.length; i++) {
