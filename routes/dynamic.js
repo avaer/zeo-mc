@@ -16,23 +16,30 @@ const routes = [
   {
     path: '/img/users/:gender/:path*',
     handler: (req, res, next) => {
-      console.log('user image', req.params);
-      res.type('image/png');
-      avatarGeneratorInstance(req.params.path, req.params.gender, SIZE).stream().pipe(res);
+      if (req.params.path && req.params.gender) {
+        res.type('image/png');
+        avatarGeneratorInstance(req.params.path, req.params.gender, SIZE).stream().pipe(res);
+      } else {
+        res.sendStatus(400);
+      }
     }
   },
   {
     path: '/img/worlds/:path*',
     handler: (req, res, next) => {
-      res.type('image/png');
-      polygen({
-        size: SIZE,
-        minPoints: MIN_POINTS,
-        maxPoints: MAX_POINTS,
-        numCells: NUM_CELLS,
-        variance: VARIANCE,
-        seed: req.params.path,
-      }).stream().pipe(res);
+      if (req.params.path) {
+        res.type('image/png');
+        polygen({
+          size: SIZE,
+          minPoints: MIN_POINTS,
+          maxPoints: MAX_POINTS,
+          numCells: NUM_CELLS,
+          variance: VARIANCE,
+          seed: req.params.path,
+        }).stream().pipe(res);
+      } else {
+        res.sendStatus(400);
+      }
     }
   }
 ];
