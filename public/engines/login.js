@@ -94,25 +94,6 @@ export default class LoginEngine extends Engine {
       .set('session', null));
   }
 
-  /* loginWithSession({session}) {
-    _getGraphQl('query', 'login', {
-      session,
-    }, {
-      user: {
-        id: true,
-        username: true,
-        gender: true,
-      },
-      session: true
-    }).then(data => {
-      if (data && data.login) {
-        this.succeedLogin(data.login);
-      } else {
-        this.fail('Invalid session');
-      }
-    }).catch(err => { this.fail(err); });
-  } */
-
   succeedLogin(data) {
     const {user, session} = data;
 
