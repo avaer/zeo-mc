@@ -5,7 +5,9 @@ const avatarGenerator = require('avatar-generator');
 const avatarGeneratorInstance = avatarGenerator();
 const polygen = require('polygen');
 
-const SIZE = 16;
+const USER_SIZE = 16;
+
+const WORLD_SIZE = 32;
 const MIN_POINTS = 5;
 const MAX_POINTS = 10;
 const NUM_CELLS = 3;
@@ -18,7 +20,7 @@ const routes = [
     handler: (req, res, next) => {
       if (req.params.path && req.params.gender) {
         res.type('image/png');
-        avatarGeneratorInstance(req.params.path, req.params.gender, SIZE).stream().pipe(res);
+        avatarGeneratorInstance(req.params.path, req.params.gender, USER_SIZE).stream().pipe(res);
       } else {
         res.sendStatus(400);
       }
@@ -30,7 +32,7 @@ const routes = [
       if (req.params.path) {
         res.type('image/png');
         polygen({
-          size: SIZE,
+          size: WORLD_SIZE,
           minPoints: MIN_POINTS,
           maxPoints: MAX_POINTS,
           numCells: NUM_CELLS,
