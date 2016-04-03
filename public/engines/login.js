@@ -108,6 +108,7 @@ export default class LoginEngine extends Engine {
 
   logout() {
     localStorage.removeItem('session');
+    localStorage.removeItem('worldname');
 
     this.updateState('login', state => state
       .set('user', null)
