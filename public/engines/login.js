@@ -47,13 +47,13 @@ export default class LoginEngine extends Engine {
 
     // fetch worlds
     _getGraphQl('query', 'worlds', {}, {
-      world: {
+      worlds: {
         worldname: true,
         seed: true,
-      },
+      }
     }).then(data => {
-      if (data) {
-        this.succeedGetWorlds(data);
+      if (data && data.worlds) {
+        this.succeedGetWorlds(data.worlds);
 
         pend();
       } else {
@@ -196,21 +196,6 @@ export default class LoginEngine extends Engine {
     }
   }
 
-  getWorlds() { // XXX hook this in during initialization
-    _getGraphQl('query', 'worlds', {}, {
-      world: {
-        worldname: true,
-        seed: true,
-      },
-    }).then(data => {
-      if (data && data.worlds) {
-        this.succeedGetWorlds(data.worlds);
-      } else {
-        this.fail('Failed to get worlds');
-      }
-    }).catch(err => { this.fail(err); });
-  }
-
   startCreateWorld() {
     this.updateState('login', state => state
       .set('creatingWorld', true));
@@ -222,10 +207,8 @@ export default class LoginEngine extends Engine {
         worldname,
         seed,
       }, {
-        world: {
-          worldname: true,
-          seed: true,
-        },
+        worldname: true,
+        seed: true,
       }).then(data => {
         if (data && data.createWorld) {
           this.succeedCreateWorld(data.createWorld);
@@ -327,7 +310,14 @@ function _makeGraphQlQuery(type, method, args, fields) {
     return method;
   }
   function _stringifyArgs(args) {
-    return Object.keys(args).map(k => { return k + ':' + JSON.stringify(String(args[k])); }).join(', ');
+    const argsKeys = Object.keys(args);
+    if (argsKeys.length > 0) {
+      const parameters = argsKeys.map(k => k + ':' + JSON.stringify(String(args[k])));
+      const result = '(' + parameters.join(', ') + ')';
+      return result;
+    } else {
+      return '';
+    }
   }
   function _stringifyFields(fields) {
     let acc = [];
@@ -342,7 +332,7 @@ function _makeGraphQlQuery(type, method, args, fields) {
     return acc.join(', ');
   }
 
-  return type + ' { ' + _stringifyMethod(method) + '(' + _stringifyArgs(args) + ') { ' + _stringifyFields(fields) + ' } }';
+  return type + ' { ' + _stringifyMethod(method) + _stringifyArgs(args) + ' { ' + _stringifyFields(fields) + ' } }';
 }
 
 function _jsonParse(s) {
