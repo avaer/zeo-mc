@@ -53,7 +53,25 @@ export default class LoginEngine extends Engine {
       }
     }).then(data => {
       if (data && data.worlds) {
-        this.succeedGetWorlds(data.worlds);
+        const {worlds} = data.worlds;
+        const world = (() => {
+          const worldname = localStorage.getItem('worldname');
+          if (worldname) {
+            const matchingWorlds = worlds.filter(world => world.worldname === worldname);
+            if (matchingWorlds.length > 0) {
+              const matchingWorld = matchingWorlds[0];
+              return matchingWorld;
+            } else {
+              return null;
+            }
+          } else {
+            return null;
+          }
+        })();
+        this.succeedGetWorlds({
+          worlds,
+          world,
+        });
 
         pend();
       } else {
@@ -111,12 +129,13 @@ export default class LoginEngine extends Engine {
   }
 
   succeedGetWorlds(data) {
-    const {worlds} = data;
+    const {worlds, world} = data;
 
-    console.log('successfully got worlds', {worlds});
+    console.log('successfully got worlds', {worlds, world});
 
     this.updateState('login', state => state
       .set('worlds', Worlds.create(worlds))
+      .set('world', world ? new World(world) : null)
       .set('mode', 'mainMenu')
       .set('error', null));
   }
@@ -240,9 +259,18 @@ export default class LoginEngine extends Engine {
   }
 
   selectWorld(worldname) {
+    localStorage.setItem('worldname', worldname);
+
     this.updateState('login', state => state
       .set('world', {worldname})
       .set('mode', 'mainMenu'));
+  }
+
+  unselectWorld(worldname) {
+    localStorage.removeItem('worldname');
+
+    this.updateState('login', state => state
+      .set('world', null));
   }
 
   changeUser(mode) {

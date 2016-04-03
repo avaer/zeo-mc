@@ -114,6 +114,7 @@ export default class Enter extends React.Component {
   onChangeWorldButtonClick() {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
+    loginEngine.unselectWorld();
     loginEngine.changeWorld();
   }
 
