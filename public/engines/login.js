@@ -12,7 +12,7 @@ export default class LoginEngine extends Engine {
     let pending = 2;
     const pend = () => {
       if (--pending === 0) {
-        this.updateState(state => state
+        this.updateState('login', state => state
           .set('loading', false));
       }
     };
@@ -36,7 +36,7 @@ export default class LoginEngine extends Engine {
         session: true
       }).then(data => {
         if (data && data.login) {
-          this.succeedLogin(data.login);
+          this.succeedInitialLogin(data.login);
 
           pend();
         } else {
@@ -115,6 +115,16 @@ export default class LoginEngine extends Engine {
       .set('world', null));
   }
 
+  succeedInitialLogin(data) {
+    const {user, session} = data;
+
+    console.log('successfully initially logged in', {user, session});
+
+    this.updateState('login', state => state
+      .set('user', user)
+      .set('session', session));
+  }
+
   succeedLogin(data) {
     const {user, session} = data;
 
@@ -125,6 +135,7 @@ export default class LoginEngine extends Engine {
     this.updateState('login', state => state
       .set('user', user)
       .set('session', session)
+      .set('world', null)
       .set('mode', 'mainMenu')
       .set('error', null));
   }
@@ -136,7 +147,7 @@ export default class LoginEngine extends Engine {
 
     this.updateState('login', state => state
       .set('worlds', Worlds.create(worlds))
-      .set('world', world ? new World(world) : null)
+      .set('world', world)
       .set('mode', 'mainMenu')
       .set('error', null));
   }
@@ -151,6 +162,8 @@ export default class LoginEngine extends Engine {
     this.updateState('login', state => state
       .set('user', user)
       .set('session', session)
+      .set('world', null)
+      .set('creatingUser', false)
       .set('mode', 'mainMenu')
       .set('error', null));
   }
@@ -265,13 +278,6 @@ export default class LoginEngine extends Engine {
     this.updateState('login', state => state
       .set('world', {worldname})
       .set('mode', 'mainMenu'));
-  }
-
-  unselectWorld(worldname) {
-    localStorage.removeItem('worldname');
-
-    this.updateState('login', state => state
-      .set('world', null));
   }
 
   changeUser(mode) {

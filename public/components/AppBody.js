@@ -36,7 +36,6 @@ export default class AppBody extends React.Component {
     const mainMenuProps = {
       user: loginUser,
       world: loginWorld,
-      // error: loginError,
 
       engines,
     };

@@ -14,6 +14,7 @@ export default class Enter extends React.Component {
   onChangeUserButtonClick = this.onChangeUserButtonClick.bind(this);
   onChangeWorldButtonClick = this.onChangeWorldButtonClick.bind(this);
   onPlayButtonClick = this.onPlayButtonClick.bind(this);
+  onLogoutButtonClick = this.onLogoutButtonClick.bind(this);
 
   getWrapperStyles() {
     return {
@@ -39,23 +40,17 @@ export default class Enter extends React.Component {
     return {
       // margin: '0 0 10px 0',
       margin: 0,
+      // marginBottom: 10,
       // fontSize: '13px',
       color: disabled ? LIGHT_COLOR : hovered ? '#4cd964' : DARK_COLOR,
-    };
-  }
-
-  getMenuItemStyles() {
-    return {
-      marginBottom: 20,
-      // padding: 5,
-      // border: '2px solid ' + DARK_COLOR,
-      // borderRadius: 3,
     };
   }
 
   getMenuItemRowStyles() {
     return {
       display: 'flex',
+      marginTop: 10,
+      marginLeft: 20,
       // padding: 5,
     };
   }
@@ -86,42 +81,64 @@ export default class Enter extends React.Component {
     };
   }
 
-  getConnectorStyles() {
+  /* getConnectorLeftStyles() {
     return {
       position: 'absolute',
-      height: '10px',
+      height: '15px',
       width: '2px',
       backgroundColor: '#333',
-      marginTop: '35px',
-      marginLeft: '19px',
+      marginTop: 0,
+      marginLeft: -10,
     };
   }
 
+  getConnectorBottomStyles() {
+    return {
+      position: 'absolute',
+      height: '2px',
+      width: '10px',
+      backgroundColor: '#333',
+      marginTop: 15,
+      marginLeft: -10,
+    };
+  } */
+
   getButtonsStyles() {
     return {
-      display: 'flex',
-      marginBottom: 20,
+      marginTop: 20,
+      // display: 'flex',
+      // marginBottom: 20,
     };
   }
 
   onChangeUserButtonClick() {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
-    loginEngine.logout();
     loginEngine.changeUser();
   }
 
   onChangeWorldButtonClick() {
-    const {engines} = this.props;
-    const loginEngine = engines.getEngine('login');
-    loginEngine.unselectWorld();
-    loginEngine.changeWorld();
+    const {user} = this.props;
+    if (user) {
+      const {engines} = this.props;
+      const loginEngine = engines.getEngine('login');
+      loginEngine.changeWorld();
+    }
   }
 
   onPlayButtonClick() {
+    const {user, world} = this.props;
+    if (user && world) {
+      const {engines} = this.props;
+      const loginEngine = engines.getEngine('login');
+      loginEngine.play();
+    }
+  }
+
+  onLogoutButtonClick() {
     const {engines} = this.props;
     const loginEngine = engines.getEngine('login');
-    loginEngine.play();
+    loginEngine.logout();
   }
 
   render() {
@@ -134,7 +151,6 @@ export default class Enter extends React.Component {
           {({hovered}) => <div>
             <h1 style={this.getHeadingStyles({hovered})}>{!this.props.user ? 'Sign in' : 'Change user'}</h1>
             {this.props.user ? <div style={this.getMenuItemRowStyles()}>
-              <div style={this.getConnectorStyles()} />
               <Avatar
                 style={this.getAvatarStyles()}
                 gender={this.props.user.gender}
@@ -150,8 +166,7 @@ export default class Enter extends React.Component {
         <MenuItem onClick={this.onChangeWorldButtonClick} disabled={enterDisabled}>
           {({hovered}) => <div>
             <h1 style={this.getHeadingStyles({hovered, disabled: enterDisabled})}>Choose world</h1>
-            {this.props.world ? <div style={this.getMenuItemRowStyles()}>
-              <div style={this.getConnectorStyles()} />
+            {this.props.user && this.props.world ? <div style={this.getMenuItemRowStyles()}>
               <Identity
                 style={this.getIdentityStyles()}
                 value={this.props.world.worldname}
@@ -169,11 +184,9 @@ export default class Enter extends React.Component {
           </div>}
         </MenuItem>
 
-        {/* <div style={this.getMenuItemStyles()}>
-          <div style={this.getCardRowStyles()}>
-            <Button onClick={this.onEnterButtonClick} primary small>Enter</Button>
-          </div>
-        </div> */}
+        {this.props.user ? <div style={this.getButtonsStyles()}>
+          <Button onClick={this.onLogoutButtonClick} small>Logout</Button>
+        </div> : null}
       </div>
     </div>;
   }
