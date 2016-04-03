@@ -242,10 +242,8 @@ export default class VoxelScene extends React.Component {
           if (holdValue !== null) {
             const {type} = holdValue;
             if (type === 'item') {
-              const {value} = holdValue;
-              if (value !== 'portalred' && value !== 'portalblue') {
-                console.log('use item', value); // XXX
-
+              const {variant} = holdValue;
+              if (variant !== 'portalred' && variant !== 'portalblue') {
                 stopHolding();
 
                 return;
@@ -275,14 +273,14 @@ export default class VoxelScene extends React.Component {
 
                 return;
               } else if (type === 'item') {
-                const {value} = holdValue;
+                const {variant} = holdValue;
                 const {adjacent: position, normal} = hit;
 
-                if (value === 'portalred') {
+                if (variant === 'portalred') {
                   voxelPortalInstance.setPortal('red', position, normal);
 
                   return;
-                } else if (value === 'portalblue') {
+                } else if (variant === 'portalblue') {
                   voxelPortalInstance.setPortal('blue', position, normal);
 
                   return;
@@ -308,7 +306,7 @@ export default class VoxelScene extends React.Component {
           }
 
           const type = 'item';
-          const value = {type, value: variant};
+          const value = {type, variant};
           startHolding(value);
         });
       }

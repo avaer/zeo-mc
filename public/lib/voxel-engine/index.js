@@ -57,8 +57,8 @@ function Game(opts) {
   this.vector = vector
   this.glMatrix = glMatrix
   this.arrayType = opts.arrayType || Uint8Array
-  this.cubeSize = 1 // backwards compat
-  this.chunkSize = opts.chunkSize || 32
+  this.cubeSize = 1
+  this.chunkSize = opts.chunkSize || 16
 
   this.frameRate = opts.frameRate || 60
   this.frameTime = 1000 / this.frameRate

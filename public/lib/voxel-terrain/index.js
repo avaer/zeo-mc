@@ -115,6 +115,8 @@ const TREE_DIRECTIONS = (function() {
   return result;
 })();
 
+const CHUNK_OUTSIDE_SIZE = TREE_LEAF_SIZE;
+
 const BEDROCK_VALUE = BLOCKS['bedrock'];
 const LAVA_VALUE = BLOCKS['lava_still'];
 const OBSIDIAN_VALUE = BLOCKS['obsidian'];
@@ -131,7 +133,7 @@ const {min, abs, floor, sqrt, pow} = Math;
 
 function voxelTerrain(opts) {
   opts = opts || {};
-  const chunkSize = opts.chunkSize || 32;
+  const chunkSize = opts.chunkSize;
   const vu = voxelUtils({chunkSize});
 
   const indevGenerator = indev({
@@ -290,7 +292,8 @@ function voxelTerrain(opts) {
 
     const riverSurfaces = [];
 
-    forEachPointInside(genPoint);
+    forEachPointInside(genPointInside);
+    forEachPointOutside(genPointOutside);
     postProcessPoints();
 
     function forEachPointInside(fn) {      
@@ -301,9 +304,25 @@ function voxelTerrain(opts) {
       }
     }
 
-    function genPoint(x, z) {
+    function forEachPointOutside(fn) {
+      for (
+        let x = startX - CHUNK_OUTSIDE_SIZE;
+        x < endX + CHUNK_OUTSIDE_SIZE;
+        x = ((x + 1) === startX) ? endX : (x + 1)
+      ) {
+        for (
+          let z = startZ;
+          z < endZ + CHUNK_OUTSIDE_SIZE;
+          z = ((z + 1) === startZ) ? endZ : (z + 1)
+        ) {
+          fn(x, z);
+        }
+      }
+    }
+
+    function genPointInside(x, z) {
       let h = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
-      if (h === TERRAIN_FLOOR || (h >= startY && h < endY)) {
+      if (h >= startY && h < endY) {
         genLand(x, h, z);
         genDirt(x, h, z);
         genRivers(x, h, z);
@@ -319,6 +338,19 @@ function voxelTerrain(opts) {
 
         genDirt(x, h, z);
         genRivers(x, h, z);
+      } else if (startY === chunkSize) {
+        if (!isRiverSurface(x, h, z) && !isCaveSurface(x, h, z)) {
+          genTrees(x, h, z);
+        }
+      }
+    }
+
+    function genPointOutside(x, z) {
+      let h = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
+      if (h >= startY && h < endY) {
+        if (!isRiverSurface(x, h, z) && !isCaveSurface(x, h, z)) {
+          genTrees(x, h, z);
+        }
       }
     }
 
