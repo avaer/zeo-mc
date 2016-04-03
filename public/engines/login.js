@@ -141,7 +141,8 @@ export default class LoginEngine extends Engine {
     console.log('successfully created world', {worldname, seed});
 
     this.updateState('login', state => state
-      .set('mode', 'mainMenu')
+      .update('worlds', worlds => worlds.push(new World({worldname, seed})))
+      .set('creatingWorld', false)
       .set('error', null));
   }
 
@@ -151,8 +152,8 @@ export default class LoginEngine extends Engine {
     console.log('successfully deleted world', worldname);
 
     this.updateState('login', state => state
-      .update('world', world => world.worldname !== worldname ? world : null)
-      .set('mode', 'mainMenu')
+      .update('world', world => ((world && world.worldname !== worldname) ? world : null))
+      .update('worlds', worlds => worlds.filter(world => world.worldname !== worldname))
       .set('error', null));
   }
 
@@ -224,7 +225,9 @@ export default class LoginEngine extends Engine {
   deleteWorld(worldname) {
     _getGraphQl('mutation', 'deleteWorld', {
       worldname,
-    }, {}).then(data => {
+    }, {
+      worldname: true,
+    }).then(data => {
       if (data && data.deleteWorld) {
         this.succeedDeleteWorld(data.deleteWorld);
       } else {
