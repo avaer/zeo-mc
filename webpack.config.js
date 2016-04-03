@@ -28,7 +28,7 @@ module.exports = {
     loaders: [
       {
         test: /\.js$/,
-        exclude: /^\.\/public\/(?:include|dist)\/[^\/]+\/index.js$/,
+        exclude: /^\.\/public\/include\/[^\/]+\/index.js$/,
         loaders: ['react-hot', 'babel'],
         include: [
           path.join(__dirname, 'public/index'),

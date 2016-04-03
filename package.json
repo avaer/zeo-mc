@@ -61,16 +61,9 @@
     "touchup": "~0.0.1",
     "voxel-fakeao": "~0.1.1",
 
-    "react-ace": "",
-    "brace": "",
-    "engine.io": "",
-    "pouchdb": "",
     "mkdirp": "",
     "glob": "",
     "node-forge": "",
-    "cheerio": "",
-    "website-scraper": "",
-    "random-word-generator": "",
 
     "avatar-generator": "",
     "polygen": "",
