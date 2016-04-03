@@ -72,6 +72,8 @@ export default class LoginEngine extends Engine {
       }, {
         user: {
           id: true,
+          username: true,
+          gender: true,
         },
         session: true
       }).then(data => {
