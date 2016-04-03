@@ -1,6 +1,6 @@
 "use strict";
 
-const eio = require('engine.io');
+const ws = require('ws');
 const u = require('../lib/js-utils');
 
 const STREAMS = [
@@ -9,111 +9,92 @@ const STREAMS = [
 
 const allStreams = u.flatten(STREAMS.map(name => require('./' + name + '.js')));
 
-function _connectionRead(handler) {
-  this.on('message', s => {
-    let result, error = null;
-    try {
-      result = JSON.parse(s);
-      if (typeof result === 'object' && result !== null && (typeof result.event === 'string') && ('data' in result)) {
-        // nothing
-      } else {
-        throw new Error('invalid message');
-      }
-    } catch(err) {
-      error = err;
-    }
-    if (!error) {
-      handler(result.event, result.data);
-    } else {
-      handler('error', {
-        code: 'EPARSE'
-      });
-    }
-  });
-}
-
-function _connectionWrite(e, d) {
-  const msg = {
-    event: e,
-    data: d
-  };
-  const msgJson = JSON.stringify(msg);
-  this.send(msgJson);
-}
-
 const api = {
   app(opts) {
     const prefix = opts.prefix || '';
 
-    const eios = _makeServer();
+    const app = server => {
+      const wss = new ws.Server({server});
 
-    function _makeServer() {
-      const eios = new eio.Server({
-        transports: ['websocket']
-      });
+      wss.on('connection', c => {
+        const url = c.upgradeReq.url;
+        if (url.indexOf(prefix) === 0) {
+          const connectionPath = url.replace(prefix, '');
 
-      eios.on('connection', c => {
-        const connectionPath = c.request.url.replace(prefix, '').replace(/\/\?.*$/, '');
-        const stream = u.find(allStreams, s => s.path === connectionPath);
-
-        const handled = allStreams.some(stream => {
-          const match = (() => {
-            if (typeof stream.path === 'string') {
-              if (connectionPath === stream.path) {
-                return [connectionPath];
+          const handled = allStreams.some(stream => {
+            const match = (() => {
+              if (typeof stream.path === 'string') {
+                return connectionPath === stream.path;
+                if (connectionPath === stream.path) {
+                  return [connectionPath];
+                } else {
+                  return null;
+                }
+              } else if (stream.path instanceof RegExp) {
+                return connectionPath.match(stream.path);
               } else {
                 return null;
               }
-            } else if (stream.path instanceof RegExp) {
-              return connectionPath.match(stream.path);
+            })();
+            if (match) {
+              c.params = match;
+              c.write = _connectionWrite;
+              c.read = _connectionRead;
+
+              const handler = stream.handler;
+              handler(c);
+
+              return true;
             } else {
-              return null;
+              return false;
             }
-          })();
-          if (match) {
-            c.params = match;
-            c.read = _connectionRead;
-            c.write = _connectionWrite;
+          });
 
-            const handler = stream.handler;
-            handler(c);
-
-            return true;
-          } else {
-            return false;
+          if (!handled) {
+            c.close();
           }
-        });
-
-        if (!handled) {
-          c.close();
         }
       });
-
-      return eios;
-    }
-
-    function _isHandledRequest(req) {
-      return req.url.startsWith(prefix);
-    }
-
-    const app = {
-      attach: server => {
-        server.on('request', (req, res) => {
-          if (_isHandledRequest(req)) {
-            eios.handleRequest(req, res);
-          }
-        });
-        server.on('upgrade', (req, socket, head) => {
-          if (_isHandledRequest(req)) {
-            eios.handleUpgrade(req, socket, head);
-          } else {
-            socket.destroy();
-          }
-        });
-      }
     };   
     return app;
   }
 };
+
+function _connectionWrite(event, data) {
+  const o = {event, data};
+  const s = JSON.stringify(o);
+  this.send(s);
+}
+
+function _connectionRead(fn) {
+  this.on('message', s => {
+    const o = _jsonParse(s);
+    if (o && typeof o === 'object') {
+      const type = o.type;
+      const data = o.data;
+      if (typeof type === 'string' && typeof data !== 'undefined') {
+        fn(type, data);
+      } else {
+        this.close();
+      }
+    } else {
+      this.close();
+    }
+  });
+}
+
+function _jsonParse(s) {
+  let result, error = null;
+  try {
+    result = JSON.parse(s);
+  } catch (err) {
+    error = err;
+  }
+  if (!error) {
+    return result;
+  } else {
+    return null;
+  }
+}
 
 module.exports = api;

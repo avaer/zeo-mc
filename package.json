@@ -26,6 +26,7 @@
 
     "spdy": "",
     "express": "",
+    "ws": "",
     "mime": "",
     "st": "",
     "react": "",

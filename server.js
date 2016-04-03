@@ -43,9 +43,7 @@ u.parallel(cb => {
   const streamApp = streams.app({
     prefix: streamPrefix
   });
-  streamApp.attach(webpackDevServer.listeningApp, {
-    path: streamPrefix
-  });
+  streamApp(webpackDevServer.listeningApp);
   const routesApp = routes.app();
   app.use(c.apiPrefix, routesApp);
   app.all('*', (req, res, next) => {
