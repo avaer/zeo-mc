@@ -322,7 +322,7 @@ function voxelTerrain(opts) {
 
     function genPointInside(x, z) {
       let h = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
-      if (h >= startY && h < endY) {
+      if (h === TERRAIN_FLOOR || (h >= startY && h < endY)) {
         genLand(x, h, z);
         genDirt(x, h, z);
         genRivers(x, h, z);
@@ -347,7 +347,7 @@ function voxelTerrain(opts) {
 
     function genPointOutside(x, z) {
       let h = floor(terrainNoise.in2D(x / TERRAIN_DIVISOR, z / TERRAIN_DIVISOR));
-      if (h >= startY && h < endY) {
+      if (h === TERRAIN_FLOOR || (h >= startY && h < endY)) {
         if (!isRiverSurface(x, h, z) && !isCaveSurface(x, h, z)) {
           genTrees(x, h, z);
         }
