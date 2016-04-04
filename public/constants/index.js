@@ -1,9 +1,11 @@
+const backendConstants = require('../../constants/index');
+
 export const DEFAULT_SEED = 'kazmer';
 
 export const FRAME_RATE = 60;
 export const WORLD_TICK_RATE = 10;
 
-export const CHUNK_SIZE = 16;
+export const CHUNK_SIZE = backendConstants.CHUNK_SIZE;
 export const CHUNK_DISTANCE = 3;
 
 export const INITIAL_POSITION = [0, 32, 0];

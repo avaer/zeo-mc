@@ -37,6 +37,7 @@
 
     "heap": "",
     "murmurhash-js": "",
+    "node-worker-pool": "",
     "indev": "",
     "aabb-3d": "0.0.0",
     "collide-3d-tilemap": "0.0.1",
