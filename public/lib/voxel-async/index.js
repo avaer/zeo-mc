@@ -1,4 +1,4 @@
-import voxelTerrain from '../voxel-terrain/index';
+import voxelTerrain from '../../../lib/voxel-terrain/index';
 import voxelBlockGenerator from '../voxel-block-generator/index';
 import voxelPlaneGenerator from '../voxel-plane-generator/index';
 import voxelParticleGenerator from '../voxel-particle-generator/index';
