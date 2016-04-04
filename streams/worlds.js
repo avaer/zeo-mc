@@ -1,3 +1,7 @@
+"use strict";
+
+const jsUtils = require('../lib/js-utils/index');
+
 const worldStreams = [
   {
     path: /^\/worlds\/([^\/]+)$/,
@@ -37,11 +41,18 @@ const worldStreams = [
 
 const handlers = {
   getChunk: function(worldname, args, cb) {
-    cb(null, {
+    const data = new Float32Array(8);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = 0;
+    }
+    data[5] = 5;
+    const value = {
       worldname,
       args,
-      lol: 'zol',
-    });
+      data,
+    };
+    const result = jsUtils.formatBinary(value);
+    cb(null, result);
   },
 };
 

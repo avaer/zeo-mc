@@ -1,3 +1,4 @@
+import jsUtils from '../../../lib/js-utils/index';
 import configJson from '../../../config/index.json';
 
 const {random} = Math;
@@ -42,7 +43,14 @@ export default class WorldConnection {
       const {_error: error} = this;
       if (!error) {
         const {_connection: connection} = this;
-        connection.getChunk(chunkSpec, cb);
+        connection.getChunk(chunkSpec, (err, result) => {
+          if (!err) {
+            result = jsUtils.parseBinary(result);
+            cb(null, result);
+          } else {
+            cb(err);
+          }
+        });
       } else {
         cb(err);
       }
