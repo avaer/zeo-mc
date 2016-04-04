@@ -70,10 +70,10 @@ function _connectionRead(fn) {
   this.on('message', s => {
     const o = _jsonParse(s);
     if (o && typeof o === 'object') {
-      const type = o.type;
+      const event = o.event;
       const data = o.data;
-      if (typeof type === 'string' && typeof data !== 'undefined') {
-        fn(type, data);
+      if (typeof event === 'string' && typeof data !== 'undefined') {
+        fn(event, data);
       } else {
         this.close();
       }

@@ -6,6 +6,10 @@ import Enter from './Enter';
 import VoxelScene from './VoxelScene';
 import VoxelMenu from './VoxelMenu';
 
+// XXX
+import WorldConnection from '../lib/world-connection/index';
+window.WorldConnection = WorldConnection;
+
 import {DEFAULT_SEED} from '../constants/index';
 
 export default class AppBody extends React.Component {
