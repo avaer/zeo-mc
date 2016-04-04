@@ -165,4 +165,4 @@ function _jsonParse(s) {
 }
 
 // XXX
-// c = new WorldConnection('lol'); c.getChunk({position: [0,0,0]}, (err, result) => { console.log({err, result}); });
+// c = new WorldConnection('z'); c.getChunk({position: [0,0,0]}, (err, result) => { console.log({err, result}); });

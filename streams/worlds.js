@@ -1,6 +1,7 @@
 "use strict";
 
 const jsUtils = require('../lib/js-utils/index');
+const worlds = require('../lib/worlds/index');
 
 const worldStreams = [
   {
@@ -41,18 +42,23 @@ const worldStreams = [
 
 const handlers = {
   getChunk: function(worldname, args, cb) {
-    const data = new Float32Array(8);
-    for (let i = 0; i < data.length; i++) {
-      data[i] = 0;
+    if (args && typeof args === 'object' && Array.isArray(args.position) && args.position.length === 3) {
+      const position = args.position;
+      const chunkSpec = {
+        worldname,
+        position,
+      };
+      worlds.getWorld(worldname).getChunk(chunkSpec, (err, value) => {
+        if (!err) {
+          const result = jsUtils.formatBinary(value);
+          cb(null, result);
+        } else {
+          cb(err);
+        }
+      });
+    } else {
+      cb('invalid arguments');
     }
-    data[5] = 5;
-    const value = {
-      worldname,
-      args,
-      data,
-    };
-    const result = jsUtils.formatBinary(value);
-    cb(null, result);
   },
 };
 
