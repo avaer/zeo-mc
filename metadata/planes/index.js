@@ -40,7 +40,10 @@ api.EFFECTS = _makeEffectSpecs([
 
 // makers
 
-api.make = function(planeName, p = [], s = []) {
+api.make = function(planeName, p, s) {
+  p = p || [];
+  s = s || [];
+
   const Plane = api.PLANES[planeName];
   const plane = new Plane(p, s);
   return plane;
@@ -53,7 +56,7 @@ module.exports = api;
 function _makePlaneMap(planes) {
   const result = {};
   planes.forEach(plane => {
-    const {NAME} = plane;
+    const NAME = plane.NAME;
     result[NAME] = plane;
   });
   return result;
@@ -62,7 +65,8 @@ function _makePlaneMap(planes) {
 function _makeVegetationSpecs(planes) {
   const result = [];
   planes.forEach(plane => {
-    const {NAME, MATERIALS} = plane;
+    const NAME = plane.NAME;
+    const MATERIALS = plane.MATERIALS;
     MATERIALS.forEach((materials, i) => {
       const spec = {
         plane: NAME,
@@ -77,7 +81,7 @@ function _makeVegetationSpecs(planes) {
 
 function _makeWeatherSpecs(planes) {
   return planes.map(plane => {
-    const {NAME} = plane;
+    const NAME = plane.NAME;
     const spec = {
       plane: NAME
     };
@@ -87,7 +91,7 @@ function _makeWeatherSpecs(planes) {
 
 function _makeEffectSpecs(planes) {
   return planes.map(plane => {
-    const {NAME} = plane;
+    const NAME = plane.NAME;
     const spec = {
       plane: NAME
     };

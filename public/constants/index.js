@@ -1,11 +1,11 @@
-const backendConstants = require('../../constants/index');
+const constants = require('../../constants/index');
 
 export const DEFAULT_SEED = 'kazmer';
 
 export const FRAME_RATE = 60;
 export const WORLD_TICK_RATE = 10;
 
-export const CHUNK_SIZE = backendConstants.CHUNK_SIZE;
+export const CHUNK_SIZE = constants.CHUNK_SIZE;
 export const CHUNK_DISTANCE = 3;
 
 export const INITIAL_POSITION = [0, 32, 0];
@@ -13,22 +13,8 @@ export const GRAVITY = [0, -0.0000036, 0];
 
 export const MENU_TIME = 0.2;
 
-export const BIOME_TEXTURES = [
-  'plains',
-  'forest',
-  'jungle',
-];
-export const TREE_TEXTURES = [
-  'acacia',
-  'big_oak',
-  'birch',
-  'jungle',
-  'oak',
-  'spruce',
-];
-
 export const FACE_VERTICES = 6;
-export const MATERIAL_FRAMES = 28;
+export const MATERIAL_FRAMES = constants.MATERIAL_FRAMES;
 export const PARTICLE_FRAMES = 160;
 export const FRAME_UV_ATTRIBUTE_SIZE = 4;
 export const FRAME_UVS_PER_ATTRIBUTE = FRAME_UV_ATTRIBUTE_SIZE / 2;

@@ -1,4 +1,6 @@
-const constants = require('../public/constants/index');
+"use strict";
+
+const constants = require('../../constants/index');
 const MATERIAL_FRAMES = constants.MATERIAL_FRAMES;
 const BIOME_TEXTURES = constants.BIOME_TEXTURES;
 const TREE_TEXTURES = constants.TREE_TEXTURES;

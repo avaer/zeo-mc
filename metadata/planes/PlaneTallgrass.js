@@ -1,5 +1,7 @@
+"use strict";
+
 const PlaneBase = require('./PlaneBase');
-const constants = require('../../public/constants/index');
+const constants = require('../../constants/index');
 const BIOME_TEXTURES = constants.BIOME_TEXTURES;
 
 const NAME = 'tallgrass';
@@ -13,10 +15,10 @@ const MATERIALS = [].concat([
 const SIZE = 1;
 
 class PlaneTallgrass extends PlaneBase {
-  static NAME = 'tallgrass';
-  static MATERIALS = MATERIALS;
+  constructor(p) {
+    p = p || [];
+    const p1 = p[0];
 
-  constructor([p1 = Math.floor(p1 * MATERIALS.length)] = [], []) {
     super([], []);
 
     const materialIndex = p1;
@@ -46,6 +48,8 @@ class PlaneTallgrass extends PlaneBase {
     ]
   }
 }
+PlaneTallgrass.NAME = 'tallgrass';
+PlaneTallgrass.MATERIALS = MATERIALS;
 
 module.exports = PlaneTallgrass;
 

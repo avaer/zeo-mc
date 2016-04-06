@@ -1,3 +1,5 @@
+"use strict";
+
 const PlaneTallgrassDouble = require('./PlaneTallgrassDouble');
 
 const NAME ='tallgrassDoubleSunflower';
@@ -14,10 +16,7 @@ const MATERIALS = [
 const SIZE = 1;
 
 class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble {
-  static NAME = NAME;
-  static MATERIALS = MATERIALS;
-
-  constructor([], []) {
+  constructor() {
     super([], []);
 
     const materialIndex = 0;
@@ -96,6 +95,8 @@ class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble {
     ]
   }
 }
+PlaneTallgrassDoubleSunflower.NAME = NAME;
+PlaneTallgrassDoubleSunflower.MATERIALS = MATERIALS;
 
 module.exports = PlaneTallgrassDoubleSunflower;
 

@@ -1,3 +1,5 @@
+"use strict";
+
 class PlaneBase {
   constructor() {
     this.materials = null;
