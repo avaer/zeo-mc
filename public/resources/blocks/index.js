@@ -62,46 +62,6 @@ const MULTI_FRAME_MATERIALS = {
   'water_still': _frameRange(32),
   'water_flow': _frameRange(32),
   'lava_still': _frameRange(20),
-  /* 'lava_still': [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    18,
-    17,
-    16,
-    15,
-    14,
-    13,
-    12,
-    11,
-    10,
-    9,
-    8,
-    7,
-    6,
-    5,
-    4,
-    3,
-    2,
-    1
-  ], */
   'lava_flow': _frameRange(16),
   'fire_layer_0': _frameRange(32),
   'fire_layer_1': _frameRange(32),
@@ -131,15 +91,6 @@ export const MATERIALS = (() => {
 })();
 
 export const BASIC = BASIC_BLOCK_TEXTURES;
-
-// XXX only for verification
-BASIC.forEach(blockName => {
-  const block = BLOCKS[blockName];
-  if (!block) {
-    window.BLOCKS = BLOCKS;
-    throw new Error('missing block: ' + blockName);
-  }
-});
 
 export const FRAMES = (() => {
   const result = {};
