@@ -5,8 +5,9 @@ const PlaneTallgrassDouble = require('./PlaneTallgrassDouble');
 const PlaneTallgrassDoubleSunflower = require('./PlaneTallgrassDoubleSunflower');
 
 const PlaneRain = require('./PlaneRain'); // XXX refaactor this to account for particles
-
 const PlaneFire = require('./PlaneFire');
+
+const api = {};
 
 // planes
 

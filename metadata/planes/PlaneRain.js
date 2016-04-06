@@ -1,3 +1,5 @@
+"use strict";
+
 const PlaneBase = require('./PlaneBase');
 
 const SIZE = 1;
@@ -13,10 +15,11 @@ const MATERIALS = [
 ];
 
 class PlaneRain extends PlaneBase {
-  static NAME = NAME;
-  static MATERIALS = MATERIALS;
+  constructor(p, s) {
+    s = s || [];
+    const s1 = typeof s[0] !== 'undefined' ? s[0]: 0;
+    const s2 = typeof s[1] !== 'undefined' ? s[1]: 1;
 
-  constructor([], [s1 = 0, s2 = 1] = []) {
     super([], [s1, s2]);
 
     const position = [0, 0, 0];
@@ -64,6 +67,8 @@ class PlaneRain extends PlaneBase {
     ]
   }
 }
+PlaneRain.NAME = NAME;
+PlaneRain.MATERIALS = MATERIALS;
 
 module.exports = PlaneRain;
 

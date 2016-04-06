@@ -1,3 +1,5 @@
+"use strict";
+
 const PlaneBase = require('./PlaneBase');
 
 const OUTER_SIZE = 1;
@@ -12,10 +14,11 @@ const MATERIALS = [
 ];
 
 class PlaneFire extends PlaneBase {
-  static NAME = NAME;
-  static MATERIALS = MATERIALS;
+  constructor(p, s) {
+    s = s || [];
+    const s1 = typeof s[0] !== 'undefined' ? s[0] : 0;
+    const s2 = typeof s[1] !== 'undefined' ? s[1] : 1;
 
-  constructor([], [s1 = 0, s2 = 1] = []) {
     super([], [s1, s2]);
 
     const outerDimensions = [OUTER_SIZE, OUTER_SIZE];
@@ -91,6 +94,8 @@ class PlaneFire extends PlaneBase {
     ]
   }
 }
+PlaneFire.NAME = NAME;
+PlaneFire.MATERIALS = MATERIALS;
 
 module.exports = PlaneFire;
 
