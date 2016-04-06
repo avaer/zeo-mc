@@ -1,8 +1,8 @@
-import ModelBase from './ModelBase';
+const ModelBase = require('./ModelBase'0;
 
 const NAME = 'wolf';
 
-export default class ModelWolf extends ModelBase {
+class ModelWolf extends ModelBase {
   static NAME = NAME;
 
   constructor([], [s1 = Math.PI * 3 / 4, s2 = 1] = []) {
@@ -181,6 +181,8 @@ export default class ModelWolf extends ModelBase {
     ];
   }
 }
+
+module.exports = ModelWolf;
 
 // XXX
 // var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.make('wolf', [], [i, 1], game); game.scene.add(m); m.position.set(-20, 10, 10); }; setInterval(() => {go(i += 0.1)}, 100);

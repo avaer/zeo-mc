@@ -1,18 +1,18 @@
-import ModelBase from './ModelBase';
+const ModelBase = require('./ModelBase');
 
-import ModelChest from './ModelChest';
-import ModelChicken from './ModelChicken';
-import ModelCow from './ModelCow';
-import ModelCreeper from './ModelCreeper';
-import ModelOcelot from './ModelOcelot';
-import ModelPig from './ModelPig';
-import ModelRabbit from './ModelRabbit';
-import ModelSlime from './ModelSlime';
-import ModelWolf from './ModelWolf';
+const ModelChest = require('./ModelChest');
+const ModelChicken = require('./ModelChicken');
+const ModelCow = require('./ModelCow');
+const ModelCreeper = require('./ModelCreeper');
+const ModelOcelot = require('./ModelOcelot');
+const ModelPig = require('./ModelPig');
+const ModelRabbit = require('./ModelRabbit');
+const ModelSlime = require('./ModelSlime');
+const ModelWolf = require('./ModelWolf');
 
-// models
+const api = {};
 
-export const MODELS = _makeModelMap([
+api.MODELS = _makeModelMap([
   ModelChest,
   ModelChicken,
   ModelCow,
@@ -24,9 +24,7 @@ export const MODELS = _makeModelMap([
   ModelWolf,
 ]);
 
-// entities
-
-export const ENTITIES = _makeEntitySpecs([
+api.ENTITIES = _makeEntitySpecs([
   ModelChest,
   ModelChicken,
   ModelCow,
@@ -38,15 +36,13 @@ export const ENTITIES = _makeEntitySpecs([
   ModelWolf,
 ]);
 
-// api
-
-export function make(modelName, p = [], s = [], game) {
-  const Model = MODELS[modelName];
+api.make = function(modelName, p = [], s = [], game) {
+  const Model = api.MODELS[modelName];
   const model = new Model(p, s);
   return model;
-}
+};
 
-// helpers
+module.exports = api;
 
 function _makeModelMap(models) {
   const result = {};

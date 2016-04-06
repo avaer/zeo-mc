@@ -1,8 +1,8 @@
-import ModelQuadruped from './ModelQuadruped';
+const ModelQuadruped = require('./ModelQuadruped');
 
 const NAME = 'cow';
 
-export default class ModelCow extends ModelQuadruped {
+class ModelCow extends ModelQuadruped {
   static NAME = NAME;
 
   constructor([p1 = 12, p2 = 0], [s1 = Math.PI * 3 / 4, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
@@ -97,6 +97,8 @@ export default class ModelCow extends ModelQuadruped {
     });
   }
 }
+
+module.exports = ModelCow;
 
 // XXX
 // var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.make('cow', [], [i, 1], game); game.scene.add(m); m.position.set(-20, 11, 10); }; setInterval(() => {go(i += 0.1)}, 100);

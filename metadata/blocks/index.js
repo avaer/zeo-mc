@@ -1,8 +1,11 @@
-import {MATERIAL_FRAMES, BIOME_TEXTURES, TREE_TEXTURES} from '../../constants/index';
+const constants = require('../public/constants/index');
+const MATERIAL_FRAMES = constants.MATERIAL_FRAMES;
+const BIOME_TEXTURES = constants.BIOME_TEXTURES;
+const TREE_TEXTURES = constants.TREE_TEXTURES;
 
-const {floor} = Math;
+const floor = Math.floor;
 
-const BLOCK_TEXTURES = require('./block-textures');
+const BLOCK_TEXTURES = require('./blocks.json');
 
 const BASIC_BLOCK_TEXTURES = (() => {
   const index = {};
@@ -69,7 +72,15 @@ const MULTI_FRAME_MATERIALS = {
   'prismarine_rough': _frameRange(4)
 };
 
-export const BLOCKS = (() => {
+const TRANSPARENT_TEXTURES = [
+  /water/,
+  /lava/,
+  /leaves/,
+];
+
+const api = {};
+
+api.BLOCKS = (() => {
   const result = {};
   for (let k in BLOCK_TEXTURES) {
     result[k] = BLOCK_TEXTURES[k];
@@ -77,7 +88,7 @@ export const BLOCKS = (() => {
   return result;
 })();
 
-export const MATERIALS = (() => {
+api.MATERIALS = (() => {
   const result = [];
   for (let k in BLOCK_TEXTURES) {
     const index = BLOCK_TEXTURES[k] - 1;
@@ -90,12 +101,12 @@ export const MATERIALS = (() => {
   return result;
 })();
 
-export const BASIC = BASIC_BLOCK_TEXTURES;
+api.BASIC = BASIC_BLOCK_TEXTURES;
 
-export const FRAMES = (() => {
+api.FRAMES = (() => {
   const result = {};
-  for (let i = 0; i < MATERIALS.length; i++) {
-    const faces = MATERIALS[i];
+  for (let i = 0; i < api.MATERIALS.length; i++) {
+    const faces = api.MATERIALS[i];
     for (let j = 0; j < 6; j++) {
       const material = faces[j];
       result[material] = _repeatFrames(material);
@@ -108,15 +119,7 @@ export const FRAMES = (() => {
   return result;
 })();
 
-global.MULTI_FRAME_MATERIALS = MULTI_FRAME_MATERIALS;
-
-const TRANSPARENT_TEXTURES = [
-  /water/,
-  /lava/,
-  /leaves/,
-];
-
-export const TRANSPARENT = (() => {
+api.TRANSPARENT = (() => {
   function isTransparent(m) {
     return TRANSPARENT_TEXTURES.some(transparencySpec => {
       if (typeof transparencySpec === 'string') {
@@ -130,14 +133,16 @@ export const TRANSPARENT = (() => {
   }
 
   const result = {};
-  for (let m in BLOCKS) {
+  for (let m in api.BLOCKS) {
     if (isTransparent(m)) {
-      const index = BLOCKS[m];
+      const index = api.BLOCKS[m];
       result[index] = true;
     }
   }
   return result;
 })();
+
+module.exports = api;
 
 function _frameRange(n) {
   let range = _range(0, n);

@@ -1,6 +1,5 @@
 import Heap from 'heap';
-import * as resources from '../../resources/index';
-const {BLOCKS} = resources;
+import {BLOCKS} from '../../metadata/index';
 
 const WATER_VALUE = BLOCKS.BLOCKS['water_still'];
 const DEPTH_VALUE = 255;

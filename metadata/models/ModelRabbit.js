@@ -1,8 +1,8 @@
-import ModelBase from './ModelBase';
+const ModelBase = require('./ModelBase');
 
 const NAME = 'rabbit';
 
-export default class ModelRabbit extends ModelBase {
+class ModelRabbit extends ModelBase {
   static NAME = NAME;
 
   constructor([], [s1 = Math.PI * 3 / 4, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
@@ -195,6 +195,8 @@ export default class ModelRabbit extends ModelBase {
     ];
   }
 }
+
+module.exports = ModelRabbit;
 
 /* package net.minecraft.client.model;
 

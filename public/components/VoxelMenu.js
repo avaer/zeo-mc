@@ -4,7 +4,7 @@ import Immutable from 'immutable';
 import THREE from 'three';
 import murmur from 'murmurhash-js';
 
-import {BLOCKS, GRADIENTS} from '../resources/index';
+import {BLOCKS, GRADIENTS} from '../metadata/index';
 import {KEYS} from '../utils/input/index';
 import {FRAME_RATE, MENU_TIME} from '../constants/index';
 

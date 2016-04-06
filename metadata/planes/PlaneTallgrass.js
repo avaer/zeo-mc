@@ -1,5 +1,6 @@
-import PlaneBase from './PlaneBase';
-import {BIOME_TEXTURES} from '../../constants/index';
+const PlaneBase = require('./PlaneBase');
+const constants = require('../../public/constants/index');
+const BIOME_TEXTURES = constants.BIOME_TEXTURES;
 
 const NAME = 'tallgrass';
 
@@ -11,7 +12,7 @@ const MATERIALS = [].concat([
 
 const SIZE = 1;
 
-export default class PlaneTallgrass extends PlaneBase {
+class PlaneTallgrass extends PlaneBase {
   static NAME = 'tallgrass';
   static MATERIALS = MATERIALS;
 
@@ -45,6 +46,8 @@ export default class PlaneTallgrass extends PlaneBase {
     ]
   }
 }
+
+module.exports = PlaneTallgrass;
 
 // XXX
 // var m; function go() {game.scene.remove(m); m = MODELS.make('tallgrass', [], [], game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();

@@ -1,8 +1,8 @@
-import ModelBase from './ModelBase';
+const ModelBase = require('./ModelBase');
 
 const NAME = 'ocelot';
 
-export default class ModelOcelot extends ModelBase {
+class ModelOcelot extends ModelBase {
   static NAME = NAME;
 
   constructor([], [s1 = Math.PI * 3 / 4, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
@@ -170,6 +170,8 @@ export default class ModelOcelot extends ModelBase {
     ]
   }
 }
+
+module.exports = ModelOcelot;
 
 // XXX
 // var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.make('ocelot', [], [i, 1], game); game.scene.add(m); m.position.set(-20, 11, 10); }; setInterval(() => {go(i += 0.1)}, 100);

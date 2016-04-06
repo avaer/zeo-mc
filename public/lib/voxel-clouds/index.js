@@ -1,5 +1,5 @@
-const resources = require('../../resources/index');
-const BLOCKS = resources.BLOCKS;
+const metadata = require('../../metadata/index');
+const BLOCKS = metadata.BLOCKS;
 const voxelBlockRenderer = require('../voxel-block-renderer/index');
 const voxelAsync = require('../voxel-async/index');
 const voxel = require('../voxel/index');

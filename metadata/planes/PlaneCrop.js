@@ -1,5 +1,6 @@
-import PlaneBase from './PlaneBase';
-import {BIOME_TEXTURES} from '../../constants/index';
+const PlaneBase = require('./PlaneBase');
+const constants = require('../../public/constants/index');
+const BIOME_TEXTURES = constants.BIOME_TEXTURES;
 
 const NAME = 'crop';
 
@@ -23,7 +24,7 @@ const MATERIALS = [].concat(
 
 const SIZE = 1;
 
-export default class PlaneCrop extends PlaneBase {
+class PlaneCrop extends PlaneBase {
   static NAME = NAME;
   static MATERIALS = MATERIALS;
 
@@ -57,6 +58,8 @@ export default class PlaneCrop extends PlaneBase {
     ]
   }
 }
+
+module.exports = PlaneCrop;
 
 // XXX
 // var m; function go() {game.scene.remove(m); m = MODELS.make('crop', [], [], game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();

@@ -1,4 +1,4 @@
-import PlaneBase from './PlaneBase';
+const PlaneBase = require('./PlaneBase');
 
 const SIZE = 1;
 
@@ -12,7 +12,7 @@ const MATERIALS = [
   ]
 ];
 
-export default class PlaneRain extends PlaneBase {
+class PlaneRain extends PlaneBase {
   static NAME = NAME;
   static MATERIALS = MATERIALS;
 
@@ -64,6 +64,8 @@ export default class PlaneRain extends PlaneBase {
     ]
   }
 }
+
+module.exports = PlaneRain;
 
 // XXX
 // var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.make('rain', [], [i, 1], game); game.scene.add(m); m.position.set(-20, 10, 10); }; setInterval(() => {go(i += (1 / 50))}, 50);

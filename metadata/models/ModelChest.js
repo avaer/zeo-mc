@@ -1,10 +1,10 @@
-import ModelBase from './ModelBase';
+const ModelBase = require('./ModelBase');
 
 const NAME = 'chest';
 
 const OFFSET = 8;
 
-export default class ModelChest extends ModelBase {
+class ModelChest extends ModelBase {
   static NAME = NAME;
 
   constructor([], [s1 = Math.PI * (2 + 1/4), s2 = 1] = []) {
@@ -61,6 +61,8 @@ export default class ModelChest extends ModelBase {
     ]
   }
 }
+
+module.exports = ModelChest;
 
 // XXX
 // var m,i=0; function go(i) {game.scene.remove(m); m = MODELS.make('chest', [], [i, 1], game); game.scene.add(m); m.position.set(-20, 10, 10); }; setInterval(() => {go(i += 0.1)}, 100);

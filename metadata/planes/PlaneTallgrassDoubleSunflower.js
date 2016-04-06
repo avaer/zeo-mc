@@ -1,4 +1,4 @@
-import PlaneTallgrassDouble from './PlaneTallgrassDouble';
+const PlaneTallgrassDouble = require('./PlaneTallgrassDouble');
 
 const NAME ='tallgrassDoubleSunflower';
 
@@ -13,7 +13,7 @@ const MATERIALS = [
 
 const SIZE = 1;
 
-export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble {
+class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble {
   static NAME = NAME;
   static MATERIALS = MATERIALS;
 
@@ -96,6 +96,8 @@ export default class PlaneTallgrassDoubleSunflower extends PlaneTallgrassDouble 
     ]
   }
 }
+
+module.exports = PlaneTallgrassDoubleSunflower;
 
 // XXX
 // var m; function go() {game.scene.remove(m); m = MODELS.make('tallgrassDoubleSunflower', [], [], game); game.scene.add(m); m.position.set(-20, 10, 10); }; go();

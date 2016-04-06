@@ -1,6 +1,5 @@
 import THREE from 'three';
-import * as Blocks from '../../resources/blocks/index';
-import * as Planes from '../../resources/planes/index';
+import {BLOCKS as Blocks, PLANES as Planes} from '../../metadata/index';
 
 const {BLOCKS} = Blocks;
 const {VEGETATIONS, WEATHERS, EFFECTS} = Planes;

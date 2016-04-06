@@ -1,8 +1,8 @@
-import ModelBase from './ModelBase';
+const ModelBase = require('./ModelBase');
 
 const NAME = 'slime';
 
-export default class ModelSlime extends ModelBase {
+class ModelSlime extends ModelBase {
   static NAME = NAME;
 
   constructor() {
@@ -48,6 +48,8 @@ export default class ModelSlime extends ModelBase {
     ];
   }
 }
+
+module.exports = ModelSlime;
 
 // XXX
 // var m; function go(i) {game.scene.remove(m); m = MODELS.make('slime', [], [], game); game.scene.add(m); m.position.set(-20, 11, 10); }; go();

@@ -1,6 +1,6 @@
-import ModelBase from './ModelBase';
+const ModelBase = require('./ModelBase');
 
-export default class ModelQuadruped extends ModelBase {
+class ModelQuadruped extends ModelBase {
   constructor([p1 = 0, p2 = 1] = [], [s1 = Math.PI * 3 / 4, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
     super();
 
@@ -70,6 +70,8 @@ export default class ModelQuadruped extends ModelBase {
     ];
   }
 }
+
+module.exports = ModelQuadruped;
 
 /* package net.minecraft.src;
 

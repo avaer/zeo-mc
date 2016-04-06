@@ -1,16 +1,16 @@
-import PlaneCrop from './PlaneCrop';
-import PlaneCross from './PlaneCross';
-import PlaneTallgrass from './PlaneTallgrass';
-import PlaneTallgrassDouble from './PlaneTallgrassDouble';
-import PlaneTallgrassDoubleSunflower from './PlaneTallgrassDoubleSunflower';
+const PlaneCrop = require('./PlaneCrop');
+const PlaneCross = require('./PlaneCross');
+const PlaneTallgrass = require('./PlaneTallgrass');
+const PlaneTallgrassDouble = require('./PlaneTallgrassDouble');
+const PlaneTallgrassDoubleSunflower = require('./PlaneTallgrassDoubleSunflower');
 
-import PlaneRain from './PlaneRain';
+const PlaneRain = require('./PlaneRain'); // XXX refaactor this to account for particles
 
-import PlaneFire from './PlaneFire';
+const PlaneFire = require('./PlaneFire');
 
 // planes
 
-export const PLANES = _makePlaneMap([
+api.PLANES = _makePlaneMap([
   PlaneCrop,
   PlaneCross,
   PlaneTallgrass,
@@ -22,7 +22,7 @@ export const PLANES = _makePlaneMap([
   PlaneFire,
 ]);
 
-export const VEGETATIONS = _makeVegetationSpecs([
+api.VEGETATIONS = _makeVegetationSpecs([
   PlaneCrop,
   PlaneCross,
   PlaneTallgrass,
@@ -30,21 +30,23 @@ export const VEGETATIONS = _makeVegetationSpecs([
   PlaneTallgrassDoubleSunflower,
 ]);
 
-export const WEATHERS = _makeWeatherSpecs([
+api.WEATHERS = _makeWeatherSpecs([
   PlaneRain,
 ]);
 
-export const EFFECTS = _makeEffectSpecs([
+api.EFFECTS = _makeEffectSpecs([
   PlaneFire,
 ]);
 
-// api
+// makers
 
-export function make(planeName, p = [], s = []) {
-  const Plane = PLANES[planeName];
+api.make = function(planeName, p = [], s = []) {
+  const Plane = api.PLANES[planeName];
   const plane = new Plane(p, s);
   return plane;
-}
+};
+
+module.exports = api;
 
 // helpers
 
