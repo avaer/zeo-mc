@@ -40,44 +40,7 @@ var files = fs.readdirSync('../../img/textures/blocks/').filter(function(file) {
   return /\.png$/.test(file);
 }).map(function(file) {
   return file.replace(/\.png$/, '');
-})/* .filter(t => {
-  function textureMatch(texture) {
-    if (typeof texture === 'string') {
-      return t === texture;
-    } else if (texture instanceof RegExp) {
-      return texture.test(t);
-    } else {
-      return false;
-    }
-  };
-
-  return mainTextures.some(textureMatch) && !unmainTextures.some(textureMatch);
-});*/ /*.sort(function(a, b) {
-  function mainTexturesMatch(t) {
-    function textureMatch(texture, t) {
-      if (typeof texture === 'string') {
-        return t === texture;
-      } else if (texture instanceof RegExp) {
-        return texture.test(t);
-      } else {
-        return false;
-      }
-    };
-
-    return mainTextures.some(function(texture) {
-      return textureMatch(texture, t);
-    }) && !unmainTextures.some(function(texture) {
-      return textureMatch(texture, t);
-    });
-  }
-
-  var d = +mainTexturesMatch(b) - +mainTexturesMatch(a);
-  if (d !== 0) {
-    return d;
-  } else {
-    return a.localeCompare(b);
-  }
-}); */
+});
 
 var result = {};
 var i = 1;
