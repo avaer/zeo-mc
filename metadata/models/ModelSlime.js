@@ -1,10 +1,10 @@
+"use strict";
+
 const ModelBase = require('./ModelBase');
 
 const NAME = 'slime';
 
 class ModelSlime extends ModelBase {
-  static NAME = NAME;
-
   constructor() {
     super();
 
@@ -48,6 +48,7 @@ class ModelSlime extends ModelBase {
     ];
   }
 }
+ModelSlime.NAME = NAME;
 
 module.exports = ModelSlime;
 

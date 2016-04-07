@@ -1,3 +1,5 @@
+"use strict";
+
 class ModelBase {
   constructor() {
     this.textures = null;

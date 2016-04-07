@@ -36,7 +36,10 @@ api.ENTITIES = _makeEntitySpecs([
   ModelWolf,
 ]);
 
-api.make = function(modelName, p = [], s = [], game) {
+api.make = function(modelName, p, s, game) {
+  p = p || [];
+  s = s || [];
+  
   const Model = api.MODELS[modelName];
   const model = new Model(p, s);
   return model;
@@ -47,7 +50,7 @@ module.exports = api;
 function _makeModelMap(models) {
   const result = {};
   models.forEach(model => {
-    const {NAME} = model;
+    const NAME = model.NAME;
     result[NAME] = model;
   });
   return result;
@@ -55,7 +58,7 @@ function _makeModelMap(models) {
 
 function _makeEntitySpecs(models) {
   return models.map(model => {
-    const {NAME} = model;
+    const NAME = model.NAME;
     const spec = {
       model: NAME,
       p: [],

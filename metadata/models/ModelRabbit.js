@@ -1,11 +1,20 @@
+"use strict";
+
 const ModelBase = require('./ModelBase');
 
 const NAME = 'rabbit';
 
 class ModelRabbit extends ModelBase {
-  static NAME = NAME;
+  constructor(p, s) {
+    p = p || [];
+    s = s || [];
+    const s1 = typeof s[0] !== 'undefined' ? s[0] : Math.PI * 3 / 4;
+    const s2 = typeof s[1] !== 'undefined' ? s[1] : 1;
+    const s3 = typeof s[2] !== 'undefined' ? s[2] : 0;
+    const s4 = typeof s[3] !== 'undefined' ? s[3] : 0;
+    const s5 = typeof s[4] !== 'undefined' ? s[4] : 0;
+    const s6 = typeof s[5] !== 'undefined' ? s[5] : 0;
 
-  constructor([], [s1 = Math.PI * 3 / 4, s2 = 1, s3 = 0, s4 = 0, s5 = 0, s6 = 0] = []) {
     super();
 
     const headRotationX = s5 * 0.017453292;
@@ -195,6 +204,7 @@ class ModelRabbit extends ModelBase {
     ];
   }
 }
+ModelRabbit.NAME = NAME;
 
 module.exports = ModelRabbit;
 

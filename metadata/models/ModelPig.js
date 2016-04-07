@@ -1,11 +1,15 @@
+"use strict";
+
 const ModelQuadruped = require('./ModelQuadruped');
 
 const NAME = 'pig';
 
 class ModelPig extends ModelQuadruped {
-  static NAME = NAME;
+  constructor(p, s) {
+    p = p || [];
+    s = s || [];
+    const p1 = typeof p[0] !== 'undefined' ? p[0] : 0;
 
-  constructor([p1 = 0] = [], s = []) {
     super([6, p1], s);
 
     this.textures = 'entity/pig/pig';
@@ -35,6 +39,7 @@ class ModelPig extends ModelQuadruped {
     });
   }
 }
+ModelPig.NAME = NAME;
 
 module.exports = ModelPig;
 

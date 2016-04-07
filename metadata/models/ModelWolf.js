@@ -1,11 +1,16 @@
-const ModelBase = require('./ModelBase'0;
+"use strict";
+
+const ModelBase = require('./ModelBase');
 
 const NAME = 'wolf';
 
 class ModelWolf extends ModelBase {
-  static NAME = NAME;
+  constructor(p, s) {
+    p = p || [];
+    s = s || [];
+    const s1 = typeof s[0] !== 'undefined' ? s[0] : Math.PI * 3 / 4;
+    const s2 = typeof s[1] !== 'undefined' ? s[1] : 1;
 
-  constructor([], [s1 = Math.PI * 3 / 4, s2 = 1] = []) {
     super([], [s1, s2]);
 
     const f = 0;
@@ -181,6 +186,7 @@ class ModelWolf extends ModelBase {
     ];
   }
 }
+ModelWolf.NAME = NAME;
 
 module.exports = ModelWolf;
 

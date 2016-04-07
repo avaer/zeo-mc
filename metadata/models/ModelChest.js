@@ -1,3 +1,5 @@
+"use strict"
+
 const ModelBase = require('./ModelBase');
 
 const NAME = 'chest';
@@ -5,9 +7,12 @@ const NAME = 'chest';
 const OFFSET = 8;
 
 class ModelChest extends ModelBase {
-  static NAME = NAME;
+  constructor(p, s) {
+    p = p || [];
+    s = s || [];
+    const s1 = typeof s[0] !== 'undefined' ? s[0] : Math.PI * (2 + 1/4);
+    const s2 = typeof s[1] !== 'undefined' ? s[1] : 1;
 
-  constructor([], [s1 = Math.PI * (2 + 1/4), s2 = 1] = []) {
     super([], [s1, s2]);
 
     const chestLidRotation = [(Math.PI * 1.75) - Math.sin(s1 * 0.6662) * (s2 * (Math.PI / 4)), 0, 0];
@@ -61,6 +66,7 @@ class ModelChest extends ModelBase {
     ]
   }
 }
+ModelChest.NAME = NAME;
 
 module.exports = ModelChest;
 
