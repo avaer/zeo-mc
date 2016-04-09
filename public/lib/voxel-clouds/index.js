@@ -1,4 +1,4 @@
-const metadata = require('../../metadata/index');
+const metadata = require('../../../metadata/index');
 const BLOCKS = metadata.BLOCKS;
 const voxelBlockRenderer = require('../voxel-block-renderer/index');
 const voxelAsync = require('../voxel-async/index');

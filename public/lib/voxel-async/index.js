@@ -5,7 +5,7 @@ import voxelParticleGenerator from '../voxel-particle-generator/index';
 import voxelSpriteGenerator from '../voxel-sprite-generator/index';
 import voxelModelGenerator from '../voxel-model-generator/index';
 
-import {BLOCKS} from '../../metadata/index';
+import {BLOCKS} from '../../../metadata/index';
 
 let voxelTerrainGenerate = null;
 let voxelBlockGeneratorInstance = null;

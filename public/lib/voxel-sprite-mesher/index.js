@@ -1,4 +1,4 @@
-import {SPRITES} from '../../metadata/index';
+import {SPRITES} from '../../../metadata/index';
 
 const SIZE = 1;
 

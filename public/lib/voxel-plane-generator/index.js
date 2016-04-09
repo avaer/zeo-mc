@@ -1,5 +1,5 @@
 import THREE from 'three';
-import {BLOCKS as Blocks, PLANES as Planes} from '../../metadata/index';
+import {BLOCKS as Blocks, PLANES as Planes} from '../../../metadata/index';
 
 const {BLOCKS} = Blocks;
 const {VEGETATIONS, WEATHERS, EFFECTS} = Planes;

@@ -17,7 +17,7 @@ import * as voxelAsync from '../lib/voxel-async/index';
 
 import * as inputUtils from '../utils/input/index';
 import {CHUNK_SIZE, CHUNK_DISTANCE, FRAME_RATE, WORLD_TICK_RATE, INITIAL_POSITION, GRAVITY, NUM_WORKERS} from '../constants/index';
-import {BLOCKS, PLANES, MODELS} from '../metadata/index';
+import {BLOCKS, PLANES, MODELS} from '../../metadata/index';
 import configJson from '../../config/index.json';
 
 window.BLOCKS = BLOCKS; // XXX remove this when we no longer need to support making models manually
