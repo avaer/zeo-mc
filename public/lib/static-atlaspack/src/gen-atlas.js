@@ -71,7 +71,6 @@ function loadTextures(opts, cb) {
     });
   };
   const packImg = (img, cb) => {
-    console.log('pack img', img.id);
     const rect = atlas.pack(img);
     if (rect) {
       cb();
@@ -125,7 +124,7 @@ loadTextures({
     const dataDirectory = path.join(__dirname, '..', 'data');
     mkdirp(dataDirectory, err => {
       if (!err) {
-        const atlasJson = atlas.json(); // XXX need a version of atlaspack that saves/loads rect.name
+        const atlasJson = atlas.json();
         fs.writeFile(path.join(dataDirectory, 'atlas.json'), atlasJson, 'utf8');
 
         atlas.canvas.pngStream().pipe(fs.createWriteStream(path.join(dataDirectory, 'atlas.png')));
