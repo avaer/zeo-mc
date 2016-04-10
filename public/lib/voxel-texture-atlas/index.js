@@ -31,7 +31,6 @@ class VoxelTextureAtlas extends EventEmitter {
 
       return canvas;
     })();
-    this._canvas = canvas;
 
     const texture = (() => {
       const texture = new THREE.Texture(canvas);
@@ -95,8 +94,6 @@ class VoxelTextureAtlas extends EventEmitter {
       }
     }
     const done = () => {
-      this._ensurePowerof2();
-
       this._texture.needsUpdate = true;
 
       this._faceMaterials = this._buildFaceMaterials();
@@ -150,31 +147,6 @@ class VoxelTextureAtlas extends EventEmitter {
     });
   }
 
-  // Ensure the texture stays at a power of 2 for mipmaps
-  // this is cheating :D
-  _ensurePowerof2() {
-    const {_canvas: canvas} = this;
-    let {width} = canvas;
-    const {height} = canvas;
-    function pow2(x) {
-      x--;
-      x |= x >> 1;
-      x |= x >> 2;
-      x |= x >> 4;
-      x |= x >> 8;
-      x |= x >> 16;
-      x++;
-      return x;
-    }
-    if (height > width) {
-      width = height;
-    };
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.getImageData(0, 0, width, height);
-    canvas.width = canvas.height = pow2(width);
-    ctx.putImageData(imageData, 0, 0);
-  }
-
   _buildFaceMaterials() {
     const result = [];
     const index = {}
@@ -192,7 +164,7 @@ class VoxelTextureAtlas extends EventEmitter {
   }
 
   _buildAtlasUvs() {
-    return this._atlas.uv(this._canvas.width, this._canvas.height);
+    return this._atlas.uv(this._atlas.canvas.width, this._atlas.canvas.height);
   }
 
   _buildFaceNormalMaterials() {
@@ -216,7 +188,8 @@ class VoxelTextureAtlas extends EventEmitter {
   _buildBlockMeshFaceFrameUvs() {
     const result = {};
 
-    const {_canvas: canvas} = this;
+    const {_atlas: atlas} = this;
+    const {canvas} = atlas;
     const {width, height} = canvas;
     for (let i = 0; i < this._faceMaterials.length; i++) {
       const faceMaterial = this._faceMaterials[i];
