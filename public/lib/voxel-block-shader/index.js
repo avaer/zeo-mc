@@ -1,4 +1,3 @@
-import {BLOCKS} from '../../resources/index';
 import {MATERIAL_FRAMES} from '../../constants/index';
 
 const {floor, ceil, round} = Math;

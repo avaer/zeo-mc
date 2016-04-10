@@ -1,4 +1,5 @@
-var Models = require('../../resources/models/index');
+var metadata = require('../../../metadata/index');
+var Models = metadata.MODELS;
 var ENTITIES = Models.ENTITIES;
 
 function voxelModelGenerator() {
