@@ -72,11 +72,9 @@ voxelBlockMesher.getVertices = function(verticesData) {
 
 voxelBlockMesher.getFrameUvs = function(facesData, normals, atlas) {
   const numFaces = facesData.length;
-  const result = Array(FRAME_UV_ATTRIBUTES);
+  const sizePerAttribute = numFaces * FACE_VERTICES * MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTES;
+  const result = new Float32Array(FRAME_UV_ATTRIBUTES * sizePerAttribute);
 
-  for (let i = 0; i < FRAME_UV_ATTRIBUTES; i++) {
-    result[i] = new Float32Array(numFaces * FACE_VERTICES * MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTES);
-  }
   for (let i = 0; i < numFaces; i++) {
     const colorValue = getColorValue(i);
     const normalDirection = getNormalDirection(i);
@@ -86,9 +84,9 @@ voxelBlockMesher.getFrameUvs = function(facesData, normals, atlas) {
     const faceFrameUvs = getFaceFrameUvs(faceMaterial);
 
     for (let j = 0; j < FRAME_UV_ATTRIBUTES; j++) {
-      result[j].set(
-        faceFrameUvs.slice(FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * j, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * (j + 1)),
-        i * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME
+      result.set(
+        faceFrameUvs.slice(j * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME, (j + 1) * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME),
+        (j * sizePerAttribute) + (i * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME)
       );
     }
   }
@@ -106,7 +104,7 @@ voxelBlockMesher.getFrameUvs = function(facesData, normals, atlas) {
     else if (normals[normalIndex + 1] === -1) return 3; // y === -1
     else if (normals[normalIndex + 2] === -1) return 4; // x === -1
     else if (normals[normalIndex + 2] === 1)  return 5; // x === 0
-    else                                           return 0;
+    else                                      return 0;
   }
 
   function getFaceNormalMaterial(colorValue, normalDirection) {
@@ -119,8 +117,12 @@ voxelBlockMesher.getFrameUvs = function(facesData, normals, atlas) {
 };
 
 voxelBlockMesher.applyFrameUvs = function(geometry, frameUvs, THREE) {
+  const sizePerAttribute = frameUvs.length / FRAME_UV_ATTRIBUTES;
   for (let i = 0; i < FRAME_UV_ATTRIBUTES; i++) {
-    geometry.addAttribute('frameUv' + i, new THREE.BufferAttribute(frameUvs[i], FRAME_UV_ATTRIBUTE_SIZE));
+    geometry.addAttribute(
+      'frameUv' + i,
+      new THREE.BufferAttribute(frameUvs.slice(i * sizePerAttribute, (i + 1) * sizePerAttribute), FRAME_UV_ATTRIBUTE_SIZE)
+    );
   }
 };
 
