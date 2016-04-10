@@ -125,10 +125,11 @@ class VoxelTextureAtlas extends EventEmitter {
       });
     };
     const packImg = (img, cb) => {
-      const node = this._atlas.pack(img);
-      if (node === false) {
-        this.atlas = this.atlas.expand(img);
-        this.atlas.tilepad = true;
+      const rect = this._atlas.pack(img);
+      if (!rect) {
+        /* this._atlas = this.atlas.expand(img);
+        this._atlas.tilepad = true; */
+        throw new Error('failed to pack texture');
       }
       cb();
     };
