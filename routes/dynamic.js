@@ -6,7 +6,7 @@ const url = require('url');
 const avatarGenerator = require('avatar-generator');
 const avatarGeneratorInstance = avatarGenerator();
 const polygen = require('polygen');
-const staticAtlaspack = require('../lib/static-atlaspack/index');
+const staticAtlaspackGenerator = require('../lib/static-atlaspack/generator');
 
 const USER_SIZE = 16;
 
@@ -79,24 +79,36 @@ const routes = [
 const _getAtlas = (() => {
   let _atlas = null;
   let _error = null;
-  let _loading = false;
   let _loaded = false;
   let _queue = [];
 
-  function _respondQueue() {
+  const _respondQueue = () => {
     for (let i = 0; i < _queue.length; i++) {
       const cb = _queue[i];
       _respond(cb);
     }
     _queue = [];
-  }
-  function _respond(cb) {
+  };
+  const _respond = cb => {
     if (!_error) {
       cb(null, _atlas);
     } else {
       cb(_error);
     }
-  }
+  };
+
+  process.nextTick(() => {
+    staticAtlaspackGenerator((err, atlas) => {
+      if (!err) {
+        _atlas = atlas;
+      } else {
+        _error = err;
+      }
+      _loaded = true;
+
+      _respondQueue();
+    });
+  });
 
   return cb => {
     if (_loaded) {
@@ -105,21 +117,6 @@ const _getAtlas = (() => {
       });
     } else {
       _queue.push(cb);
-
-      if (!_loading) {
-        staticAtlaspack((err, atlas) => {
-          if (!err) {
-            _atlas = atlas;
-          } else {
-            _error = err;
-          }
-          _loaded = true;
-
-          _respondQueue();
-        });
-
-        _loading = true;
-      }
     }
   };
 })();
