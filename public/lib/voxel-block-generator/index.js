@@ -1,4 +1,4 @@
-import voxelTextureAtlas from 'voxelTextureAtlas';
+import voxelTextureAtlas from '../voxel-texture-atlas/index';
 
 const TRANSPARENT_MASK = 0x8000;
 const NO_FLAGS_MASK = 0x7FFF;
