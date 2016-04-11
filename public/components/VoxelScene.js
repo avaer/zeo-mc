@@ -59,10 +59,6 @@ export default class VoxelScene extends React.Component {
     let textureAtlas, textureLoader, game, avatar;
 
     const loadTextures = cb => {
-      function getTexturePath(texture) {
-        return ;
-      }
-
       (() => {
         let pending = 2;
         function pend() {
