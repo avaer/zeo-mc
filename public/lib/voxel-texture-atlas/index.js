@@ -28,7 +28,7 @@ class VoxelTextureAtlas {
     return _atlasUvs[material];
   }
   getAtlasUvs(material) {
-    return VoxelTextureAtlas.getTexture(this._atlasUvs, material);
+    return VoxelTextureAtlas.getAtlasUvs(this._atlasUvs, material);
   }
 
   static getFaceNormalMaterial(_faceNormalMaterials, colorValue, normalDirection) {
