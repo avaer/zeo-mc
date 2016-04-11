@@ -377,7 +377,3 @@ class Crosshair extends React.Component {
     return <div style={style} />;
   }
 }
-
-function _positionKey(position) {
-  return position.join(',');
-}

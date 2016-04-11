@@ -1,3 +1,4 @@
+const voxelAsync = require('../voxel-async/index');
 const voxelBlockGenerator = require('../voxel-block-generator/index');
 const voxelBlockMesher = require('../voxel-block-mesher/index');
 
@@ -73,7 +74,7 @@ VoxelConstruct.prototype.createDebris = function(pos, value, power) {
     const normals = bufferGeometry.getAttribute('normal').array;
 
     const facesData = [value, value, value, value, value, value];
-    const frameUvs = voxelBlockGenerator.getFrameUvs(facesData, normals, this._game.textureAtlas);
+    const frameUvs = voxelBlockGenerator.getFrameUvs(facesData, normals, voxelAsync);
     voxelBlockMesher.applyFrameUvs(bufferGeometry, frameUvs, this._game.THREE);
 
     return bufferGeometry;

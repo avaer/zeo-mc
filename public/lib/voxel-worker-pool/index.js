@@ -64,7 +64,7 @@ class VoxelWorkerPool {
   }
 
   generateAsync(position, cb) {
-    const positionKey = _positionKey(position);
+    const positionKey = position.join(',');
     let cbs = this._pendingGenerates.get(positionKey);
     if (!cbs) {
       cbs = [];

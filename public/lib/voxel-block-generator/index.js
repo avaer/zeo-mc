@@ -1,4 +1,6 @@
+import THREE from 'three';
 import voxelTextureAtlas from '../voxel-texture-atlas/index';
+import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
 const TRANSPARENT_MASK = 0x8000;
 const NO_FLAGS_MASK = 0x7FFF;
@@ -222,7 +224,6 @@ voxelBlockGenerator.getVertices = function(verticesData) {
 
 voxelBlockGenerator.getNormals = function(vertices) {
   const geometry = new THREE.BufferGeometry();
-  geometry.addAtribute('position', new THREEE.BufferAttribute(vertices, 3));
   geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
   geometry.computeVertexNormals();
   const normals = geometry.getAttribute('normal').array;

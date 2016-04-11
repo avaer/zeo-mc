@@ -17,46 +17,28 @@ class VoxelTextureAtlas {
     this._planeMeshFrameUvs = this._buildPlaneMeshFrameUvs();
   }
 
-  static getTexture(_texture) {
-    return _texture;
-  }
   getTexture() {
-    return VoxelTextureAtlas.getTexture(this._texture);
+    return voxelTextureAtlas.getTexture(this._texture);
   }
 
-  static getAtlasUvs(_atlasUvs, material) {
-    return _atlasUvs[material];
-  }
   getAtlasUvs(material) {
-    return VoxelTextureAtlas.getAtlasUvs(this._atlasUvs, material);
+    return voxelTextureAtlas.getAtlasUvs(this._atlasUvs, material);
   }
 
-  static getFaceNormalMaterial(_faceNormalMaterials, colorValue, normalDirection) {
-    return _faceNormalMaterials[((colorValue - 1) * FACE_VERTICES) + normalDirection];
-  }
   getFaceNormalMaterial(colorValue, normalDirection) {
-    return VoxelTextureAtlas.getFaceNormalMaterial(this._faceNormalMaterials, colorValue, normalDirection);
+    return voxelTextureAtlas.getFaceNormalMaterial(this._faceNormalMaterials, colorValue, normalDirection);
   }
 
-  static getFaceMaterial(_faceNormalMaterials, colorValue) {
-    return VoxelTextureAtlas.getFaceNormalMaterial(_faceNormalMaterials, colorValue, 0);
-  }
   getFaceMaterial(colorValue) {
-    return VoxelTextureAtlas.getFaceMaterial(this._faceNormalMaterials, colorValue);
+    return voxelTextureAtlas.getFaceMaterial(this._faceNormalMaterials, colorValue);
   }
 
-  static getBlockMeshFaceFrameUvs(_blockMeshFaceFrameUvs, material) {
-    return _blockMeshFaceFrameUvs[material];
-  }
   getBlockMeshFaceFrameUvs(material) {
-    return VoxelTextureAtlas.getBlockMeshFaceFrameUvs(this._blockMeshFaceFrameUvs, material);
+    return voxelTextureAtlas.getBlockMeshFaceFrameUvs(this._blockMeshFaceFrameUvs, material);
   }
 
-  static getPlaneMeshFrameUvs(_planeMeshFrameUvs, material, even) {
-    return _planeMeshFrameUvs[material][even ? 0 : 1];
-  }
   getPlaneMeshFrameUvs(material, even) {
-    return VoxelTextureAtlas.getPlaneMeshFrameUvs(this._planeMeshFrameUvs, material, even);
+    return voxelTextureAtlas.getPlaneMeshFrameUvs(this._planeMeshFrameUvs, material, even);
   }
 
   _buildTexture() {
@@ -239,5 +221,23 @@ class VoxelTextureAtlas {
 function voxelTextureAtlas(opts) {
   return new VoxelTextureAtlas(opts);
 }
+voxelTextureAtlas.getTexture = function(_texture) {
+  return _texture;
+};
+voxelTextureAtlas.getAtlasUvs = function(_atlasUvs, material) {
+  return _atlasUvs[material];
+};
+voxelTextureAtlas.getFaceNormalMaterial = function(_faceNormalMaterials, colorValue, normalDirection) {
+  return _faceNormalMaterials[((colorValue - 1) * FACE_VERTICES) + normalDirection];
+};
+voxelTextureAtlas.getFaceMaterial = function(_faceNormalMaterials, colorValue) {
+  return voxelTextureAtlas.getFaceNormalMaterial(_faceNormalMaterials, colorValue, 0);
+};
+voxelTextureAtlas.getBlockMeshFaceFrameUvs = function(_blockMeshFaceFrameUvs, material) {
+  return _blockMeshFaceFrameUvs[material];
+};
+voxelTextureAtlas.getPlaneMeshFrameUvs = function(_planeMeshFrameUvs, material, even) {
+  return _planeMeshFrameUvs[material][even ? 0 : 1];
+};
 
 module.exports = voxelTextureAtlas;
