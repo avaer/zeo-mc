@@ -100,11 +100,13 @@ export default class VoxelScene extends React.Component {
     const initializeWorkers = cb => {
       const {seed} = this.props;
       const chunkSize = CHUNK_SIZE;
-      const voxelAsyncOpts = {seed, chunkSize};
+      const {_blockMeshFaceFrameUvs: blockMeshFaceFrameUvs} = textureAtlas;
+      const voxelAsyncOpts = {seed, chunkSize, blockMeshFaceFrameUvs};
       voxelAsync.init(voxelAsyncOpts);
 
+      const workerOpts = voxelAsyncOpts;
       const numWorkers = NUM_WORKERS;
-      const workerPool = voxelWorkerPool({voxelAsyncOpts, numWorkers});
+      const workerPool = voxelWorkerPool({workerOpts, numWorkers});
       this._workerPool = workerPool;
 
       cb();

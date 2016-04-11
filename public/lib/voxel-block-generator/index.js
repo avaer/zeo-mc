@@ -8,7 +8,7 @@ function voxelBlockGenerator(voxelAsync) {
 
     const vertices = voxelBlockGenerator.getVertices(verticesData);
     const normals = voxelBlockGenerator.getNormals(vertices);
-    const frameUvs = voxelBlockGenerator.getFrameUvs(facesData, normals, atlas); // XXX need to inject the altas through voxelAsync
+    const frameUvs = voxelBlockGenerator.getFrameUvs(facesData, normals, voxelAsync);
     return {vertices, normals, frameUvs};
   };
 };
@@ -227,7 +227,7 @@ voxelBlockGenerator.getNormals = function(vertices) {
   return normals;
 };
 
-voxelBlockGenerator.getFrameUvs = function(facesData, normals, atlas) {
+voxelBlockGenerator.getFrameUvs = function(facesData, normals, voxelAsync) {
   const numFaces = facesData.length;
   const sizePerAttribute = numFaces * FACE_VERTICES * MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTES;
   const result = new Float32Array(FRAME_UV_ATTRIBUTES * sizePerAttribute);
@@ -264,12 +264,12 @@ voxelBlockGenerator.getFrameUvs = function(facesData, normals, atlas) {
     else                                      return 0;
   }
 
- function getFaceNormalMaterial(colorValue, normalDirection) {
-    return atlas.getFaceNormalMaterial(colorValue, normalDirection);
+  function getFaceNormalMaterial(colorValue, normalDirection) {
+    return atlas.getFaceNormalMaterial(colorValue, normalDirection); // XXX inject this from voxel-texture-atlas
   }
 
   function getFaceFrameUvs(faceMaterial) {
-    return atlas.getBlockMeshFaceFrameUvs(faceMaterial);
+    return voxelAsync.initData.blockMeshFaceFrameUvs[faceMaterial];
   }
 };
 

@@ -16,7 +16,11 @@ let voxelModelGeneratorInstance = null;
 
 const api = {};
 
-function init({seed, chunkSize}) {
+api.initData = null;
+
+function init({seed, chunkSize, blockMeshFaceFrameUvs}) {
+  api.initData = {seed, chunkSize, blockMeshFaceFrameUvs};
+
   voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
   voxelBlockGeneratorInstance = voxelBlockGenerator(api);
   voxelPlaneGeneratorInstance = voxelPlaneGenerator(api);

@@ -1,8 +1,8 @@
 import {CHUNK_SIZE} from '../constants/index';
 
 export default class VoxelWorkerPool extends React.Component {
-  constructor({voxelAsyncOpts, numWorkers}) {
-    this._workers = this._makeWorkers(voxelAsyncOpts, numWorkers);
+  constructor({workerOpts, numWorkers}) {
+    this._workers = this._makeWorkers(workerOpts, numWorkers);
     this._workerIndex = 0;
     this._pendingGenerates = new Map();
   }
