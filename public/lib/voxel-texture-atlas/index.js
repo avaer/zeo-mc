@@ -18,27 +18,27 @@ class VoxelTextureAtlas {
   }
 
   getTexture() {
-    return this._texture;
+    return voxelTextureAtlas.getTexture(this._texture);
   }
 
   getAtlasUvs(material) {
-    return this._atlasUvs[material];
+    return voxelTextureAtlas.getAtlasUvs(this._atlasUvs, material);
   }
 
   getFaceNormalMaterial(colorValue, normalDirection) {
-    return this._faceNormalMaterials[((colorValue - 1) * FACE_VERTICES) + normalDirection];
+    return voxelTextureAtlas.getFaceNormalMaterial(this._faceNormalMaterials, colorValue, normalDirection);
   }
 
   getFaceMaterial(colorValue) {
-    return this.getFaceNormalMaterial(colorValue, 0);
+    return voxelTextureAtlas.getFaceMaterial(this._faceNormalMaterials, colorValue);
   }
 
   getBlockMeshFaceFrameUvs(material) {
-    return this._blockMeshFaceFrameUvs[material];
+    return voxelTextureAtlas.getBlockMeshFaceFrameUvs(this._blockMeshFaceFrameUvs, material);
   }
 
   getPlaneMeshFrameUvs(material, even) {
-    return this._planeMeshFrameUvs[material][even ? 0 : 1];
+    return voxelTextureAtlas.getPlaneMeshFrameUvs(this._planeMeshFrameUvs, material, even);
   }
 
   _buildTexture() {
@@ -221,5 +221,23 @@ class VoxelTextureAtlas {
 function voxelTextureAtlas(opts) {
   return new VoxelTextureAtlas(opts);
 }
+voxelTextureAtlas.getTexture = function(_texture) {
+  return _texture;
+};
+voxelTextureAtlas.getAtlasUvs = function(_atlasUvs, material) {
+  return _atlasUvs[material];
+};
+voxelTextureAtlas.getFaceNormalMaterial = function(_faceNormalMaterials, colorValue, normalDirection) {
+  return _faceNormalMaterials[((colorValue - 1) * FACE_VERTICES) + normalDirection];
+};
+voxelTextureAtlas.getFaceMaterial = function(_faceNormalMaterials, colorValue) {
+  return voxelTextureAtlas.getFaceNormalMaterial(_faceNormalMaterials, colorValue, 0);
+};
+voxelTextureAtlas.getBlockMeshFaceFrameUvs = function(_blockMeshFaceFrameUvs, material) {
+  return _blockMeshFaceFrameUvs[material];
+};
+voxelTextureAtlas.getPlaneMeshFrameUvs = function(_planeMeshFrameUvs, material, even) {
+  return _planeMeshFrameUvs[material][even ? 0 : 1];
+};
 
 module.exports = voxelTextureAtlas;

@@ -5,6 +5,7 @@ import THREE from 'three';
 
 import staticAtlaspackLoader from '../../lib/static-atlaspack/loader';
 import voxelEngine from '../lib/voxel-engine/index';
+import voxelWorkerPool from '../lib/voxel-worker-pool/index';
 import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
 import voxelTextureLoader from '../lib/voxel-texture-loader/index';
 import voxelSky from '../lib/voxel-sky/index';
@@ -40,17 +41,8 @@ const INITIAL_CHUNK_POSITIONS = (() => {
 
 export default class VoxelScene extends React.Component {
   componentWillMount() {
-    const {seed} = this.props;
-    const chunkSize = CHUNK_SIZE;
-    const voxelAsyncOpts = {seed, chunkSize};
-
-    voxelAsync.init(voxelAsyncOpts);
-
     this._game = null;
-
-    this._workers = _makeWorkers(voxelAsyncOpts);
-    this._workerIndex = 0;
-    this._pendingGenerates = new Map();
+    this._workerPool = null;
   }
 
   componentDidMount() {
@@ -103,6 +95,21 @@ export default class VoxelScene extends React.Component {
           pend();
         });
       })();
+    };
+
+    const initializeWorkers = cb => {
+      const {seed} = this.props;
+      const chunkSize = CHUNK_SIZE;
+      const {_faceNormalMaterials: faceNormalMaterials, _blockMeshFaceFrameUvs: blockMeshFaceFrameUvs} = textureAtlas;
+      const voxelAsyncOpts = {seed, chunkSize, faceNormalMaterials, blockMeshFaceFrameUvs};
+      voxelAsync.init(voxelAsyncOpts);
+
+      const workerOpts = voxelAsyncOpts;
+      const numWorkers = NUM_WORKERS;
+      const workerPool = voxelWorkerPool({workerOpts, numWorkers});
+      this._workerPool = workerPool;
+
+      cb();
     };
 
     const initializeGame = cb => {
@@ -171,7 +178,7 @@ export default class VoxelScene extends React.Component {
       let doneChunks = 0;
       for (let i = 0; i < INITIAL_CHUNK_POSITIONS.length; i++) {
         const position = INITIAL_CHUNK_POSITIONS[i];
-        this.generateAsync(position, chunk => {
+        this._workerPool.generateAsync(position, chunk => {
           game.showChunk(chunk);
 
           doneChunks++;
@@ -185,7 +192,7 @@ export default class VoxelScene extends React.Component {
     const startGame = cb => {
       game.voxels.on('missingChunk', position => {
         // console.log('missing chunk', position);
-        this.generateAsync(position, chunk => {
+        this._workerPool.generateAsync(position, chunk => {
           // console.log('generated chunk', position);
 
           game.showChunk(chunk);
@@ -326,7 +333,7 @@ export default class VoxelScene extends React.Component {
       })(0);
     }
 
-    step([loadTextures, initializeGame, generateInitialChunks, startGame]);
+    step([loadTextures, initializeWorkers, initializeGame, generateInitialChunks, startGame]);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -346,36 +353,6 @@ export default class VoxelScene extends React.Component {
     return $(ReactDom.findDOMNode(this));
   }
 
-  callWorker(method, args, cb) {
-    const workerIndex = this._workerIndex;
-    const worker = this._workers[workerIndex];
-    this._workerIndex = (workerIndex + 1) % this._workers.length;
-
-    worker.call(method, args, cb);
-  }
-
-  generateAsync(position, cb) {
-    const positionKey = _positionKey(position);
-    let cbs = this._pendingGenerates.get(positionKey);
-    if (!cbs) {
-      cbs = [];
-      this._pendingGenerates.set(positionKey, cbs)
-
-      this.callWorker('generate', [position], (err, chunk) => {
-        this._pendingGenerates.delete(positionKey);
-
-        if (!err) {
-          cbs.forEach(cb => {
-            cb(chunk);
-          });
-        } else {
-          console.warn(err);
-        }
-      });
-    }
-    cbs.push(cb);
-  }
-
   render() {
     return (
       <div>
@@ -383,56 +360,6 @@ export default class VoxelScene extends React.Component {
       </div>
     );
   }
-}
-
-function _makeWorkers(workerOpts) {
-  const workers = [];
-  for (let i = 0; i < NUM_WORKERS; i++) {
-    (() => {
-      const worker = new Worker('/static/voxel-worker.js');
-      worker.call = (method, args, cb) => {
-        const type = 'request';
-        worker.postMessage({type, method, args});
-        cbs.push(cb);
-      };
-      worker.init = () => {
-        worker.call('init', [workerOpts], err => {
-          if (err) {
-            console.warn(err);
-          } else {
-            // nothing
-          }
-        });
-      };
-      const cbs = [];
-      worker.onmessage = resMsg => {
-        const {data: res} = resMsg;
-        const {type} = res;
-        if (type === 'response') {
-          const cb = cbs.shift();
-
-          const {error} = res;
-          if (!error) {
-            const {result} = res;
-            cb(null, result);
-          } else {
-            cb(error);
-          }
-        } else if (type === 'log') {
-          const {log} = res;
-          console.log(log);
-        }
-      };
-      worker.onerror, err => {
-        console.warn('worker error', err);
-      };
-
-      worker.init();
-
-      workers.push(worker);
-    })();
-  }
-  return workers;
 }
 
 class Crosshair extends React.Component {
@@ -449,8 +376,4 @@ class Crosshair extends React.Component {
 
     return <div style={style} />;
   }
-}
-
-function _positionKey(position) {
-  return position.join(',');
 }
