@@ -76,7 +76,7 @@ module.exports = function (game) {
           voxels[0] = variant.block;
           const dims = [1, 1, 1];
           const data = {voxels, dims};
-          const mesh = voxelBlockRenderer(data, game.atlas, game.THREE);
+          const mesh = voxelBlockRenderer(data, game.textureAtlas, game.THREE);
           mesh.material = game.blockShader.material;
           mesh.position.set(-1, -7, -3);
           mesh.rotation.set(0, 0, -Math.PI/2);
@@ -88,7 +88,7 @@ module.exports = function (game) {
           };
           const dims = [1, 1, 1];
           const data = {vegetations, dims};
-          const mesh = voxelPlaneRenderer(data, game.atlas, game.THREE);
+          const mesh = voxelPlaneRenderer(data, game.textureAtlas, game.THREE);
           mesh.material = game.planeShader.material;
           mesh.position.set(0, -6, -6);
           mesh.rotation.set(0, 0, -Math.PI/2);
@@ -100,7 +100,7 @@ module.exports = function (game) {
           };
           const dims = [1, 1, 1];
           const data = {effects, dims};
-          const mesh = voxelPlaneRenderer(data, game.atlas, game.THREE);
+          const mesh = voxelPlaneRenderer(data, game.textureAtlas, game.THREE);
           mesh.material = game.planeShader.material;
           mesh.position.set(1, -8, -3);
           mesh.rotation.set(0, 0, -Math.PI/2);

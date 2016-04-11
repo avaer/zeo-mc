@@ -39,7 +39,8 @@ module.exports = {
           path.join(__dirname, 'public/components'),
           path.join(__dirname, 'public/stores'),
           path.join(__dirname, 'public/engines'),
-          path.join(__dirname, 'public/records')
+          path.join(__dirname, 'public/records'),
+          path.join(__dirname, 'lib'),
         ]
       },
       {

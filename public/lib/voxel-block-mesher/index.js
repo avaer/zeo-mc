@@ -1,6 +1,6 @@
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
-function voxelBlockMesher(data, atlas, THREE) {
+function voxelBlockMesher(data, textureAtlas, THREE) {
   const {vertices: verticesData, faces: facesData} = data;
 
   const numFaces = facesData.length;
@@ -13,7 +13,7 @@ function voxelBlockMesher(data, atlas, THREE) {
       geometry.computeVertexNormals();
 
       const normals = geometry.getAttribute('normal').array;
-      const frameUvs = voxelBlockMesher.getFrameUvs(facesData, normals, atlas);
+      const frameUvs = voxelBlockMesher.getFrameUvs(facesData, normals, textureAtlas);
       voxelBlockMesher.applyFrameUvs(geometry, frameUvs, THREE);
 
       return geometry;
@@ -70,7 +70,7 @@ voxelBlockMesher.getVertices = function(verticesData) {
   return result;
 };
 
-voxelBlockMesher.getFrameUvs = function(facesData, normals, atlas) {
+voxelBlockMesher.getFrameUvs = function(facesData, normals, textureAtlas) {
   const numFaces = facesData.length;
   const sizePerAttribute = numFaces * FACE_VERTICES * MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTES;
   const result = new Float32Array(FRAME_UV_ATTRIBUTES * sizePerAttribute);
@@ -108,11 +108,11 @@ voxelBlockMesher.getFrameUvs = function(facesData, normals, atlas) {
   }
 
   function getFaceNormalMaterial(colorValue, normalDirection) {
-    return atlas.getFaceNormalMaterial(colorValue, normalDirection);
+    return textureAtlas.getFaceNormalMaterial(colorValue, normalDirection);
   }
 
   function getFaceFrameUvs(faceMaterial) {
-    return atlas.getBlockMeshFaceFrameUvs(faceMaterial);
+    return textureAtlas.getBlockMeshFaceFrameUvs(faceMaterial);
   }
 };
 

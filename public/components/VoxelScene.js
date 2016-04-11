@@ -3,6 +3,7 @@ import ReactDom from 'react-dom';
 import {is} from 'immutable';
 import THREE from 'three';
 
+import staticAtlaspackLoader from '../../lib/static-atlaspack/loader';
 import voxelEngine from '../lib/voxel-engine/index';
 import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
 import voxelTextureLoader from '../lib/voxel-texture-loader/index';
@@ -55,24 +56,9 @@ export default class VoxelScene extends React.Component {
   componentDidMount() {
     const {width, height, engines} = this.props;
 
-    let atlas, textureLoader, game, avatar;
+    let textureAtlas, textureLoader, game, avatar;
 
-    const loadTextureAtlas = cb => {
-      function getTexturePath(texture) {
-        return configJson.apiPrefix + '/img/textures/blocks/' + texture + '.png';
-      }
-
-      function getTextureImage(texture, cb) {
-        const img = document.createElement('img');
-        img.onload = () => {
-          cb(null, img);
-        };
-        img.onerror = err => {
-          cb(err);
-        };
-        img.src = getTexturePath(texture);
-      }
-
+    const loadTextures = cb => {
       (() => {
         let pending = 2;
         function pend() {
@@ -81,18 +67,22 @@ export default class VoxelScene extends React.Component {
           }
         }
 
-        atlas = voxelTextureAtlas({
-          materials: BLOCKS.MATERIALS,
-          frames: BLOCKS.FRAMES,
-          getTextureImage,
-          THREE
-        });
-        atlas.once('load', err => {
-          if (!err) {
-            pend();
-          } else {
+        staticAtlaspackLoader({
+          jsonUrl: configJson.apiPrefix + '/img/textures/atlas.json',
+          imgUrl: configJson.apiPrefix + '/img/textures/atlas.png',
+        }, (err, atlas) => {
+          if (err) {
             console.warn(err);
           }
+
+          textureAtlas = voxelTextureAtlas({
+            atlas,
+            materials: BLOCKS.MATERIALS,
+            frames: BLOCKS.FRAMES,
+            THREE
+          });
+
+          pend();
         });
 
         textureLoader = voxelTextureLoader({
@@ -105,7 +95,13 @@ export default class VoxelScene extends React.Component {
           'items/flare',
           'items/portalred',
           'items/portalblue',
-        ], pend);
+        ], err => {
+          if (err) {
+            console.warn(err);
+          }
+
+          pend();
+        });
       })();
     };
 
@@ -113,7 +109,7 @@ export default class VoxelScene extends React.Component {
       game = voxelEngine({
         width,
         height,
-        atlas,
+        textureAtlas,
         textureLoader,
         generateChunks: false,
         chunkSize: CHUNK_SIZE,
@@ -156,7 +152,7 @@ export default class VoxelScene extends React.Component {
 
       const clouds = voxelClouds({
         game,
-        atlas,
+        textureAtlas,
         size: 16,
         // color: new THREE.Color(0, 0, 0),
         speed: 0.01
@@ -330,7 +326,7 @@ export default class VoxelScene extends React.Component {
       })(0);
     }
 
-    step([loadTextureAtlas, initializeGame, generateInitialChunks, startGame]);
+    step([loadTextures, initializeGame, generateInitialChunks, startGame]);
   }
 
   componentWillReceiveProps(nextProps) {

@@ -3,10 +3,10 @@ import {MATERIAL_FRAMES} from '../../constants/index';
 const {floor, ceil, round} = Math;
 
 function VoxelBlockShader(opts) {
-  const {game, atlas} = opts;
+  const {game, textureAtlas} = opts;
 
   this.game = game;
-  this.atlas = atlas;
+  this.textureAtlas = textureAtlas;
 
   const {THREE} = game;
 
@@ -31,7 +31,7 @@ function VoxelBlockShader(opts) {
 
         // begin custom
         tileMap: {type: 't', value: null}, // textures not preserved by UniformsUtils.merge(); set below instead
-        atlasSize: {type: 'f', value: this.atlas.getTexture().image.width}, // atlas canvas width (= height) in pixels
+        atlasSize: {type: 'f', value: this.textureAtlas.getTexture().image.width}, // atlas canvas width (= height) in pixels
         frame: {type: 'i', value: 0}
         // end custom
       }
@@ -299,7 +299,7 @@ function VoxelBlockShader(opts) {
     // depthWrite: false,
     // depthTest: false,
   };
-  materialParams.uniforms.tileMap.value = this.atlas.getTexture();
+  materialParams.uniforms.tileMap.value = this.textureAtlas.getTexture();
 
   this.material = new THREE.ShaderMaterial(materialParams);
 }

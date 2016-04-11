@@ -76,7 +76,7 @@ function Game(opts) {
   this.antialias = opts.antialias
   this.playerHeight = opts.playerHeight || 1.62
   this.meshType = opts.meshType || 'surfaceMesh'
-  this.atlas = opts.atlas
+  this.textureAtlas = opts.textureAtlas
   this.textureLoader = opts.textureLoader
 
   this.items = []
@@ -121,12 +121,12 @@ function Game(opts) {
 
   this.blockShader = voxelBlockShader({
     game: this,
-    atlas: this.atlas,
+    textureAtlas: this.textureAtlas,
     transparent: false
   });
   this.planeShader = voxelPlaneShader({
     game: this,
-    atlas: this.atlas
+    textureAtlas: this.textureAtlas
   });
   this.particleShader = voxelParticleShader({
     game: this,
@@ -706,7 +706,7 @@ Game.prototype.showChunk = function(chunk) {
 
   if (blocksNeedUpdate) {
     const blockMesh = (() => {
-      const blockMesh = voxelBlockRenderer(chunk, this.atlas, THREE);
+      const blockMesh = voxelBlockRenderer(chunk, this.textureAtlas, THREE);
       if (blockMesh) {
         blockMesh.material = this.blockShader.material;
         return blockMesh;
@@ -728,7 +728,7 @@ Game.prototype.showChunk = function(chunk) {
 
   if (planesNeedUpdate) {
     const planeMesh = (() => {
-      const planeMesh = voxelPlaneRenderer(chunk, this.atlas, THREE);
+      const planeMesh = voxelPlaneRenderer(chunk, this.textureAtlas, THREE);
       if (planeMesh) {
         planeMesh.material = this.planeShader.material;
         return planeMesh;

@@ -1,55 +1,20 @@
-import events from 'events';
-const EventEmitter = events.EventEmitter;
-
-import atlaspack from 'atlaspack';
-import touchup from 'touchup';
-
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UVS_PER_ATTRIBUTE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
 const {floor} = Math;
 
-class VoxelTextureAtlas extends EventEmitter {
-  constructor({materials = [], frames = {}, size = 2048, getTextureImage, THREE}) {
-    super();
-
+class VoxelTextureAtlas {
+  constructor({atlas, materials, frames, THREE}) {
+    this._atlas = atlas;
     this._materials = materials;
     this._frames = frames;
-    this._faceMaterials = null;
-    this._atlasUvs = null;
-    this._faceNormalMaterials = null;
-    this._blockMeshFaceFrameUvs = null;
-    this._planeMeshFrameUvs = null;
+    this._THREE = THREE;
 
-    const canvas = (() => {
-      const canvas = document.createElement('canvas');
-      canvas.width = size || 2048;
-      canvas.height = size || 2048;
-
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = 'black';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      return canvas;
-    })();
-
-    const texture = (() => {
-      const texture = new THREE.Texture(canvas);
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.LinearMipMapLinearFilter;
-      return texture;
-    })();
-    this._texture = texture;
-
-    const atlas = (() => {
-      const atlas = atlaspack(canvas);
-      atlas.tilepad = true;
-      return atlas;
-    })();
-    this._atlas = atlas;
-
-    this._getTextureImage = getTextureImage;
-
-    this._init();
+    this._texture = this._buildTexture();
+    this._faceMaterials = this._buildFaceMaterials();
+    this._atlasUvs = this._buildAtlasUvs();
+    this._faceNormalMaterials = this._buildFaceNormalMaterials();
+    this._blockMeshFaceFrameUvs = this._buildBlockMeshFaceFrameUvs();
+    this._planeMeshFrameUvs = this._buildPlaneMeshFrameUvs();
   }
 
   getTexture() {
@@ -76,75 +41,14 @@ class VoxelTextureAtlas extends EventEmitter {
     return this._planeMeshFrameUvs[material][even ? 0 : 1];
   }
 
-  _init() {
-    const loadIndex = {};
-    this._materials.forEach(faceMaterials => {
-      faceMaterials.forEach(material => {
-        this._frames[material].forEach(texture => {
-          loadIndex[material] = true;
-        });
-      });
-    });
-
-    const loadMaterials = Object.keys(loadIndex);
-    let pending = loadMaterials.length;
-    function pend() {
-      if (--pending === 0) {
-        done();
-      }
-    }
-    const done = () => {
-      this._texture.needsUpdate = true;
-
-      this._faceMaterials = this._buildFaceMaterials();
-      this._atlasUvs = this._buildAtlasUvs();
-      this._faceNormalMaterials = this._buildFaceNormalMaterials();
-      this._blockMeshFaceFrameUvs = this._buildBlockMeshFaceFrameUvs();
-      this._planeMeshFrameUvs = this._buildPlaneMeshFrameUvs();
-
-      this.emit('load', null);
-    };
-    const getImg = (material, cb) => {
-      this._getTextureImage(material, (err, img) => {
-        if (!err) {
-          var img2 = new Image();
-          img2.onload = function() {
-            cb(null, img2);
-          };
-          img2.onerror = function(err) {
-            cb(err);
-          };
-          img2.id = material;
-          img2.src = touchup.repeat(img, 2, 2);
-        } else {
-          cb(err);
-        }
-      });
-    };
-    const packImg = (img, cb) => {
-      const rect = this._atlas.pack(img);
-      if (!rect) {
-        /* this._atlas = this.atlas.expand(img);
-        this._atlas.tilepad = true; */
-        throw new Error('failed to pack texture');
-      }
-      cb();
-    };
-    loadMaterials.forEach(material => {
-      getImg(material, (err, img) => {
-        if (!err) {
-          packImg(img, err => {
-            if (!err) {
-              pend();
-            } else {
-              console.error(err);
-            }
-          });
-        } else {
-          console.error(err);
-        }
-      });
-    });
+  _buildTexture() {
+    const {_atlas: atlas, _THREE: THREE} = this;
+    const {canvas} = atlas;
+    const texture = new THREE.Texture(canvas);
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.needsUpdate = true;
+    return texture;
   }
 
   _buildFaceMaterials() {
@@ -164,7 +68,9 @@ class VoxelTextureAtlas extends EventEmitter {
   }
 
   _buildAtlasUvs() {
-    return this._atlas.uv(this._atlas.canvas.width, this._atlas.canvas.height);
+    const {_atlas: atlas} = this;
+    const {canvas} = atlas;
+    return atlas.uv(canvas.width, canvas.height);
   }
 
   _buildFaceNormalMaterials() {
