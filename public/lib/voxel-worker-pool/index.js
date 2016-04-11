@@ -1,4 +1,4 @@
-export default class VoxelWorkerPool {
+class VoxelWorkerPool {
   constructor({workerOpts, numWorkers}) {
     this._workers = this._makeWorkers(workerOpts, numWorkers);
     this._workerIndex = 0;
@@ -85,3 +85,9 @@ export default class VoxelWorkerPool {
     cbs.push(cb);
   }
 }
+
+function voxelWorkerPool(opts) {
+  return new VoxelWorkerPool(opts);
+}
+
+export default voxelWorkerPool;
