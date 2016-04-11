@@ -56,7 +56,7 @@ export default class VoxelScene extends React.Component {
   componentDidMount() {
     const {width, height, engines} = this.props;
 
-    let atlas, textureLoader, game, avatar;
+    let textureAtlas, textureLoader, game, avatar;
 
     const loadTextures = cb => {
       function getTexturePath(texture) {
@@ -74,13 +74,13 @@ export default class VoxelScene extends React.Component {
         staticAtlaspackLoader({
           jsonUrl: configJson.apiPrefix + '/img/textures/atlas.json',
           imgUrl: configJson.apiPrefix + '/img/textures/atlas.png',
-        }, (err, atlaspack) => {
+        }, (err, atlas) => {
           if (err) {
             console.warn(err);
           }
 
-          atlas = voxelTextureAtlas({
-            atlaspack,
+          textureAtlas = voxelTextureAtlas({
+            atlas,
             materials: BLOCKS.MATERIALS,
             frames: BLOCKS.FRAMES,
             THREE
@@ -113,7 +113,7 @@ export default class VoxelScene extends React.Component {
       game = voxelEngine({
         width,
         height,
-        atlas,
+        textureAtlas,
         textureLoader,
         generateChunks: false,
         chunkSize: CHUNK_SIZE,
@@ -156,7 +156,7 @@ export default class VoxelScene extends React.Component {
 
       const clouds = voxelClouds({
         game,
-        atlas,
+        textureAtlas,
         size: 16,
         // color: new THREE.Color(0, 0, 0),
         speed: 0.01

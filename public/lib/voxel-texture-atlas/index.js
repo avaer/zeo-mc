@@ -4,8 +4,6 @@ const {floor} = Math;
 
 class VoxelTextureAtlas {
   constructor({atlas, materials, frames, THREE}) {
-    super();
-
     this._atlas = atlas;
     this._materials = materials;
     this._frames = frames;

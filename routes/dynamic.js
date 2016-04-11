@@ -50,7 +50,6 @@ const routes = [
   {
     path: '/img/textures/atlas.json',
     handler: (req, res, next) => {
-      console.log('got handler', req.url);
       _getAtlas((err, atlas) => {
         if (!err) {
           res.type('application/json');
