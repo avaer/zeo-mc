@@ -1,3 +1,5 @@
+import voxelTextureAtlas from 'voxelTextureAtlas';
+
 const TRANSPARENT_MASK = 0x8000;
 const NO_FLAGS_MASK = 0x7FFF;
 
@@ -265,11 +267,11 @@ voxelBlockGenerator.getFrameUvs = function(facesData, normals, voxelAsync) {
   }
 
   function getFaceNormalMaterial(colorValue, normalDirection) {
-    return atlas.getFaceNormalMaterial(colorValue, normalDirection); // XXX inject this from voxel-texture-atlas
+    return voxelTextureAtlas.getFaceNormalMaterial(voxelAsync.initData.faceNormalMaterials, colorValue, normalDirection);
   }
 
   function getFaceFrameUvs(faceMaterial) {
-    return voxelAsync.initData.blockMeshFaceFrameUvs[faceMaterial];
+    return voxelTextureAtlas.getBlockMeshFaceFrameUvs(voxelAsync.initData.blockMeshFaceFrameUvs, faceMaterial);
   }
 };
 
