@@ -26,7 +26,7 @@ class VoxelTextureAtlas {
   }
 
   getFaceNormalMaterial(colorValue, normalDirection) {
-    return this._faceNormalMaterials(colorValue, normalDirection);
+    return this._faceNormalMaterials[((colorValue - 1) * FACE_VERTICES) + normalDirection];
   }
 
   getFaceMaterial(colorValue) {
@@ -74,21 +74,15 @@ class VoxelTextureAtlas {
   }
 
   _buildFaceNormalMaterials() {
-    function getKey(colorValue, normalDirection) {
-      return [colorValue, normalDirection].join(':');
-    }
-
-    const map = {};
-    for (let i = 0; i < this._materials.length; i++) {
+    const numMaterials = this._materials.length;
+    const result = Array(numMaterials * FACE_VERTICES);
+    for (let i = 0; i < numMaterials; i++) {
       const faces = this._materials[i];
       for (let j = 0; j < FACE_VERTICES; j++) {
-        map[getKey(i + 1, j)] = faces[j];
+        result[(i * FACE_VERTICES) + j] = faces[j];
       }
     }
-
-    return function(colorValue, normalDirection) {
-      return map[getKey(colorValue, normalDirection)];
-    };
+    return result;
   }
 
   _buildBlockMeshFaceFrameUvs() {
