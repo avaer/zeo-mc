@@ -1,6 +1,6 @@
 import {CHUNK_SIZE} from '../constants/index';
 
-export default class VoxelWorkerPool extends React.Component {
+export default class VoxelWorkerPool {
   constructor({workerOpts, numWorkers}) {
     this._workers = this._makeWorkers(workerOpts, numWorkers);
     this._workerIndex = 0;
