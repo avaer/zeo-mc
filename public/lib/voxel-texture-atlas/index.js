@@ -47,6 +47,7 @@ class VoxelTextureAtlas {
     const texture = new THREE.Texture(canvas);
     texture.magFilter = THREE.NearestFilter;
     texture.minFilter = THREE.LinearMipMapLinearFilter;
+    texture.needsUpdate = true;
     return texture;
   }
 

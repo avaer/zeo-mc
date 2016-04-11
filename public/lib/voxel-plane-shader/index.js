@@ -3,10 +3,10 @@ import {MATERIAL_FRAMES} from '../../constants/index';
 const {floor, ceil, round} = Math;
 
 function VoxelPlaneShader(opts) {
-  const {game, atlas} = opts;
+  const {game, textureAtlas} = opts;
 
   this.game = game;
-  this.atlas = atlas;
+  this.textureAtlas = textureAtlas;
 
   const {THREE} = this.game;
 
@@ -209,7 +209,7 @@ function VoxelPlaneShader(opts) {
     // depthWrite: false,
     // depthTest: false,
   };
-  materialParams.uniforms.tileMap.value = this.atlas.getTexture();
+  materialParams.uniforms.tileMap.value = this.textureAtlas.getTexture();
 
   this.material = new THREE.ShaderMaterial(materialParams);
 }

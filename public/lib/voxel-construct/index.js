@@ -72,7 +72,7 @@ VoxelConstruct.prototype.createDebris = function(pos, value, power) {
     const normals = bufferGeometry.getAttribute('normal').array;
 
     const facesData = [value, value, value, value, value, value];
-    const frameUvs = voxelBlockMesher.getFrameUvs(facesData, normals, this._game.atlas);
+    const frameUvs = voxelBlockMesher.getFrameUvs(facesData, normals, this._game.textureAtlas);
     voxelBlockMesher.applyFrameUvs(bufferGeometry, frameUvs, this._game.THREE);
 
     return bufferGeometry;

@@ -16,7 +16,7 @@ function Clouds(opts) {
   if (!(this instanceof Clouds)) return new Clouds(opts || {});
   if (opts.THREE) opts = {game:opts};
   this.game = opts.game;
-  this.atlas = opts.atlas;
+  this.textureAtlas = opts.textureAtlas;
   this.high = opts.high || 10;
   this.distance = opts.distance || 300;
   this.size = opts.size || 16;
@@ -57,14 +57,14 @@ module.exports = Clouds;
 
 Clouds.prototype.generate = function(i) {
   var game = this.game;
-  var atlas = this.atlas;
+  var textureAtlas = this.textureAtlas;
   var size = this.size;
 
   var data = voxel.generate([0, 0, 0], [size, 1, size], (x, y, z) => {
     return this.generator(x, z, i);
   });
 
-  var cloud = voxelBlockRenderer(data, atlas, game.THREE);
+  var cloud = voxelBlockRenderer(data, textureAtlas, game.THREE);
   cloud.material = this.material;
 
   game.scene.add(cloud);

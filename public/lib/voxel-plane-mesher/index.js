@@ -1,6 +1,6 @@
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
-function voxelPlaneMesher(data, atlas, THREE) {
+function voxelPlaneMesher(data, textureAtlas, THREE) {
   const {vertices: verticesData, faces: facesData} = data;
   const numFaces = facesData.length;
   if (numFaces > 0) {
@@ -11,7 +11,7 @@ function voxelPlaneMesher(data, atlas, THREE) {
       geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
       geometry.computeVertexNormals();
 
-      const frameUvs = voxelPlaneMesher.getFrameUvs(facesData, atlas);
+      const frameUvs = voxelPlaneMesher.getFrameUvs(facesData, textureAtlas);
       voxelPlaneMesher.applyFrameUvs(geometry, frameUvs, THREE);
 
       return geometry;
@@ -68,7 +68,7 @@ voxelPlaneMesher.getVertices = function(verticesData) {
   return result;
 };
 
-voxelPlaneMesher.getFrameUvs = function(facesData, atlas) {
+voxelPlaneMesher.getFrameUvs = function(facesData, textureAtlas) {
   const numFaces = facesData.length;
   const result = Array(FRAME_UV_ATTRIBUTES);
 
@@ -97,11 +97,11 @@ voxelPlaneMesher.getFrameUvs = function(facesData, atlas) {
   }
 
   function getFaceMaterial(colorValue) {
-    return atlas.getFaceMaterial(colorValue);
+    return textureAtlas.getFaceMaterial(colorValue);
   }
 
   function getPlaneMeshFrameUvs(faceMaterial, even) {
-    return atlas.getPlaneMeshFrameUvs(faceMaterial, even);
+    return textureAtlas.getPlaneMeshFrameUvs(faceMaterial, even);
   }
 };
 
