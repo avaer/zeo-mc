@@ -21,7 +21,7 @@ class VoxelTextureAtlas {
     return _texture;
   }
   getTexture() {
-    VoxelTextureAtlas.getTexture(this._texture);
+    return VoxelTextureAtlas.getTexture(this._texture);
   }
 
   static getAtlasUvs(_atlasUvs, material) {
