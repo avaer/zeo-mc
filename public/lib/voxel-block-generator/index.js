@@ -2,6 +2,10 @@ import THREE from 'three';
 import voxelTextureAtlas from '../voxel-texture-atlas/index';
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
+const MASK_SIZE = 4096;
+const mask = new Int32Array(MASK_SIZE);
+const invMask = new Int32Array(MASK_SIZE);
+
 const TRANSPARENT_MASK = 0x8000;
 const NO_FLAGS_MASK = 0x7FFF;
 
@@ -25,7 +29,7 @@ voxelBlockGenerator.getGreedyMesh = function({voxels, depths}, dims, voxelAsync)
 
   //Sweep over 3-axes
   for(var d=0; d<3; ++d) {
-    var i, j, k, l, w, h, n, c
+    var i, j, k, l, w, W, h, n, c
       , u = (d+1)%3
       , v = (d+2)%3
       , x = [0,0,0]
@@ -38,14 +42,15 @@ voxelBlockGenerator.getGreedyMesh = function({voxels, depths}, dims, voxelAsync)
       , qdimsX, qdimsXY
       , xd
 
-    const mask = new Int32Array(dimsU * dimsV);
-    const invMask = new Int32Array(dimsU * dimsV);
-
     q[d] =  1;
     x[d] = -1;
 
     qdimsX  = dimsX  * q[1]
     qdimsXY = dimsXY * q[2]
+
+    if (MASK_SIZE < dimsU * dimsV) {
+      throw new Error('mask buffer not big enough');
+    }
 
     // Compute mask
     while (x[d] < dimsD) {
@@ -149,6 +154,14 @@ voxelBlockGenerator.getGreedyMesh = function({voxels, depths}, dims, voxelAsync)
 
               const color = removeFlags(c);
               tFaces.push(color);
+            }
+
+            //Zero-out mask
+            W = n + w;
+            for(l=0; l<h; ++l) {
+              for(k=n; k<W; ++k) {
+                mask[k+l*dimsU] = 0;
+              }
             }
 
             //Increment counters and continue
