@@ -140,11 +140,9 @@ voxelPlaneGenerator.getVertices = function(verticesData) {
 
 voxelPlaneGenerator.getFrameUvs = function(facesData, voxelAsync) {
   const numFaces = facesData.length;
-  const result = Array(FRAME_UV_ATTRIBUTES);
+  const sizePerAttribute = numFaces * FACE_VERTICES * MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTES;
+  const result = new Float32Array(FRAME_UV_ATTRIBUTES * sizePerAttribute);
 
-  for (let i = 0; i < FRAME_UV_ATTRIBUTES; i++) {
-    result[i] = new Float32Array(numFaces * FACE_VERTICES * MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTES);
-  }
   for (let i = 0; i < numFaces; i++) {
     const colorValue = getColorValue(i);
     const faceMaterial = getFaceMaterial(colorValue);
@@ -153,9 +151,9 @@ voxelPlaneGenerator.getFrameUvs = function(facesData, voxelAsync) {
     const faceFrameUvs = getPlaneMeshFrameUvs(faceMaterial, i % 2 === 0);
 
     for (let j = 0; j < FRAME_UV_ATTRIBUTES; j++) {
-      result[j].set(
-        faceFrameUvs.slice(FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * j, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME * (j + 1)),
-        i * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME
+      result.set(
+        faceFrameUvs.slice(j * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME, (j + 1) * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME),
+        (j * sizePerAttribute) + (i * FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME)
       );
     }
   }

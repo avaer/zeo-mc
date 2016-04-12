@@ -22,8 +22,12 @@ function voxelPlaneMesher(data, textureAtlas, THREE) {
 }
 
 voxelPlaneMesher.applyFrameUvs = function(geometry, frameUvs, THREE) {
+  const sizePerAttribute = frameUvs.length / FRAME_UV_ATTRIBUTES;
   for (let i = 0; i < FRAME_UV_ATTRIBUTES; i++) {
-    geometry.addAttribute('frameUv' + i, new THREE.BufferAttribute(frameUvs[i], FRAME_UV_ATTRIBUTE_SIZE))
+    geometry.addAttribute(
+      'frameUv' + i,
+      new THREE.BufferAttribute(frameUvs.slice(i * sizePerAttribute, (i + 1) * sizePerAttribute), FRAME_UV_ATTRIBUTE_SIZE)
+    );
   }
 };
 
