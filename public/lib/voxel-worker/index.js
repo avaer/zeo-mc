@@ -69,11 +69,19 @@ function init(opts) {
 function generate(position) {
   const chunks = voxelAsync.generateSync(position);
   const {voxels, depths, dims} = chunks;
-  const {_cachedBlockMesh} = dims;
-  const {vertices, normals, frameUvs} = _cachedBlockMesh;
+  const {_cachedBlockMesh, _cachedPlaneMesh} = dims;
 
   const result = chunks;
-  const transfers = [voxels.buffer, depths.buffer, vertices.buffer, normals.buffer, frameUvs.buffer];
+  const transfers = [
+    voxels.buffer,
+    depths.buffer,
+    _cachedBlockMesh.vertices.buffer,
+    _cachedBlockMesh.normals.buffer,
+    _cachedBlockMesh.frameUvs.buffer,
+    _cachedPlaneMesh.vertices.buffer,
+    _cachedPlaneMesh.normals.buffer,
+    _cachedPlaneMesh.frameUvs.buffer,
+  ];
   return {result, transfers};
 }
 

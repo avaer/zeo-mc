@@ -11,8 +11,8 @@ const NO_FLAGS_MASK = 0x7FFF;
 
 function voxelBlockGenerator(voxelAsync) {
   return function({voxels, depths}, dims) {
-    const greedyMesh = voxelBlockGenerator.getGreedyMesh({voxels, depths}, dims, voxelAsync);
-    const {vertices: verticesData, faces: facesData} = greedyMesh;
+    const mesh = voxelBlockGenerator.getMesh({voxels, depths}, dims, voxelAsync);
+    const {vertices: verticesData, faces: facesData} = mesh;
 
     const vertices = voxelBlockGenerator.getVertices(verticesData);
     const normals = voxelBlockGenerator.getNormals(vertices);
@@ -21,7 +21,7 @@ function voxelBlockGenerator(voxelAsync) {
   };
 };
 
-voxelBlockGenerator.getGreedyMesh = function({voxels, depths}, dims, voxelAsync) {
+voxelBlockGenerator.getMesh = function({voxels, depths}, dims, voxelAsync) {
   var vertices = [], faces = [], tVertices = [], tFaces = []
     , dimsX = dims[0]
     , dimsY = dims[1]

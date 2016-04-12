@@ -18,8 +18,8 @@ const api = {};
 
 api.initData = null;
 
-function init({seed, chunkSize, faceNormalMaterials, blockMeshFaceFrameUvs}) {
-  api.initData = {seed, chunkSize, faceNormalMaterials, blockMeshFaceFrameUvs};
+function init({seed, chunkSize, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs}) {
+  api.initData = {seed, chunkSize, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs};
 
   voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
   voxelBlockGeneratorInstance = voxelBlockGenerator(api);
