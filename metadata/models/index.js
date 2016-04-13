@@ -12,7 +12,7 @@ const ModelWolf = require('./ModelWolf');
 
 const api = {};
 
-api.MODELS = _makeModelMap([
+api.MODELS = [
   ModelChest,
   ModelChicken,
   ModelCow,
@@ -22,48 +22,20 @@ api.MODELS = _makeModelMap([
   ModelRabbit,
   ModelSlime,
   ModelWolf,
-]);
+];
 
-api.ENTITIES = _makeEntitySpecs([
-  ModelChest,
-  ModelChicken,
-  ModelCow,
-  ModelCreeper,
-  ModelOcelot,
-  ModelPig,
-  ModelRabbit,
-  ModelSlime,
-  ModelWolf,
-]);
+api.MODEL_NAMES = api.MODELS.map(Model => Model.NAME);
 
-api.make = function(modelName, p, s, game) {
-  p = p || [];
-  s = s || [];
-  
-  const Model = api.MODELS[modelName];
-  const model = new Model(p, s);
-  return model;
-};
+api.MODEL_INDEX = (() => {
+  const result = {};
+  for (let i = 0; i < api.MODELS.length; i++) {
+    const Model = api.MODELS[i];
+    const {NAME} = Model;
+    result[NAME] = Model;
+  }
+  return result;
+})();
+
+api.ENTITIES = api.MODEL_NAMES;
 
 module.exports = api;
-
-function _makeModelMap(models) {
-  const result = {};
-  models.forEach(model => {
-    const NAME = model.NAME;
-    result[NAME] = model;
-  });
-  return result;
-}
-
-function _makeEntitySpecs(models) {
-  return models.map(model => {
-    const NAME = model.NAME;
-    const spec = {
-      model: NAME,
-      p: [],
-      s: []
-    };
-    return spec;
-  });
-}

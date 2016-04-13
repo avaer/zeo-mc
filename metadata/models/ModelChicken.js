@@ -18,7 +18,6 @@ class ModelChicken extends ModelBase {
 
     const headRotation = [0, 0, 0];//[-(s5 / (180 / Math.PI)), s4 / (180 / Math.PI), 0];
 
-    this.textures = 'entity/chicken';
     this.meshes = [
       {
         name: 'head',
@@ -144,6 +143,7 @@ class ModelChicken extends ModelBase {
   }
 }
 ModelChicken.NAME = NAME;
+ModelChicken.TEXTURE = 'entity/chicken';
 
 module.exports = ModelChicken;
 

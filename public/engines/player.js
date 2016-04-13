@@ -5,6 +5,7 @@ const {Engine} = Engines;
 import Player from '../stores/player';
 const {Item} = Player;
 import * as randomWord from '../lib/random-word/index';
+import {BLOCKS} from '../../metadata/index';
 
 const {floor, random} = Math;
 

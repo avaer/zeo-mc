@@ -17,7 +17,6 @@ class ModelQuadruped extends ModelBase {
 
     super();
 
-    this.textures = null;
     this.meshes = [
       {
         name: 'head',

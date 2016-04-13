@@ -1,6 +1,9 @@
-var metadata = require('../../../metadata/index');
-var Models = metadata.MODELS;
-var ENTITIES = Models.ENTITIES;
+"use strict";
+
+const metadata = require('../../../metadata/index');
+const Models = metadata.MODELS;
+const MODEL_NAMES = Models.MODEL_NAMES;
+const MODEL_INDEX = Models.MODEL_INDEX;
 
 function voxelModelGenerator() {
   return function(entities, dims) {
@@ -11,16 +14,17 @@ function voxelModelGenerator() {
       if (entity !== null) {
         const [x, y, z, value] = entity;
 
-        const modelSpec = ENTITIES[value - 1];
-        if (!modelSpec) {
+        const modelName = MODEL_NAMES[value - 1];
+        if (!modelName) {
           throw new Error('invalid model value: ' + JSON.stringify(value));
         }
-        const {model: modelName, p, s} = modelSpec;
-        const modelPrototype = Models.make(modelName, p, s);
+        const Model = MODEL_INDEX[modelName];
+        const modelInstance = new Model();
 
         const position = [x, y, z];
-        const {meshes, textures} = modelPrototype;
-        const model = {position, meshes, textures};
+        const {meshes} = modelInstance;
+        const {TEXTURE: texture} = Model;
+        const model = {position, meshes, texture};
 
         models.push(model);
       }

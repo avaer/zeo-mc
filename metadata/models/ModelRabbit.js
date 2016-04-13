@@ -21,7 +21,6 @@ class ModelRabbit extends ModelBase {
     const headRotationY = s4 * 0.017453292;
     const footRotationX = Math.sin(s1);
 
-    this.textures = 'entity/rabbit/brown';
     this.meshes = [
       {
         name: 'rabbitLeftFoot',
@@ -205,6 +204,7 @@ class ModelRabbit extends ModelBase {
   }
 }
 ModelRabbit.NAME = NAME;
+ModelRabbit.TEXTURE = 'entity/rabbit/brown';
 
 module.exports = ModelRabbit;
 

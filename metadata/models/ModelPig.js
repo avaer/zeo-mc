@@ -12,7 +12,6 @@ class ModelPig extends ModelQuadruped {
 
     super([6, p1], s);
 
-    this.textures = 'entity/pig/pig';
     this.meshes = this.meshes.map(mesh => {
       if (mesh.name === 'head') {
         // console.log('pig uv', [17 - 4, 17 - 4, 17 + (4*3), 17 + (4*1), 64, 32]);
@@ -40,6 +39,7 @@ class ModelPig extends ModelQuadruped {
   }
 }
 ModelPig.NAME = NAME;
+ModelPig.TEXTURE = 'entity/pig/pig';
 
 module.exports = ModelPig;
 

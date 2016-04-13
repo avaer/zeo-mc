@@ -17,7 +17,6 @@ class ModelWolf extends ModelBase {
     const f1 = 13.5;
     const wolfBodyRotation = [Math.PI / 2, 0, 0];
 
-    this.textures = 'entity/wolf/wolf';
     this.meshes = [
       {
         name: 'wolfHeadMain',
@@ -187,6 +186,7 @@ class ModelWolf extends ModelBase {
   }
 }
 ModelWolf.NAME = NAME;
+ModelWolf.TEXTURE = 'entity/wolf/wolf';
 
 module.exports = ModelWolf;
 

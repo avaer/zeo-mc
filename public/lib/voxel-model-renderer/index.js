@@ -14,8 +14,8 @@ function _makeObjects(models, textureLoader, THREE) {
   for (let i = 0, l = models.length; i < l; i++) {
     const model = models[i];
 
-    const {position, meshes, textures} = model;
-    const subobject = _makeObject(meshes, textures, textureLoader, THREE);
+    const {position, meshes, texture} = model;
+    const subobject = _makeObject(meshes, texture, textureLoader, THREE);
     const boundingBox = new THREE.Box3().setFromObject(subobject);
     const minY = boundingBox.min.y;
 
@@ -26,18 +26,17 @@ function _makeObjects(models, textureLoader, THREE) {
   return object;
 }
 
-function _makeObject(meshes, textures, textureLoader, THREE) {
+function _makeObject(meshes, texture, textureLoader, THREE) {
   const root = new THREE.Object3D();
 
   const child = new THREE.Object3D();
   root.add(child);
   (function recurse(object, meshes) {
     meshes.forEach(mesh => {
-      let {position, dimensions, rotationPoint, uv, offset, textureIndex, children} = mesh;
+      let {position, dimensions, rotationPoint, uv, offset, children} = mesh;
       if (position && dimensions && rotationPoint && uv) {
         const {rotation = [0, 0, 0]} = mesh;
         rotationPoint = [rotationPoint[0], -rotationPoint[1], rotationPoint[2]];
-        const texture = _resolveTexture(textures, textureIndex);
 
         const submesh = _makeCubeMesh(position, dimensions, texture, uv, textureLoader, THREE);
 
@@ -59,7 +58,6 @@ function _makeObject(meshes, textures, textureLoader, THREE) {
           recurse(object, children);
         }
       } else if (position && dimensions && uv) {
-        const texture = _resolveTexture(textures, textureIndex);
         const submesh = _makeCubeMesh(position, dimensions, texture, uv, textureLoader, THREE);
 
         object.add(submesh);
@@ -112,17 +110,6 @@ function _getFaceVertexUvs(THREE) {
   }
 
   return faceVertexUvs;
-}
-
-function _resolveTexture(textures, textureIndex) {
-  if (!Array.isArray(textures)) {
-    textures = [textures];
-  }
-  if (typeof textureIndex !== 'number') {
-    textureIndex = 0;
-  }
-  const texture = textures[textureIndex];
-  return texture;
 }
 
 function _makeCubeMesh(position, dimensions, texture, uv, textureLoader, THREE) {

@@ -19,7 +19,6 @@ class ModelCow extends ModelQuadruped {
 
     super([p1, p2], [s1, s2, s3, s4, s5, s6]);
 
-    this.textures = 'entity/cow/cow';
     this.meshes = this.meshes.map(mesh => {
       if (mesh.name === 'head') {
         return {
@@ -109,6 +108,7 @@ class ModelCow extends ModelQuadruped {
   }
 }
 ModelCow.NAME = NAME;
+ModelCow.TEXTURE = 'entity/cow/cow';
 
 module.exports = ModelCow;
 

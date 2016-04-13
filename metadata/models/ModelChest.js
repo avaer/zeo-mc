@@ -17,7 +17,6 @@ class ModelChest extends ModelBase {
 
     const chestLidRotation = [(Math.PI * 1.75) - Math.sin(s1 * 0.6662) * (s2 * (Math.PI / 4)), 0, 0];
 
-    this.textures = 'entity/chest/normal';
     this.meshes = [
       {
         name: 'chestLid',
@@ -67,6 +66,7 @@ class ModelChest extends ModelBase {
   }
 }
 ModelChest.NAME = NAME;
+ModelChest.TEXTURE = 'entity/chest/normal';
 
 module.exports = ModelChest;
 

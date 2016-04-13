@@ -8,7 +8,6 @@ class ModelSlime extends ModelBase {
   constructor() {
     super();
 
-    this.textures = 'entity/slime/slime';
     this.meshes = [
       {
         name: 'slimeBodies',
@@ -49,6 +48,7 @@ class ModelSlime extends ModelBase {
   }
 }
 ModelSlime.NAME = NAME;
+ModelSlime.TEXTURE = 'entity/slime/slime';
 
 module.exports = ModelSlime;
 

@@ -17,7 +17,6 @@ class ModelOcelot extends ModelBase {
 
     super();
 
-    this.textures = 'entity/cat/ocelot';
     this.meshes = [
       {
         name: 'head',
@@ -180,6 +179,7 @@ class ModelOcelot extends ModelBase {
   }
 }
 ModelOcelot.NAME = NAME;
+ModelOcelot.TEXTURE = 'entity/cat/ocelot';
 
 module.exports = ModelOcelot;
 

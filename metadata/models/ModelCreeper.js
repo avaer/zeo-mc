@@ -19,7 +19,6 @@ class ModelCreeper extends ModelBase {
 
     const i = 4;
 
-    this.textures = 'entity/creeper/creeper';
     this.meshes = [
       {
         name: 'head',
@@ -113,6 +112,7 @@ class ModelCreeper extends ModelBase {
   }
 }
 ModelCreeper.NAME = NAME;
+ModelCreeper.TEXTURE = 'entity/creeper/creeper';
 
 module.exports = ModelCreeper;
 
