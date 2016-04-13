@@ -185,7 +185,7 @@ function _getCubeMaterial(textureName, uv, textureLoader, THREE) {
   } else {
     const materials = [];
     for (let i = 0; i < 6; i++) {
-      const textureUrl = textureLoader.getTextureUrl(textureName);
+      const textureUrl = textureLoader.getTextureUrl('entity/' + textureName);
       const texture = textureLoader.getTexture(textureUrl, uv[i], THREE);
       const submaterial = new THREE.MeshLambertMaterial({
         map: texture,
