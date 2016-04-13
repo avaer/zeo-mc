@@ -186,7 +186,7 @@ class ModelWolf extends ModelBase {
   }
 }
 ModelWolf.NAME = NAME;
-ModelWolf.TEXTURE = 'entity/wolf/wolf';
+ModelWolf.TEXTURE = 'wolf/wolf';
 
 module.exports = ModelWolf;
 

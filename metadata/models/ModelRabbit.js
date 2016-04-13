@@ -204,7 +204,7 @@ class ModelRabbit extends ModelBase {
   }
 }
 ModelRabbit.NAME = NAME;
-ModelRabbit.TEXTURE = 'entity/rabbit/brown';
+ModelRabbit.TEXTURE = 'rabbit/brown';
 
 module.exports = ModelRabbit;
 

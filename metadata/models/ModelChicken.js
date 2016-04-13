@@ -143,7 +143,7 @@ class ModelChicken extends ModelBase {
   }
 }
 ModelChicken.NAME = NAME;
-ModelChicken.TEXTURE = 'entity/chicken';
+ModelChicken.TEXTURE = 'chicken';
 
 module.exports = ModelChicken;
 

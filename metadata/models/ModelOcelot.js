@@ -179,7 +179,7 @@ class ModelOcelot extends ModelBase {
   }
 }
 ModelOcelot.NAME = NAME;
-ModelOcelot.TEXTURE = 'entity/cat/ocelot';
+ModelOcelot.TEXTURE = 'cat/ocelot';
 
 module.exports = ModelOcelot;
 
