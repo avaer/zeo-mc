@@ -1,3 +1,5 @@
+"use strict";
+
 const ModelBase = require('./ModelBase');
 
 const ModelChest = require('./ModelChest');
@@ -30,7 +32,7 @@ api.MODEL_INDEX = (() => {
   const result = {};
   for (let i = 0; i < api.MODELS.length; i++) {
     const Model = api.MODELS[i];
-    const {NAME} = Model;
+    const NAME = Model.NAME;
     result[NAME] = Model;
   }
   return result;
