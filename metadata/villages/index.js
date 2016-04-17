@@ -5,6 +5,7 @@ const HouseLarge = require('./HouseLarge');
 const Blacksmith = require('./Blacksmith');
 const ButcherShop = require('./ButcherShop');
 const Church = require('./Church');
+const Library = require('./Library');
 
 const BUILDINGS = [
   Farm,
@@ -14,6 +15,7 @@ const BUILDINGS = [
   Blacksmith,
   ButcherShop,
   Church,
+  Library,
 ];
 
 const api = {
