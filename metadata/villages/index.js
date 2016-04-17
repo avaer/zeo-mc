@@ -1,5 +1,6 @@
 const Farm = require('./Farm');
 const Well = require('./Well');
+const LampPost = require('./LampPost');
 const HouseSmall = require('./HouseSmall');
 const HouseLarge = require('./HouseLarge');
 const Blacksmith = require('./Blacksmith');
@@ -10,6 +11,7 @@ const Library = require('./Library');
 const BUILDINGS = [
   Farm,
   Well,
+  LampPost,
   HouseSmall,
   HouseLarge,
   Blacksmith,
