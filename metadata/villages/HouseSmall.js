@@ -180,9 +180,9 @@ const VARIANT_KEYS = Object.keys(VARIANTS);
 class HouseSmall {
   constructor(p) {
     p = p || [];
-    const p1 = typeof p[0] !== 'undefined' ? p[0] : 0;
+    const p1 = typeof p[0] !== 'undefined' ? p[0] : floor(random() * VARIANT_KEYS.length);
 
-    const variantIndex = floor(random() * VARIANT_KEYS);
+    const variantIndex = p1 % VARIANT_KEYS.length;
     const variantKey = VARIANT_KEYS[variantIndex];
     const variant = VARIANTS[variantKey];
     this.layers = variant;
