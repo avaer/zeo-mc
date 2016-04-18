@@ -73,6 +73,7 @@ const TREES = [
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
+    const eatNoise = opts.eatNoise;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -97,7 +98,7 @@ const TREES = [
           const yDistance = abs((i - base - 1) - ((height - base) / 2));
           const leafDistance = sqrt(j * j + k * k + yDistance * yDistance);
           if (leafDistance <= leafRadius) {
-            const leafEatN = trunkNoise.in3D(xi, yi, zi);
+            const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * OAK_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
               onPoint(xi, yi, zi, OAK_LEAVES_VALUE);
@@ -124,6 +125,7 @@ const TREES = [
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
+    const eatNoise = opts.eatNoise;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -150,7 +152,7 @@ const TREES = [
           const leafRadius = (leafRadiusScale * leafRadiusMax) * (1 + leafRadiusVariance * ((i % 2) === 0 ? 1 : -1));
           const leafDistance = sqrt(j * j + k * k);
           if (leafDistance <= leafRadius) {
-            const leafEatN = trunkNoise.in3D(xi, yi, zi);
+            const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * SPRUCE_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
               onPoint(xi, yi, zi, SPRUCE_LEAVES_VALUE);
@@ -183,6 +185,7 @@ const TREES = [
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
+    const eatNoise = opts.eatNoise;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -208,7 +211,7 @@ const TREES = [
 
           const leafDistance = sqrt(j * j + k * k);
           if (leafDistance <= leafRadius) {
-            const leafEatN = trunkNoise.in3D(xi, yi, zi);
+            const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * BIRCH_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
               onPoint(xi, yi, zi, BIRCH_LEAVES_VALUE);
@@ -235,6 +238,7 @@ const TREES = [
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
+    const eatNoise = opts.eatNoise;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -257,7 +261,7 @@ const TREES = [
 
           const leafDistance = sqrt(j * j + k * k);
           if (leafDistance <= leafRadius) {
-            const leafEatN = trunkNoise.in3D(xi, yi, zi);
+            const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * JUNGLE_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
               onPoint(xi, yi, zi, JUNGLE_LEAVES_VALUE);
