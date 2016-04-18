@@ -17,8 +17,8 @@ const SPRUCE_MIN_HEIGHT = 4;
 const SPRUCE_MAX_HEIGHT = 14;
 const SPRUCE_BASE_MIN_RATIO = 0.1;
 const SPRUCE_BASE_MAX_RATIO = 0.3;
-const SPRUCE_LEAVES_RADIUS_RATIO_MIN = 2;
-const SPRUCE_LEAVES_RADIUS_RATIO_MAX = 3;
+const SPRUCE_LEAVES_RADIUS_RATIO_MIN = 0.2;
+const SPRUCE_LEAVES_RADIUS_RATIO_MAX = 0.4;
 const SPRUCE_LEAVES_RADIUS_VARIANCE_MIN = 0.1;
 const SPRUCE_LEAVES_RADIUS_VARIANCE_MAX = 0.4;
 const SPRUCE_LEAVES_EAT_RATIO = 0.1;
@@ -91,7 +91,7 @@ const TREES = [
 
     const yi = y + snappedHeight;
     onPoint(x, yi, z, OAK_LEAVES_VALUE);
-  },
+  }, */
 
   // spruce
   function(opts) {
@@ -114,7 +114,7 @@ const TREES = [
     const snappedHeight = floor(height);
 
     const leafN = leafNoise.in2D(x, z);
-    const leafRadiusMax = SPRUCE_LEAVES_RADIUS_RATIO_MIN + (leafN * (SPRUCE_LEAVES_RADIUS_RATIO_MAX - SPRUCE_LEAVES_RADIUS_RATIO_MIN));
+    const leafRadiusMax = (height - base) * (SPRUCE_LEAVES_RADIUS_RATIO_MIN + (leafN * (SPRUCE_LEAVES_RADIUS_RATIO_MAX - SPRUCE_LEAVES_RADIUS_RATIO_MIN)));
     for (let i = 0; i < height; i++) {
       let yi = y + i;
 
@@ -149,9 +149,9 @@ const TREES = [
 
     const yi = y + snappedHeight;
     onPoint(x, yi, z, SPRUCE_LEAVES_VALUE);
-  }, */
+  },
 
-  // birch
+  /* // birch
   function(opts) {
     const position = opts.position;
     const x = position[0];
@@ -198,7 +198,7 @@ const TREES = [
 
     const yi = y + snappedHeight;
     onPoint(x, yi, z, BIRCH_LEAVES_VALUE);
-  }, 
+  }, */
 ];
 
 function make(opts) {
