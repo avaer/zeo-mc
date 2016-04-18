@@ -87,7 +87,7 @@ const VARIANTS = {
 };
 const VARIANT_KEYS = Object.keys(VARIANTS);
 
-class HouseSmall {
+class Farm {
   constructor(p) {
     p = p || [];
     const p1 = typeof p[0] !== 'undefined' ? p[0] : floor(random() * VARIANT_KEYS.length);
