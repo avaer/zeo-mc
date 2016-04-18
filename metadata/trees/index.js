@@ -6,10 +6,10 @@ const BLOCKS = Blocks.BLOCKS;
 const OAK_MIN_HEIGHT = 4;
 const OAK_MAX_HEIGHT = 14;
 const OAK_BASE_MIN_RATIO = 0.1;
-const OAK_BASE_MAX_RATIO = 0.5;
-const OAK_LEAVES_RADIUS_RATIO_MIN = 0.7;
+const OAK_BASE_MAX_RATIO = 0.3;
+const OAK_LEAVES_RADIUS_RATIO_MIN = 0.6;
 const OAK_LEAVES_RADIUS_RATIO_MAX = 1;
-const OAK_LEAVES_EAT_RATIO = 0.15;
+const OAK_LEAVES_EAT_RATIO = 0.1;
 const OAK_LOG_VALUE = BLOCKS['log_big_oak'];
 const OAK_LEAVES_VALUE = BLOCKS['leaves_big_oak_plains'];
 
@@ -18,6 +18,7 @@ const LEAVES_SIZE = 8;
 const min = Math.min;
 const max = Math.max;
 const floor = Math.floor;
+const abs = Math.abs;
 const sqrt = Math.sqrt;
 
 const TREES = [
@@ -51,22 +52,19 @@ const TREES = [
     }
 
     const leafN = leafNoise.in2D(x, z);
+    const leafRadius = ((height - base) / 2) * (OAK_LEAVES_RADIUS_RATIO_MIN + (leafN * (OAK_LEAVES_RADIUS_RATIO_MAX - OAK_LEAVES_RADIUS_RATIO_MIN)));
     for (let i = 0; i < height; i++) {
       let yi = y + i;
       onPoint(x, yi, z, OAK_LOG_VALUE);
 
       if (i >= base) {
-        const leafDepth = (i < height / 2) ? (i - base + 1) : (height - i + 1);
-        let leafRadius = max(leafDepth * (OAK_LEAVES_RADIUS_RATIO_MIN + (leafN * (OAK_LEAVES_RADIUS_RATIO_MAX - OAK_LEAVES_RADIUS_RATIO_MIN))), 1);
-         if (i >= height / 2) {
-          leafRadius = max(leafRadius, 1);
-        }
 
         leafPoints((j, k) => {
           const xi = x + j;
           const zi = z + k;
 
-          const leafDistance = sqrt(j * j + k * k);
+          const yDistance = abs((i - base - 1) - ((height - base) / 2));
+          const leafDistance = sqrt(j * j + k * k + yDistance * yDistance);
           if (leafDistance <= leafRadius) {
             const leafEatN = trunkNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * OAK_LEAVES_EAT_RATIO;
