@@ -80,6 +80,10 @@ const TRANSPARENT_TEXTURES = [
   /leaves/,
 ];
 
+const TRANSLUCENT_TEXTURES = [
+  /leaves/,
+];
+
 const api = {};
 
 api.BLOCKS = (() => {
@@ -128,6 +132,29 @@ api.TRANSPARENT = (() => {
         return m === transparencySpec;
       } else if (transparencySpec instanceof RegExp) {
         return transparencySpec.test(m);
+      } else {
+        return false;
+      }
+    });
+  }
+
+  const result = {};
+  for (let m in api.BLOCKS) {
+    if (isTransparent(m)) {
+      const index = api.BLOCKS[m];
+      result[index] = true;
+    }
+  }
+  return result;
+})();
+
+api.TRANSLUCENT = (() => {
+  function isTransparent(m) {
+    return TRANSLUCENT_TEXTURES.some(translucencySpec => {
+      if (typeof translucencySpec === 'string') {
+        return m === translucencySpec;
+      } else if (translucencySpec instanceof RegExp) {
+        return translucencySpec.test(m);
       } else {
         return false;
       }
