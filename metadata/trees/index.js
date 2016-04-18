@@ -35,11 +35,27 @@ const BIRCH_LEAVES_EAT_RATIO = 0.1;
 const BIRCH_LOG_VALUE = BLOCKS['log_birch'];
 const BIRCH_LEAVES_VALUE = BLOCKS['leaves_birch_plains'];
 
+const JUNGLE_MIN_HEIGHT = 1;
+const JUNGLE_MAX_HEIGHT = 26;
+const JUNGLE_CANOPY_RATIO = 0.5;
+const JUNGLE_CANOPY_OFFSET_RATIO_MAX = 0.125;
+const JUNGLE_CANOPY_RADIUS_RATIO_MIN = 1;
+const JUNGLE_CANOPY_RADIUS_RATIO_MAX = 1.5;
+const JUNGLE_CANOPY_CAP_RATIO_MIN = 0.2;
+const JUNGLE_CANOPY_CAP_RATIO_MAX = 0.4;
+const JUNGLE_CANOPY_CAP_MIN = 3;
+const JUNGLE_LEAVES_RADIUS_RATIO_MIN = 0.5;
+const JUNGLE_LEAVES_RADIUS_RATIO_MAX = 1;
+const JUNGLE_LEAVES_EAT_RATIO = 0.1;
+const JUNGLE_LOG_VALUE = BLOCKS['log_jungle'];
+const JUNGLE_LEAVES_VALUE = BLOCKS['leaves_jungle_plains'];
+
 const LEAVES_SIZE = 8;
 
 const min = Math.min;
 const max = Math.max;
 const floor = Math.floor;
+const ceil = Math.ceil;
 const abs = Math.abs;
 const sqrt = Math.sqrt;
 
@@ -54,6 +70,8 @@ const TREES = [
     const heightNoise = opts.heightNoise;
     const baseNoise = opts.baseNoise;
     const trunkNoise = opts.trunkNoise;
+    const trunkNoise2 = opts.trunkNoise2;
+    const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
@@ -67,7 +85,7 @@ const TREES = [
     const leafN = leafNoise.in2D(x, z);
     const leafRadius = ((height - base) / 2) * (OAK_LEAVES_RADIUS_RATIO_MIN + (leafN * (OAK_LEAVES_RADIUS_RATIO_MAX - OAK_LEAVES_RADIUS_RATIO_MIN)));
     for (let i = 0; i < height; i++) {
-      let yi = y + i;
+      const yi = y + i;
       onPoint(x, yi, z, OAK_LOG_VALUE);
 
       if (i >= base) {
@@ -91,7 +109,7 @@ const TREES = [
 
     const yi = y + snappedHeight;
     onPoint(x, yi, z, OAK_LEAVES_VALUE);
-  }, */
+  },
 
   // spruce
   function(opts) {
@@ -103,6 +121,8 @@ const TREES = [
     const heightNoise = opts.heightNoise;
     const baseNoise = opts.baseNoise;
     const trunkNoise = opts.trunkNoise;
+    const trunkNoise2 = opts.trunkNoise2;
+    const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
@@ -116,8 +136,7 @@ const TREES = [
     const leafN = leafNoise.in2D(x, z);
     const leafRadiusMax = (height - base) * (SPRUCE_LEAVES_RADIUS_RATIO_MIN + (leafN * (SPRUCE_LEAVES_RADIUS_RATIO_MAX - SPRUCE_LEAVES_RADIUS_RATIO_MIN)));
     for (let i = 0; i < height; i++) {
-      let yi = y + i;
-
+      const yi = y + i;
       const trunkN = leafNoise.in3D(x, yi, z);
       const leafRadiusVariance = SPRUCE_LEAVES_RADIUS_VARIANCE_MIN + (trunkN * (SPRUCE_LEAVES_RADIUS_VARIANCE_MAX - SPRUCE_LEAVES_RADIUS_VARIANCE_MIN));
 
@@ -151,7 +170,7 @@ const TREES = [
     onPoint(x, yi, z, SPRUCE_LEAVES_VALUE);
   },
 
-  /* // birch
+  // birch
   function(opts) {
     const position = opts.position;
     const x = position[0];
@@ -161,6 +180,8 @@ const TREES = [
     const heightNoise = opts.heightNoise;
     const baseNoise = opts.baseNoise;
     const trunkNoise = opts.trunkNoise;
+    const trunkNoise2 = opts.trunkNoise2;
+    const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
@@ -174,16 +195,17 @@ const TREES = [
     const leafN = leafNoise.in2D(x, z);
     const leafRadiusMax = (height - base) * BIRCH_LEAVES_RADIUS_RATIO_MIN + (leafN * (BIRCH_LEAVES_RADIUS_RATIO_MAX - BIRCH_LEAVES_RADIUS_RATIO_MIN));
     for (let i = 0; i < height; i++) {
-      let yi = y + i;
+      const yi = y + i;
       onPoint(x, yi, z, BIRCH_LOG_VALUE);
 
       if (i >= base) {
+        const leafRadiusScale = 1 - (abs((i - base) - ((height - base) * 0.2)) / (height - base));
+        const leafRadius = leafRadiusScale * leafRadiusMax;
+
         _leafPoints((j, k) => {
           const xi = x + j;
           const zi = z + k;
 
-          const leafRadiusScale = 1 - (abs((i - base) - ((height - base) * 0.2)) / (height - base));
-          const leafRadius = leafRadiusScale * leafRadiusMax;
           const leafDistance = sqrt(j * j + k * k);
           if (leafDistance <= leafRadius) {
             const leafEatN = trunkNoise.in3D(xi, yi, zi);
@@ -199,6 +221,88 @@ const TREES = [
     const yi = y + snappedHeight;
     onPoint(x, yi, z, BIRCH_LEAVES_VALUE);
   }, */
+
+  // jungle
+  function(opts) {
+    const position = opts.position;
+    const x = position[0];
+    const y = position[1];
+    const z = position[2];
+    const typeNoise = opts.typeNoise;
+    const heightNoise = opts.heightNoise;
+    const baseNoise = opts.baseNoise;
+    const trunkNoise = opts.trunkNoise;
+    const trunkNoise2 = opts.trunkNoise2;
+    const trunkNoise3 = opts.trunkNoise3;
+    const leafNoise = opts.leafNoise;
+    const onPoint = opts.onPoint;
+    const voxelUtils = opts.voxelUtils;
+
+    const heightNoiseN = heightNoise.in2D(x, z);
+    const height = JUNGLE_MIN_HEIGHT + (heightNoiseN * (JUNGLE_MAX_HEIGHT - JUNGLE_MIN_HEIGHT));
+    const snappedHeight = floor(height);
+
+    function makeCanopy(x, y, z, size) {
+      const leafN = leafNoise.in3D(x, y, z);
+      const leafRadiusMax = size * (JUNGLE_CANOPY_RADIUS_RATIO_MIN + (leafN * (JUNGLE_CANOPY_RADIUS_RATIO_MAX - JUNGLE_CANOPY_RADIUS_RATIO_MIN)));
+
+      for (let i = 0; i < size; i++) {
+        const yi = y - size + i;
+        const leafRadiusScale = 1 - (abs(i - (size * 0.1)) / size);
+        const leafRadius = leafRadiusScale * leafRadiusMax;
+
+        _leafPointsAll((j, k) => {
+          const xi = x + j;
+          const zi = z + k;
+
+          const leafDistance = sqrt(j * j + k * k);
+          if (leafDistance <= leafRadius) {
+            const leafEatN = trunkNoise.in3D(xi, yi, zi);
+            const leafEatProbability = leafDistance * JUNGLE_LEAVES_EAT_RATIO;
+            if (leafEatN > leafEatProbability) {
+              onPoint(xi, yi, zi, JUNGLE_LEAVES_VALUE);
+            }
+          }
+        });
+      }
+    }
+
+    for (let i = 0; i < height - 1; i++) {
+      const yi = y + i;
+
+      const trunkNoiseN = trunkNoise.in3D(x, yi, z);
+      if (trunkNoiseN < JUNGLE_CANOPY_RATIO) {
+        const trunkNoiseNX = trunkNoise2.in3D(x, yi, z);
+        const xdRaw = (-1 + trunkNoiseNX * 2) * (height * JUNGLE_CANOPY_OFFSET_RATIO_MAX);
+        const xd = floor(abs(xdRaw)) * (xdRaw >= 0 ? 1 : -1);
+        const trunkNoiseNZ = trunkNoise3.in3D(x, yi, z);
+        const zdRaw = (-1 + trunkNoiseNZ * 2) * (height * JUNGLE_CANOPY_OFFSET_RATIO_MAX);
+        const zd = floor(abs(zdRaw)) * (zdRaw >= 0 ? 1 : -1);
+        const canopyDistance = sqrt(xd * xd + zd * zd);
+        const canopySize = ceil(canopyDistance);
+        if (canopySize < i) {
+          makeCanopy(x + xd, yi, z + zd, canopySize);
+        }
+      }
+    }
+
+    const yi = y + snappedHeight;
+    const topCanopyN = leafNoise.in3D(x, yi, z);
+    const topCanopySize = min(
+      max(
+        floor(height * (JUNGLE_CANOPY_CAP_RATIO_MIN + (topCanopyN * (JUNGLE_CANOPY_CAP_RATIO_MAX - JUNGLE_CANOPY_CAP_RATIO_MIN)))),
+        min(snappedHeight, JUNGLE_CANOPY_CAP_MIN)
+      ),
+      LEAVES_SIZE
+    );
+    makeCanopy(x, yi, z, topCanopySize)
+    // onPoint(x, yi, z, JUNGLE_LEAVES_VALUE);
+
+    for (let i = 0; i < height - 2; i++) {
+      const yi = y + i;
+      onPoint(x, yi, z, JUNGLE_LOG_VALUE);
+    }
+  },
 ];
 
 function make(opts) {
@@ -217,6 +321,14 @@ function _leafPoints(fn) {
   for (let j = -LEAVES_SIZE; j <= LEAVES_SIZE; j++) {
     for (let k = -LEAVES_SIZE; k <= LEAVES_SIZE; k++) {
       if (j === 0 && k === 0) continue;
+      fn(j, k);
+    }
+  }
+}
+
+function _leafPointsAll(fn) {
+  for (let j = -LEAVES_SIZE; j <= LEAVES_SIZE; j++) {
+    for (let k = -LEAVES_SIZE; k <= LEAVES_SIZE; k++) {
       fn(j, k);
     }
   }
