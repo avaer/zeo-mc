@@ -58,6 +58,8 @@ const ACACIA_FORK_HEIGHT_RATIO_MIN = 0
 const ACACIA_FORK_HEIGHT_RATIO_MAX = 1;
 const ACACIA_FORK_ANGLE_MIN = 0.5;
 const ACACIA_FORK_ANGLE_MAX = 1;
+const ACACIA_FORK_HEIGHT_OFFSET_RATIO_MIN = 0.1;
+const ACACIA_FORK_HEIGHT_OFFSET_RATIO_MAX = 0.25;
 const ACACIA_CANOPY_RADIUS_RATIO_MIN = 1;
 const ACACIA_CANOPY_RADIUS_RATIO_MAX = 2.5;
 const ACACIA_LEAVES_EAT_RATIO = 0.1;
@@ -378,6 +380,9 @@ const TREES = [
     const forkLeftAngle = (ACACIA_FORK_ANGLE_MIN + (forkLeftAngleN * (ACACIA_FORK_ANGLE_MAX - ACACIA_FORK_ANGLE_MIN)));
     const forkRightAngleN = baseNoise3.in3D(x, y + snappedFork, z);
     const forkRightAngle = (ACACIA_FORK_ANGLE_MIN + (forkRightAngleN * (ACACIA_FORK_ANGLE_MAX - ACACIA_FORK_ANGLE_MIN)));
+    const forkHeightOffsetN = heightNoise.in3D(x, y + snappedFork, z);
+    const forkHeightOffset = height * (ACACIA_FORK_HEIGHT_OFFSET_RATIO_MIN + (forkHeightOffsetN * (ACACIA_FORK_HEIGHT_OFFSET_RATIO_MAX - ACACIA_FORK_HEIGHT_OFFSET_RATIO_MIN)))
+    const snappedForkHeightOffset = floor(forkHeightOffset);
 
     function makeCanopy(x, y, z, size) {
       const leafN = leafNoise.in3D(x, y, z);
@@ -405,14 +410,15 @@ const TREES = [
     }
 
     for (let i = 0; i < height; i++) {
+      const yi = y + i;
+
       if (i < fork) {
-        const yi = y + i;
         onPoint(x, yi, z, ACACIA_LEAVES_VALUE);
       } else {
         const forkHeight = i - fork;
 
         const xil = round(x + forkAxes[0][0] * (forkHeight * forkLeftAngle));
-        const yil = y + i;
+        const yil = yi;
         const zil = round(z + forkAxes[0][1] * (forkHeight * forkLeftAngle));
         if (i < snappedForkLeftHeight) {
           onPoint(xil, yil, zil, ACACIA_LEAVES_VALUE);
@@ -422,7 +428,7 @@ const TREES = [
         }
 
         const xir = round(x + forkAxes[1][0] * (forkHeight * forkRightAngle));
-        const yir = y + i - 1;
+        const yir = yi - snappedForkHeightOffset;
         const zir = round(z + forkAxes[1][1] * (forkHeight * forkRightAngle));
         if (i < snappedForkRightHeight) {
           onPoint(xir, yir, zir, ACACIA_LEAVES_VALUE);
