@@ -411,9 +411,9 @@ const TREES = [
       } else {
         const forkHeight = i - fork;
 
-        const xil = x + forkAxes[0][0] * (forkHeight * forkLeftAngle);
+        const xil = round(x + forkAxes[0][0] * (forkHeight * forkLeftAngle));
         const yil = y + i;
-        const zil = z + forkAxes[0][1] * (forkHeight * forkLeftAngle);
+        const zil = round(z + forkAxes[0][1] * (forkHeight * forkLeftAngle));
         if (i < snappedForkLeftHeight) {
           onPoint(xil, yil, zil, ACACIA_LEAVES_VALUE);
         } else if (i === snappedForkLeftHeight) {
@@ -421,9 +421,9 @@ const TREES = [
           makeCanopy(xil, yi, zil, canopySize);
         }
 
-        const xir = x + forkAxes[1][0] * (forkHeight * forkRightAngle);
+        const xir = round(x + forkAxes[1][0] * (forkHeight * forkRightAngle));
         const yir = y + i - 1;
-        const zir = z + forkAxes[1][1] * (forkHeight * forkRightAngle);
+        const zir = round(z + forkAxes[1][1] * (forkHeight * forkRightAngle));
         if (i < snappedForkRightHeight) {
           onPoint(xir, yir, zir, ACACIA_LEAVES_VALUE);
         } else if (i === snappedForkRightHeight) {
