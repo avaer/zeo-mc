@@ -58,8 +58,8 @@ const ACACIA_FORK_HEIGHT_RATIO_MIN = 0
 const ACACIA_FORK_HEIGHT_RATIO_MAX = 1;
 const ACACIA_FORK_ANGLE_MIN = 0.5;
 const ACACIA_FORK_ANGLE_MAX = 1;
-const ACACIA_LEAVES_RADIUS_RATIO_MIN = 0.5;
-const ACACIA_LEAVES_RADIUS_RATIO_MAX = 1;
+const ACACIA_CANOPY_RADIUS_RATIO_MIN = 1;
+const ACACIA_CANOPY_RADIUS_RATIO_MAX = 2.5;
 const ACACIA_LEAVES_EAT_RATIO = 0.1;
 const ACACIA_LOG_VALUE = BLOCKS['log_acacia'];
 const ACACIA_LEAVES_VALUE = BLOCKS['leaves_acacia_plains'];
@@ -70,6 +70,7 @@ const min = Math.min;
 const max = Math.max;
 const floor = Math.floor;
 const ceil = Math.ceil;
+const round = Math.round;
 const abs = Math.abs;
 const sqrt = Math.sqrt;
 
@@ -368,26 +369,26 @@ const TREES = [
       }
     })();
     const forkLeftHeightN = heightNoise2.in3D(x, y + snappedFork, z);
-    const forkLeftHeight = snappedFork + (height - fork) * (ACACIA_FORK_HEIGHT_RATIO_MIN + (forkLeftHeightN * (ACACIA_FORK_HEIGHT_RATIO_MAX - ACACIA_FORK_HEIGHT_RATIO_MIN)));
+    const forkLeftHeight = fork + (height - fork) * (ACACIA_FORK_HEIGHT_RATIO_MIN + (forkLeftHeightN * (ACACIA_FORK_HEIGHT_RATIO_MAX - ACACIA_FORK_HEIGHT_RATIO_MIN)));
     const snappedForkLeftHeight = floor(forkLeftHeight);
     const forkRightHeightN = heightNoise3.in3D(x, y + snappedFork, z);
-    const forkRightHeight = snappedFork + (height - fork) * (ACACIA_FORK_HEIGHT_RATIO_MIN + (forkRightHeightN * (ACACIA_FORK_HEIGHT_RATIO_MAX - ACACIA_FORK_HEIGHT_RATIO_MIN)));
+    const forkRightHeight = fork + (height - fork) * (ACACIA_FORK_HEIGHT_RATIO_MIN + (forkRightHeightN * (ACACIA_FORK_HEIGHT_RATIO_MAX - ACACIA_FORK_HEIGHT_RATIO_MIN)));
     const snappedForkRightHeight = floor(forkRightHeight);
     const forkLeftAngleN = baseNoise2.in3D(x, y + snappedFork, z);
     const forkLeftAngle = (ACACIA_FORK_ANGLE_MIN + (forkLeftAngleN * (ACACIA_FORK_ANGLE_MAX - ACACIA_FORK_ANGLE_MIN)));
     const forkRightAngleN = baseNoise3.in3D(x, y + snappedFork, z);
     const forkRightAngle = (ACACIA_FORK_ANGLE_MIN + (forkRightAngleN * (ACACIA_FORK_ANGLE_MAX - ACACIA_FORK_ANGLE_MIN)));
 
-    function makeCanopy(x, y, z, size) { // XXX implement this
+    function makeCanopy(x, y, z, size) {
       const leafN = leafNoise.in3D(x, y, z);
       const leafRadiusMax = size * (ACACIA_CANOPY_RADIUS_RATIO_MIN + (leafN * (ACACIA_CANOPY_RADIUS_RATIO_MAX - ACACIA_CANOPY_RADIUS_RATIO_MIN)));
 
       for (let i = 0; i < size; i++) {
         const yi = y - size + i;
-        const leafRadiusScale = 1 - (abs(i - (size * 0.1)) / size);
+        const leafRadiusScale = 1 - (abs(i - (size * 0.2)) / size);
         const leafRadius = leafRadiusScale * leafRadiusMax;
 
-        _leafPointsAll((j, k) => {
+        _leafPoints((j, k) => {
           const xi = x + j;
           const zi = z + k;
 
@@ -416,7 +417,8 @@ const TREES = [
         if (i < snappedForkLeftHeight) {
           onPoint(xil, yil, zil, ACACIA_LEAVES_VALUE);
         } else if (i === snappedForkLeftHeight) {
-          makeCanopy(xil, yi, zil);
+          const canopySize = round((forkLeftHeight - fork) / 2);
+          makeCanopy(xil, yi, zil, canopySize);
         }
 
         const xir = x + forkAxes[1][0] * (forkHeight * forkRightAngle);
@@ -425,7 +427,8 @@ const TREES = [
         if (i < snappedForkRightHeight) {
           onPoint(xir, yir, zir, ACACIA_LEAVES_VALUE);
         } else if (i === snappedForkRightHeight) {
-          makeCanopy(xir, yir, zir);
+          const canopySize = round((forkRightHeight - fork) / 2);
+          makeCanopy(xir, yir, zir, canopySize);
         }
       }
     }
