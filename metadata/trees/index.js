@@ -66,6 +66,11 @@ const ACACIA_LEAVES_EAT_RATIO = 0.1;
 const ACACIA_LOG_VALUE = BLOCKS['log_acacia'];
 const ACACIA_LEAVES_VALUE = BLOCKS['leaves_acacia_plains'];
 
+const CACTUS_MIN_HEIGHT = 1;
+const CACTUS_MAX_HEIGHT = 4;
+const CACTUS_TOP_VALUE = BLOCKS['cactus_top'];
+const CACTUS_SIDE_VALUE = BLOCKS['cactus_side'];
+
 const LEAVES_SIZE = 8;
 
 const min = Math.min;
@@ -331,7 +336,7 @@ const TREES = [
       const yi = y + i;
       onPoint(x, yi, z, JUNGLE_LOG_VALUE);
     }
-  }, */
+  },
 
   // acacia
   function(opts) {
@@ -438,12 +443,42 @@ const TREES = [
         }
       }
     }
-  },
+  }, */
 
   // XXX dark oak
   // XXX huge red mushroom
   // XXX huge brown mushroom
-  // XXX cactus
+
+  // cactus
+  function(opts) {
+    const position = opts.position;
+    const x = position[0];
+    const y = position[1];
+    const z = position[2];
+    const typeNoise = opts.typeNoise;
+    const heightNoise = opts.heightNoise;
+    const heightNoise2 = opts.heightNoise2;
+    const heightNoise3 = opts.heightNoise3;
+    const baseNoise = opts.baseNoise;
+    const trunkNoise = opts.trunkNoise;
+    const trunkNoise2 = opts.trunkNoise2;
+    const trunkNoise3 = opts.trunkNoise3;
+    const leafNoise = opts.leafNoise;
+    const eatNoise = opts.eatNoise;
+    const onPoint = opts.onPoint;
+    const voxelUtils = opts.voxelUtils;
+
+    const heightNoiseN = heightNoise.in2D(x, z);
+    const height = CACTUS_MIN_HEIGHT + (heightNoiseN * (CACTUS_MAX_HEIGHT - CACTUS_MIN_HEIGHT));
+    const snappedHeight = floor(height);
+
+    for (let i = 0; i < height; i++) {
+      const yi = y + i;
+      const value = i === snappedHeight - 1 ? CACTUS_TOP_VALUE : CACTUS_SIDE_VALUE;
+      onPoint(x, yi, z, value);
+    }
+  },
+
   // XXX logs w/mushrooms: oak, spruce, birch, jungle
 ];
 

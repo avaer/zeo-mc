@@ -60,6 +60,8 @@ const MULTI_BLOCK_TEXTURES = (() => {
   TREE_TEXTURES.forEach(treeTexture => {
     result['log_' + treeTexture] = ['log_' + treeTexture + '_top', 'log_' + treeTexture + '_top', 'log_' + treeTexture];
   });
+  result['cactus_top'] = ['cactus_top', 'cactus_bottom', 'cactus_side'];
+  result['cactus_side'] = ['cactus_bottom', 'cactus_bottom', 'cactus_side'];
   return result;
 })();
 
