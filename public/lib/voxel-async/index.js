@@ -110,6 +110,11 @@ function isTransparent(value) {
 }
 api.isTransparent = isTransparent;
 
+function isTranslucent(value) {
+  return !!BLOCKS.TRANSLUCENT[value];
+}
+api.isTranslucent = isTranslucent;
+
 function _ensureInitialized() {
   if (
     voxelTerrainGenerate !== null &&

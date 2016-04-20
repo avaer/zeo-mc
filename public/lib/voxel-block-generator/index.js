@@ -63,7 +63,7 @@ voxelBlockGenerator.getMesh = function({voxels, depths}, dims, voxelAsync) {
           let a = xd >= 0      ? getType(voxels, x[0]      + dimsX * x[1]          + dimsXY * x[2]          ) : 0;
           let b = xd < dimsD-1 ? getType(voxels, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY) : 0;
 
-          if (a !== b) {
+          if (a !== b || isTranslucent(a) || isTranslucent(b)) {
             const aT = isTransparent(a);
             const bT = isTransparent(b);
 
@@ -188,8 +188,12 @@ voxelBlockGenerator.getMesh = function({voxels, depths}, dims, voxelAsync) {
     return (v & TRANSPARENT_MASK) !== 0;
   }
 
+  function isTranslucent(type) {
+    return voxelAsync.isTranslucent(type);
+  }
+
   function removeFlags(v) {
-    return (v & NO_FLAGS_MASK);
+    return v & NO_FLAGS_MASK;
   }
 };
 

@@ -60,6 +60,11 @@ const MULTI_BLOCK_TEXTURES = (() => {
   TREE_TEXTURES.forEach(treeTexture => {
     result['log_' + treeTexture] = ['log_' + treeTexture + '_top', 'log_' + treeTexture + '_top', 'log_' + treeTexture];
   });
+  result['cactus_top'] = ['cactus_top', 'cactus_bottom', 'cactus_side'];
+  result['cactus_side'] = ['cactus_bottom', 'cactus_bottom', 'cactus_side'];
+  result['mushroom_block_skin_brown'] = ['mushroom_block_skin_brown', 'mushroom_block_inside', 'mushroom_block_skin_brown'];
+  result['mushroom_block_skin_red'] = ['mushroom_block_skin_red', 'mushroom_block_inside', 'mushroom_block_skin_red'];
+  result['mushroom_block_skin_stem'] = ['mushroom_block_inside', 'mushroom_block_inside', 'mushroom_block_skin_stem'];
   return result;
 })();
 
@@ -77,6 +82,10 @@ const MULTI_FRAME_MATERIALS = {
 const TRANSPARENT_TEXTURES = [
   /water/,
   /lava/,
+  /leaves/,
+];
+
+const TRANSLUCENT_TEXTURES = [
   /leaves/,
 ];
 
@@ -128,6 +137,29 @@ api.TRANSPARENT = (() => {
         return m === transparencySpec;
       } else if (transparencySpec instanceof RegExp) {
         return transparencySpec.test(m);
+      } else {
+        return false;
+      }
+    });
+  }
+
+  const result = {};
+  for (let m in api.BLOCKS) {
+    if (isTransparent(m)) {
+      const index = api.BLOCKS[m];
+      result[index] = true;
+    }
+  }
+  return result;
+})();
+
+api.TRANSLUCENT = (() => {
+  function isTransparent(m) {
+    return TRANSLUCENT_TEXTURES.some(translucencySpec => {
+      if (typeof translucencySpec === 'string') {
+        return m === translucencySpec;
+      } else if (translucencySpec instanceof RegExp) {
+        return translucencySpec.test(m);
       } else {
         return false;
       }
