@@ -439,6 +439,12 @@ const TREES = [
       }
     }
   },
+
+  // XXX dark oak
+  // XXX huge red mushroom
+  // XXX huge brown mushroom
+  // XXX cactus
+  // XXX logs w/mushrooms: oak, spruce, birch, jungle
 ];
 
 function make(opts) {
