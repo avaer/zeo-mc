@@ -110,7 +110,7 @@ const abs = Math.abs;
 const sqrt = Math.sqrt;
 
 const TREES = [
-  /* // oak
+  // oak
   function(opts) {
     const position = opts.position;
     const x = position[0];
@@ -121,6 +121,8 @@ const TREES = [
     const heightNoise2 = opts.heightNoise2;
     const heightNoise3 = opts.heightNoise3;
     const baseNoise = opts.baseNoise;
+    const baseNoise2 = opts.baseNoise2;
+    const baseNoise3 = opts.baseNoise3;
     const trunkNoise = opts.trunkNoise;
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
@@ -175,6 +177,8 @@ const TREES = [
     const heightNoise2 = opts.heightNoise2;
     const heightNoise3 = opts.heightNoise3;
     const baseNoise = opts.baseNoise;
+    const baseNoise2 = opts.baseNoise2;
+    const baseNoise3 = opts.baseNoise3;
     const trunkNoise = opts.trunkNoise;
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
@@ -238,6 +242,8 @@ const TREES = [
     const heightNoise2 = opts.heightNoise2;
     const heightNoise3 = opts.heightNoise3;
     const baseNoise = opts.baseNoise;
+    const baseNoise2 = opts.baseNoise2;
+    const baseNoise3 = opts.baseNoise3;
     const trunkNoise = opts.trunkNoise;
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
@@ -294,6 +300,8 @@ const TREES = [
     const heightNoise2 = opts.heightNoise2;
     const heightNoise3 = opts.heightNoise3;
     const baseNoise = opts.baseNoise;
+    const baseNoise2 = opts.baseNoise2;
+    const baseNoise3 = opts.baseNoise3;
     const trunkNoise = opts.trunkNoise;
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
@@ -380,6 +388,8 @@ const TREES = [
     const heightNoise2 = opts.heightNoise2;
     const heightNoise3 = opts.heightNoise3;
     const baseNoise = opts.baseNoise;
+    const baseNoise2 = opts.baseNoise2;
+    const baseNoise3 = opts.baseNoise3;
     const trunkNoise = opts.trunkNoise;
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
@@ -475,7 +485,7 @@ const TREES = [
         }
       }
     }
-  }, */
+  },
 
   // dark oak
   function(opts) {
@@ -488,6 +498,8 @@ const TREES = [
     const heightNoise2 = opts.heightNoise2;
     const heightNoise3 = opts.heightNoise3;
     const baseNoise = opts.baseNoise;
+    const baseNoise2 = opts.baseNoise2;
+    const baseNoise3 = opts.baseNoise3;
     const trunkNoise = opts.trunkNoise;
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
@@ -559,7 +571,7 @@ const TREES = [
   },
 
   // huge red mushroom
-  /* function(opts) {
+  function(opts) {
     const position = opts.position;
     const x = position[0];
     const y = position[1];
@@ -569,6 +581,8 @@ const TREES = [
     const heightNoise2 = opts.heightNoise2;
     const heightNoise3 = opts.heightNoise3;
     const baseNoise = opts.baseNoise;
+    const baseNoise2 = opts.baseNoise2;
+    const baseNoise3 = opts.baseNoise3;
     const trunkNoise = opts.trunkNoise;
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
@@ -630,6 +644,8 @@ const TREES = [
     const heightNoise2 = opts.heightNoise2;
     const heightNoise3 = opts.heightNoise3;
     const baseNoise = opts.baseNoise;
+    const baseNoise2 = opts.baseNoise2;
+    const baseNoise3 = opts.baseNoise3;
     const trunkNoise = opts.trunkNoise;
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
@@ -674,6 +690,8 @@ const TREES = [
     const heightNoise2 = opts.heightNoise2;
     const heightNoise3 = opts.heightNoise3;
     const baseNoise = opts.baseNoise;
+    const baseNoise2 = opts.baseNoise2;
+    const baseNoise3 = opts.baseNoise3;
     const trunkNoise = opts.trunkNoise;
     const trunkNoise2 = opts.trunkNoise2;
     const trunkNoise3 = opts.trunkNoise3;
@@ -692,7 +710,7 @@ const TREES = [
       const value = (i === snappedHeight - 1) ? CACTUS_TOP_VALUE : CACTUS_SIDE_VALUE;
       onPoint(x, yi, z, value);
     }
-  }, */
+  },
 
   // XXX logs w/mushrooms: oak, spruce, birch, jungle
 ];
