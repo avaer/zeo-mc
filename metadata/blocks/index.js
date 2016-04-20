@@ -62,6 +62,8 @@ const MULTI_BLOCK_TEXTURES = (() => {
   });
   result['cactus_top'] = ['cactus_top', 'cactus_bottom', 'cactus_side'];
   result['cactus_side'] = ['cactus_bottom', 'cactus_bottom', 'cactus_side'];
+  result['mushroom_block_skin_stem'] = ['mushroom_block_inside', 'mushroom_block_inside', 'mushroom_block_skin_stem'];
+  result['mushroom_block_skin_brown'] = ['mushroom_block_skin_brown', 'mushroom_block_inside', 'mushroom_block_skin_brown'];
   return result;
 })();
 
