@@ -25,7 +25,7 @@ const SPRUCE_LEAVES_EAT_RATIO = 0.1;
 const SPRUCE_LOG_VALUE = BLOCKS['log_spruce'];
 const SPRUCE_LEAVES_VALUE = BLOCKS['leaves_spruce_plains'];
 
-const BIRCH_MIN_HEIGHT = 4;
+const BIRCH_MIN_HEIGHT = 6;
 const BIRCH_MAX_HEIGHT = 20;
 const BIRCH_BASE_MIN_RATIO = 0.4;
 const BIRCH_BASE_MAX_RATIO = 0.6;
@@ -263,7 +263,6 @@ const TREES = [
     const leafRadiusMax = (height - base) * BIRCH_LEAVES_RADIUS_RATIO_MIN + (leafN * (BIRCH_LEAVES_RADIUS_RATIO_MAX - BIRCH_LEAVES_RADIUS_RATIO_MIN));
     for (let i = 0; i < height; i++) {
       const yi = y + i;
-      onPoint(x, yi, z, BIRCH_LOG_VALUE);
 
       if (i >= base) {
         const leafRadiusScale = 1 - (abs((i - base) - ((height - base) * 0.2)) / (height - base));
@@ -282,6 +281,11 @@ const TREES = [
             }
           }
         });
+
+        const value = (i < (base + ((height - base) / 2))) ? BIRCH_LOG_VALUE : BIRCH_LEAVES_VALUE;
+        onPoint(x, yi, z, value);
+      } else {
+        onPoint(x, yi, z, BIRCH_LOG_VALUE);
       }
     }
 
