@@ -67,21 +67,21 @@ const ACACIA_LOG_VALUE = BLOCKS['log_acacia'];
 const ACACIA_LEAVES_VALUE = BLOCKS['leaves_acacia_plains'];
 
 const HUGE_RED_MUSHROOM_MIN_HEIGHT = 4;
-const HUGE_RED_MUSHROOM_MAX_HEIGHT = 16;
-const HUGE_RED_MUSHROOM_RADIUS_RATIO_MIN = 0.5;
-const HUGE_RED_MUSHROOM_RADIUS_RATIO_MAX = 0.8;
+const HUGE_RED_MUSHROOM_MAX_HEIGHT = 12;
+const HUGE_RED_MUSHROOM_RADIUS_RATIO_MIN = 0.2;
+const HUGE_RED_MUSHROOM_RADIUS_RATIO_MAX = 0.4;
 const HUGE_RED_MUSHROOM_TRUNK_VALUE = BLOCKS['mushroom_block_skin_stem'];
 const HUGE_RED_MUSHROOM_CANOPY_VALUE = BLOCKS['mushroom_block_skin_red'];
 
 const HUGE_BROWN_MUSHROOM_MIN_HEIGHT = 4;
-const HUGE_BROWN_MUSHROOM_MAX_HEIGHT = 16;
-const HUGE_BROWN_MUSHROOM_RADIUS_RATIO_MIN = 0.5;
-const HUGE_BROWN_MUSHROOM_RADIUS_RATIO_MAX = 0.8;
+const HUGE_BROWN_MUSHROOM_MAX_HEIGHT = 12;
+const HUGE_BROWN_MUSHROOM_RADIUS_RATIO_MIN = 0.4;
+const HUGE_BROWN_MUSHROOM_RADIUS_RATIO_MAX = 0.6;
 const HUGE_BROWN_MUSHROOM_TRUNK_VALUE = BLOCKS['mushroom_block_skin_stem'];
 const HUGE_BROWN_MUSHROOM_CANOPY_VALUE = BLOCKS['mushroom_block_skin_brown'];
 
 const CACTUS_MIN_HEIGHT = 1;
-const CACTUS_MAX_HEIGHT = 4;
+const CACTUS_MAX_HEIGHT = 6;
 const CACTUS_TOP_VALUE = BLOCKS['cactus_top'];
 const CACTUS_SIDE_VALUE = BLOCKS['cactus_side'];
 
@@ -481,7 +481,7 @@ const TREES = [
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
-    const height = HUGE_RED_MUSHROOM_MIN_HEIGHT + (heightNoiseN * (HUGE_RED_MUSHROOM_MIN_HEIGHT - HUGE_RED_MUSHROOM_MIN_HEIGHT));
+    const height = HUGE_RED_MUSHROOM_MIN_HEIGHT + (heightNoiseN * (HUGE_RED_MUSHROOM_MAX_HEIGHT - HUGE_RED_MUSHROOM_MIN_HEIGHT));
     const snappedHeight = floor(height);
 
     for (let i = 0; i < height; i++) {
@@ -503,10 +503,16 @@ const TREES = [
         onPoint(xi, yi, zi, HUGE_RED_MUSHROOM_CANOPY_VALUE);
       }
     });
-    for (let i = 0; i < snappedLeafRadius; i++) {
-      const yi = i - snappedLeafRadius + i;
+    for (let i = -1; i < snappedLeafRadius; i++) {
+      const yi = y + snappedHeight - snappedLeafRadius + i;
       _leafPoints((j, k) => {
-        if (j === snappedLeafRadius || k === snappedLeafRadius && !(j === snappedLeafRadius && k === snappedLeafRadius)) {
+        const xd = abs(j);
+        const zd = abs(k);
+        if (
+          (xd <= snappedLeafRadius && zd <= snappedLeafRadius) &&
+          (xd === snappedLeafRadius || zd === snappedLeafRadius) &&
+          !(xd === snappedLeafRadius && zd === snappedLeafRadius)
+        ) {
           const xi = x + j;
           const zi = z + k;
           onPoint(xi, yi, zi, HUGE_RED_MUSHROOM_CANOPY_VALUE);
@@ -538,7 +544,7 @@ const TREES = [
     const height = HUGE_BROWN_MUSHROOM_MIN_HEIGHT + (heightNoiseN * (HUGE_BROWN_MUSHROOM_MAX_HEIGHT - HUGE_BROWN_MUSHROOM_MIN_HEIGHT));
     const snappedHeight = floor(height);
 
-    for (let i = 0; i < height; i++) {
+    for (let i = 0; i < snappedHeight; i++) {
       const yi = y + i;
       onPoint(x, yi, z, HUGE_BROWN_MUSHROOM_TRUNK_VALUE);
     }
@@ -546,13 +552,13 @@ const TREES = [
     const yi = y + snappedHeight;
     const leafN = leafNoise.in3D(x, yi, z);
     const leafRadius = height * (HUGE_BROWN_MUSHROOM_RADIUS_RATIO_MIN + (leafN * (HUGE_BROWN_MUSHROOM_RADIUS_RATIO_MAX - HUGE_BROWN_MUSHROOM_RADIUS_RATIO_MIN)));
-    _leafPoints((j, k) => {
+    _leafPointsAll((j, k) => {
       const xi = x + j;
       const zi = z + k;
 
       const xd = abs(j);
       const zd = abs(k);
-      if ((xd < leafRadius - 1 || zd < leafRadius - 1) && (xd < leafRadius || zd < leafRadius)) {
+      if ((xd < leafRadius - 1 || zd < leafRadius - 1) && (xd < leafRadius && zd < leafRadius)) {
         onPoint(xi, yi, zi, HUGE_BROWN_MUSHROOM_CANOPY_VALUE);
       }
     });
@@ -581,9 +587,9 @@ const TREES = [
     const height = CACTUS_MIN_HEIGHT + (heightNoiseN * (CACTUS_MAX_HEIGHT - CACTUS_MIN_HEIGHT));
     const snappedHeight = floor(height);
 
-    for (let i = 0; i < height; i++) {
+    for (let i = 0; i < snappedHeight; i++) {
       const yi = y + i;
-      const value = i === snappedHeight - 1 ? CACTUS_TOP_VALUE : CACTUS_SIDE_VALUE;
+      const value = (i === snappedHeight - 1) ? CACTUS_TOP_VALUE : CACTUS_SIDE_VALUE;
       onPoint(x, yi, z, value);
     }
   },
