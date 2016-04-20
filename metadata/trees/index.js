@@ -50,18 +50,18 @@ const JUNGLE_LEAVES_EAT_RATIO = 0.1;
 const JUNGLE_LOG_VALUE = BLOCKS['log_jungle'];
 const JUNGLE_LEAVES_VALUE = BLOCKS['leaves_jungle_plains'];
 
-const ACACIA_MIN_HEIGHT = 4;
-const ACACIA_MAX_HEIGHT = 8;
-const ACACIA_FORK_MIN_RATIO = 0.4;
-const ACACIA_FORK_MAX_RATIO = 0.8;
-const ACACIA_FORK_HEIGHT_RATIO_MIN = 0
-const ACACIA_FORK_HEIGHT_RATIO_MAX = 1;
+const ACACIA_MIN_HEIGHT = 6;
+const ACACIA_MAX_HEIGHT = 14;
+const ACACIA_FORK_MIN_RATIO = 0.25;
+const ACACIA_FORK_MAX_RATIO = 0.5;
+const ACACIA_FORK_HEIGHT_RATIO_MIN = 0.4;
+const ACACIA_FORK_HEIGHT_RATIO_MAX = 0.8;
 const ACACIA_FORK_ANGLE_MIN = 0.5;
 const ACACIA_FORK_ANGLE_MAX = 1;
 const ACACIA_FORK_HEIGHT_OFFSET_RATIO_MIN = 0.1;
 const ACACIA_FORK_HEIGHT_OFFSET_RATIO_MAX = 0.25;
 const ACACIA_CANOPY_RADIUS_RATIO_MIN = 1;
-const ACACIA_CANOPY_RADIUS_RATIO_MAX = 2.5;
+const ACACIA_CANOPY_RADIUS_RATIO_MAX = 2;
 const ACACIA_LEAVES_EAT_RATIO = 0.1;
 const ACACIA_LOG_VALUE = BLOCKS['log_acacia'];
 const ACACIA_LEAVES_VALUE = BLOCKS['leaves_acacia_plains'];
@@ -110,7 +110,7 @@ const abs = Math.abs;
 const sqrt = Math.sqrt;
 
 const TREES = [
-  // oak
+  /* // oak
   function(opts) {
     const position = opts.position;
     const x = position[0];
@@ -375,7 +375,7 @@ const TREES = [
       const yi = y + i;
       onPoint(x, yi, z, JUNGLE_LOG_VALUE);
     }
-  },
+  }, */
 
   // acacia
   function(opts) {
@@ -419,10 +419,10 @@ const TREES = [
     })();
     const forkLeftHeightN = heightNoise2.in3D(x, y + snappedFork, z);
     const forkLeftHeight = fork + (height - fork) * (ACACIA_FORK_HEIGHT_RATIO_MIN + (forkLeftHeightN * (ACACIA_FORK_HEIGHT_RATIO_MAX - ACACIA_FORK_HEIGHT_RATIO_MIN)));
-    const snappedForkLeftHeight = floor(forkLeftHeight);
+    const snappedForkLeftHeight = round(forkLeftHeight);
     const forkRightHeightN = heightNoise3.in3D(x, y + snappedFork, z);
     const forkRightHeight = fork + (height - fork) * (ACACIA_FORK_HEIGHT_RATIO_MIN + (forkRightHeightN * (ACACIA_FORK_HEIGHT_RATIO_MAX - ACACIA_FORK_HEIGHT_RATIO_MIN)));
-    const snappedForkRightHeight = floor(forkRightHeight);
+    const snappedForkRightHeight = round(forkRightHeight);
     const forkLeftAngleN = baseNoise2.in3D(x, y + snappedFork, z);
     const forkLeftAngle = (ACACIA_FORK_ANGLE_MIN + (forkLeftAngleN * (ACACIA_FORK_ANGLE_MAX - ACACIA_FORK_ANGLE_MIN)));
     const forkRightAngleN = baseNoise3.in3D(x, y + snappedFork, z);
@@ -440,7 +440,7 @@ const TREES = [
         const leafRadiusScale = 1 - (abs(i - (size * 0.2)) / size);
         const leafRadius = leafRadiusScale * leafRadiusMax;
 
-        _leafPoints((j, k) => {
+        _leafPointsAll((j, k) => {
           const xi = x + j;
           const zi = z + k;
 
@@ -460,7 +460,7 @@ const TREES = [
       const yi = y + i;
 
       if (i < fork) {
-        onPoint(x, yi, z, ACACIA_LEAVES_VALUE);
+        onPoint(x, yi, z, ACACIA_LOG_VALUE);
       } else {
         const forkHeight = i - fork;
 
@@ -468,7 +468,7 @@ const TREES = [
         const yil = yi;
         const zil = round(z + forkAxes[0][1] * (forkHeight * forkLeftAngle));
         if (i < snappedForkLeftHeight) {
-          onPoint(xil, yil, zil, ACACIA_LEAVES_VALUE);
+          onPoint(xil, yil, zil, ACACIA_LOG_VALUE);
         } else if (i === snappedForkLeftHeight) {
           const canopySize = round((forkLeftHeight - fork) / 2);
           makeCanopy(xil, yi, zil, canopySize);
@@ -478,7 +478,7 @@ const TREES = [
         const yir = yi - snappedForkHeightOffset;
         const zir = round(z + forkAxes[1][1] * (forkHeight * forkRightAngle));
         if (i < snappedForkRightHeight) {
-          onPoint(xir, yir, zir, ACACIA_LEAVES_VALUE);
+          onPoint(xir, yir, zir, ACACIA_LOG_VALUE);
         } else if (i === snappedForkRightHeight) {
           const canopySize = round((forkRightHeight - fork) / 2);
           makeCanopy(xir, yir, zir, canopySize);
@@ -487,7 +487,7 @@ const TREES = [
     }
   },
 
-  // dark oak
+  /* // dark oak
   function(opts) {
     const position = opts.position;
     const x = position[0];
@@ -710,7 +710,7 @@ const TREES = [
       const value = (i === snappedHeight - 1) ? CACTUS_TOP_VALUE : CACTUS_SIDE_VALUE;
       onPoint(x, yi, z, value);
     }
-  },
+  }, */
 
   // XXX logs w/mushrooms: oak, spruce, birch, jungle
 ];
