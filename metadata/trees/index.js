@@ -27,8 +27,8 @@ const SPRUCE_LEAVES_VALUE = BLOCKS['leaves_spruce_plains'];
 
 const BIRCH_MIN_HEIGHT = 4;
 const BIRCH_MAX_HEIGHT = 20;
-const BIRCH_BASE_MIN_RATIO = 0.5;
-const BIRCH_BASE_MAX_RATIO = 0.7;
+const BIRCH_BASE_MIN_RATIO = 0.4;
+const BIRCH_BASE_MAX_RATIO = 0.6;
 const BIRCH_LEAVES_RADIUS_RATIO_MIN = 0.5;
 const BIRCH_LEAVES_RADIUS_RATIO_MAX = 1;
 const BIRCH_LEAVES_EAT_RATIO = 0.1;
@@ -65,6 +65,20 @@ const ACACIA_CANOPY_RADIUS_RATIO_MAX = 2.5;
 const ACACIA_LEAVES_EAT_RATIO = 0.1;
 const ACACIA_LOG_VALUE = BLOCKS['log_acacia'];
 const ACACIA_LEAVES_VALUE = BLOCKS['leaves_acacia_plains'];
+
+const DARK_OAK_MIN_HEIGHT = 6;
+const DARK_OAK_MAX_HEIGHT = 14;
+const DARK_OAK_BASE_MIN_RATIO = 0.4;
+const DARK_OAK_BASE_MAX_RATIO = 0.6;
+const DARK_OAK_BRANCHES_RADIUS_RATIO_MIN = 0.1;
+const DARK_OAK_BRANCHES_RADIUS_RATIO_MAX = 0.2;
+const DARK_OAK_BRANCHES_EAT_RATIO = 0.5;
+const DARK_OAK_BRANCHES_EAT_SCALE = 0.5;
+const DARK_OAK_LEAVES_RADIUS_RATIO_MIN = 0.3;
+const DARK_OAK_LEAVES_RADIUS_RATIO_MAX = 0.6;
+const DARK_OAK_LEAVES_EAT_RATIO = 0.1;
+const DARK_OAK_LOG_VALUE = BLOCKS['log_oak'];
+const DARK_OAK_LEAVES_VALUE = BLOCKS['leaves_oak_plains'];
 
 const HUGE_RED_MUSHROOM_MIN_HEIGHT = 4;
 const HUGE_RED_MUSHROOM_MAX_HEIGHT = 12;
@@ -112,6 +126,7 @@ const TREES = [
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
+    const eatNoise2 = opts.eatNoise2;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -128,7 +143,6 @@ const TREES = [
       onPoint(x, yi, z, OAK_LOG_VALUE);
 
       if (i >= base) {
-
         _leafPoints((j, k) => {
           const xi = x + j;
           const zi = z + k;
@@ -166,6 +180,7 @@ const TREES = [
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
+    const eatNoise2 = opts.eatNoise2;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -228,6 +243,7 @@ const TREES = [
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
+    const eatNoise2 = opts.eatNoise2;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -283,6 +299,7 @@ const TREES = [
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
+    const eatNoise2 = opts.eatNoise2;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -368,6 +385,7 @@ const TREES = [
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
+    const eatNoise2 = opts.eatNoise2;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -459,9 +477,7 @@ const TREES = [
     }
   }, */
 
-  // XXX dark oak
-
-  // huge red mushroom
+  // dark oak
   function(opts) {
     const position = opts.position;
     const x = position[0];
@@ -477,6 +493,88 @@ const TREES = [
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
+    const eatNoise2 = opts.eatNoise2;
+    const onPoint = opts.onPoint;
+    const voxelUtils = opts.voxelUtils;
+
+    const heightNoiseN = heightNoise.in2D(x, z);
+    const height = DARK_OAK_MIN_HEIGHT + (heightNoiseN * (DARK_OAK_MAX_HEIGHT - DARK_OAK_MIN_HEIGHT));
+    const baseNoiseN = baseNoise.in2D(x, z);
+    const base = height * (DARK_OAK_BASE_MIN_RATIO + (baseNoiseN * (DARK_OAK_BASE_MAX_RATIO - DARK_OAK_BASE_MIN_RATIO)));
+    const snappedHeight = floor(height);
+    const leafN = leafNoise.in2D(x, z);
+    const leafRadiusMax = height * (DARK_OAK_LEAVES_RADIUS_RATIO_MIN + (leafN * (DARK_OAK_LEAVES_RADIUS_RATIO_MAX - DARK_OAK_LEAVES_RADIUS_RATIO_MIN)));
+    const trunkN = trunkNoise.in2D(x, z);;
+    const branchRadiusMax = height * (DARK_OAK_BRANCHES_RADIUS_RATIO_MIN + (trunkN * (DARK_OAK_BRANCHES_RADIUS_RATIO_MAX - DARK_OAK_BRANCHES_RADIUS_RATIO_MIN)));
+
+    for (let i = 0; i < height; i++) {
+      const yi = y + i;
+
+      if (i >= base) {
+        _leafPointsAll((j, k) => {
+          const xi = x + j;
+          const zi = z + k;
+
+          const leafRadiusScale = 1 - (abs((i - base) - (height - base) * 0.2) / ((height - base) * 0.6));
+          const leafRadius = leafRadiusScale * leafRadiusMax;
+          const jd = j > 0 ? j - 1 : j;
+          const kd = k > 0 ? k - 1 : k;
+          const leafDistance = sqrt(jd * jd + kd * kd);
+          if (leafDistance <= leafRadius) {
+            const leafEatN = eatNoise.in3D(xi, yi, zi);
+            const leafEatProbability = leafDistance * DARK_OAK_LEAVES_EAT_RATIO;
+            if (leafEatN > leafEatProbability) {
+              onPoint(xi, yi, zi, DARK_OAK_LEAVES_VALUE);
+            }
+          }
+        });
+      }
+
+      _leafPointsAll((j, k) => {
+        const xi = x + j;
+        const zi = z + k;
+
+        const branchRadiusScale = 1 - (abs(i - base) / ((height - base) * 0.3));
+        const branchRadius = branchRadiusScale * branchRadiusMax;
+        const jd = j > 0 ? j - 1 : j;
+        const kd = k > 0 ? k - 1 : k;
+        const branchDistance = sqrt(jd * jd + kd * kd);
+        if (branchDistance <= branchRadius) {
+          const branchEatN = eatNoise2.in3D(xi, yi, zi);
+          const branchEatProbability = branchDistance * DARK_OAK_BRANCHES_EAT_RATIO;
+          if (branchEatN > branchEatProbability) {
+            onPoint(xi, yi, zi, DARK_OAK_LOG_VALUE);
+          }
+        }
+      });
+
+      if (i < base + 1) {
+        _trunkPoints((j, k) => {
+          const xi = x + j;
+          const zi = z + k;
+          onPoint(xi, yi, zi, DARK_OAK_LOG_VALUE);
+        });
+      }
+    }
+  },
+
+  // huge red mushroom
+  /* function(opts) {
+    const position = opts.position;
+    const x = position[0];
+    const y = position[1];
+    const z = position[2];
+    const typeNoise = opts.typeNoise;
+    const heightNoise = opts.heightNoise;
+    const heightNoise2 = opts.heightNoise2;
+    const heightNoise3 = opts.heightNoise3;
+    const baseNoise = opts.baseNoise;
+    const trunkNoise = opts.trunkNoise;
+    const trunkNoise2 = opts.trunkNoise2;
+    const trunkNoise3 = opts.trunkNoise3;
+    const leafNoise = opts.leafNoise;
+    const eatNoise = opts.eatNoise;
+    const eatNoise2 = opts.eatNoise2;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -537,6 +635,7 @@ const TREES = [
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
+    const eatNoise2 = opts.eatNoise2;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -580,6 +679,7 @@ const TREES = [
     const trunkNoise3 = opts.trunkNoise3;
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
+    const eatNoise2 = opts.eatNoise2;
     const onPoint = opts.onPoint;
     const voxelUtils = opts.voxelUtils;
 
@@ -592,7 +692,7 @@ const TREES = [
       const value = (i === snappedHeight - 1) ? CACTUS_TOP_VALUE : CACTUS_SIDE_VALUE;
       onPoint(x, yi, z, value);
     }
-  },
+  }, */
 
   // XXX logs w/mushrooms: oak, spruce, birch, jungle
 ];
@@ -624,6 +724,13 @@ function _leafPointsAll(fn) {
       fn(j, k);
     }
   }
+}
+
+function _trunkPoints(fn) {
+  fn(0, 0);
+  fn(1, 0);
+  fn(0, 1);
+  fn(1, 1);
 }
 
 const api = {
