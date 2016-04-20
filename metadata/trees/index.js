@@ -110,7 +110,7 @@ const abs = Math.abs;
 const sqrt = Math.sqrt;
 
 const TREES = [
-  /* // oak
+  // oak
   function(opts) {
     const position = opts.position;
     const x = position[0];
@@ -375,7 +375,7 @@ const TREES = [
       const yi = y + i;
       onPoint(x, yi, z, JUNGLE_LOG_VALUE);
     }
-  }, */
+  },
 
   // acacia
   function(opts) {
@@ -487,7 +487,7 @@ const TREES = [
     }
   },
 
-  /* // dark oak
+  // dark oak
   function(opts) {
     const position = opts.position;
     const x = position[0];
@@ -710,7 +710,7 @@ const TREES = [
       const value = (i === snappedHeight - 1) ? CACTUS_TOP_VALUE : CACTUS_SIDE_VALUE;
       onPoint(x, yi, z, value);
     }
-  }, */
+  },
 
   // XXX logs w/mushrooms: oak, spruce, birch, jungle
 ];
