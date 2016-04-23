@@ -213,19 +213,19 @@ function _getFaceUvs(texture, uv, textureAtlas) {
     const faceUv = projectedUvs[i];
     const [u1, v1, u2, v2] = faceUv;
 
-    result[faceStartIndex + 0] = u1;
+    result[faceStartIndex + 0] = u2;
     result[faceStartIndex + 1] = v1;
     result[faceStartIndex + 2] = u2;
-    result[faceStartIndex + 3] = v1;
+    result[faceStartIndex + 3] = v2;
     result[faceStartIndex + 4] = u1;
-    result[faceStartIndex + 5] = v2;
+    result[faceStartIndex + 5] = v1;
 
     result[faceStartIndex + 6] = u2;
-    result[faceStartIndex + 7] = v1;
-    result[faceStartIndex + 8] = u2;
+    result[faceStartIndex + 7] = v2;
+    result[faceStartIndex + 8] = u1;
     result[faceStartIndex + 9] = v2;
     result[faceStartIndex + 10] = u1;
-    result[faceStartIndex + 11] = v2;
+    result[faceStartIndex + 11] = v1;
   }
   return result;
 }
