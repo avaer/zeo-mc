@@ -194,10 +194,44 @@ function _getCubeMaterial(textureAtlas, THREE) {
 function _getFaceUvs(texture, uv, textureAtlas) {
   uv = _normalizeUv(uv);
 
-  console.log('get face uvs', uv, textureAtlas); // XXX
+  const textureDimensions = textureAtlas.getTextureDimensions(texture);
+  const scaledUvs = _scaleUvs(uv, textureDimensions);
+  const textureUvs = textureAtlas.getAtlasUvs(texture);
+  const projectedUvs = _projectUvs(scaledUvs, textureUvs);
 
-  const result = new Float32Array(6 * 2 * 3 * 2);
+  console.log('get face uvs', {texture, uv, textureDimensions, scaledUvs, textureUvs, projectedUvs}); // XXX
+
+  // uv order: left, right, bottom, top, back, front
+  // geometry order: right, left, top, bottom, back, front
+  const result = new Float32Array(6 * 2 * 3 * 2); // 6 sides, 2 trigs, 3 points, 2 uv components
+  /* const SIZE_PER_FACE = result.length / 6;
+  const FACE_INDEX = 5;
+  for (let i = FACE_INDEX * SIZE_PER_FACE; i < (((FACE_INDEX + 1) * SIZE_PER_FACE) - (SIZE_PER_FACE / 2)); i += 2) {
+    result[i + 0] = Math.random();
+    result[i + 1] = Math.random();
+  } */
   return result;
+}
+
+function _scaleUvs(uvs, dimensions) {
+  const {width, height} = dimensions;
+  return uvs.map(uv => {
+    const [u, v] = uv;
+    return [u / width, v / height];
+  });
+}
+
+function _projectUvs(uvs, targetUvs) {
+  const startU = targetUvs[0][0];
+  const endU = targetUvs[1][0];
+  const uWidth = endU - startU;
+  const startV = targetUvs[0][1];
+  const endV = targetUvs[3][1];
+  const vHeight = endV - startV;
+  return uvs.map(uv => {
+    const [u, v] = uv;
+    return [startU + u * uWidth, startV + v * vHeight];
+  });
 }
 
 module.exports = voxelModelRenderer;
