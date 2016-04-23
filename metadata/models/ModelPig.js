@@ -39,7 +39,7 @@ class ModelPig extends ModelQuadruped {
   }
 }
 ModelPig.NAME = NAME;
-ModelPig.TEXTURE = 'entity/pig/pig';
+ModelPig.TEXTURE = 'pig/pig';
 
 module.exports = ModelPig;
 

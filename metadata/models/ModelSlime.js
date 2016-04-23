@@ -48,7 +48,7 @@ class ModelSlime extends ModelBase {
   }
 }
 ModelSlime.NAME = NAME;
-ModelSlime.TEXTURE = 'entity/slime/slime';
+ModelSlime.TEXTURE = 'slime/slime';
 
 module.exports = ModelSlime;
 

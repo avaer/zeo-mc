@@ -771,7 +771,7 @@ Game.prototype.showChunk = function(chunk) {
   }
 
   if (modelsNeedUpdate) {
-    const modelMesh = voxelModelRenderer(chunk, this.textureLoader, THREE);
+    const modelMesh = voxelModelRenderer(chunk, this.textureAtlas, THREE);
     mesh.add(modelMesh);
     mesh.modelMesh = modelMesh;
   }

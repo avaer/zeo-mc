@@ -66,7 +66,7 @@ class ModelChest extends ModelBase {
   }
 }
 ModelChest.NAME = NAME;
-ModelChest.TEXTURE = 'entity/chest/normal';
+ModelChest.TEXTURE = 'chest/normal';
 
 module.exports = ModelChest;
 

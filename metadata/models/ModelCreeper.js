@@ -112,7 +112,7 @@ class ModelCreeper extends ModelBase {
   }
 }
 ModelCreeper.NAME = NAME;
-ModelCreeper.TEXTURE = 'entity/creeper/creeper';
+ModelCreeper.TEXTURE = 'creeper/creeper';
 
 module.exports = ModelCreeper;
 

@@ -41,6 +41,24 @@ class VoxelTextureAtlas {
     return voxelTextureAtlas.getPlaneMeshFrameUvs(this._planeMeshFrameUvs, material, even);
   }
 
+  getAtlasDimensions() {
+    const {_atlas: atlas} = this;
+    const {rect} = atlas;
+    const {w: width, h: height} = rect;
+    return {width, height};
+  }
+
+  getTextureDimensions(texture) {
+    const atlasDimensions = this.getAtlasDimensions();
+    const {width: atlasWidth, height: atlasHeight} = atlasDimensions;
+    const atlasUvs = this.getAtlasUvs(texture);
+    const uWidth = atlasUvs[1][0] - atlasUvs[0][0];
+    const vHeight = atlasUvs[3][1] - atlasUvs[0][1];
+    const width = atlasWidth * uWidth;
+    const height = atlasHeight * vHeight;
+    return {width, height};
+  }
+
   _buildTexture() {
     const {_atlas: atlas, _THREE: THREE} = this;
     const {canvas} = atlas;

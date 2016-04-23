@@ -108,7 +108,7 @@ class ModelCow extends ModelQuadruped {
   }
 }
 ModelCow.NAME = NAME;
-ModelCow.TEXTURE = 'entity/cow/cow';
+ModelCow.TEXTURE = 'cow/cow';
 
 module.exports = ModelCow;
 
