@@ -10,8 +10,9 @@ const ModelOcelot = require('./ModelOcelot');
 const ModelPig = require('./ModelPig');
 const ModelRabbit = require('./ModelRabbit');
 const ModelSlime = require('./ModelSlime');
-const ModelWolf = require('./ModelWolf');
 const ModelSpider = require('./ModelSpider');
+const ModelSquid = require('./ModelSquid');
+const ModelWolf = require('./ModelWolf');
 
 const api = {};
 
@@ -24,8 +25,9 @@ api.MODELS = [
   ModelPig,
   ModelRabbit,
   ModelSlime,
-  ModelWolf, */
-  ModelSpider,
+  ModelSpider, */
+  ModelSquid,
+  /* ModelWolf, */
 ];
 
 api.MODEL_NAMES = api.MODELS.map(Model => Model.NAME);
