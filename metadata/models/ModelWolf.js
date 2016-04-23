@@ -69,7 +69,7 @@ class ModelWolf extends ModelBase {
               [7, 10, 10, 14],
               [4, 10, 7, 14],
               [11, 14, 15, 17],
-              [5, 14, 7, 17],
+              [4, 14, 7, 17],
             ],
             position: [-1.5, 0, -5],
             dimensions: [3, 3, 4]
