@@ -208,9 +208,19 @@ function _getFaceUvs(texture, uv, textureAtlas) {
   // geometry order: right, left, top, bottom, back, front
   const result = new Float32Array(6 * 2 * 3 * 2); // 6 sides, 2 trigs, 3 points, 2 uv components
   // for (let i = 0; i < 6; i++) {
-  for (let i = 5; i <= 5; i++) {
+  for (let i = 0; i < 6; i++) {
     const faceStartIndex = i * 2 * 3 * 2;
-    const faceUv = projectedUvs[i];
+    const faceUv = (() => {
+      switch (i) {
+        case 0: return projectedUvs[1];
+        case 1: return projectedUvs[0];
+        case 2: return projectedUvs[3];
+        case 3: return projectedUvs[2];
+        case 4: return projectedUvs[4];
+        case 5: return projectedUvs[5];
+        default: return null;
+      }
+    })();
     const [u1, v1, u2, v2] = faceUv;
 
     result[faceStartIndex + 0] = u2;
