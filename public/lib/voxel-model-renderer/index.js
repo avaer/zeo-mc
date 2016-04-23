@@ -202,8 +202,6 @@ function _getFaceUvs(texture, uv, textureAtlas) {
   });
   const projectedUvs = _projectUvs(scaledUvs, textureUvs);
 
-  console.log('get face uvs', {texture, uv, textureDimensions, scaledUvs, textureUvs, projectedUvs}); // XXX
-
   // uv order: left, right, bottom, top, back, front
   // geometry order: right, left, top, bottom, back, front
   const result = new Float32Array(6 * 2 * 3 * 2); // 6 sides, 2 trigs, 3 points, 2 uv components
