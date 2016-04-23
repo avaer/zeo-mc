@@ -26,8 +26,8 @@ class ModelSquid extends ModelBase {
         ],
         position: [-6, -8, -6],
         dimensions: [12, 16, 12],
-        rotationPoint: [0, 0 + i, -3],
-        rotation: [0, 24 + byte0, 0]
+        rotationPoint: [0, 24 + byte0, -3],
+        rotation: [0, 0, 0]
       },
     ].concat((() => {
       const tentacles = Array(8);
