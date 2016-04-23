@@ -7,6 +7,8 @@ const NAME = 'spider';
 class ModelSpider extends ModelBase {
   constructor(p, s) {
     p = p || [];
+    const p1 = typeof p[0] !== 'undefined' ? p[0] : 0;
+    const p2 = typeof p[1] !== 'undefined' ? p[1] : 0;
     s = s || [];
     const s1 = typeof s[0] !== 'undefined' ? s[0] : Math.PI * 3 / 4;
     const s2 = typeof s[1] !== 'undefined' ? s[1] : 1;
@@ -17,6 +19,17 @@ class ModelSpider extends ModelBase {
     super();
 
     const i = 15;
+    const f = Math.PI / 4;
+    const f1 = 0;
+    const f2 = 0.3926991;
+    const f3 = -(Math.cos(p1 * 0.6662 * 2) * 0.4) * p2;
+    const f4 = -(Math.cos(p1 * 0.6662 * 2 + Math.PI) * 0.4) * p2;
+    const f5 = -(Math.cos(p1 * 0.6662 * 2 + (Math.PI / 2)) * 0.4) * p2;
+    const f6 = -(Math.cos(p1 * 0.6662 * 2 + (Math.PI * 3 / 2)) * 0.4) * p2;
+    const f7 = Math.abs(Math.sin(p1 * 0.6662 + 0) * 0.4) * p2;
+    const f8 = Math.abs(Math.sin(p1 * 0.6662 + Math.PI) * 0.4) * p2;
+    const f9 = Math.abs(Math.sin(p1 * 0.6662 + (Math.PI / 2)) * 0.4) * p2;
+    const f10 = Math.abs(Math.sin(p1 * 0.6662 + (Math.PI * 3 / 2)) * 0.4) * p2;
 
     // const headRotation = [0, 0, 0];
 
@@ -24,120 +37,175 @@ class ModelSpider extends ModelBase {
       {
         name: 'head',
         uv: [
-          [0, 3, 3, 9],
+          [32, 12, 40, 20],
+          [56, 12, 64, 20],
+          [48, 4, 56, 12],
+          [40, 4, 48, 12],
+          [48, 12, 56, 20],
+          [40, 12, 48, 20],
         ],
         position: [-4, -4, -8],
         dimensions: [8, 8, 8],
         rotationPoint: [0, 0 + i, -3],
-        // rotation: headRotation
+        rotation: [0, 0, 0]
       },
       {
         name: 'neck',
         uv: [
-          [0, 3, 3, 9],
+          [0, 6, 6, 12],
+          [18, 16, 24, 12],
+          [12, 0, 18, 6],
+          [6, 0, 12, 6],
+          [12, 6, 18, 12],
+          [6, 6, 12, 12]
         ],
         position: [-3, -3, -3],
         dimensions: [6, 6, 6],
         rotationPoint: [0, i, 0],
-        // rotation: headRotation
+        rotation: [0, 0, 0]
       },
       {
         name: 'body',
         uv: [
-          [0, 3, 3, 9],
+          [0, 20, 12, 32],
+          [34, 20, 46, 32],
+          [23, 12, 34, 20],
+          [12, 12, 23, 20],
+          [23, 20, 34, 32],
+          [12, 20, 23, 32],
         ],
         position: [-5, -4, -6],
         dimensions: [10, 8, 12],
-        rotationPoint: [0, 0 + i, 9],
-        // rotation: headRotation
+        rotationPoint: [0, i, 9],
+        rotation: [0, 0, 0]
       },
       {
         name: 'leg1',
         uv: [
-          [0, 3, 3, 9],
+          [36, 2, 38, 4],
+          [18, 2, 20, 4],
+          [36, 0, 52, 2],
+          [20, 0, 36, 2],
+          [20, 2, 36, 4],
+          [38, 2, 54, 4],
         ],
         position: [-15, -1, -1],
         dimensions: [16, 2, 2],
         rotationPoint: [-4, 0 + i, 2],
-        // rotation: headRotation
+        rotation: [0, f2 * 2 + f1 + f3, -f + f7]
       },
       {
         name: 'leg2',
         uv: [
-          [0, 3, 3, 9],
+          [36, 2, 38, 4],
+          [18, 2, 20, 4],
+          [36, 0, 52, 2],
+          [20, 0, 36, 2],
+          [20, 2, 36, 4],
+          [38, 2, 54, 4],
         ],
         position: [-1, -1, -1],
         dimensions: [16, 2, 2],
         rotationPoint: [4, 0 + i, 2.0],
-        // rotation: headRotation
+        rotation: [0, -f2 * 2 - f1 - f3, f - f7]
       },
       {
         name: 'leg3',
         uv: [
-          [0, 3, 3, 9],
+          [36, 2, 38, 4],
+          [18, 2, 20, 4],
+          [36, 0, 52, 2],
+          [20, 0, 36, 2],
+          [20, 2, 36, 4],
+          [38, 2, 54, 4],
         ],
         position: [-15, -1, -1],
         dimensions: [16, 2, 2],
         rotationPoint: [-4, 0 + i, 1],
-        // rotation: headRotation
+        rotation: [0, f2 * 1 + f1 + f4, -f * 0.74 + f8]
       },
       {
         name: 'leg4',
         uv: [
-          [0, 3, 3, 9],
+          [36, 2, 38, 4],
+          [18, 2, 20, 4],
+          [36, 0, 52, 2],
+          [20, 0, 36, 2],
+          [20, 2, 36, 4],
+          [38, 2, 54, 4],
         ],
         position: [-1, -1, -1],
         dimensions: [16, 2, 2],
         rotationPoint: [4, 0 + i, 1],
-        // rotation: headRotation
+        rotation: [0, -f2 * 1 - f1 - f4, f * 0.74 - f8]
       },
       {
         name: 'leg5',
         uv: [
-          [0, 3, 3, 9],
+          [36, 2, 38, 4],
+          [18, 2, 20, 4],
+          [36, 0, 52, 2],
+          [20, 0, 36, 2],
+          [20, 2, 36, 4],
+          [38, 2, 54, 4],
         ],
         position: [-15, -1, -1],
         dimensions: [16, 2, 2],
         rotationPoint: [-4, 0 + i, 0],
-        // rotation: headRotation
+        rotation: [0, -f2 * 1 + f1 + f5, -f * 0.74 + f9]
       },
       {
         name: 'leg6',
         uv: [
-          [0, 3, 3, 9],
+          [36, 2, 38, 4],
+          [18, 2, 20, 4],
+          [36, 0, 52, 2],
+          [20, 0, 36, 2],
+          [20, 2, 36, 4],
+          [38, 2, 54, 4],
         ],
         position: [-1, -1, -1],
         dimensions: [16, 2, 2],
         rotationPoint: [4, 0 + i, 0],
-        // rotation: headRotation
+        rotation: [0, f2 * 1 - f1 - f5, f * 0.74 - f9]
       },
       {
         name: 'leg7',
         uv: [
-          [0, 3, 3, 9],
+          [36, 2, 38, 4],
+          [18, 2, 20, 4],
+          [36, 0, 52, 2],
+          [20, 0, 36, 2],
+          [20, 2, 36, 4],
+          [38, 2, 54, 4],
         ],
         position: [-15, -1, -1],
         dimensions: [16, 2, 2],
         rotationPoint: [-4, 0 + i, -1],
-        // rotation: headRotation
+        rotation: [0, -f2 * 2 + f1 + f6, -f + f10]
       },
       {
         name: 'leg8',
         uv: [
-          [0, 3, 3, 9],
+          [36, 2, 38, 4],
+          [18, 2, 20, 4],
+          [36, 0, 52, 2],
+          [20, 0, 36, 2],
+          [20, 2, 36, 4],
+          [38, 2, 54, 4],
         ],
         position: [-1, -1, -1],
         dimensions: [16, 2, 2],
         rotationPoint: [4, 0 + i, -1],
-        // rotation: headRotation
+        rotation: [0, f2 * 2 - f1 - f6, f - f10]
       },
     ];
   }
 }
-ModelChicken.NAME = NAME;
-ModelChicken.TEXTURE = 'spider/spider';
+ModelSpider.NAME = NAME;
+ModelSpider.TEXTURE = 'spider/spider';
 
-module.exports = ModelChicken;
+module.exports = ModelSpider;
 
 /* package net.minecraft.src;
 
