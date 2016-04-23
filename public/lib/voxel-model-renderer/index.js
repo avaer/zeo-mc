@@ -196,7 +196,10 @@ function _getFaceUvs(texture, uv, textureAtlas) {
 
   const textureDimensions = textureAtlas.getTextureDimensions(texture);
   const scaledUvs = _scaleUvs(uv, textureDimensions);
-  const textureUvs = textureAtlas.getAtlasUvs(texture);
+  const textureUvs = textureAtlas.getAtlasUvs(texture).map(uv => {
+    const [u, v] = uv;
+    return [u, 1 - v];
+  });
   const projectedUvs = _projectUvs(scaledUvs, textureUvs);
 
   console.log('get face uvs', {texture, uv, textureDimensions, scaledUvs, textureUvs, projectedUvs}); // XXX
@@ -204,20 +207,34 @@ function _getFaceUvs(texture, uv, textureAtlas) {
   // uv order: left, right, bottom, top, back, front
   // geometry order: right, left, top, bottom, back, front
   const result = new Float32Array(6 * 2 * 3 * 2); // 6 sides, 2 trigs, 3 points, 2 uv components
-  /* const SIZE_PER_FACE = result.length / 6;
-  const FACE_INDEX = 5;
-  for (let i = FACE_INDEX * SIZE_PER_FACE; i < (((FACE_INDEX + 1) * SIZE_PER_FACE) - (SIZE_PER_FACE / 2)); i += 2) {
-    result[i + 0] = Math.random();
-    result[i + 1] = Math.random();
-  } */
+  // for (let i = 0; i < 6; i++) {
+  for (let i = 5; i <= 5; i++) {
+    const faceStartIndex = i * 2 * 3 * 2;
+    const faceUv = projectedUvs[i];
+    const [u1, v1, u2, v2] = faceUv;
+
+    result[faceStartIndex + 0] = u1;
+    result[faceStartIndex + 1] = v1;
+    result[faceStartIndex + 2] = u2;
+    result[faceStartIndex + 3] = v1;
+    result[faceStartIndex + 4] = u1;
+    result[faceStartIndex + 5] = v2;
+
+    result[faceStartIndex + 6] = u2;
+    result[faceStartIndex + 7] = v1;
+    result[faceStartIndex + 8] = u2;
+    result[faceStartIndex + 9] = v2;
+    result[faceStartIndex + 10] = u1;
+    result[faceStartIndex + 11] = v2;
+  }
   return result;
 }
 
 function _scaleUvs(uvs, dimensions) {
   const {width, height} = dimensions;
   return uvs.map(uv => {
-    const [u, v] = uv;
-    return [u / width, v / height];
+    const [u1, v1, u2, v2] = uv;
+    return [u1 / width, v1 / height, u2 / width, v2 / height];
   });
 }
 
@@ -229,8 +246,8 @@ function _projectUvs(uvs, targetUvs) {
   const endV = targetUvs[3][1];
   const vHeight = endV - startV;
   return uvs.map(uv => {
-    const [u, v] = uv;
-    return [startU + u * uWidth, startV + v * vHeight];
+    const [u1, v1, u2, v2] = uv;
+    return [startU + u1 * uWidth, startV + v1 * vHeight, startU + u2 * uWidth, startV + v2 * vHeight];
   });
 }
 
