@@ -22,13 +22,13 @@ const ModelZombie = require('./ModelZombie');
 const api = {};
 
 api.MODELS = [
-  /* ModelBat,
+  ModelBat,
   ModelChest,
   ModelChicken,
   ModelCow,
-  ModelCreeper, */
+  ModelCreeper,
   ModelHorse,
-  /* ModelOcelot,
+  ModelOcelot,
   ModelPig,
   ModelRabbit,
   ModelSheep,
@@ -37,7 +37,7 @@ api.MODELS = [
   ModelSpider,
   ModelSquid,
   ModelWolf,
-  ModelZombie, */
+  ModelZombie,
 ];
 
 api.MODEL_NAMES = api.MODELS.map(Model => Model.NAME);
