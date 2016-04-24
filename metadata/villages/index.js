@@ -33,6 +33,8 @@ const BUILDING_INDEX = (() => {
 
 function make(opts) {
   const position = opts.position;
+  const heightMap = opts.heightMap;
+  const usedMap = opts.usedMap;
   const chunkNoise = opts.chunkNoise;
   const wellNoiseX = opts.wellNoiseX;
   const wellNoiseZ = opts.wellNoiseZ;
