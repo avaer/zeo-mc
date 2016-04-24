@@ -33,12 +33,12 @@ function _makeObject(meshes, texture, textureAtlas, THREE) {
   root.add(child);
   (function recurse(object, meshes) {
     meshes.forEach(mesh => {
-      let {position, dimensions, rotationPoint, uv, offset, children} = mesh;
+      let {position, dimensions, rotationPoint, uv, mirror = false, children} = mesh;
       if (position && dimensions && rotationPoint && uv) {
         const {rotation = [0, 0, 0]} = mesh;
         rotationPoint = [rotationPoint[0], -rotationPoint[1], rotationPoint[2]];
 
-        const submesh = _makeCubeMesh(position, dimensions, texture, uv, textureAtlas, THREE);
+        const submesh = _makeCubeMesh(position, dimensions, texture, uv, mirror, textureAtlas, THREE);
 
         const subobject1 = new THREE.Object3D();
         subobject1.position.set(
@@ -55,10 +55,10 @@ function _makeObject(meshes, texture, textureAtlas, THREE) {
         object.add(subobject1);
 
         if (children) {
-          recurse(object, children);
+          recurse(subobject2, children);
         }
       } else if (position && dimensions && uv) {
-        const submesh = _makeCubeMesh(position, dimensions, texture, uv, textureAtlas, THREE);
+        const submesh = _makeCubeMesh(position, dimensions, texture, uv, mirror, textureAtlas, THREE);
 
         object.add(submesh);
 
@@ -98,7 +98,7 @@ function _makeObject(meshes, texture, textureAtlas, THREE) {
   return root;
 }
 
-let faceVertexUvs = null;
+/* let faceVertexUvs = null;
 function _getFaceVertexUvs(THREE) {
   if (!faceVertexUvs) {
     const uv = [new THREE.Vector2(1, 1), new THREE.Vector2(1, 0), new THREE.Vector2(0, 0), new THREE.Vector2(0, 1)];
@@ -110,15 +110,15 @@ function _getFaceVertexUvs(THREE) {
   }
 
   return faceVertexUvs;
-}
+} */
 
-function _makeCubeMesh(position, dimensions, texture, uv, textureAtlas, THREE) {
+function _makeCubeMesh(position, dimensions, texture, uv, mirror, textureAtlas, THREE) {
   position = [position[0], -position[1], position[2]];
   dimensions = [dimensions[0], dimensions[1], dimensions[2]];
 
   const geometry = (() => {
     const geometry = _getCubeGeometry(dimensions[0], dimensions[1], dimensions[2], THREE);
-    const uvs = _getFaceUvs(texture, uv, textureAtlas);
+    const uvs = _getFaceUvs(texture, uv, mirror, textureAtlas);
     geometry.addAttribute('uv', new THREE.BufferAttribute(uvs, 2));
     return geometry;
   })();
@@ -172,7 +172,7 @@ function _getCubeGeometry(x, y, z, THREE) {
     return cachedGeometry;
   } else {
     const cubeGeometry = new THREE.CubeGeometry(x, y, z);
-    cubeGeometry.faceVertexUvs = _getFaceVertexUvs(THREE);
+    // cubeGeometry.faceVertexUvs = _getFaceVertexUvs(THREE);
     const bufferGeometry = new THREE.BufferGeometry().fromGeometry(cubeGeometry);
     cubeGeometryCache.set(geometryKey, bufferGeometry);
     return bufferGeometry;
@@ -184,6 +184,7 @@ function _getCubeMaterial(textureAtlas, THREE) {
   if (cubeMaterial === null) {
     cubeMaterial = new THREE.MeshLambertMaterial({
       map: textureAtlas.getTexture(),
+      side: THREE.DoubleSide,
       transparent: true,
       fog: true
     });
@@ -191,7 +192,7 @@ function _getCubeMaterial(textureAtlas, THREE) {
   return cubeMaterial;
 }
 
-function _getFaceUvs(texture, uv, textureAtlas) {
+function _getFaceUvs(texture, uv, mirror, textureAtlas) {
   uv = _normalizeUv(uv);
 
   const textureDimensions = textureAtlas.getTextureDimensions(texture);
@@ -201,8 +202,8 @@ function _getFaceUvs(texture, uv, textureAtlas) {
     return [u, 1 - v];
   });
   const projectedUvs = _projectUvs(scaledUvs, textureUvs);
-
-  console.log('get face uvs', {texture, uv, textureDimensions, scaledUvs, textureUvs, projectedUvs}); // XXX
+  const mirroredUvs = !mirror ? projectedUvs : _mirrorUvs(projectedUvs);
+  const faceUvs = mirroredUvs;
 
   // uv order: left, right, bottom, top, back, front
   // geometry order: right, left, top, bottom, back, front
@@ -212,12 +213,12 @@ function _getFaceUvs(texture, uv, textureAtlas) {
     const faceStartIndex = i * 2 * 3 * 2;
     const faceUv = (() => {
       switch (i) {
-        case 0: return projectedUvs[1];
-        case 1: return projectedUvs[0];
-        case 2: return projectedUvs[3];
-        case 3: return projectedUvs[2];
-        case 4: return projectedUvs[4];
-        case 5: return projectedUvs[5];
+        case 0: return faceUvs[1];
+        case 1: return faceUvs[0];
+        case 2: return faceUvs[3];
+        case 3: return faceUvs[2];
+        case 4: return faceUvs[4];
+        case 5: return faceUvs[5];
         default: return null;
       }
     })();
@@ -258,6 +259,13 @@ function _projectUvs(uvs, targetUvs) {
   return uvs.map(uv => {
     const [u1, v1, u2, v2] = uv;
     return [startU + u1 * uWidth, startV + v1 * vHeight, startU + u2 * uWidth, startV + v2 * vHeight];
+  });
+}
+
+function _mirrorUvs(uvs) {
+  return uvs.map(uv => {
+    const [u1, v1, u2, v2] = uv;
+    return [u2, v1, u1, v2];
   });
 }
 
