@@ -163,20 +163,8 @@ function _normalizeUv(uv) {
   }
 }
 
-const cubeGeometryCache = new Map();
 function _getCubeGeometry(x, y, z, THREE) {
-  const geometryKey = x + '-' + y + '-' + z;
-
-  const cachedGeometry = cubeGeometryCache.get(geometryKey);
-  if (cachedGeometry) {
-    return cachedGeometry;
-  } else {
-    const cubeGeometry = new THREE.CubeGeometry(x, y, z);
-    // cubeGeometry.faceVertexUvs = _getFaceVertexUvs(THREE);
-    const bufferGeometry = new THREE.BufferGeometry().fromGeometry(cubeGeometry);
-    cubeGeometryCache.set(geometryKey, bufferGeometry);
-    return bufferGeometry;
-  }
+  return new THREE.BufferGeometry().fromGeometry(new THREE.CubeGeometry(x, y, z));
 }
 
 let cubeMaterial = null;
