@@ -1,5 +1,7 @@
 "use strict";
 
+const NAME = 'well';
+
 const LAYERS = [
   {
     legend: {
@@ -89,6 +91,7 @@ class Well {
     this.offset = -11;
   }
 }
+Well.NAME = NAME;
 
 function _repeat(e, n) {
   const result = Array(n);

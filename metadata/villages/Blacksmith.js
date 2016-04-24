@@ -1,5 +1,7 @@
 "use strict";
 
+const NAME = 'blacksmith';
+
 const LAYERS = [
   {
     legend: {
@@ -113,5 +115,6 @@ class Blacksmith {
     this.layers = LAYERS;
   }
 }
+Blacksmith.NAME = NAME;
 
 module.exports = Blacksmith;

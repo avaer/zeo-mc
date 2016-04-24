@@ -1,5 +1,7 @@
 "use strict";
 
+const NAME = 'farm';
+
 const floor = Math.floor;
 const random = Math.random;
 
@@ -100,5 +102,6 @@ class Farm {
     this.layers = variant;
   }
 }
+Farm.NAME = NAME;
 
 module.exports = Farm;

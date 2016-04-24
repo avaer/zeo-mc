@@ -1,5 +1,7 @@
 "use strict";
 
+const NAME = 'lampPost';
+
 const LAYERS = _repeat({
   legend: {
     'F': 'Fence',
@@ -28,6 +30,7 @@ class LampPost {
     this.layers = LAYERS;
   }
 }
+LampPost.NAME = NAME;
 
 function _repeat(e, n) {
   const result = Array(n);

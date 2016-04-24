@@ -1,5 +1,7 @@
 "use strict";
 
+const NAME = 'library';
+
 const LAYERS = [
   {
     legend: {
@@ -160,5 +162,6 @@ class Library {
     this.layers = LAYERS;
   }
 }
+Library.NAME = NAME;
 
 module.exports = Library;

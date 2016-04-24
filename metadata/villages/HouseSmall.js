@@ -1,5 +1,7 @@
 "use strict";
 
+const NAME = 'houseSmall';
+
 const floor = Math.floor;
 const random = Math.random;
 
@@ -188,5 +190,6 @@ class HouseSmall {
     this.layers = variant;
   }
 }
+HouseSmall.NAME = NAME;
 
 module.exports = HouseSmall;

@@ -1,5 +1,7 @@
 "use strict";
 
+const NAME = 'houseLarge';
+
 const LAYERS = [
   {
     legend: {
@@ -159,5 +161,6 @@ class HouseLarge {
     this.layers = LAYERS;
   }
 }
+HouseLarge.NAME = NAME;
 
 module.exports = HouseLarge;

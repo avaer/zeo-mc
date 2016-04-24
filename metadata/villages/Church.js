@@ -1,5 +1,7 @@
 "use strict";
 
+const NAME = 'church';
+
 const LAYERS = [
   {
     legend: {
@@ -218,6 +220,7 @@ class Church {
     this.layers = LAYERS;
   }
 }
+Church.NAME = NAME;
 
 function _repeat(e, n) {
   const result = Array(n);
