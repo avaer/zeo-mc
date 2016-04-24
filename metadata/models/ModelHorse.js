@@ -17,8 +17,6 @@ class ModelHorse extends ModelBase {
 
     super();
 
-    // XXX uvs
-
     this.meshes = [
       {
         name: 'body',
@@ -82,7 +80,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'backLeftLeg',
         uv: [
-          [44, 3, 47, 5],
+          [78, 34, 83, 43],
+          [87, 34, 92, 43],
+          [87, 29, 91, 34],
+          [83, 29, 87, 34],
+          [92, 34, 96, 43],
+          [88, 34, 87, 43],
         ],
         position: [-2.5, -2, -2.5],
         dimensions: [4, 9, 5],
@@ -92,7 +95,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'backLeftShin',
         uv: [
-          [44, 3, 47, 5],
+          [78, 46, 82, 51],
+          [84, 46, 88, 51],
+          [84, 43, 87, 46],
+          [81, 43, 84, 46],
+          [88, 46, 90, 51],
+          [81, 46, 85, 51],
         ],
         position: [-2, 0, -1.5],
         dimensions: [3, 5, 3],
@@ -102,7 +110,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'backLeftHoof',
         uv: [
-          [44, 3, 47, 5],
+          [78, 55, 82, 58],
+          [86, 55, 90, 58],
+          [86, 51, 90, 55],
+          [82, 51, 86, 45],
+          [90, 55, 94, 58],
+          [82, 55, 86, 58],
         ],
         position: [-2.5, 5.1, -2],
         dimensions: [4, 3, 4],
@@ -112,7 +125,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'backRightLeg',
         uv: [
-          [44, 3, 47, 5],
+          [78, 34, 83, 43],
+          [87, 34, 92, 43],
+          [87, 29, 91, 34],
+          [83, 29, 87, 34],
+          [92, 34, 96, 43],
+          [88, 34, 87, 43],
         ],
         position: [-1.5, -2, -2.5],
         dimensions: [4, 9, 5],
@@ -122,7 +140,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'backRightShin',
         uv: [
-          [44, 3, 47, 5],
+          [78, 46, 82, 51],
+          [84, 46, 88, 51],
+          [84, 43, 87, 46],
+          [81, 43, 84, 46],
+          [88, 46, 90, 51],
+          [81, 46, 85, 51],
         ],
         position: [-1, 0, -1.5],
         dimensions: [3, 5, 3],
@@ -132,7 +155,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'backRightHoof',
         uv: [
-          [44, 3, 47, 5],
+          [78, 55, 82, 58],
+          [86, 55, 90, 58],
+          [86, 51, 90, 55],
+          [82, 51, 86, 45],
+          [90, 55, 94, 58],
+          [82, 55, 86, 58],
         ],
         position: [-1.5, 5.1, -2],
         dimensions: [4, 3, 4],
@@ -142,7 +170,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'frontLeftLeg',
         uv: [
-          [44, 3, 47, 5],
+          [44, 33, 48, 41],
+          [51, 33, 55, 41],
+          [51, 29, 54, 33],
+          [48, 29, 51, 33],
+          [55, 33, 58, 41],
+          [48, 33, 51, 41],
         ],
         position: [-1.9, -1, -2.1],
         dimensions: [3, 8, 4],
@@ -152,7 +185,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'frontLeftShin',
         uv: [
-          [44, 3, 47, 5],
+          [44, 44, 47, 49],
+          [50, 44, 53, 49],
+          [50, 41, 53, 44],
+          [47, 41, 50, 44],
+          [53, 44, 56, 49],
+          [47, 44, 50, 49],
         ],
         position: [-1.9, 0, -1.6],
         dimensions: [3, 5, 3],
@@ -162,7 +200,13 @@ class ModelHorse extends ModelBase {
       {
         name: 'frontLeftHoof',
         uv: [
-          [44, 3, 47, 5],
+          [44, 55, 48, 58],
+          [52, 55, 56, 58],
+          [52, 51, 56, 55],
+          [48, 51, 52, 45],
+          [56, 55, 60, 58],
+          [48, 55, 52, 58],
+
         ],
         position: [-2.4, 5.1, -2.1],
         dimensions: [4, 3, 4],
@@ -172,7 +216,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'frontRightLeg',
         uv: [
-          [44, 3, 47, 5],
+          [44, 33, 48, 41],
+          [51, 33, 55, 41],
+          [51, 29, 54, 33],
+          [48, 29, 51, 33],
+          [55, 33, 58, 41],
+          [48, 33, 51, 41],
         ],
         position: [-1.1, -1, -2.1],
         dimensions: [3, 8, 4],
@@ -182,7 +231,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'frontRightShin',
         uv: [
-          [44, 3, 47, 5],
+          [44, 44, 47, 49],
+          [50, 44, 53, 49],
+          [50, 41, 53, 44],
+          [47, 41, 50, 44],
+          [53, 44, 56, 49],
+          [47, 44, 50, 49],
         ],
         position: [-1.1, 0, -1.6],
         dimensions: [3, 5, 3],
@@ -192,7 +246,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'frontRightHoof',
         uv: [
-          [44, 3, 47, 5],
+          [44, 55, 48, 58],
+          [52, 55, 56, 58],
+          [52, 51, 56, 55],
+          [48, 51, 52, 45],
+          [56, 55, 60, 58],
+          [48, 55, 52, 58],
         ],
         position: [-1.6, 5.1, -2.1],
         dimensions: [4, 3, 4],
@@ -202,7 +261,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'head',
         uv: [
-          [44, 3, 47, 5],
+          [0, 7, 7, 12],
+          [12, 7, 19, 12],
+          [12, 0, 17, 7],
+          [7, 0, 12, 7],
+          [19, 7, 24, 12],
+          [7, 7, 12, 12],
         ],
         position: [-2.5, -10, -1.5],
         dimensions: [5, 5, 7],
@@ -212,21 +276,31 @@ class ModelHorse extends ModelBase {
           {
             name: 'mouth1',
             uv: [
-              [44, 3, 47, 5],
+              [24, 24, 30, 27],
+              [34, 24, 40, 27],
+              [34, 18, 38, 24],
+              [30, 18, 34, 24],
+              [40, 24, 44, 27],
+              [30, 24, 34, 27],
             ],
             position: [-2, -10, -7],
             dimensions: [4, 3, 6],
-            rotationPoint: [0, 3.95, -10],
+            // rotationPoint: [0, 3.95, -10],
             rotation: [0.5235988, 0, 0]
           },
           {
             name: 'mouth2',
             uv: [
-              [44, 3, 47, 5],
+              [24, 32, 29, 34],
+              [33, 32, 38, 34],
+              [33, 27, 37, 32],
+              [29, 27, 33, 32],
+              [38, 32, 42, 34],
+              [29, 32, 33, 34],
             ],
             position: [-2, -7, -6.5],
             dimensions: [4, 2, 5],
-            rotationPoint: [0, 4, -10],
+            // rotationPoint: [0, 4, -10],
             rotation: [0.5235988, 0, 0]
           },
         ]
@@ -234,7 +308,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'leftEar',
         uv: [
-          [44, 3, 47, 5],
+          [0, 1, 1, 4],
+          [3, 1, 4, 4],
+          [3, 0, 5, 1],
+          [1, 0, 3, 1],
+          [4, 1, 6, 4],
+          [1, 1, 3, 4],
         ],
         position: [0.45, -1, 4],
         dimensions: [2, 3, 1],
@@ -244,7 +323,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'rightEar',
         uv: [
-          [44, 3, 47, 5],
+          [0, 1, 1, 4],
+          [3, 1, 4, 4],
+          [3, 0, 5, 1],
+          [1, 0, 3, 1],
+          [4, 1, 6, 4],
+          [1, 1, 3, 4],
         ],
         position: [-2.45, -12, 4],
         dimensions: [2, 3, 1],
@@ -269,7 +353,12 @@ class ModelHorse extends ModelBase {
       {
         name: 'mane',
         uv: [
-          [0, 20, 8, 34],
+          [24, 10, 31, 14],
+          [34, 10, 41, 14],
+          [34, 3, 37, 10],
+          [31, 3, 34, 10],
+          [42, 10, 45, 14],
+          [31, 10, 34, 14],
         ],
         position: [-1, -11.5, 5],
         dimensions: [2, 16, 4],
@@ -280,7 +369,7 @@ class ModelHorse extends ModelBase {
   }
 }
 ModelHorse.NAME = NAME;
-ModelHorse.TEXTURE = 'horse/horse_black';
+ModelHorse.TEXTURE = 'horse/horse_white';
 
 module.exports = ModelHorse;
 
