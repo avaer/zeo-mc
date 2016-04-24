@@ -49,7 +49,7 @@
     "raf": "0.0.1",
     "spatial-events": "0.0.1",
     "spatial-trigger": "0.0.0",
-    "three": "0.75.0",
+    "three": "0.76.1",
     "three-js-csg": "72.0.0",
     "tic": "0.2.1",
     "voxel-physical": "0.0.10",
