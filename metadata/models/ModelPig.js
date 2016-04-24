@@ -28,7 +28,7 @@ class ModelPig extends ModelQuadruped {
           ],
           position: [-2, 0, -9],
           dimensions: [4, 3, 1],
-          rotationPoint: mesh.rotationPoint,
+          // rotationPoint: mesh.rotationPoint,
           scale: p1
         });
         return mesh;
