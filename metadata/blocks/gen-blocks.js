@@ -14,6 +14,7 @@ var mainTextures = [
   /water/,
 
   // planes
+  /beetroots/,
   /carrots/,
   /nether_wart/,
   /potatoes/,
