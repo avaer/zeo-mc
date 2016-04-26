@@ -66,7 +66,7 @@ const LAYERS = [
       'L': {type: BLOCKS['glass'], model: 'pane', direction: 'west'},
       'A': {type: BLOCKS['glass'], model: 'pane', direction: 'east'},
       'W': {type: BLOCKS['log_oak']},
-      'R': {type: BLOCKS['planks_oak'], model: 'pressure_plate'},
+      'R': {type: BLOCKS['planks_oak'], model: 'pressure_plate_up'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],

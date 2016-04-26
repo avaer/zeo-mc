@@ -54,7 +54,7 @@ const LAYERS = [
       'F': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'south'},
       'E': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'southwest'},
       'B': {type: BLOCKS['furnace_side']},
-      'R': {type: BLOCKS['planks_oak'], model: 'pressure_plate'},
+      'R': {type: BLOCKS['planks_oak'], model: 'pressure_plate_up'},
     },
     layout: [
       ['C', 'C', 'C', 'C', 'P', 'G', 'P', 'G', 'P', 'W'],
