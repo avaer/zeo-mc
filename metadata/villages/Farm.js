@@ -6,20 +6,19 @@ const floor = Math.floor;
 const random = Math.random;
 
 const CROPS = [
-  'seeds',
-  'wheat',
-  'carrots',
-  'potato',
-  'beetroot',
+  {type:'wheat_stage_0', model: 'crop'},
+  {type:'carrots_stage_0', model: 'crop'},
+  {type:'potatoes_stage_0', model: 'crop'},
+  {type:'beetrootss_stage_0', model: 'crop'},
 ];
 
 const VARIANTS = {
   small: cropType => ([
     {
       legend: {
-        'W': 'wood',
-        'F': 'farmland',
-        '~': 'water',
+        'W': {type: BLOCKS['log_oak']},
+        'F': {type: BLOCKS['farmland_dry']},
+        '~': {type: BLOCKS['water_still']},
       },
       layout: [
         ['W', 'W', 'W', 'W', 'W', 'W', 'W'],
@@ -35,7 +34,7 @@ const VARIANTS = {
     },
     {
       legend: {
-        'C': CROPS[cropType],
+        'C': {type: CROPS[cropType],
       },
       layout: [
         [' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -53,9 +52,9 @@ const VARIANTS = {
   large: cropType => ([
     {
       legend: {
-        'W': 'wood',
-        'F': 'farmland',
-        '~': 'water',
+        'W': {type: BLOCKS['log_oak']},
+        'F': {type: BLOCKS['farmland_dry']},
+        '~': {type: BLOCKS['water_Still']},
       },
       layout: [
         ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
