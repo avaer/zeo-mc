@@ -1,12 +1,15 @@
 "use strict";
 
+const Blocks = require('../blocks/index');
+const BLOCKS = Blocks.BLOCKS;
+
 const NAME = 'library';
 
 const LAYERS = [
   {
     legend: {
-      'C': 'Cobblestone',
-      'S': 'Cobblestone Stairs',
+      'C': {type: BLOCKS['cobblestone']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],

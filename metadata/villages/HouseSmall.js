@@ -13,7 +13,7 @@ const VARIANTS = {
     {
       legend: {
         'c': {type: BLOCKS['cobblestone']},
-        's': {type: BLOCKS['cobblestone'], model: 'stairs'},
+        's': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
       },
       layout: [
         ['c', 'c', 'c', 'c', 'c'],
@@ -28,7 +28,6 @@ const VARIANTS = {
       legend: {
         'c': {type: BLOCKS['cobblestone']},
         'p': {type: BLOCKS['planks_oak']},
-        's': {type: BLOCKS['cobblestone'], model: 'stairs'},
         'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
         'D': {type: BLOCKS['door_oak_lower'], model: 'door_lower', direction: 'south'},
       },
