@@ -1,12 +1,15 @@
 "use strict";
 
+const Blocks = require('../blocks/index');
+const BLOCKS = Blocks.BLOCKS;
+
 const NAME = 'church';
 
 const LAYERS = [
   {
     legend: {
-      'C': 'cobblestone',
-      'S': 'cobblestone-stairs',
+      'C': {type: BLOCKS['cobblestone']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
     },
     layout: [
       [' ', 'C', 'C', 'C', ' '],
@@ -23,10 +26,10 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'cobblestone',
-      'S': 'cobblestone-stairs',
-      'L': 'ladder',
-      'D': 'door-wood-bottom',
+      'C': {type: BLOCKS['cobblestone']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
+      'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
+      'D': {type: BLOCKS['door_oak_lower'], model: 'door_lower', direction: 'south'},
     },
     layout: [
       [' ', 'C', 'C', 'C', ' '],
@@ -34,7 +37,7 @@ const LAYERS = [
       ['C', 'C', 'S', 'C', 'C'],
       ['C', 'S', ' ', 'S', 'C'],
       ['C', ' ', ' ', ' ', 'C'],
-      ['C', 'L', ' ', ' ', 'C'],
+      ['C', 'H', ' ', ' ', 'C'],
       ['C', ' ', ' ', ' ', 'C'],
       ['C', ' ', ' ', ' ', 'C'],
       [' ', 'C', 'D', 'C', ' '],
@@ -43,11 +46,12 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'cobblestone',
-      'G': 'glass-pane',
-      'S': 'cobblestone-stairs',
-      'L': 'ladder',
-      'D': 'door-wood-top',
+      'C': {type: BLOCKS['cobblestone']},
+      'G': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'west'},
+      'L': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'east'},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
+      'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
+      'D': {type: BLOCKS['door_oak_upper'], model: 'door_upper', direction: 'south'},
     },
     layout: [
       [' ', 'C', 'C', 'C', ' '],
@@ -55,8 +59,8 @@ const LAYERS = [
       ['C', ' ', ' ', ' ', 'C'],
       ['C', ' ', ' ', ' ', 'C'],
       ['C', ' ', ' ', ' ', 'C'],
-      ['C', 'L', ' ', ' ', 'C'],
-      ['G', ' ', ' ', ' ', 'G'],
+      ['C', 'H', ' ', ' ', 'C'],
+      ['G', ' ', ' ', ' ', 'L'],
       ['C', ' ', ' ', ' ', 'C'],
       [' ', 'C', 'D', 'C', ' '],
       [' ', ' ', ' ', ' ', ' '],
@@ -64,18 +68,20 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'cobblestone',
-      'G': 'glass-pane',
-      'L': 'ladder',
+      'C': {type: BLOCKS['cobblestone']},
+      'G': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'north'},
+      'L': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'west'},
+      'A': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'east'},
+      'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
     },
     layout: [
       [' ', 'C', 'G', 'C', ' '],
       ['C', ' ', ' ', ' ', 'C'],
-      ['G', ' ', ' ', ' ', 'G'],
+      ['L', ' ', ' ', ' ', 'A'],
       ['C', ' ', ' ', ' ', 'C'],
       ['C', ' ', ' ', ' ', 'C'],
-      ['C', 'L', ' ', ' ', 'C'],
-      ['G', ' ', ' ', ' ', 'G'],
+      ['C', 'H', ' ', ' ', 'C'],
+      ['L', ' ', ' ', ' ', 'A'],
       ['C', ' ', ' ', ' ', 'C'],
       [' ', 'C', 'C', 'C', ' '],
       [' ', ' ', ' ', ' ', ' '],
@@ -83,9 +89,9 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'cobblestone',
-      'G': 'glass-pane',
-      'L': 'ladder',
+      'C': {type: BLOCKS['cobblestone']},
+      'G': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'north'},
+      'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
     },
     layout: [
       [' ', 'C', 'C', 'C', ' '],
@@ -93,7 +99,7 @@ const LAYERS = [
       ['C', 'T', ' ', 'T', 'C'],
       ['C', ' ', 'T', ' ', 'C'],
       ['C', 'C', 'C', 'C', 'C'],
-      ['C', 'L', 'C', 'C', 'C'],
+      ['C', 'H', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C'],
@@ -102,8 +108,8 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'cobblestone',
-      'L': 'ladder',
+      'C': {type: BLOCKS['cobblestone']},
+      'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' '],
@@ -111,7 +117,7 @@ const LAYERS = [
       [' ', 'C', 'C', 'C', ' '],
       [' ', 'C', 'C', 'C', ' '],
       [' ', 'C', 'C', 'C', ' '],
-      ['C', 'L', ' ', ' ', 'C'],
+      ['C', 'H', ' ', ' ', 'C'],
       ['C', ' ', ' ', ' ', 'C'],
       ['C', ' ', ' ', ' ', 'C'],
       [' ', 'C', 'C', 'C', ' '],
@@ -120,9 +126,12 @@ const LAYERS = [
   },
 ].concat(_repeat({
   legend: {
-    'C': 'cobblestone',
-    'G': 'glass-pane',
-    'L': 'ladder',
+    'C': {type: BLOCKS['cobblestone']},
+    'G': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'north'},
+    'L': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'west'},
+    'A': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'east'},
+    'S': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'south'},
+    'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
   },
   layout: [
     [' ', ' ', ' ', ' ', ' '],
@@ -130,18 +139,21 @@ const LAYERS = [
     [' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' '],
     [' ', 'C', 'G', 'C', ' '],
-    ['C', 'L', ' ', ' ', 'C'],
-    ['G', ' ', ' ', ' ', 'G'],
+    ['C', 'H', ' ', ' ', 'C'],
+    ['L', ' ', ' ', ' ', 'A'],
     ['C', ' ', ' ', ' ', 'C'],
-    [' ', 'C', 'G', 'C', ' '],
+    [' ', 'C', 'S', 'C', ' '],
     [' ', ' ', ' ', ' ', ' '],
   ],
 }, 2)).concat([
   {
     legend: {
-      'C': 'cobblestone',
-      'L': 'ladder',
-      'G': 'glass-pane',
+      'C': {type: BLOCKS['cobblestone']},
+      'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
+      'G': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'north'},
+      'L': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'west'},
+      'A': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'east'},
+      'S': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'south'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' '],
@@ -149,17 +161,17 @@ const LAYERS = [
       [' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' '],
       [' ', 'C', 'G', 'C', ' '],
-      ['C', 'L', ' ', ' ', 'C'],
-      ['G', ' ', ' ', ' ', 'G'],
+      ['C', 'H', ' ', ' ', 'C'],
+      ['L', ' ', ' ', ' ', 'A'],
       ['C', ' ', ' ', ' ', 'C'],
-      [' ', 'C', 'G', 'C', ' '],
+      [' ', 'C', 'S', 'C', ' '],
       [' ', ' ', ' ', ' ', ' '],
     ],
   },
   {
     legend: {
-      'C': 'cobblestone',
-      'L': 'ladder',
+      'C': {type: BLOCKS['cobblestone']},
+      'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' '],
@@ -167,7 +179,7 @@ const LAYERS = [
       [' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' '],
       ['C', 'C', 'C', 'C', 'C'],
-      ['C', 'L', 'C', 'C', 'C'],
+      ['C', 'H', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C'],
@@ -176,7 +188,7 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'cobblestone',
+      'C': {type: BLOCKS['cobblestone']},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' '],
@@ -193,12 +205,7 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'cobblestone',
-      'A': 'air',
-      'G': 'glass-pane',
-      'S': 'stairs',
-      'T': 'torch',
-      'L': 'ladder',
+      'C': {type: BLOCKS['cobblestone']},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' '],

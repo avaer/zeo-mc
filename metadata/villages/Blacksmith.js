@@ -51,7 +51,8 @@ const LAYERS = [
       'L': {type: BLOCKS['glass'], model: 'pane', direction: 'east'},
       'I': {type: BLOCKS['iron_bars'], model: 'bars', direction: 'west'},
       'W': {type: BLOCKS['log_oak']},
-      'F': {type: BLOCKS['planks_oak'], model: 'fence', direction: 'south'},
+      'F': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'south'},
+      'E': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'southwest'},
       'B': {type: BLOCKS['furnace_side']},
       'R': {type: BLOCKS['planks_oak'], model: 'pressure_plate'},
     },
@@ -62,7 +63,7 @@ const LAYERS = [
       [' ', ' ', ' ', 'B', 'P', 'P', ' ', ' ', ' ', 'P'],
       [' ', ' ', ' ', ' ', ' ', ' ', 'P', ' ', ' ', 'L'],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'P'],
-      ['F', ' ', ' ', ' ', 'F', ' ', 'W', 'P', 'P', 'W'],
+      ['E', ' ', ' ', ' ', 'F', ' ', 'W', 'P', 'P', 'W'],
     ],
   },
   {
@@ -70,7 +71,8 @@ const LAYERS = [
       'C': {type: BLOCKS['cobblestone']},
       'P': {type: BLOCKS['planks_oak']},
       'W': {type: BLOCKS['log_oak']},
-      'F': {type: BLOCKS['planks_oak'], model: 'fence', direction: 'south'},
+      'F': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'south'},
+      'E': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'southwest'},
       'B': {type: BLOCKS['furnace_side']},
     },
     layout: [
@@ -80,7 +82,7 @@ const LAYERS = [
       [' ', ' ', ' ', 'B', 'P', 'P', ' ', ' ', ' ', 'P'],
       [' ', ' ', ' ', ' ', ' ', ' ', 'P', ' ', ' ', 'P'],
       [' ', ' ', ' ', ' ', ' ', ' ', 'P', ' ', ' ', 'P'],
-      ['F', ' ', ' ', ' ', 'F', ' ', 'W', 'P', 'P', 'W'],
+      ['E', ' ', ' ', ' ', 'F', ' ', 'W', 'P', 'P', 'W'],
     ],
   },
   {

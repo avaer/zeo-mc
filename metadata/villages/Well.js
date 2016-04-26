@@ -5,7 +5,7 @@ const NAME = 'well';
 const LAYERS = [
   {
     legend: {
-      'S': 'Cobblestone',
+      'S': {type: BLOCKS['cobblestone']},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' '],
@@ -18,8 +18,8 @@ const LAYERS = [
   },
 ].concat(_repeat({
   legend: {
-    'S': 'Cobblestone',
-    'W': 'Water',
+    'S': {type: BLOCKS['cobblestone']},
+    'W': {type: BLOCKS['water_still']},
   },
   layout: [
     [' ', ' ', ' ', ' ', ' ', ' '],
@@ -32,8 +32,8 @@ const LAYERS = [
 }, 10)).concat([
   {
     legend: {
-      'S': 'Cobblestone',
-      'W': 'Water',
+      'S': {type: BLOCKS['cobblestone']},
+      'W': {type: BLOCKS['water_still']},
     },
     layout: [
       ['S', 'S', 'S', 'S', 'S', 'S'],
@@ -46,7 +46,7 @@ const LAYERS = [
   },
   {
     legend: {
-      'S': 'Cobblestone',
+      'S': {type: BLOCKS['cobblestone']},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' '],
@@ -59,20 +59,23 @@ const LAYERS = [
   },
 ]).concat(_repeat({
   legend: {
-    'F': 'Fence',
+    'F': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'northwest'},
+    'E': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'northeast'},
+    'N': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'southwest'},
+    'C': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'southeast'},
   },
   layout: [
     [' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', 'F', ' ', ' ', 'F', ' '],
+    [' ', 'F', ' ', ' ', 'E', ' '],
     [' ', ' ', ' ', ' ', ' ', ' '],
     [' ', ' ', ' ', ' ', ' ', ' '],
-    [' ', 'F', ' ', ' ', 'F', ' '],
+    [' ', 'N', ' ', ' ', 'C', ' '],
     [' ', ' ', ' ', ' ', ' ', ' '],
   ],
 }, 2)).concat([
   {
     legend: {
-      'S': 'Cobblestone',
+      'S': {type: BLOCKS['cobblestone']},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' '],
