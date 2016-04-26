@@ -9,8 +9,8 @@ const VARIANTS = {
   version1: [
     {
       legend: {
-        'c': 'cobblestone',
-        's': 'cobblestone-stairs',
+        'c': {type: BLOCKS['cobblestone']},
+        's': {type: BLOCKS['cobblestone'], model: 'stairs'},
       },
       layout: [
         ['c', 'c', 'c', 'c', 'c'],
@@ -23,53 +23,58 @@ const VARIANTS = {
     },
     {
       legend: {
-        'c': 'cobblestone',
-        's': 'cobblestone-stairs',
+        'c': {type: BLOCKS['cobblestone']},
+        'p': {type: BLOCKS['planks_oak']},
+        's': {type: BLOCKS['cobblestone'], model: 'stairs'},
+        'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
+        'D': {type: BLOCKS['door_oak_lower'], model: 'door_lower', direction: 'south'},
       },
       layout: [
-        ['c', 'j', 'j', 'j', 'c'],
-        ['j', ' ', ' ', 'H', 'j'],
-        ['j', ' ', ' ', ' ', 'j'],
-        ['j', ' ', ' ', ' ', 'j'],
-        ['c', 'j', 'D', 'j', 'c'],
+        ['c', 'p', 'p', 'p', 'c'],
+        ['p', ' ', ' ', 'H', 'p'],
+        ['p', ' ', ' ', ' ', 'p'],
+        ['p', ' ', ' ', ' ', 'p'],
+        ['c', 'p', 'D', 'p', 'c'],
       ]
     },
     {
       legend: {
-        'c': 'cobblestone',
-        'j': 'oak-wood-planks',
-        'g': 'glass-pane',
-        'H': 'ladder',
-        'D': 'door-oak-top',
+        'c': {type: BLOCKS['cobblestone']},
+        'p': {type: BLOCKS['planks_oak']},
+        'G': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'north'},
+        'L': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'west'},
+        'A': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'east'},
+        'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
+        'D': {type: BLOCKS['door_oak_upper'], model: 'door_upper', direction: 'south'},
       },
       layout: [
-        ['c', 'j', 'g', 'j', 'c'],
-        ['j', ' ', ' ', 'H', 'j'],
-        ['g', ' ', ' ', ' ', 'g'],
-        ['j', ' ', ' ', ' ', 'j'],
-        ['c', 'j', 'D', 'j', 'c'],
+        ['c', 'p', 'G', 'p', 'c'],
+        ['p', ' ', ' ', 'H', 'p'],
+        ['L', ' ', ' ', ' ', 'A'],
+        ['p', ' ', ' ', ' ', 'p'],
+        ['c', 'p', 'D', 'p', 'c'],
       ]
     },
     {
       legend: {
-        'c': 'cobblestone',
-        'j': 'oak-wood-planks',
-        'H': 'ladder',
-        '!': 'torch',
+        'c': {type: BLOCKS['cobblestone']},
+        'p': {type: BLOCKS['planks_oak']},
+        'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
+        '!': {type: BLOCKS['torch_on'], model: 'torch_wall', direction: 'north'},
       },
       layout: [
-        ['c', 'j', 'j', 'j', 'c'],
-        ['j', ' ', ' ', 'H', 'j'],
-        ['j', ' ', ' ', ' ', 'j'],
-        ['j', ' ', '!', ' ', 'j'],
-        ['c', 'j', 'j', 'j', 'c'],
+        ['c', 'p', 'p', 'p', 'c'],
+        ['p', ' ', ' ', 'H', 'p'],
+        ['p', ' ', ' ', ' ', 'p'],
+        ['p', ' ', '!', ' ', 'p'],
+        ['c', 'p', 'p', 'p', 'c'],
       ]
     },
     {
       legend: {
-        'w': 'oak-wood',
-        'j': 'oak-wood-planks',
-        'H': 'ladder',
+        'w': {type: BLOCKS['log_oak']},
+        'p': {type: BLOCKS['planks_oak']},
+        'H': {type: BLOCKS['ladder'], model: 'ladder', direction: 'south'},
       },
       layout: [
         ['w', 'w', 'w', 'w', 'w'],
@@ -81,23 +86,30 @@ const VARIANTS = {
     },
     {
       legend: {
-        'f': 'fence',
+        'F': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'north'},
+        'E': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'west'},
+        'N': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'east'},
+        'C': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'south'},
+        'f': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'northwest'},
+        'e': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'northeast'},
+        'n': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'southwest'},
+        'c': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'southeast'},
       },
       layout: [
-        ['f', 'f', 'f', 'f', 'f'],
-        ['f', ' ', ' ', ' ', 'f'],
-        ['f', ' ', ' ', ' ', 'f'],
-        ['f', ' ', ' ', ' ', 'f'],
-        ['f', 'f', 'f', 'f', 'f'],
+        ['f', 'F', 'F', 'F', 'e'],
+        ['E', ' ', ' ', ' ', 'N'],
+        ['E', ' ', ' ', ' ', 'N'],
+        ['E', ' ', ' ', ' ', 'N'],
+        ['n', 'C', 'C', 'C', 'c'],
       ]
     },
   ],
   version2: [
     {
       legend: {
-        'C': 'cobblestone',
-        'D': 'dirt',
-        'S': 'cobblestone-stairs',
+        'c': {type: BLOCKS['cobblestone']},
+        'D': {type: BLOCKS['dirt']},
+        'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
       },
       layout: [
         ['C', 'C', 'C', 'C'],
@@ -110,9 +122,9 @@ const VARIANTS = {
     },
     {
       legend: {
-        'W': 'oak-wood',
-        'P': 'oak-wood-planks',
-        'D': 'door-oak-bottom',
+        'W': {type: BLOCKS['log_oak']},
+        'P': {type: BLOCKS['planks_oak']},
+        'D': {type: BLOCKS['door_oak_lower'], model: 'door_lower', direction: 'south'},
       },
       layout: [
         ['W', 'P', 'P', 'W'],
@@ -124,24 +136,25 @@ const VARIANTS = {
     },
     {
       legend: {
-        'W': 'oak-wood',
-        'P': 'oak-wood-planks',
-        'D': 'door-oak-top',
-        'G': 'glass-pane',
+        'W': {type: BLOCKS['log_oak']},
+        'P': {type: BLOCKS['planks_oak']},
+        'G': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'west'},
+        'L': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'east'},
+        'D': {type: BLOCKS['door_oak_upper'], model: 'door_upper', direction: 'south'},
       },
       layout: [
         ['W', 'P', 'P', 'W'],
         ['P', ' ', ' ', 'P'],
-        ['G', ' ', ' ', 'G'],
-        ['G', ' ', ' ', 'G'],
+        ['G', ' ', ' ', 'L'],
+        ['G', ' ', ' ', 'L'],
         ['P', ' ', ' ', 'P'],
         ['W', 'D', 'P', 'W'],
       ],
     },
     {
       legend: {
-        'W': 'oak-wood',
-        'P': 'oak-wood-planks',
+        'W': {type: BLOCKS['log_oak']},
+        'P': {type: BLOCKS['planks_oak']},
       },
       layout: [
         ['W', 'P', 'P', 'W'],
@@ -153,7 +166,7 @@ const VARIANTS = {
     },
     {
       legend: {
-        'W': 'oak-wood',
+        'W': {type: BLOCKS['log_oak']},
       },
       layout: [
         [' ', 'W', 'W', ' '],
@@ -165,7 +178,7 @@ const VARIANTS = {
     },
     {
       legend: {
-        'W': 'oak-wood',
+        'W': {type: BLOCKS['log_oak']},
       },
       layout: [
         [' ', ' ', ' ', ' '],
