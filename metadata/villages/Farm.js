@@ -1,5 +1,8 @@
 "use strict";
 
+const Blocks = require('../blocks/index');
+const BLOCKS = Blocks.BLOCKS;
+
 const NAME = 'farm';
 
 const floor = Math.floor;

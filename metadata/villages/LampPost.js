@@ -1,10 +1,13 @@
 "use strict";
 
+const Blocks = require('../blocks/index');
+const BLOCKS = Blocks.BLOCKS;
+
 const NAME = 'lampPost';
 
 const LAYERS = _repeat({
   legend: {
-    'F': 'Fence',
+    'F': {type: BLOCKS['planks_oak'], model: 'fence_post'},
   },
   layout: [
     [' ', ' ', ' '],
@@ -14,13 +17,16 @@ const LAYERS = _repeat({
 }, 3).concat([
   {
     legend: {
-      'T': 'Torch',
-      'B': 'Black Wool',
+      't': {type: BLOCKS['torch_on'], model: 'torch_wall', direction: 'north'},
+      'o': {type: BLOCKS['torch_on'], model: 'torch_wall', direction: 'south'},
+      'r': {type: BLOCKS['torch_on'], model: 'torch_wall', direction: 'west'},
+      'c': {type: BLOCKS['torch_on'], model: 'torch_wall', direction: 'east'},
+      'B': {type: BLOCKS['wool_colored_black']},
     },
     layout: [
-      [' ', 'T', ' '],
-      ['T', 'B', 'T'],
-      [' ', 'T', ' '],
+      [' ', 't', ' '],
+      ['o', 'B', 'r'],
+      [' ', 'c', ' '],
     ],
   }
 ]);
