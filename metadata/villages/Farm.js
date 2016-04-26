@@ -6,10 +6,10 @@ const floor = Math.floor;
 const random = Math.random;
 
 const CROPS = [
-  {type:'wheat_stage_0', model: 'crop'},
-  {type:'carrots_stage_0', model: 'crop'},
-  {type:'potatoes_stage_0', model: 'crop'},
-  {type:'beetrootss_stage_0', model: 'crop'},
+  BLOCKS['wheat_stage_0'],
+  BLOCKS['carrots_stage_0'],
+  BLOCKS['potatoes_stage_0'],
+  BLOCKS['beetrootss_stage_0'],
 ];
 
 const VARIANTS = {
@@ -34,7 +34,7 @@ const VARIANTS = {
     },
     {
       legend: {
-        'C': {type: CROPS[cropType],
+        'C': {type: CROPS[cropType], model: 'crop'},
       },
       layout: [
         [' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -70,7 +70,7 @@ const VARIANTS = {
     },
     {
       legend: {
-        'C': CROPS[cropType],
+        'C': {type: CROPS[cropType], model: 'crop'},
       },
       layout: [
         [' ', ' ', ' ', ' ', ' ', ' ', ' '],
