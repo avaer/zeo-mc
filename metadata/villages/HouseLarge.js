@@ -1,5 +1,7 @@
 "use strict";
 
+const BlueprintBase = require('./BlueprintBase');
+
 const Blocks = require('../blocks/index');
 const BLOCKS = Blocks.BLOCKS;
 
@@ -173,8 +175,10 @@ const LAYERS = [
   },
 ];
 
-class HouseLarge {
+class HouseLarge extends BlueprintBase {
   constructor() {
+    super();
+
     this.layers = LAYERS;
   }
 }

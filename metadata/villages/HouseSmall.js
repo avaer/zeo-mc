@@ -1,5 +1,7 @@
 "use strict";
 
+const BlueprintBase = require('./BlueprintBase');
+
 const Blocks = require('../blocks/index');
 const BLOCKS = Blocks.BLOCKS;
 
@@ -194,8 +196,10 @@ const VARIANTS = {
 };
 const VARIANT_KEYS = Object.keys(VARIANTS);
 
-class HouseSmall {
+class HouseSmall extends BlueprintBase {
   constructor(p) {
+    super();
+
     p = p || [];
     const p1 = typeof p[0] !== 'undefined' ? p[0] : floor(random() * VARIANT_KEYS.length);
 

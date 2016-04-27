@@ -1,5 +1,7 @@
 "use strict";
 
+const BlueprintBase = require('./BlueprintBase');
+
 const Blocks = require('../blocks/index');
 const BLOCKS = Blocks.BLOCKS;
 
@@ -116,8 +118,10 @@ const LAYERS = [
   },
 ];
 
-class Blacksmith {
+class Blacksmith extends BlueprintBase {
   constructor() {
+    super();
+
     this.layers = LAYERS;
   }
 }

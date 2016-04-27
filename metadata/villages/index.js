@@ -54,17 +54,22 @@ function make(opts) {
     const wellNoiseZN = wellNoiseZ.in2D(chunkX, chunkZ);
     const wellZ = startZ + floor(villageWellNoiseZN * chunkSize) + WELL_OFFSET[1];
     const position = [wellX, wellZ];
+
+    // attempt to build main well
     if (_canBuild({
       type: 'well',
       position,
       getLand,
       getTree
     })) {
+      // build main well
       _makeBuilding({
         type: 'well',
         position,
         onPoint
       });
+
+      // XXX build roads and the rest of the buildings here
     }
   }
 }
@@ -128,11 +133,10 @@ function _makeBuilding(opts) {
 
   const Building = BUILDING_INDEX[type];
   const building = new Building();
-  const layers = building.layers;
-  const yOffset = building.yOffset;
-  const dimensions = building.getDimensions(); // XXX implement this
+  const dimensions = building.getDimensions();
   const width = dimensions.width;
   const depth = dimensions.depth;
+  const yOffset = building.getYOffset();
 
   const maxCoveredY = (() => {
     let result = 0;
@@ -163,7 +167,7 @@ function _makeBuilding(opts) {
     }, (x, z) => {
       const h = getHeight(x, y);
       for (let y = h + 1; y < startY; y++) {
-        onPoint(x, y, z, BLOCKS['cobblestone']);
+        onPoint(x, y, z, BLOCKS['cobblestone']); // XXX set block metadata here as well
       }
     });
   }
@@ -181,7 +185,7 @@ function _makeBuilding(opts) {
       }, (x, z) => {
         const j = x - startX;
         const k = z - startZ;
-        const block = building.getBlock(j, i, k); // XXX implement this
+        const block = building.getBlock(j, i, k);
         const value = block.type;
 
         onPoint(x, y, z, value);
