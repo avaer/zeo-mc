@@ -94,7 +94,7 @@ const LAYERS = [
 class Well {
   constructor() {
     this.layers = LAYERS;
-    this.offset = -11;
+    this.yOffset = -11;
   }
 }
 Well.NAME = NAME;

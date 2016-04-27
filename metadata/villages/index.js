@@ -1,3 +1,6 @@
+const Blocks = require('../blocks/index');
+const BLOCKS = Blocks.BLOCKS;
+
 const Farm = require('./Farm');
 const Well = require('./Well');
 const LampPost = require('./LampPost');
@@ -80,11 +83,36 @@ function _canBuild(opts) {
   const dimensions = building.getDimensions();
   const width = dimensions.width;
   const depth = dimensions.depth;
+  return _everyHorizontalPoint({
+    startX,
+    startY,
+    width,
+    depth,
+  }, (x, z) => getLand(x, z) && !getTree(x, z));
+}
+
+function _forEachBuildingHorizontalPoint(opts, fn) {
+  const startX = opts.startX;
+  const startZ = opts.startZ;
+  const width = opts.width;
+  const depth = opts.depth;
+
   for (let z = startZ; z < startZ + depth; z++) {
-    for (let x = startX; x < startX + depth; x++) {
-      if (getLand(x, z) && !getTree(x, z)) {
-        // nothing
-      } else {
+    for (let x = startX; x < startX + width; x++) {
+      fn(x, z);
+    }
+  }
+}
+
+function _everyHorizontalPoint(opts, predicate) {
+  const startX = opts.startX;
+  const startZ = opts.startZ;
+  const width = opts.width;
+  const depth = opts.depth;
+
+  for (let z = startZ; z < startZ + depth; z++) {
+    for (let x = startX; x < startX + width; x++) {
+      if (!predicate(x, z)) {
         return false;
       }
     }
@@ -92,18 +120,74 @@ function _canBuild(opts) {
   return true;
 }
 
-function _makeBuilding(buildingType, opts) {
+function _makeBuilding(opts) {
   const type = opts.type;
   const position = opts.position;
-  const onPoint = opts.onPoint;
+  const startX = position[0];
+  const startZ = position[1];
 
   const Building = BUILDING_INDEX[type];
   const building = new Building();
   const layers = building.layers;
-  const offset = building.offset;
-  // XXX place the building on the highest terrain height of the horizontal blocks it occupies
-  // XXX generate a stone base for the building if needed
-  // XXX reify layers to onPoint() block value calls
+  const yOffset = building.yOffset;
+  const dimensions = building.getDimensions(); // XXX implement this
+  const width = dimensions.width;
+  const depth = dimensions.depth;
+
+  const maxCoveredY = (() => {
+    let result = 0;
+    _forEachBuildingHorizontalPoint({
+      startX,
+      startZ,
+      width,
+      depth,
+    }, (x, z) => {
+      const h = getHeight(x, z);
+      if (h > result) {
+        result = h;
+      }
+    });
+    return result;
+  })();
+  const startY = maxCoveredY + yOffset;
+
+  _makeBase();
+  _makeLayers();
+
+  function _makeBase() {
+    _forEachBuildingHorizontalPoint({
+      startX,
+      startZ,
+      width,
+      depth,
+    }, (x, z) => {
+      const h = getHeight(x, y);
+      for (let y = h + 1; y < startY; y++) {
+        onPoint(x, y, z, BLOCKS['cobblestone']);
+      }
+    });
+  }
+
+  function _makeLayers() {
+    const numKLayers = layers.length;
+    for (let i = 0; i < numLayers; i++) {
+      const y = startY + i;
+
+      _forEachBuildingHorizontalPoint({
+        startX,
+        startZ,
+        width,
+        depth,
+      }, (x, z) => {
+        const j = x - startX;
+        const k = z - startZ;
+        const block = building.getBlock(j, i, k); // XXX implement this
+        const value = block.type;
+
+        onPoint(x, y, z, value);
+      });
+    }
+  }
   // XXX make sure to handle the bottom-up offsetted well generation case
 }
 
