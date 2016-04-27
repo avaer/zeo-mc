@@ -33,8 +33,9 @@ const BUILDING_INDEX = (() => {
 
 function make(opts) {
   const position = opts.position;
-  const heightMap = opts.heightMap;
-  const usedMap = opts.usedMap;
+  const getHeight = opts.getHeight;
+  const getLand = opts.getLand;
+  const getTree = opts.getTree;
   const chunkNoise = opts.chunkNoise;
   const wellNoiseX = opts.wellNoiseX;
   const wellNoiseZ = opts.wellNoiseZ;
@@ -49,14 +50,46 @@ function make(opts) {
     const wellX = startX + floor(wellNoiseXN * chunkSize) + WELL_OFFSET[0];
     const wellNoiseZN = wellNoiseZ.in2D(chunkX, chunkZ);
     const wellZ = startZ + floor(villageWellNoiseZN * chunkSize) + WELL_OFFSET[1];
-    // XXX ensure there is room for the well before trying to make it
-    VILLAGES.makeBuilding({
+    const position = [wellX, wellZ];
+    if (_canBuild({
       type: 'well',
-      position: [wellX, wellZ],
-      onPoint
-    });
-    // XXX generate worms and additional buildings in NEWS directions
+      position,
+      getLand,
+      getTree
+    })) {
+      _makeBuilding({
+        type: 'well',
+        position,
+        onPoint
+      });
+    }
   }
+}
+
+function _canBuild(opts) {
+  const type = opts.type;
+  const position = opts.position;
+  const getLand = opts.getLand;
+  const getTree = opts.getTree;
+
+  const startX = position[0];
+  const startZ = position[1];
+
+  const Building = BUILDING_INDEX[type];
+  const building = new Building();
+  const dimensions = building.getDimensions();
+  const width = dimensions.width;
+  const depth = dimensions.depth;
+  for (let z = startZ; z < startZ + depth; z++) {
+    for (let x = startX; x < startX + depth; x++) {
+      if (getLand(x, z) && !getTree(x, z)) {
+        // nothing
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 function _makeBuilding(buildingType, opts) {
