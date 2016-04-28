@@ -56,8 +56,8 @@ export default class VoxelScene extends React.Component {
         }
 
         staticAtlaspackLoader({
-          jsonUrl: configJson.apiPrefix + '/img/textures/atlas.json',
-          imgUrl: configJson.apiPrefix + '/img/textures/atlas.png',
+          jsonUrl: configJson.apiPrefix + '/img/atlas.json',
+          imgUrl: configJson.apiPrefix + '/img/atlas.png',
         }, (err, atlas) => {
           if (err) {
             console.warn(err);
@@ -74,7 +74,7 @@ export default class VoxelScene extends React.Component {
         });
 
         textureLoader = voxelTextureLoader({
-          getTextureUrl: texture => configJson.apiPrefix + '/img/textures/' + texture + '.png',
+          getTextureUrl: texture => configJson.apiPrefix + '/img/' + texture + '.png',
           THREE
         });
         textureLoader.loadTextures([
@@ -135,7 +135,7 @@ export default class VoxelScene extends React.Component {
         sky(15);
       }, 15);
 
-      avatar = voxelPlayer(game)('api/img/textures/avatar/player.png');
+      avatar = voxelPlayer(game)('api/img/avatar/player.png');
       avatar.position.set(INITIAL_POSITION[0], INITIAL_POSITION[1], INITIAL_POSITION[2]);
       avatar.possess();
       game.on('tick', function(dt) {
