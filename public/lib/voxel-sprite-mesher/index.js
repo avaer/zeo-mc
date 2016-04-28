@@ -12,7 +12,7 @@ const SCALE = 0.075;
 const BYTES_PER_PIXEL = 4;
 const CUBE_VERTICES = 108;
 
-function voxelSpriteMesher(data, textureLoader, THREE) {
+function voxelSpriteMesher(data, textureAtlas, THREE) {
   const {vertices: verticesData, faces: facesData} = data;
   const numFaces = facesData.length;
   if (numFaces > 0) {
@@ -23,13 +23,10 @@ function voxelSpriteMesher(data, textureLoader, THREE) {
 
       const mesh = (() => {
         const geometry = (() => {
-          const textureUrl = textureLoader.getTextureUrl('items/' + item);
-          const texture = textureLoader.getCachedTexture(textureUrl);
-          if (!texture) {
-            throw new Error('failed to load cached texture: ' + JSON.stringify(item));
+          const imageData = textureAtlas.getImageData(item);
+          if (!imageData) {
+            throw new Error('failed to load texture image data: ' + JSON.stringify(item));
           }
-
-          const imageData = textureLoader.getImageData(texture);
           const {data: pixelData, width, height} = imageData;
 
           function getPixel(x, y) {

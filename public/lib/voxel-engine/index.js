@@ -77,7 +77,6 @@ function Game(opts) {
   this.playerHeight = opts.playerHeight || 1.62
   this.meshType = opts.meshType || 'surfaceMesh'
   this.textureAtlas = opts.textureAtlas
-  this.textureLoader = opts.textureLoader
 
   this.items = []
   this.voxels = voxel(this)
@@ -130,7 +129,6 @@ function Game(opts) {
   });
   this.particleShader = voxelParticleShader({
     game: this,
-    textureLoader: this.textureLoader
   });
 
   this.worldTicker = voxelWorldTicker(this);

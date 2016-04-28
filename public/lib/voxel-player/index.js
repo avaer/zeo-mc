@@ -110,7 +110,7 @@ module.exports = function (game) {
           const items = [variant]
           const dims = [1, 1, 1];
           const data = {items, dims};
-          const mesh = voxelSpriteRenderer(data, game.textureLoader, game.THREE);
+          const mesh = voxelSpriteRenderer(data, game.textureAtlas, game.THREE);
           // mesh.material = game.planeShader.material;
           mesh.position.set(1, -8, -3);
           mesh.rotation.set(0, 0, -Math.PI/2);

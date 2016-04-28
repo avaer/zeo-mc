@@ -1,5 +1,12 @@
 "use strict";
 
+const ITEMS = [
+  'greenapple',
+  'flare',
+  'portalred',
+  'portalblue',
+];
+
 const WEAPON_NAMES = [
   'portalred',
   'portalblue',
@@ -14,6 +21,7 @@ const WEAPONS = (() => {
 })();
 
 const api = {
+  ITEMS,
   WEAPONS,
 };
 

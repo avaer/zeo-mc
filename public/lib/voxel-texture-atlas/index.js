@@ -59,6 +59,32 @@ class VoxelTextureAtlas {
     return {width, height};
   }
 
+  getImageData(texture) {
+    const atlasDimensions = this.getAtlasDimensions();
+    const {width: atlasWidth, height: atlasHeight} = atlasDimensions;
+
+    const atlasUvs = this.getAtlasUvs(texture);
+
+    const uStart = atlasUvs[0][0];
+    const uEnd = atlasUvs[1][0];
+    const uWidth = uEnd - uStart;
+
+    const vStart = atlasUvs[0][1];
+    const vEnd = atlasUvs[3][1];
+    const vHeight = vEnd - vStart;
+
+    const x = atlasWidth * uStart;
+    const y = atlasWidth * vStart;
+    const width = atlasWidth * uWidth;
+    const height = atlasHeight * vHeight;
+
+    const {_atlas: atlas} = this;
+    const {canvas} = atlas;
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(x, y, width, height);
+    return imageData;
+  }
+
   _buildTexture() {
     const {_atlas: atlas, _THREE: THREE} = this;
     const {canvas} = atlas;

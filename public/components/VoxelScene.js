@@ -7,7 +7,6 @@ import staticAtlaspackLoader from '../../lib/static-atlaspack/loader';
 import voxelEngine from '../lib/voxel-engine/index';
 import voxelWorkerPool from '../lib/voxel-worker-pool/index';
 import voxelTextureAtlas from '../lib/voxel-texture-atlas/index';
-import voxelTextureLoader from '../lib/voxel-texture-loader/index';
 import voxelSky from '../lib/voxel-sky/index';
 import voxelClouds from '../lib/voxel-clouds/index';
 import voxelPlayer from '../lib/voxel-player/index';
@@ -44,53 +43,26 @@ export default class VoxelScene extends React.Component {
   componentDidMount() {
     const {width, height, engines} = this.props;
 
-    let textureAtlas, textureLoader, game, avatar;
+    let textureAtlas, game, avatar;
 
     const loadTextures = cb => {
-      (() => {
-        let pending = 2;
-        function pend() {
-          if (--pending === 0) {
-            cb();
-          }
+      staticAtlaspackLoader({
+        jsonUrl: configJson.apiPrefix + '/img/atlas.json',
+        imgUrl: configJson.apiPrefix + '/img/atlas.png',
+      }, (err, atlas) => {
+        if (err) {
+          console.warn(err);
         }
 
-        staticAtlaspackLoader({
-          jsonUrl: configJson.apiPrefix + '/img/atlas.json',
-          imgUrl: configJson.apiPrefix + '/img/atlas.png',
-        }, (err, atlas) => {
-          if (err) {
-            console.warn(err);
-          }
-
-          textureAtlas = voxelTextureAtlas({
-            atlas,
-            materials: BLOCKS.MATERIALS,
-            frames: BLOCKS.FRAMES,
-            THREE
-          });
-
-          pend();
-        });
-
-        textureLoader = voxelTextureLoader({
-          getTextureUrl: texture => configJson.apiPrefix + '/img/' + texture + '.png',
+        textureAtlas = voxelTextureAtlas({
+          atlas,
+          materials: BLOCKS.MATERIALS,
+          frames: BLOCKS.FRAMES,
           THREE
         });
-        textureLoader.loadTextures([
-          'particles/rain',
-          'items/greenapple',
-          'items/flare',
-          'items/portalred',
-          'items/portalblue',
-        ], err => {
-          if (err) {
-            console.warn(err);
-          }
 
-          pend();
-        });
-      })();
+        cb();
+      });
     };
 
     const initializeWorkers = cb => {
@@ -113,7 +85,6 @@ export default class VoxelScene extends React.Component {
         width,
         height,
         textureAtlas,
-        textureLoader,
         generateChunks: false,
         chunkSize: CHUNK_SIZE,
         chunkDistance: CHUNK_DISTANCE,

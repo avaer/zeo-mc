@@ -48,7 +48,7 @@ const routes = [
     }
   },
   {
-    path: '/img/textures/atlas.json',
+    path: '/img/atlas.json',
     handler: (req, res, next) => {
       _getAtlas((err, atlas) => {
         if (!err) {
@@ -61,7 +61,7 @@ const routes = [
     }
   },
   {
-    path: '/img/textures/atlas.png',
+    path: '/img/atlas.png',
     handler: (req, res, next) => {
       _getAtlas((err, atlas) => {
         if (!err) {
