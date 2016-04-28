@@ -37,7 +37,7 @@ var unmainTextures = [
   /forest/,
   /jungle/
 ];
-var files = fs.readdirSync('../../public/img/textures/blocks/').filter(function(file) {
+var files = fs.readdirSync('../../assets/img/blocks/').filter(function(file) {
   return /\.png$/.test(file);
 }).map(function(file) {
   return file.replace(/\.png$/, '');
