@@ -7,7 +7,7 @@ const BLOCK_MODELS_INDEX = (() => {
   for (let k in BLOCK_MODELS) {
     const blockModel = BLOCK_MODELS[k];
     const {index} = blockModel;
-    result[index] = blockModel;
+    result[index] = k;
   }
   return result;
 })();

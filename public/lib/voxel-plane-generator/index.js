@@ -88,14 +88,6 @@ voxelPlaneGenerator.getMesh = function({vegetations, effects}, dims, voxelAsync)
   return {vertices, faces};
 };
 
-voxelPlaneGenerator.getNormals = function(vertices) {
-  const geometry = new THREE.BufferGeometry();
-  geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-  geometry.computeVertexNormals();
-  const normals = geometry.getAttribute('normal').array;
-  return normals;
-};
-
 voxelPlaneGenerator.getVertices = function(verticesData) {
   const numFaces = verticesData.length / 4;
   const result = new Float32Array(numFaces * FACE_VERTICES * 3);
@@ -136,6 +128,14 @@ voxelPlaneGenerator.getVertices = function(verticesData) {
   }
 
   return result;
+};
+
+voxelPlaneGenerator.getNormals = function(vertices) {
+  const geometry = new THREE.BufferGeometry();
+  geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+  geometry.computeVertexNormals();
+  const normals = geometry.getAttribute('normal').array;
+  return normals;
 };
 
 voxelPlaneGenerator.getFrameUvs = function(facesData, voxelAsync) {

@@ -1,5 +1,6 @@
 var voxel = require('../voxel/index')
 var voxelBlockRenderer = require('../voxel-block-renderer/index')
+var voxelBlockModelRenderer = require('../voxel-block-model-renderer/index')
 var voxelPlaneRenderer = require('../voxel-plane-renderer/index')
 var voxelParticleRenderer = require('../voxel-particle-renderer/index')
 var voxelModelRenderer = require('../voxel-model-renderer/index')
@@ -7,6 +8,7 @@ var voxelRaycast = require('../voxel-raycast/index')
 var voxelAsync = require('../voxel-async/index')
 var voxelUtils = require('../../../lib/voxel-utils/index')
 var voxelBlockShader = require('../voxel-block-shader/index')
+var voxelBlockModelShader = require('../voxel-block-model-shader/index')
 var voxelPlaneShader = require('../voxel-plane-shader/index')
 var voxelParticleShader = require('../voxel-particle-shader/index')
 var voxelWorldTicker = require('../voxel-world-ticker/index')
@@ -122,6 +124,10 @@ function Game(opts) {
     game: this,
     textureAtlas: this.textureAtlas,
     transparent: false
+  });
+  this.blockModelShader = voxelBlockModelShader({
+    game: this,
+    textureAtlas: this.textureAtlas
   });
   this.planeShader = voxelPlaneShader({
     game: this,
@@ -335,6 +341,7 @@ Game.prototype.setValue = function(position, value) {
         const metadata = {model, direction, depth};
         this.voxelUtils.setBlockMetadata(chunk.metadata.buffer, index, metadata);
         mesh.blocksNeedUpdate = true;
+        mesh.blockModelsNeedUpdate = true;
       } else if (type === 'vegetation') {
         const x = this.voxelUtils.snapCoordinate(position[0]);
         const y = this.voxelUtils.snapCoordinate(position[1]);
@@ -363,6 +370,7 @@ Game.prototype.deleteValue = function(value) {
     chunk.voxels[index] = 0;
     this.voxelUtils.clearBlockMetadata(chunk.metadata.buffer, index);
     mesh.blocksNeedUpdate = true;
+    mesh.blockModelsNeedUpdate = true;
   } else if (type === 'vegetation') {
     chunk.vegetations[index] = null;
     mesh.planesNeedUpdate = true;
@@ -689,10 +697,12 @@ Game.prototype.showChunk = function(chunk) {
     mesh = new THREE.Object3D();
 
     mesh.blockMesh = null;
+    mesh.blockModelMesh = null;
     mesh.planeMesh = null;
     mesh.modelMesh = null;
 
     mesh.blocksNeedUpdate = true;
+    mesh.blockModelsNeedUpdate = true;
     mesh.planesNeedUpdate = true;
     mesh.particlesNeedUpdate = true;
     mesh.modelsNeedUpdate = true;
@@ -701,7 +711,7 @@ Game.prototype.showChunk = function(chunk) {
     mesh.position.set(bounds[0][0], bounds[0][1], bounds[0][2]);
   }
 
-  const {blocksNeedUpdate, planesNeedUpdate, particlesNeedUpdate, modelsNeedUpdate} = mesh;
+  const {blocksNeedUpdate, blockModelsNeedUpdate, planesNeedUpdate, particlesNeedUpdate, modelsNeedUpdate} = mesh;
 
   const worldTick = this.getWorldTick();
 
@@ -725,6 +735,28 @@ Game.prototype.showChunk = function(chunk) {
       mesh.blockMesh = null;
     }
     mesh.blocksNeedUpdate = false;
+  }
+
+  if (blockModelsNeedUpdate) {
+    const blockModelMesh = (() => {
+      const blockModelMesh = voxelBlockModelRenderer(chunk, this.textureAtlas, THREE);
+      if (blockModelMesh) {
+        blockModelMesh.material = this.blockModelShader.material;
+        return blockModelMesh;
+      } else {
+        return null;
+      }
+    })();
+    if (mesh.blockModelMesh) {
+      mesh.remove(mesh.blockModelMesh);
+    }
+    if (blockModelMesh) {
+      mesh.add(blockModelMesh);
+      mesh.blockModelMesh = blockModelMesh;
+    } else {
+      mesh.blockModelMesh = null;
+    }
+    mesh.blockModelsNeedUpdate = false;
   }
 
   if (planesNeedUpdate) {
