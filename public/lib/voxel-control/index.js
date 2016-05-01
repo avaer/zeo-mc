@@ -181,7 +181,7 @@ proto.tick = function(dt) {
   } else if (this.state.flare) {
     this.onhold({type: 'item', variant: 'flare'});
   } else if (this.state.torch) {
-    this.onhold({type: 'block', variant: {block: BLOCKS['torch_on'], model: BLOCK_MODELS['normal_torch'].index}});
+    this.onhold({type: 'block', variant: {block: BLOCKS['torch_on'], model: BLOCK_MODELS['normal_torch'].index + 1}});
   } else if (this.state.portalred) {
     this.onhold({type: 'item', variant: 'portalred'});
   } else if (this.state.portalblue) {
