@@ -1,5 +1,11 @@
 module.exports = control
 
+const metadata = require('../../../metadata/index');
+const Blocks = metadata.BLOCKS;
+const BLOCKS = Blocks.BLOCKS;
+const BlockModels = metadata.BLOCK_MODELS;
+const BLOCK_MODELS = BlockModels.BLOCK_MODELS;
+
 var Stream = require('stream').Stream
 
 function control(control_state, opts) {
@@ -171,13 +177,15 @@ proto.tick = function(dt) {
   }
 
   if (this.state.greenapple) {
-    this.onhold('greenapple');
+    this.onhold({type: 'item', variant: 'greenapple'});
   } else if (this.state.flare) {
-    this.onhold('flare');
+    this.onhold({type: 'item', variant: 'flare'});
+  } else if (this.state.torch) {
+    this.onhold({type: 'block', variant: {block: BLOCKS['torch_on'], model: BLOCK_MODELS['normal_torch'].index}});
   } else if (this.state.portalred) {
-    this.onhold('portalred');
+    this.onhold({type: 'item', variant: 'portalred'});
   } else if (this.state.portalblue) {
-    this.onhold('portalblue');
+    this.onhold({type: 'item', variant: 'portalblue'});
   }
 }
 

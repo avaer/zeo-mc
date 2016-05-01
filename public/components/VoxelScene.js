@@ -270,13 +270,11 @@ export default class VoxelScene extends React.Component {
           lastMenu = now;
         });
 
-        game.on('hold', variant => {
+        game.on('hold', value => {
           if (holdValue) {
             stopHolding();
           }
 
-          const type = 'item';
-          const value = {type, variant};
           startHolding(value);
         });
       }

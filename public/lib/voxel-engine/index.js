@@ -428,8 +428,9 @@ Game.prototype.defaultButtons = {
   '<tab>': 'menu',
   'Q': 'greenapple',
   'E': 'flare',
+  'C': 'torch',
   'Z': 'portalred',
-  'C': 'portalblue',
+  'X': 'portalblue',
 }
 
 // used in methods that have identity function(pos) {}

@@ -159,6 +159,7 @@ function normalizeBlockModels(blockModels) {
   }
 
   var result = {};
+  var numModels = 0;
   for (var k in blockModels) {
     var blockModel = blockModels[k];
     var blockModelPath = _getPath(blockModel);
@@ -166,7 +167,10 @@ function normalizeBlockModels(blockModels) {
     var textureMap = _getTextureMap(blockModelPath);
     if (textureMap) {
       var geometry = _buildGeometry(blockModelPath, elements, textureMap);
-      result[k] = geometry;
+      if (geometry) {
+        var index = numModels++;
+        result[k] = {index, geometry};
+      }
     }
   }
   return result;
