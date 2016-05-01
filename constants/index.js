@@ -17,5 +17,6 @@ api.TREE_TEXTURES = [
   'spruce',
 ];
 api.MATERIAL_FRAMES = 28;
+api.BLOCK_METADATA_BYTES = 3;
 
 module.exports = api;
