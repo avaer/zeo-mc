@@ -104,23 +104,24 @@ function normalizeBlockModels(blockModels) {
     var result = [];
     var isDangling = false;
     elements.forEach(element => {
-      var from = element.from;
-      var to = element.to;
-      var faces = element.faces;
+      var elementFrom = element.from;
+      var elementTo = element.to;
+      var elementFaces = element.faces;
 
       var position = [
-        (from[0] + to[0]) / 2,
-        (from[1] + to[1]) / 2,
-        (from[2] + to[2]) / 2,
+        (elementFrom[0] + elementTo[0]) / 2,
+        (elementFrom[1] + elementTo[1]) / 2,
+        (elementFrom[2] + elementTo[2]) / 2,
       ];
       var dimensions = [
-        to[0] - from[0],
-        to[1] - from[1],
-        to[2] - from[2],
+        elementTo[0] - elementFrom[0],
+        elementTo[1] - elementFrom[1],
+        elementTo[2] - elementFrom[2],
       ];
       // XXX make sure this order is right
-      var uv = ['west', 'east', 'bottom', 'top', 'south', 'north'].map(faceKey => {
-        var face = faces[faceKey];
+      // geometry order: right, left, top, bottom, back, front
+      var faces = ['east', 'west', 'up', 'down', 'south', 'north'].map(faceKey => {
+        var face = elementFaces[faceKey];
         if (face) {
           var faceUv = face.uv;
           var faceTexture = face.texture;
@@ -148,7 +149,7 @@ function normalizeBlockModels(blockModels) {
         }
       });
 
-      var geometry = {position, dimensions, uv};
+      var geometry = {position, dimensions, faces};
       result.push(geometry);
     });
     if (!isDangling) {

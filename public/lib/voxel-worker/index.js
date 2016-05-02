@@ -80,7 +80,7 @@ function generate(position) {
     _cachedBlockMesh.frameUvs.buffer,
     _cachedBlockModelMesh.vertices.buffer,
     _cachedBlockModelMesh.normals.buffer,
-    _cachedBlockModelMesh.uvs.buffer,
+    _cachedBlockModelMesh.faceUvs.buffer,
     _cachedPlaneMesh.vertices.buffer,
     _cachedPlaneMesh.normals.buffer,
     _cachedPlaneMesh.frameUvs.buffer,
