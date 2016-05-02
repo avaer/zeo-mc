@@ -20,6 +20,4 @@ const api = {
   GRADIENTS,
 };
 
-global.metadata = api; // XXX
-
 module.exports = api;

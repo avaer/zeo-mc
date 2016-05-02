@@ -118,7 +118,7 @@ voxelBlockModelGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync
 voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
   const {positions, dimensions, faces} = mesh;
 
-  const numFaces = (() => { // XXX
+  const numFaces = (() => {
     let result = 0;
     for (let i = 0; i < faces.length; i++) {
       const facesSpec = faces[i];
@@ -131,7 +131,6 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
     }
     return result;
   })();
-  // const numFaces = positions.length * 6;
 
   const vertices = new Float32Array(numFaces * VERTICES_SIZE_PER_FACE);
   const normals = new Float32Array(numFaces * NORMALS_SIZE_PER_FACE);
@@ -151,7 +150,7 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
 
     // geoemtry order: east, west, up, down, south, north
     for (let j = 0; j < 6; j++) {
-      const faceSpec = facesSpec[j]; // XXX
+      const faceSpec = facesSpec[j];
       if (faceSpec) {
         vertices.set(
           geometryVertices.slice(j * VERTICES_SIZE_PER_FACE, (j + 1) * VERTICES_SIZE_PER_FACE),
@@ -163,7 +162,7 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
           faceIndex * NORMALS_SIZE_PER_FACE
         );
 
-        const faceUvsData = (() => { // XXX
+        const faceUvsData = (() => {
           const result = new Float32Array(FACE_UVS_SIZE_PER_FACE);
           const textureUvs = voxelTextureAtlas.getAtlasUvs(voxelAsync.initData.atlasUvs, faceSpec.texture);
 
@@ -180,29 +179,29 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
           const faceSpecUvs = faceSpec.uv || [0, 0, textureWidth, textureHeight];
           const projectedTextureUvs = [
             textureUStart + (faceSpecUvs[0] / textureWidth) * textureUWidth,
-            textureVStart + (faceSpecUvs[1] / textureHeight) * textureVHeight,
+            1 - (textureVStart + (faceSpecUvs[1] / textureHeight) * textureVHeight),
             textureUStart + (faceSpecUvs[2] / textureWidth) * textureUWidth,
-            textureVStart + (faceSpecUvs[3] / textureHeight) * textureVHeight,
+            1 - (textureVStart + (faceSpecUvs[3] / textureHeight) * textureVHeight),
           ];
 
           // abd
           result[0] = projectedTextureUvs[0];
-          result[1] = projectedTextureUvs[1];
+          result[1] = projectedTextureUvs[3];
 
-          result[2] = projectedTextureUvs[2];
+          result[2] = projectedTextureUvs[0];
           result[3] = projectedTextureUvs[1];
 
-          result[4] = projectedTextureUvs[0];
+          result[4] = projectedTextureUvs[2];
           result[5] = projectedTextureUvs[3];
 
           // bcd
-          result[6] = projectedTextureUvs[2];
+          result[6] = projectedTextureUvs[0];
           result[7] = projectedTextureUvs[1];
 
           result[8] = projectedTextureUvs[2];
-          result[9] = projectedTextureUvs[3];
+          result[9] = projectedTextureUvs[1];
 
-          result[10] = projectedTextureUvs[0];
+          result[10] = projectedTextureUvs[2];
           result[11] = projectedTextureUvs[3];
 
           return result;
