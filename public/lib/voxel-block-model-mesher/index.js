@@ -1,13 +1,14 @@
 import {FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES} from '../../constants/index';
 
 function voxelBlockModelMesher(data, textureAtlas, THREE) {
-  const {vertices, normals, uvs/*, frameUvs */} = data;
+  const {vertices, normals, faceUvs/*, frameUvs */} = data;
 
   if (vertices.length > 0) {
     const geometry = (() => {
       const geometry = new THREE.BufferGeometry();
       geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
       geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
+      geometry.addAttribute('uv', new THREE.BufferAttribute(faceUvs, 2));
       // voxelPlaneMesher.applyFrameUvs(geometry, frameUvs, THREE);
       return geometry;
     })();

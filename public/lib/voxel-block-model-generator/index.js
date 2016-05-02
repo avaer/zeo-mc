@@ -17,7 +17,7 @@ function voxelBlockModelGenerator(voxelAsync) {
     const mesh = voxelBlockModelGenerator.getMesh({voxels, metadata}, dims, voxelAsync, vu);
     // const {vertices: verticesData, faces: facesData} = mesh;
 
-    const geometry = voxelBlockModelGenerator.getGeometry(mesh);
+    const geometry = voxelBlockModelGenerator.getGeometry(mesh, voxelAsync);
     const {vertices, normals, faceUvs} = geometry;
     // const normals = voxelBlockModelGenerator.getNormals(vertices);
     // const frameUvs = voxelBlockModelGenerator.getFrameUvs(facesData, voxelAsync);
@@ -42,11 +42,14 @@ voxelBlockModelGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync
           if (blockModel) {
             const blockModelName = BLOCK_MODEL_INDEX[blockModel - 1];
             const blockModelSpec = BLOCK_MODELS[blockModelName];
-            const {geometry: geometrySpec} = blockModelSpec;
-            const {position: positionSpec, dimensions: dimensionsSpec, faces: facesSpec} = geometrySpec;
-            positions.push([x + positionSpec[0], y + positionSpec[1], z + positionSpec[2]]);
-            dimensions.push(dimensionsSpec);
-            faces.push(facesSpec);
+            const {geometry: geometrySpecs} = blockModelSpec;
+            for (let i = 0; i < geometrySpecs.length; i++) {
+              const geometrySpec = geometrySpecs[i];
+              const {position: positionSpec, dimensions: dimensionsSpec, faces: facesSpec} = geometrySpec;
+              positions.push([x + positionSpec[0], y + positionSpec[1], z + positionSpec[2]]);
+              dimensions.push(dimensionsSpec);
+              faces.push(facesSpec);
+            }
           }
         }
 
@@ -112,7 +115,7 @@ voxelBlockModelGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync
   return {positions, dimensions, faces};
 };
 
-voxelBlockModelGenerator.getGeometry = function(mesh) {
+voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
   const {positions, dimensions, faces} = mesh;
 
   const numFaces = (() => {
@@ -133,6 +136,7 @@ voxelBlockModelGenerator.getGeometry = function(mesh) {
   const normals = new Float32Array(numFaces * NORMALS_SIZE_PER_FACE);
   const faceUvs = new Float32Array(numFaces * FACE_UVS_SIZE_PER_FACE);
 
+  let faceIndex = 0;
   for (let i = 0; i < positions.length; i++) {
     const position = positions[i];
     const dimension = dimensions[i];
@@ -141,15 +145,13 @@ voxelBlockModelGenerator.getGeometry = function(mesh) {
     const cubeGeometry = new THREE.CubeGeometry(dimension[0], dimension[1], dimension[2]);
     cubeGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(position[0], position[1], position[2]));
     const geometry = new THREE.BufferGeometry().fromGeometry(cubeGeometry);
-    const geometryVertices = geometry.getAttribute('position');
-    const geometryNormals = geometry.getAttribute('normal');
-    const geometryUvs = geometry.getAttribute('uv');
+    const geometryVertices = geometry.getAttribute('position').array;
+    const geometryNormals = geometry.getAttribute('normal').array;
+    const geometryUvs = geometry.getAttribute('uv').array;
 
     for (let j = 0; j < 6; j++) {
       const faceSpec = facesSpec[j];
       if (faceSpec) {
-        const faceIndex = i * 6 + j;
-
         vertices.set(
           geometryVertices.slice(j * VERTICES_SIZE_PER_FACE, (j + 1) * VERTICES_SIZE_PER_FACE),
           faceIndex * VERTICES_SIZE_PER_FACE
@@ -162,7 +164,7 @@ voxelBlockModelGenerator.getGeometry = function(mesh) {
 
         const faceUvsData = (() => {
           const result = new Float32Array(FACE_UVS_SIZE_PER_FACE);
-          const textureUvs = voxelTextureAtlas.getAtlasUvs(voxelAsync.initData.atlasUvs, texture);
+          const textureUvs = voxelTextureAtlas.getAtlasUvs(voxelAsync.initData.atlasUvs, faceSpec.texture);
 
           const textureUStart = textureUvs[0][0];
           const textureUEnd = textureUvs[1][0];
@@ -220,6 +222,8 @@ voxelBlockModelGenerator.getGeometry = function(mesh) {
           faceUvsData,
           faceIndex * FACE_UVS_SIZE_PER_FACE
         );
+
+        faceIndex++;
       }
     }
   }
