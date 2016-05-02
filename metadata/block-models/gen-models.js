@@ -123,7 +123,6 @@ function normalizeBlockModels(blockModels) {
         elementToScaled[1] - elementFromScaled[1],
         elementToScaled[2] - elementFromScaled[2],
       ];
-      // XXX make sure this order is right
       // geometry order: right, left, top, bottom, back, front
       var faces = ['east', 'west', 'up', 'down', 'south', 'north'].map(faceKey => {
         var face = elementFaces[faceKey];

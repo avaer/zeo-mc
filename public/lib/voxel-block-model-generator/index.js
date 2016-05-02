@@ -118,7 +118,7 @@ voxelBlockModelGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync
 voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
   const {positions, dimensions, faces} = mesh;
 
-  /* const numFaces = (() => { // XXX
+  const numFaces = (() => { // XXX
     let result = 0;
     for (let i = 0; i < faces.length; i++) {
       const facesSpec = faces[i];
@@ -130,8 +130,8 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
       }
     }
     return result;
-  })(); */
-  const numFaces = positions.length * 6;
+  })();
+  // const numFaces = positions.length * 6;
 
   const vertices = new Float32Array(numFaces * VERTICES_SIZE_PER_FACE);
   const normals = new Float32Array(numFaces * NORMALS_SIZE_PER_FACE);
@@ -149,9 +149,9 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
     const geometryVertices = geometry.getAttribute('position').array;
     const geometryNormals = geometry.getAttribute('normal').array;
 
+    // geoemtry order: east, west, up, down, south, north
     for (let j = 0; j < 6; j++) {
-      // const faceSpec = facesSpec[j]; // XXX
-      const faceSpec = true;
+      const faceSpec = facesSpec[j]; // XXX
       if (faceSpec) {
         vertices.set(
           geometryVertices.slice(j * VERTICES_SIZE_PER_FACE, (j + 1) * VERTICES_SIZE_PER_FACE),
@@ -163,7 +163,7 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
           faceIndex * NORMALS_SIZE_PER_FACE
         );
 
-        /* const faceUvsData = (() => { // XXX
+        const faceUvsData = (() => { // XXX
           const result = new Float32Array(FACE_UVS_SIZE_PER_FACE);
           const textureUvs = voxelTextureAtlas.getAtlasUvs(voxelAsync.initData.atlasUvs, faceSpec.texture);
 
@@ -177,52 +177,46 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
           const textureVHeight = textureVEnd - textureVStart;
           const textureHeight = textureVHeight * voxelAsync.initData.atlasHeight;
 
-          const faceSpecUvs = faceSpec.uv || [
-            [0, 0],
-            [textureWidth, 0],
-            [textureWidth, textureHeight],
-            [0, textureHeight],
+          const faceSpecUvs = faceSpec.uv || [0, 0, textureWidth, textureHeight];
+          const projectedTextureUvs = [
+            textureUStart + (faceSpecUvs[0] / textureWidth) * textureUWidth,
+            textureVStart + (faceSpecUvs[1] / textureHeight) * textureVHeight,
+            textureUStart + (faceSpecUvs[2] / textureWidth) * textureUWidth,
+            textureVStart + (faceSpecUvs[3] / textureHeight) * textureVHeight,
           ];
-
-          const projectedTextureUvs = (() => {
-            const result = Array(4);
-            for (let i = 0; i < 4; i++) {
-              const textureUv = textureUvs[i];
-              const faceSpecUv = faceSpecUvs[i];
-              result[i] = [
-                textureUStart + (faceSpecUv[0] / textureWidth) * textureUWidth,
-                textureVStart + (faceSpecUv[1] / textureHeight) * textureVHeight
-              ];
-            }
-            return result;
-          })();
+          /* const textureUvPoints = [
+            [projectedTextureUvs[0], projectedTextureUvs[1]],
+            [projectedTextureUvs[2], projectedTextureUvs[1]],
+            [projectedTextureUvs[2], projectedTextureUvs[3]],
+            [projectedTextureUvs[0], projectedTextureUvs[3]],
+          ]; */
 
           // abd
-          result[0] = projectedTextureUvs[0][0];
-          result[1] = projectedTextureUvs[0][1];
+          result[0] = projectedTextureUvs[0];
+          result[1] = projectedTextureUvs[1];
 
-          result[2] = projectedTextureUvs[1][0];
-          result[3] = projectedTextureUvs[1][1];
+          result[2] = projectedTextureUvs[2];
+          result[3] = projectedTextureUvs[1];
 
-          result[4] = projectedTextureUvs[3][0];
-          result[5] = projectedTextureUvs[3][1];
+          result[4] = projectedTextureUvs[0];
+          result[5] = projectedTextureUvs[3];
 
           // bcd
-          result[6] = projectedTextureUvs[1][0];
-          result[7] = projectedTextureUvs[1][1];
+          result[6] = projectedTextureUvs[2];
+          result[7] = projectedTextureUvs[1];
 
-          result[8] = projectedTextureUvs[2][0];
-          result[9] = projectedTextureUvs[2][1];
+          result[8] = projectedTextureUvs[2];
+          result[9] = projectedTextureUvs[3];
 
-          result[10] = projectedTextureUvs[3][0];
-          result[11] = projectedTextureUvs[3][1];
+          result[10] = projectedTextureUvs[0];
+          result[11] = projectedTextureUvs[3];
 
           return result;
         })();
         faceUvs.set(
           faceUvsData,
           faceIndex * FACE_UVS_SIZE_PER_FACE
-        ); */
+        );
 
         faceIndex++;
       }
