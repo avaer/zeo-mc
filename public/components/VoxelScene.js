@@ -74,7 +74,9 @@ export default class VoxelScene extends React.Component {
         _blockMeshFaceFrameUvs: blockMeshFaceFrameUvs,
         _planeMeshFrameUvs: planeMeshFrameUvs
       } = textureAtlas;
-      const voxelAsyncOpts = {seed, chunkSize, atlasUvs, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs};
+      const atlasDimensions = textureAtlas.getAtlasDimensions();
+      const {width: atlasWidth, height: atlasHeight} = atlasDimensions;
+      const voxelAsyncOpts = {seed, chunkSize, atlasWidth, atlasHeight, atlasUvs, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs};
       voxelAsync.init(voxelAsyncOpts);
 
       const workerOpts = voxelAsyncOpts;

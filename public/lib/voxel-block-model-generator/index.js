@@ -114,12 +114,6 @@ voxelBlockModelGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync
 voxelBlockModelGenerator.getGeometry = function(mesh) {
   const {positions, dimensions, faces} = mesh;
 
-  return { // XXX
-    vertices: new Float32Array(0),
-    normals: new Float32Array(0),
-    faceUvs: new Float32Array(0),
-  };
-
   const numFaces = (() => {
     let result = 0;
     for (let i = 0; i < faces.length; i++) {
@@ -136,7 +130,7 @@ voxelBlockModelGenerator.getGeometry = function(mesh) {
 
   const vertices = new Float32Array(numFaces * VERTICES_SIZE_PER_FACE);
   const normals = new Float32Array(numFaces * NORMALS_SIZE_PER_FACE);
-  const faceUvs = new Float32Array(numFaces * UVS_SIZE_PER_FACE);
+  const faceUvs = new Float32Array(numFaces * FACE_UVS_SIZE_PER_FACE);
 
   for (let i = 0; i < positions.length; i++) {
     const position = positions[i];
@@ -154,17 +148,75 @@ voxelBlockModelGenerator.getGeometry = function(mesh) {
       const faceSpec = facesSpec[j];
       if (faceSpec) {
         const faceIndex = i * 6 + j;
+
         vertices.set(
           geometryVertices.slice(j * VERTICES_SIZE_PER_FACE, (j + 1) * VERTICES_SIZE_PER_FACE),
           faceIndex * VERTICES_SIZE_PER_FACE
         );
+
         normals.set(
           geometryNormals.slice(j * VERTICES_SIZE_PER_FACE, (j + 1) * VERTICES_SIZE_PER_FACE),
           faceIndex * NORMALS_SIZE_PER_FACE
         );
+
+        const faceUvsData = (() => {
+          const result = new Float32Array(FACE_UVS_SIZE_PER_FACE);
+          const textureUvs = voxelTextureAtlas.getAtlasUvs(voxelAsync.initData.atlasUvs, texture);
+
+          const textureUStart = textureUvs[0][0];
+          const textureUEnd = textureUvs[1][0];
+          const textureUWidth = textureUEnd - textureUStart;
+          const textureWidth = textureUWidth * voxelAsync.initData.atlasWidth;
+
+          const textureVStart = textureUvs[0][1];
+          const textureVEnd = textureUvs[2][1];
+          const textureVHeight = textureVEnd - textureVStart;
+          const textureHeight = textureVHeight * voxelAsync.initData.atlasHeight;
+
+          const faceSpecUvs = faceSpec.uv || [
+            [0, 0],
+            [textureWidth, 0],
+            [textureWidth, textureHeight],
+            [0, textureHeight],
+          ];
+
+          const projectedTextureUvs = (() => {
+            const result = Array(4);
+            for (let i = 0; i < 4; i++) {
+              const textureUv = textureUvs[i];
+              const faceSpecUv = faceSpecUvs[i];
+              result[i] = [
+                textureUStart + (faceSpecUv[0] / textureWidth) * textureUWidth,
+                textureVStart + (faceSpecUv[1] / textureHeight) * textureVHeight
+              ];
+            }
+            return result;
+          })();
+
+          // abd
+          result[0] = projectedTextureUvs[0][0];
+          result[1] = projectedTextureUvs[0][1];
+
+          result[2] = projectedTextureUvs[1][0];
+          result[3] = projectedTextureUvs[1][1];
+
+          result[4] = projectedTextureUvs[3][0];
+          result[5] = projectedTextureUvs[3][1];
+
+          // bcd
+          result[6] = projectedTextureUvs[1][0];
+          result[7] = projectedTextureUvs[1][1];
+
+          result[8] = projectedTextureUvs[2][0];
+          result[9] = projectedTextureUvs[2][1];
+
+          result[10] = projectedTextureUvs[3][0];
+          result[11] = projectedTextureUvs[3][1];
+
+          return result;
+        })();
         faceUvs.set(
-          // XXX generate this based on the textureAtals uvs
-          // geometryNormals.slice(j * VERTICES_SIZE_PER_FACE, (j + 1) * VERTICES_SIZE_PER_FACE),
+          faceUvsData,
           faceIndex * FACE_UVS_SIZE_PER_FACE
         );
       }

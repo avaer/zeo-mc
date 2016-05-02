@@ -45,18 +45,13 @@ class VoxelTextureAtlas {
     const {_atlas: atlas} = this;
     const {rect} = atlas;
     const {w: width, h: height} = rect;
-    return {width, height};
+    return voxelTextureAtlas.getAtlasDimensions(width, height);
   }
 
   getTextureDimensions(texture) {
     const atlasDimensions = this.getAtlasDimensions();
     const {width: atlasWidth, height: atlasHeight} = atlasDimensions;
-    const atlasUvs = this.getAtlasUvs(texture);
-    const uWidth = atlasUvs[1][0] - atlasUvs[0][0];
-    const vHeight = atlasUvs[3][1] - atlasUvs[0][1];
-    const width = atlasWidth * uWidth;
-    const height = atlasHeight * vHeight;
-    return {width, height};
+    return voxelTextureAtlas.getTextureDimensions(this._atlasUvs, atlasWidth, atlasHeight, texture);
   }
 
   getImageData(texture) {
@@ -265,6 +260,17 @@ class VoxelTextureAtlas {
 function voxelTextureAtlas(opts) {
   return new VoxelTextureAtlas(opts);
 }
+voxelTextureAtlas.getAtlasDimensions = function(width, height) {
+  return {width, height};
+};
+voxelTextureAtlas.getTextureDimensions = function(_atlasUvs, atlasWidth, atlasHeight, texture) {
+  const atlasUvs = voxelTextureAtlas.getAtlasUvs(_atlasUvs, texture);
+  const uWidth = atlasUvs[1][0] - atlasUvs[0][0];
+  const vHeight = atlasUvs[3][1] - atlasUvs[0][1];
+  const width = atlasWidth * uWidth;
+  const height = atlasHeight * vHeight;
+  return {width, height};
+};
 voxelTextureAtlas.getTexture = function(_texture) {
   return _texture;
 };
