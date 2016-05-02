@@ -40,10 +40,11 @@ voxelBlockModelGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync
         if (block) {
           const blockModel = vu.getBlockMetadataModel(metadata.buffer, idx);
           if (blockModel) {
-            const modelSpec = BLOCK_MODEL_INDEX[blockModel - 1];
-            const {geometry: geometrySpec} = modelSpec;
-            const {positions: positionsSpec, dimensions: dimensionsSpec, faces: facesSpec} = geometrySpec;
-            positions.push([x + positionsSpec[0], y + positionsSpec[1], z + positionsSpec[2]]);
+            const blockModelName = BLOCK_MODEL_INDEX[blockModel - 1];
+            const blockModelSpec = BLOCK_MODELS[blockModelName];
+            const {geometry: geometrySpec} = blockModelSpec;
+            const {position: positionSpec, dimensions: dimensionsSpec, faces: facesSpec} = geometrySpec;
+            positions.push([x + positionSpec[0], y + positionSpec[1], z + positionSpec[2]]);
             dimensions.push(dimensionsSpec);
             faces.push(facesSpec);
           }
