@@ -1,6 +1,8 @@
 var path = require('path');
 var fs = require('fs');
 
+var BLOCK_MODEL_SCALE = 1 / 16;
+
 function getBlockModelJsons(cb) {
   var blockModelsDirectory = path.join(__dirname, '..', '..', 'assets', 'json', 'block-models');
   var files = fs.readdirSync(blockModelsDirectory).filter(f => /\.json$/.test(f)).map(f => f.replace(/\.json$/, ''));
@@ -108,15 +110,18 @@ function normalizeBlockModels(blockModels) {
       var elementTo = element.to;
       var elementFaces = element.faces;
 
+      var elementFromScaled = [elementFrom[0] * BLOCK_MODEL_SCALE, elementFrom[1] * BLOCK_MODEL_SCALE, elementFrom[2] * BLOCK_MODEL_SCALE];
+      var elementToScaled = [elementTo[0] * BLOCK_MODEL_SCALE, elementTo[1] * BLOCK_MODEL_SCALE, elementTo[2] * BLOCK_MODEL_SCALE];
+
       var position = [
-        (elementFrom[0] + elementTo[0]) / 2,
-        (elementFrom[1] + elementTo[1]) / 2,
-        (elementFrom[2] + elementTo[2]) / 2,
+        (elementFromScaled[0] + elementToScaled[0]) / 2,
+        (elementFromScaled[1] + elementToScaled[1]) / 2,
+        (elementFromScaled[2] + elementToScaled[2]) / 2,
       ];
       var dimensions = [
-        elementTo[0] - elementFrom[0],
-        elementTo[1] - elementFrom[1],
-        elementTo[2] - elementFrom[2],
+        elementToScaled[0] - elementFromScaled[0],
+        elementToScaled[1] - elementFromScaled[1],
+        elementToScaled[2] - elementFromScaled[2],
       ];
       // XXX make sure this order is right
       // geometry order: right, left, top, bottom, back, front
