@@ -177,6 +177,11 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
           const textureHeight = textureVHeight * voxelAsync.initData.atlasHeight;
 
           const faceSpecUvs = faceSpec.uv || [0, 0, textureWidth, textureHeight];
+
+          /*
+           [0,1] []
+           []    [2,3]
+          */
           const projectedTextureUvs = [
             textureUStart + (faceSpecUvs[0] / textureWidth) * textureUWidth,
             1 - (textureVStart + (faceSpecUvs[1] / textureHeight) * textureVHeight),
@@ -184,25 +189,29 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
             1 - (textureVStart + (faceSpecUvs[3] / textureHeight) * textureVHeight),
           ];
 
+          /*
+            b c
+            a d
+          */
           // abd
           result[0] = projectedTextureUvs[0];
-          result[1] = projectedTextureUvs[3];
+          result[1] = projectedTextureUvs[1];
 
           result[2] = projectedTextureUvs[0];
-          result[3] = projectedTextureUvs[1];
+          result[3] = projectedTextureUvs[3];
 
           result[4] = projectedTextureUvs[2];
-          result[5] = projectedTextureUvs[3];
+          result[5] = projectedTextureUvs[1];
 
           // bcd
           result[6] = projectedTextureUvs[0];
-          result[7] = projectedTextureUvs[1];
+          result[7] = projectedTextureUvs[3];
 
           result[8] = projectedTextureUvs[2];
-          result[9] = projectedTextureUvs[1];
+          result[9] = projectedTextureUvs[3];
 
           result[10] = projectedTextureUvs[2];
-          result[11] = projectedTextureUvs[3];
+          result[11] = projectedTextureUvs[1];
 
           return result;
         })();
