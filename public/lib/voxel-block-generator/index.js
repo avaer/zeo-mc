@@ -67,35 +67,35 @@ voxelBlockGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync, vu)
           if (xd >= 0) {
             const aOffset = x[0]      + dimsX * x[1]          + dimsXY * x[2];
             a = voxels[aOffset];
-            aM = metadata ? vu.getBlockMetadataModel(metadata.buffer, aOffset) : 0;
+            aM = metadata ? !!vu.getBlockMetadataModel(metadata.buffer, aOffset) : true;
           } else {
             a = 0;
-            aM = 0;
+            aM = false;
           }
           if (xd < dimsD-1) {
             const bOffset = x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY;
             b = voxels[bOffset];
-            bM = metadata ? vu.getBlockMetadataModel(metadata.buffer, bOffset) : 0;
+            bM = metadata ? !!vu.getBlockMetadataModel(metadata.buffer, bOffset) : false;
           } else {
             b = 0;
-            bM = 0;
+            bM = false;
           }
 
-          if (a !== b || isTranslucent(a) || isTranslucent(b) || isModel(aM) || isModel(bM)) {
+          if (a !== b || isTranslucent(a) || isTranslucent(b)) {
             const aT = isTransparent(a);
             const bT = isTransparent(b);
 
             aT && (a = a | TRANSPARENT_MASK);
             bT && (b = b | TRANSPARENT_MASK);
 
-            // both are transparent, add to both directions
-            if (aT && bT) {
+            // both are transparent and not models, add to both directions
+            if (aT && bT && !aM && !bM) {
               // nothing
-            // if a is solid and b is not there or transparent or a model
-            } else if (a && (!b || bT || bM)) {
+            // if a is solid and not a model and b is not there or transparent or a model
+            } else if (a && !aM && (!b || bT || bM)) {
               b = 0;
-            // if b is solid and a is not there or transparent or a model
-            } else if (b && (!a || aT || aM)) {
+            // if b is solid and node a model and a is not there or transparent or a model
+            } else if (b && !bM && (!a || aT || aM)) {
               a = 0;
             // dont draw this face
             } else {
@@ -200,10 +200,6 @@ voxelBlockGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync, vu)
 
   function isTransparentMasked(v) {
     return (v & TRANSPARENT_MASK) !== 0;
-  }
-
-  function isModel(model) {
-    return !!model;
   }
 
   function isTranslucent(type) {
