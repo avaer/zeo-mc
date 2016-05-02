@@ -67,7 +67,7 @@ voxelBlockGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync, vu)
           if (xd >= 0) {
             const aOffset = x[0]      + dimsX * x[1]          + dimsXY * x[2];
             a = voxels[aOffset];
-            aM = metadata ? !!vu.getBlockMetadataModel(metadata.buffer, aOffset) : true;
+            aM = metadata ? !!vu.getBlockMetadataModel(metadata.buffer, aOffset) : false;
           } else {
             a = 0;
             aM = false;
