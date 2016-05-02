@@ -8,7 +8,7 @@ function voxelBlockModelMesher(data, textureAtlas, THREE) {
       const geometry = new THREE.BufferGeometry();
       geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
       geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
-      geometry.addAttribute('uv', new THREE.BufferAttribute(faceUvs, 2));
+      geometry.addAttribute('faceUv', new THREE.BufferAttribute(faceUvs, 2));
       // voxelPlaneMesher.applyFrameUvs(geometry, frameUvs, THREE);
       return geometry;
     })();

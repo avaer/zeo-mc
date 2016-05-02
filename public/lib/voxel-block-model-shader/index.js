@@ -1,7 +1,3 @@
-import {MATERIAL_FRAMES} from '../../constants/index';
-
-const {floor, ceil, round} = Math;
-
 function VoxelBlockModelShader(opts) {
   const {game, textureAtlas} = opts;
 
@@ -48,6 +44,10 @@ function VoxelBlockModelShader(opts) {
 
       "#endif",
 
+      // begin custom
+      // '#define USE_MAP',
+      // end custom
+
       THREE.ShaderChunk[ "common" ],
       THREE.ShaderChunk[ "uv_pars_vertex" ],
       THREE.ShaderChunk[ "uv2_pars_vertex" ],
@@ -60,21 +60,11 @@ function VoxelBlockModelShader(opts) {
       THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
       THREE.ShaderChunk[ "logdepthbuf_pars_vertex" ],
 
-      /* // begin custom
-      'uniform int frame;',
+      // begin custom
+      'attribute vec2 faceUv;',
       '',
-      _range(0, MATERIAL_FRAMES / 2).map(i => 'attribute vec4 frameUv' + i +';').join('\n'),
-      '',
-      'varying vec2 vTile;',
-      '',
-      'vec2 getTileFrame() {',
-      _range(0, MATERIAL_FRAMES).map(i =>
-      '  if (frame == ' + i + ') return frameUv' + floor(i / 2) + '.' + ((i % 2 === 0) ? 'xy' : 'zw') + ';'
-      ).join('\n'),
-      '  return vec2(0.0, 0.0);',
-      '}',
-      '',
-      // end custom */
+      'varying vec2 vFaceUv;',
+      // end custom
 
       "void main() {",
 
@@ -100,8 +90,7 @@ function VoxelBlockModelShader(opts) {
         THREE.ShaderChunk[ "shadowmap_vertex" ],
 
         // begin custom
-        // 'vTile = getTileFrame();',
-        // 'gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+        'vFaceUv = faceUv;',
         // end custom
 
       "}"
@@ -121,6 +110,10 @@ function VoxelBlockModelShader(opts) {
       "	varying vec3 vLightBack;",
 
       "#endif",
+
+      // begin custom
+      // '#define USE_MAP',
+      // end custom
 
       THREE.ShaderChunk[ "common" ],
       THREE.ShaderChunk[ "color_pars_fragment" ],
@@ -143,7 +136,7 @@ function VoxelBlockModelShader(opts) {
       // begin custom
       'uniform sampler2D tileMap;',
       '',
-      // 'varying vec2 vTile;',
+      'varying vec2 vFaceUv;',
       '',
       // end custom
 
@@ -155,16 +148,16 @@ function VoxelBlockModelShader(opts) {
 
         THREE.ShaderChunk[ "logdepthbuf_fragment" ],
 
-        THREE.ShaderChunk[ "map_fragment" ],
-        /* // begin custom
-        'vec4 texelColor = texture2D(tileMap, vTile);',
+        // begin custom
+        // THREE.ShaderChunk[ "map_fragment" ],
+        'vec4 texelColor = texture2D(tileMap, vFaceUv);',
 
         'if (texelColor.a < 0.5) discard;',
 
         // 'texelColor = mapTexelToLinear(texelColor);',
 
         'diffuseColor *= texelColor;',
-        // end custom */
+        // end custom
 
         THREE.ShaderChunk[ "color_fragment" ],
         THREE.ShaderChunk[ "alphamap_fragment" ],

@@ -122,8 +122,7 @@ function Game(opts) {
 
   this.blockShader = voxelBlockShader({
     game: this,
-    textureAtlas: this.textureAtlas,
-    transparent: false
+    textureAtlas: this.textureAtlas
   });
   this.blockModelShader = voxelBlockModelShader({
     game: this,

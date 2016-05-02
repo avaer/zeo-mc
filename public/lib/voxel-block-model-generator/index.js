@@ -184,12 +184,6 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
             textureUStart + (faceSpecUvs[2] / textureWidth) * textureUWidth,
             textureVStart + (faceSpecUvs[3] / textureHeight) * textureVHeight,
           ];
-          /* const textureUvPoints = [
-            [projectedTextureUvs[0], projectedTextureUvs[1]],
-            [projectedTextureUvs[2], projectedTextureUvs[1]],
-            [projectedTextureUvs[2], projectedTextureUvs[3]],
-            [projectedTextureUvs[0], projectedTextureUvs[3]],
-          ]; */
 
           // abd
           result[0] = projectedTextureUvs[0];
