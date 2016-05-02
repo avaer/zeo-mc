@@ -2,7 +2,7 @@ import {MATERIAL_FRAMES} from '../../constants/index';
 
 const {floor, ceil, round} = Math;
 
-function VoxelPlaneShader(opts) {
+function VoxelBlockModelShader(opts) {
   const {game, textureAtlas} = opts;
 
   this.game = game;
@@ -30,7 +30,7 @@ function VoxelPlaneShader(opts) {
 
         // begin custom
         tileMap: {type: 't', value: null}, // textures not preserved by UniformsUtils.merge(); set below instead
-        frame: {type: 'i', value: 0}
+        // frame: {type: 'i', value: 0}
         // end custom
       }
 
@@ -60,7 +60,7 @@ function VoxelPlaneShader(opts) {
       THREE.ShaderChunk[ "shadowmap_pars_vertex" ],
       THREE.ShaderChunk[ "logdepthbuf_pars_vertex" ],
 
-      // begin custom
+      /* // begin custom
       'uniform int frame;',
       '',
       _range(0, MATERIAL_FRAMES / 2).map(i => 'attribute vec4 frameUv' + i +';').join('\n'),
@@ -74,7 +74,7 @@ function VoxelPlaneShader(opts) {
       '  return vec2(0.0, 0.0);',
       '}',
       '',
-      // end custom
+      // end custom */
 
       "void main() {",
 
@@ -100,7 +100,8 @@ function VoxelPlaneShader(opts) {
         THREE.ShaderChunk[ "shadowmap_vertex" ],
 
         // begin custom
-        'vTile = getTileFrame();',
+        // 'vTile = getTileFrame();',
+        // 'gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
         // end custom
 
       "}"
@@ -142,7 +143,7 @@ function VoxelPlaneShader(opts) {
       // begin custom
       'uniform sampler2D tileMap;',
       '',
-      'varying vec2 vTile;',
+      // 'varying vec2 vTile;',
       '',
       // end custom
 
@@ -154,8 +155,8 @@ function VoxelPlaneShader(opts) {
 
         THREE.ShaderChunk[ "logdepthbuf_fragment" ],
 
-        // begin custom
-        // THREE.ShaderChunk[ "map_fragment" ],
+        THREE.ShaderChunk[ "map_fragment" ],
+        /* // begin custom
         'vec4 texelColor = texture2D(tileMap, vTile);',
 
         'if (texelColor.a < 0.5) discard;',
@@ -163,7 +164,7 @@ function VoxelPlaneShader(opts) {
         // 'texelColor = mapTexelToLinear(texelColor);',
 
         'diffuseColor *= texelColor;',
-        // end custom
+        // end custom */
 
         THREE.ShaderChunk[ "color_fragment" ],
         THREE.ShaderChunk[ "alphamap_fragment" ],
@@ -214,7 +215,7 @@ function VoxelPlaneShader(opts) {
   this.material = new THREE.ShaderMaterial(materialParams);
 }
 
-VoxelPlaneShader.prototype.setFrame = function(frame) {
+/* VoxelPlaneShader.prototype.setFrame = function(frame) {
   frame = frame % MATERIAL_FRAMES;
   this.material.uniforms.frame.value = frame;
 }
@@ -226,10 +227,10 @@ function _range(a, b) {
     result[i] = a + i;
   }
   return result;
+} */
+
+function voxelBlockModelShader(opts) {
+  return new VoxelBlockModelShader(opts);
 }
 
-function voxelPlaneShader(opts) {
-  return new VoxelPlaneShader(opts);
-}
-
-module.exports = voxelPlaneShader;
+module.exports = voxelBlockModelShader;

@@ -118,7 +118,7 @@ voxelBlockModelGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync
 voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
   const {positions, dimensions, faces} = mesh;
 
-  const numFaces = (() => {
+  /* const numFaces = (() => { // XXX
     let result = 0;
     for (let i = 0; i < faces.length; i++) {
       const facesSpec = faces[i];
@@ -130,7 +130,8 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
       }
     }
     return result;
-  })();
+  })(); */
+  const numFaces = positions.length * 6;
 
   const vertices = new Float32Array(numFaces * VERTICES_SIZE_PER_FACE);
   const normals = new Float32Array(numFaces * NORMALS_SIZE_PER_FACE);
@@ -147,10 +148,10 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
     const geometry = new THREE.BufferGeometry().fromGeometry(cubeGeometry);
     const geometryVertices = geometry.getAttribute('position').array;
     const geometryNormals = geometry.getAttribute('normal').array;
-    const geometryUvs = geometry.getAttribute('uv').array;
 
     for (let j = 0; j < 6; j++) {
-      const faceSpec = facesSpec[j];
+      // const faceSpec = facesSpec[j]; // XXX
+      const faceSpec = true;
       if (faceSpec) {
         vertices.set(
           geometryVertices.slice(j * VERTICES_SIZE_PER_FACE, (j + 1) * VERTICES_SIZE_PER_FACE),
@@ -158,11 +159,11 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
         );
 
         normals.set(
-          geometryNormals.slice(j * VERTICES_SIZE_PER_FACE, (j + 1) * VERTICES_SIZE_PER_FACE),
+          geometryNormals.slice(j * NORMALS_SIZE_PER_FACE, (j + 1) * NORMALS_SIZE_PER_FACE),
           faceIndex * NORMALS_SIZE_PER_FACE
         );
 
-        const faceUvsData = (() => {
+        /* const faceUvsData = (() => { // XXX
           const result = new Float32Array(FACE_UVS_SIZE_PER_FACE);
           const textureUvs = voxelTextureAtlas.getAtlasUvs(voxelAsync.initData.atlasUvs, faceSpec.texture);
 
@@ -221,7 +222,7 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
         faceUvs.set(
           faceUvsData,
           faceIndex * FACE_UVS_SIZE_PER_FACE
-        );
+        ); */
 
         faceIndex++;
       }
@@ -231,7 +232,7 @@ voxelBlockModelGenerator.getGeometry = function(mesh, voxelAsync) {
   return {vertices, normals, faceUvs};
 };
 
-voxelBlockModelGenerator.getVertices = function(verticesData) {
+/* voxelBlockModelGenerator.getVertices = function(verticesData) {
   const numFaces = verticesData.length / 4;
   const result = new Float32Array(numFaces * FACE_VERTICES * 3);
 
@@ -281,7 +282,7 @@ voxelBlockModelGenerator.getNormals = function(vertices) {
   return normals;
 };
 
-/* voxelBlockModelGenerator.getFrameUvs = function(facesData, voxelAsync) {
+voxelBlockModelGenerator.getFrameUvs = function(facesData, voxelAsync) {
   const numFaces = facesData.length;
   const sizePerAttribute = numFaces * FACE_VERTICES * MATERIAL_FRAMES * 2 / FRAME_UV_ATTRIBUTES;
   const result = new Float32Array(FRAME_UV_ATTRIBUTES * sizePerAttribute);
