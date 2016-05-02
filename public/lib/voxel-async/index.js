@@ -117,8 +117,9 @@ api.modelGenerator = modelGenerator;
 function clearMeshCache(chunk) {
   const {dims} = chunk;
   dims._cachedBlockMesh = null;
+  dims._cachedBlockModelMesh = null;
   dims._cachedPlaneMesh = null;
-  dims._cachedSpriteMesh = null;
+  // dims._cachedSpriteMesh = null;
 }
 api.clearMeshCache = clearMeshCache;
 
