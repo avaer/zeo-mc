@@ -1,7 +1,11 @@
 import skin from '../minecraft-skin/index';
+
 import voxelBlockRenderer from '../voxel-block-renderer/index';
+import voxelBlockModelRenderer from '../voxel-block-model-renderer/index';
 import voxelPlaneRenderer from '../voxel-plane-renderer/index';
 import voxelSpriteRenderer from '../voxel-sprite-renderer/index';
+
+import {BLOCK_METADATA_BYTES} from '../../../constants/index';
 
 module.exports = function (game) {
   var mountPoint;
@@ -72,16 +76,28 @@ module.exports = function (game) {
       const rightArmHold = (() => {
         const {type, variant} = value;
         if (type === 'block') {
+          const {block, model} = variant;
           const voxels = new Float32Array(1);
-          voxels[0] = variant.block;
+          voxels[0] = block;
           const dims = [1, 1, 1];
-          const data = {voxels, dims};
-          const mesh = voxelBlockRenderer(data, game.textureAtlas, game.THREE);
-          mesh.material = game.blockShader.material;
-          mesh.position.set(-1, -7, -3);
-          mesh.rotation.set(0, 0, -Math.PI/2);
-          mesh.scale.set(4, 4, 4);
-          return mesh;
+          const metadata = new Uint8Array(BLOCK_METADATA_BYTES);
+          game.voxelUtils.setBlockMetadataModel(metadata.buffer, 0, model);
+          const data = {voxels, metadata, dims};
+          if (!model) {
+            const mesh = voxelBlockRenderer(data, game.textureAtlas, game.THREE);
+            mesh.material = game.blockShader.material;
+            mesh.position.set(-1, -7, -3);
+            mesh.rotation.set(0, 0, -Math.PI/2);
+            mesh.scale.set(4, 4, 4);
+            return mesh;
+          } else {
+            const mesh = voxelBlockModelRenderer(data, game.textureAtlas, game.THREE);
+            mesh.material = game.blockModelShader.material;
+            mesh.position.set(0, -5, -5);
+            mesh.rotation.set(0, 0, -Math.PI/2);
+            mesh.scale.set(6, 6, 6);
+            return mesh;
+          }
         } else if (type === 'vegetation') {
           const vegetations = {
             0: [0, 0, 0, variant[3]]

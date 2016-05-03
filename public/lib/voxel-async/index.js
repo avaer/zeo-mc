@@ -1,5 +1,6 @@
 import voxelTerrain from '../../../lib/voxel-terrain/index';
 import voxelBlockGenerator from '../voxel-block-generator/index';
+import voxelBlockModelGenerator from '../voxel-block-model-generator/index';
 import voxelPlaneGenerator from '../voxel-plane-generator/index';
 import voxelParticleGenerator from '../voxel-particle-generator/index';
 import voxelSpriteGenerator from '../voxel-sprite-generator/index';
@@ -9,6 +10,7 @@ import {BLOCKS} from '../../../metadata/index';
 
 let voxelTerrainGenerate = null;
 let voxelBlockGeneratorInstance = null;
+let voxelBlockModelGeneratorInstance = null;
 let voxelPlaneGeneratorInstance = null;
 let voxelParticleGeneratorInstance = null;
 let voxelSpriteGeneratorInstance = null;
@@ -18,11 +20,12 @@ const api = {};
 
 api.initData = null;
 
-function init({seed, chunkSize, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs}) {
-  api.initData = {seed, chunkSize, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs};
+function init({seed, chunkSize, atlasWidth, atlasHeight, atlasUvs, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs}) {
+  api.initData = {seed, chunkSize, atlasWidth, atlasHeight, atlasUvs, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs};
 
   voxelTerrainGenerate = voxelTerrain({seed, chunkSize});
   voxelBlockGeneratorInstance = voxelBlockGenerator(api);
+  voxelBlockModelGeneratorInstance = voxelBlockModelGenerator(api);
   voxelPlaneGeneratorInstance = voxelPlaneGenerator(api);
   voxelParticleGeneratorInstance = voxelParticleGenerator(api);
   voxelSpriteGeneratorInstance = voxelSpriteGenerator(api);
@@ -34,10 +37,12 @@ function generateSync(position) {
   _ensureInitialized();
 
   const chunk = voxelTerrainGenerate(position);
-  const {voxels, depths, vegetations, weathers, effects, dims} = chunk;
-  dims._cachedBlockMesh = voxelBlockGeneratorInstance({voxels, depths}, dims);
+  const {voxels, metadata, vegetations, weathers, effects, /* items, */ dims} = chunk;
+  dims._cachedBlockMesh = voxelBlockGeneratorInstance({voxels, metadata}, dims);
+  dims._cachedBlockModelMesh = voxelBlockModelGeneratorInstance({voxels, metadata}, dims);
   dims._cachedPlaneMesh = voxelPlaneGeneratorInstance({vegetations, effects}, dims);
   dims._cachedParticleMesh = voxelParticleGeneratorInstance({weathers}, dims);
+  // dims._cachedSpriteMesh = voxelSpriteGeneratorInstance({items}, dims);
   return chunk;
 }
 api.generateSync = generateSync;
@@ -53,6 +58,18 @@ function blockGenerator(data, dims) {
   }
 }
 api.blockGenerator = blockGenerator;
+
+function blockModelGenerator(data, dims) {
+  _ensureInitialized();
+
+  const cachedBlockModelMesh = dims._cachedBlockModelMesh;
+  if (cachedBlockModelMesh) {
+    return cachedBlockModelMesh;
+  } else {
+    return voxelBlockModelGeneratorInstance(data, dims, {transparent: false});
+  }
+}
+api.blockModelGenerator = blockModelGenerator;
 
 function planeGenerator(data, dims) {
   _ensureInitialized();
@@ -100,8 +117,9 @@ api.modelGenerator = modelGenerator;
 function clearMeshCache(chunk) {
   const {dims} = chunk;
   dims._cachedBlockMesh = null;
+  dims._cachedBlockModelMesh = null;
   dims._cachedPlaneMesh = null;
-  dims._cachedSpriteMesh = null;
+  // dims._cachedSpriteMesh = null;
 }
 api.clearMeshCache = clearMeshCache;
 

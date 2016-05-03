@@ -1,23 +1,29 @@
 "use strict";
 
+const BlueprintBase = require('./BlueprintBase');
+
+const Blocks = require('../blocks/index');
+const BLOCKS = Blocks.BLOCKS;
+
+const NAME = 'farm';
+
 const floor = Math.floor;
 const random = Math.random;
 
 const CROPS = [
-  'seeds',
-  'wheat',
-  'carrots',
-  'potato',
-  'beetroot',
+  BLOCKS['wheat_stage_0'],
+  BLOCKS['carrots_stage_0'],
+  BLOCKS['potatoes_stage_0'],
+  BLOCKS['beetrootss_stage_0'],
 ];
 
 const VARIANTS = {
   small: cropType => ([
     {
       legend: {
-        'W': 'wood',
-        'F': 'farmland',
-        '~': 'water',
+        'W': {type: BLOCKS['log_oak']},
+        'F': {type: BLOCKS['farmland_dry']},
+        '~': {type: BLOCKS['water_still']},
       },
       layout: [
         ['W', 'W', 'W', 'W', 'W', 'W', 'W'],
@@ -33,7 +39,7 @@ const VARIANTS = {
     },
     {
       legend: {
-        'C': CROPS[cropType],
+        'C': {type: CROPS[cropType], model: 'crop'},
       },
       layout: [
         [' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -51,9 +57,9 @@ const VARIANTS = {
   large: cropType => ([
     {
       legend: {
-        'W': 'wood',
-        'F': 'farmland',
-        '~': 'water',
+        'W': {type: BLOCKS['log_oak']},
+        'F': {type: BLOCKS['farmland_dry']},
+        '~': {type: BLOCKS['water_Still']},
       },
       layout: [
         ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
@@ -69,7 +75,7 @@ const VARIANTS = {
     },
     {
       legend: {
-        'C': CROPS[cropType],
+        'C': {type: CROPS[cropType], model: 'crop'},
       },
       layout: [
         [' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -87,8 +93,10 @@ const VARIANTS = {
 };
 const VARIANT_KEYS = Object.keys(VARIANTS);
 
-class Farm {
+class Farm extends BlueprintBase {
   constructor(p) {
+    super();
+
     p = p || [];
     const p1 = typeof p[0] !== 'undefined' ? p[0] : floor(random() * VARIANT_KEYS.length);
     const p2 = typeof p[1] !== 'undefined' ? p[1] : floor(random() * CROPS.length);
@@ -100,5 +108,6 @@ class Farm {
     this.layers = variant;
   }
 }
+Farm.NAME = NAME;
 
 module.exports = Farm;

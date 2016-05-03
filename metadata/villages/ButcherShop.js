@@ -1,13 +1,20 @@
 "use strict";
 
+const BlueprintBase = require('./BlueprintBase');
+
+const Blocks = require('../blocks/index');
+const BLOCKS = Blocks.BLOCKS;
+
+const NAME = 'butcherShop';
+
 const LAYERS = [
   {
     legend: {
-      'D': 'Dirt',
-      'C': 'Cobblestone',
-      'P': 'Oak Wood Planks',
-      'S': 'Cobblestone Stairs',
-      'T': 'Stone Slab Top',
+      'D': {type: BLOCKS['dirt']},
+      'C': {type: BLOCKS['cobblestone']},
+      'P': {type: BLOCKS['planks_oak']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
+      'T': {type: BLOCKS['stone_slab_side']},
     },
     layout: [
       [' ', ' ', 'D', 'D', 'D', 'D', 'D', 'D', 'D'],
@@ -26,37 +33,42 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'P': 'Oak Wood Planks',
-      'S': 'Cobblestone Stairs',
-      'F': 'Fence',
-      'O': 'Door Oak Bottom',
-      'T': 'Oak Wood Stairs',
-      'D': 'Double Stone Slab',
+      'S': {type: BLOCKS['cobblestone']},
+      'P': {type: BLOCKS['planks_oak']},
+      'F': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'north'},
+      'E': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'west'},
+      'N': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'east'},
+      'e': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'northwest'},
+      'n': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'northeast'},
+      'O': {type: BLOCKS['door_oak_lower'], model: 'door_lower', direction: 'south'},
+      'T': {type: BLOCKS['planks_oak'], model: 'stairs', direction: 'south'},
+      'D': {type: BLOCKS['stone_slab_side']},
     },
     layout: [
-      [' ', ' ', 'F', 'F', 'F', 'F', 'F', 'F', 'F'],
-      [' ', ' ', 'F', ' ', ' ', ' ', ' ', ' ', 'F'],
-      [' ', ' ', 'F', ' ', ' ', ' ', ' ', ' ', 'F'],
-      [' ', ' ', 'F', ' ', ' ', ' ', ' ', ' ', 'F'],
-      [' ', ' ', 'F', ' ', ' ', ' ', ' ', ' ', 'F'],
-      ['C', 'C', 'C', 'C', 'C', 'C', 'O', 'C', 'C'],
-      ['C', 'P', 'T', ' ', ' ', ' ', ' ', ' ', 'C'],
-      ['C', 'T', 'F', ' ', ' ', ' ', ' ', ' ', 'C'],
-      ['C', ' ', ' ', ' ', ' ', ' ', 'D', ' ', 'C'],
-      ['C', ' ', ' ', ' ', ' ', ' ', 'D', ' ', 'C'],
-      ['C', 'C', 'O', 'C', 'C', 'C', 'C', 'C', 'C'],
+      [' ', ' ', 'e', 'F', 'F', 'F', 'F', 'F', 'n'],
+      [' ', ' ', 'E', ' ', ' ', ' ', ' ', ' ', 'N'],
+      [' ', ' ', 'E', ' ', ' ', ' ', ' ', ' ', 'N'],
+      [' ', ' ', 'E', ' ', ' ', ' ', ' ', ' ', 'N'],
+      [' ', ' ', 'E', ' ', ' ', ' ', ' ', ' ', 'N'],
+      ['S', 'S', 'S', 'S', 'S', 'S', 'O', 'S', 'S'],
+      ['S', 'P', 'T', ' ', ' ', ' ', ' ', ' ', 'S'],
+      ['S', 'T', 'F', ' ', ' ', ' ', ' ', ' ', 'S'],
+      ['S', ' ', ' ', ' ', ' ', ' ', 'D', ' ', 'S'],
+      ['S', ' ', ' ', ' ', ' ', ' ', 'D', ' ', 'S'],
+      ['S', 'S', 'O', 'S', 'S', 'S', 'S', 'S', 'S'],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     ],
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'P': 'Oak Wood Planks',
-      'O': 'Door Oak Top',
-      'G': 'Glass Pane',
-      'W': 'Oak Wood',
-      'L': 'Wooden Pressure Plate',
+      'S': {type: BLOCKS['cobblestone']},
+      'P': {type: BLOCKS['planks_oak']},
+      'O': {type: BLOCKS['door_oak_upper'], model: 'door_top', direction: 'south'},
+      'G': {type: BLOCKS['glass'], model: 'pane', direction: 'north'},
+      'L': {type: BLOCKS['glass'], model: 'pane', direction: 'west'},
+      'A': {type: BLOCKS['glass'], model: 'pane', direction: 'east'},
+      'W': {type: BLOCKS['log_oak']},
+      'R': {type: BLOCKS['planks_oak'], model: 'pressure_plate_up'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -64,28 +76,29 @@ const LAYERS = [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-      ['C', 'P', 'G', 'G', 'P', 'P', 'O', 'P', 'C'],
+      ['S', 'P', 'G', 'G', 'P', 'P', 'O', 'P', 'S'],
       ['W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W'],
-      ['G', ' ', 'L', ' ', ' ', ' ', ' ', ' ', 'G'],
-      ['G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'G'],
+      ['L', ' ', 'R', ' ', ' ', ' ', ' ', ' ', 'A'],
+      ['L', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'A'],
       ['W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W'],
-      ['C', 'P', 'O', 'P', 'P', 'G', 'P', 'P', 'C'],
+      ['S', 'P', 'O', 'P', 'P', 'G', 'P', 'P', 'S'],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     ],
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'P': 'Oak Wood Planks',
-      'T': 'Oak Wood Stairs',
-      '!': 'Torch',
+      'C': {type: BLOCKS['cobblestone']},
+      'P': {type: BLOCKS['planks_oak']},
+      'S': {type: BLOCKS['planks_oak'], model: 'stairs', direction: 'north'},
+      'T': {type: BLOCKS['planks_oak'], model: 'stairs', direction: 'south'},
+      '!': {type: BLOCKS['torch_on'], model: 'torch_wall', direction: 'south'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-      ['T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T'],
+      ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'],
       ['C', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'C'],
       ['C', ' ', ' ', ' ', ' ', ' ', '!', ' ', 'C'],
       ['C', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'C'],
@@ -97,8 +110,9 @@ const LAYERS = [
   },
   {
     legend: {
-      'P': 'Oak Wood Planks',
-      'T': 'Oak Wood Stairs',
+      'P': {type: BLOCKS['planks_oak']},
+      'S': {type: BLOCKS['planks_oak'], model: 'stairs', direction: 'north'},
+      'T': {type: BLOCKS['planks_oak'], model: 'stairs', direction: 'south'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -106,7 +120,7 @@ const LAYERS = [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-      ['T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T'],
+      ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'],
       ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
       ['P', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'P'],
       ['P', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'P'],
@@ -117,7 +131,9 @@ const LAYERS = [
   },
   {
     legend: {
-      'T': 'Oak Wood Stairs',
+      'P': {type: BLOCKS['planks_oak']},
+      'S': {type: BLOCKS['planks_oak'], model: 'stairs', direction: 'north'},
+      'T': {type: BLOCKS['planks_oak'], model: 'stairs', direction: 'south'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -126,7 +142,7 @@ const LAYERS = [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-      ['T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T'],
+      ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'],
       ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
       ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
       ['T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T'],
@@ -136,10 +152,13 @@ const LAYERS = [
   },
 ];
 
-class ButcherShop {
+class ButcherShop extends BlueprintBase {
   constructor() {
+    super();
+
     this.layers = LAYERS;
   }
 }
+ButcherShop.NAME = NAME;
 
 module.exports = ButcherShop;

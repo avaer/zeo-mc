@@ -1,10 +1,17 @@
 "use strict";
 
+const BlueprintBase = require('./BlueprintBase');
+
+const Blocks = require('../blocks/index');
+const BLOCKS = Blocks.BLOCKS;
+
+const NAME = 'library';
+
 const LAYERS = [
   {
     legend: {
-      'C': 'Cobblestone',
-      'S': 'Cobblestone Stairs',
+      'C': {type: BLOCKS['cobblestone']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -19,18 +26,19 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'O': 'Oak Wood Planks',
-      'S': 'Oak Wood Stairs',
-      'F': 'Fence',
-      'c': 'Crafting Table',
-      'D': 'Door',
+      'C': {type: BLOCKS['cobblestone']},
+      'O': {type: BLOCKS['planks_oak']},
+      'S': {type: BLOCKS['planks_oak'], model: 'stairs', direction: 'south'},
+      'F': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'west'},
+      'E': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'east'},
+      'c': {type: BLOCKS['crafting_table_side']},
+      'D': {type: BLOCKS['door_oak_lower'], model: 'door_lower', direction: 'south'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
       ['C', 'O', 'S', 'S', 'S', 'S', ' ', ' ', 'C'],
-      ['C', 'S', 'F', ' ', 'F', ' ', ' ', ' ', 'C'],
+      ['C', 'S', 'F', ' ', 'E', ' ', ' ', ' ', 'C'],
       ['C', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'C'],
       ['C', 'c', ' ', ' ', ' ', ' ', ' ', ' ', 'C'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'D', 'C'],
@@ -39,44 +47,49 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'O': 'Oak Wood Planks',
-      'G': 'Glass Pane',
-      'W': 'Wooden Pressure Plate',
+      'C': {type: BLOCKS['cobblestone']},
+      'O': {type: BLOCKS['planks_oak']},
+      'G': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'north'},
+      'L': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'west'},
+      'A': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'east'},
+      'S': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'south'},
+      'W': {type: BLOCKS['planks_oak'], model: 'pressure_plate_up'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       ['C', 'O', 'G', 'G', 'O', 'G', 'G', 'O', 'C'],
       ['O', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'O'],
-      ['G', ' ', 'W', ' ', 'W', ' ', ' ', ' ', 'G'],
-      ['G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'G'],
+      ['L', ' ', 'W', ' ', 'W', ' ', ' ', ' ', 'A'],
+      ['L', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'A'],
       ['O', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'O'],
-      ['C', 'O', 'G', 'G', 'G', 'O', 'O', ' ', 'C'],
+      ['C', 'O', 'S', 'S', 'S', 'O', 'O', ' ', 'C'],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     ],
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'O': 'Oak Wood Planks',
-      'G': 'Glass Pane',
-      'B': 'Bookshelf',
+      'C': {type: BLOCKS['cobblestone']},
+      'O': {type: BLOCKS['planks_oak']},
+      'G': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'west'},
+      'L': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'east'},
+      'A': {type: BLOCKS['glass'], model: 'glass_pane_ns', direction: 'south'},
+      'B': {type: BLOCKS['bookshelf']},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       ['C', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'C'],
       ['O', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'O'],
-      ['G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'G'],
-      ['G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'G'],
+      ['G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'L'],
+      ['G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'L'],
       ['O', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'O'],
-      ['C', 'O', 'G', 'G', 'G', 'O', 'O', 'O', 'C'],
+      ['C', 'O', 'A', 'A', 'A', 'O', 'O', 'O', 'C'],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     ],
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'O': 'Oak Wood Planks',
+      'C': {type: BLOCKS['cobblestone']},
+      'O': {type: BLOCKS['planks_oak']},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -91,63 +104,67 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'O': 'Oak Wood Stairs',
+      'C': {type: BLOCKS['cobblestone']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
+      'T': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'north'},
     },
     layout: [
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+      ['T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+      ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'],
     ],
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'O': 'Oak Wood Stairs',
+      'C': {type: BLOCKS['cobblestone']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
+      'T': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'north'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+      ['T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
-      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-    ],
-  },
-  {
-    legend: {
-      'C': 'Cobblestone',
-      'O': 'Oak Wood Stairs',
-    },
-    layout: [
-      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
-      ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
-      ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
-      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
     ],
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'O': 'Oak Wood Stairs',
+      'C': {type: BLOCKS['cobblestone']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
+      'T': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'north'},
+    },
+    layout: [
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      ['T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T'],
+      ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
+      ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
+      ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+    ],
+  },
+  {
+    legend: {
+      'C': {type: BLOCKS['cobblestone']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
+      'T': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'north'},
     },
     layout: [
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+      ['T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T'],
+      ['S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S'],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -155,10 +172,13 @@ const LAYERS = [
   },
 ];
 
-class Library {
+class Library extends BlueprintBase {
   constructor() {
+    super();
+
     this.layers = LAYERS;
   }
 }
+Library.NAME = NAME;
 
 module.exports = Library;

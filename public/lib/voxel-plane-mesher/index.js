@@ -1,4 +1,4 @@
-import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FACE, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
+import {FRAME_UV_ATTRIBUTE_SIZE, FRAME_UV_ATTRIBUTES} from '../../constants/index';
 
 function voxelPlaneMesher(data, textureAtlas, THREE) {
   const {vertices, normals, frameUvs} = data;

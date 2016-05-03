@@ -1,10 +1,17 @@
 "use strict";
 
+const BlueprintBase = require('./BlueprintBase');
+
+const Blocks = require('../blocks/index');
+const BLOCKS = Blocks.BLOCKS;
+
+const NAME = 'blacksmith';
+
 const LAYERS = [
   {
     legend: {
-      'C': 'Cobblestone',
-      'S': 'Cobblestone Stairs',
+      'C': {type: BLOCKS['cobblestone']},
+      'S': {type: BLOCKS['cobblestone'], model: 'stairs', direction: 'south'},
     },
     layout: [
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C'],
@@ -19,14 +26,14 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'P': 'Oak Wood Planks',
-      'W': 'Oak Wood',
-      'L': 'Lava',
-      'S': 'Oak Wood Stairs',
-      'F': 'Fence',
-      'D': 'Double Stone Slab',
-      'Q': 'Chest',
+      'C': {type: BLOCKS['cobblestone']},
+      'P': {type: BLOCKS['planks_oak']},
+      'W': {type: BLOCKS['log_oak']},
+      'L': {type: BLOCKS['lava_still']},
+      'S': {type: BLOCKS['planks_oak'], model: 'stairs', direction: 'south'},
+      'F': {type: BLOCKS['planks_oak'], model: 'fence', direction: 'south'},
+      'D': {type: BLOCKS['stone_slab_side']},
+      'Q': {type: BLOCKS['log_oak']}, // XXX Chest
     },
     layout: [
       ['C', 'C', 'C', 'C', 'P', 'P', 'P', 'P', 'P', 'W'],
@@ -40,32 +47,35 @@ const LAYERS = [
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'P': 'Oak Wood Planks',
-      'N': 'Glass Pane',
-      'I': 'Iron Bars',
-      'W': 'Oak Wood',
-      'F': 'Fence',
-      'B': 'Furnace',
-      'R': 'Wooden Pressure Plate',
+      'C': {type: BLOCKS['cobblestone']},
+      'P': {type: BLOCKS['planks_oak']},
+      'G': {type: BLOCKS['glass'], model: 'pane', direction: 'north'},
+      'L': {type: BLOCKS['glass'], model: 'pane', direction: 'east'},
+      'I': {type: BLOCKS['iron_bars'], model: 'bars', direction: 'west'},
+      'W': {type: BLOCKS['log_oak']},
+      'F': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'south'},
+      'E': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'southwest'},
+      'B': {type: BLOCKS['furnace_side']},
+      'R': {type: BLOCKS['planks_oak'], model: 'pressure_plate_up'},
     },
     layout: [
-      ['C', 'C', 'C', 'C', 'P', 'N', 'P', 'N', 'P', 'W'],
+      ['C', 'C', 'C', 'C', 'P', 'G', 'P', 'G', 'P', 'W'],
       ['I', ' ', ' ', 'C', ' ', ' ', ' ', ' ', ' ', 'P'],
-      ['I', ' ', ' ', 'C', ' ', ' ', ' ', 'R', ' ', 'N'],
+      ['I', ' ', ' ', 'C', ' ', ' ', ' ', 'R', ' ', 'L'],
       [' ', ' ', ' ', 'B', 'P', 'P', ' ', ' ', ' ', 'P'],
-      [' ', ' ', ' ', ' ', ' ', ' ', 'P', ' ', ' ', 'N'],
+      [' ', ' ', ' ', ' ', ' ', ' ', 'P', ' ', ' ', 'L'],
       [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', 'P'],
-      ['F', ' ', ' ', ' ', 'F', ' ', 'W', 'P', 'P', 'W'],
+      ['E', ' ', ' ', ' ', 'F', ' ', 'W', 'P', 'P', 'W'],
     ],
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'P': 'Oak Wood Planks',
-      'W': 'Oak Wood',
-      'F': 'Fence',
-      'B': 'Furnace',
+      'C': {type: BLOCKS['cobblestone']},
+      'P': {type: BLOCKS['planks_oak']},
+      'W': {type: BLOCKS['log_oak']},
+      'F': {type: BLOCKS['planks_oak'], model: 'fence_ns', direction: 'south'},
+      'E': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'southwest'},
+      'B': {type: BLOCKS['furnace_side']},
     },
     layout: [
       ['C', 'C', 'C', 'C', 'P', 'P', 'P', 'P', 'P', 'W'],
@@ -74,13 +84,13 @@ const LAYERS = [
       [' ', ' ', ' ', 'B', 'P', 'P', ' ', ' ', ' ', 'P'],
       [' ', ' ', ' ', ' ', ' ', ' ', 'P', ' ', ' ', 'P'],
       [' ', ' ', ' ', ' ', ' ', ' ', 'P', ' ', ' ', 'P'],
-      ['F', ' ', ' ', ' ', 'F', ' ', 'W', 'P', 'P', 'W'],
+      ['E', ' ', ' ', ' ', 'F', ' ', 'W', 'P', 'P', 'W'],
     ],
   },
   {
     legend: {
-      'C': 'Cobblestone',
-      'W': 'Oak Wood',
+      'C': {type: BLOCKS['cobblestone']},
+      'W': {type: BLOCKS['log_oak']},
     },
     layout: [
       ['C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'W'],
@@ -94,7 +104,7 @@ const LAYERS = [
   },
   {
     legend: {
-      '$': 'Stone Slab Top',
+      '$': {type: BLOCKS['cobblestone']},
     },
     layout: [
       ['$', '$', '$', '$', '$', '$', '$', '$', '$', '$'],
@@ -108,10 +118,13 @@ const LAYERS = [
   },
 ];
 
-class Blacksmith {
+class Blacksmith extends BlueprintBase {
   constructor() {
+    super();
+
     this.layers = LAYERS;
   }
 }
+Blacksmith.NAME = NAME;
 
 module.exports = Blacksmith;

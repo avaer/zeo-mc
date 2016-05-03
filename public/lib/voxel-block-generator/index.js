@@ -1,4 +1,6 @@
 import THREE from 'three';
+import {BLOCK_MODELS} from '../../../metadata/index';
+import voxelUtils from '../../../lib/voxel-utils/index';
 import voxelTextureAtlas from '../voxel-texture-atlas/index';
 import {FACE_VERTICES, MATERIAL_FRAMES, FRAME_UV_ATTRIBUTES, FRAME_UV_ATTRIBUTE_SIZE_PER_FRAME} from '../../constants/index';
 
@@ -10,8 +12,10 @@ const TRANSPARENT_MASK = 0x8000;
 const NO_FLAGS_MASK = 0x7FFF;
 
 function voxelBlockGenerator(voxelAsync) {
-  return function({voxels, depths}, dims) {
-    const mesh = voxelBlockGenerator.getMesh({voxels, depths}, dims, voxelAsync);
+  const vu = voxelUtils({chunkSize: voxelAsync.initData.chunkSize});
+
+  return function({voxels, metadata}, dims) {
+    const mesh = voxelBlockGenerator.getMesh({voxels, metadata}, dims, voxelAsync, vu);
     const {vertices: verticesData, faces: facesData} = mesh;
 
     const vertices = voxelBlockGenerator.getVertices(verticesData);
@@ -21,7 +25,7 @@ function voxelBlockGenerator(voxelAsync) {
   };
 };
 
-voxelBlockGenerator.getMesh = function({voxels, depths}, dims, voxelAsync) {
+voxelBlockGenerator.getMesh = function({voxels, metadata}, dims, voxelAsync, vu) {
   var vertices = [], faces = [], tVertices = [], tFaces = []
     , dimsX = dims[0]
     , dimsY = dims[1]
@@ -59,9 +63,23 @@ voxelBlockGenerator.getMesh = function({voxels, depths}, dims, voxelAsync) {
 
       for(x[v] = 0; x[v] < dimsV; ++x[v]) {
         for(x[u] = 0; x[u] < dimsU; ++x[u], ++n) {
-          // Modified to read through getType()
-          let a = xd >= 0      ? getType(voxels, x[0]      + dimsX * x[1]          + dimsXY * x[2]          ) : 0;
-          let b = xd < dimsD-1 ? getType(voxels, x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY) : 0;
+          let a, b, aM, bM;
+          if (xd >= 0) {
+            const aOffset = x[0]      + dimsX * x[1]          + dimsXY * x[2];
+            a = voxels[aOffset];
+            aM = metadata ? !!vu.getBlockMetadataModel(metadata.buffer, aOffset) : false;
+          } else {
+            a = 0;
+            aM = false;
+          }
+          if (xd < dimsD-1) {
+            const bOffset = x[0]+q[0] + dimsX * x[1] + qdimsX + dimsXY * x[2] + qdimsXY;
+            b = voxels[bOffset];
+            bM = metadata ? !!vu.getBlockMetadataModel(metadata.buffer, bOffset) : false;
+          } else {
+            b = 0;
+            bM = false;
+          }
 
           if (a !== b || isTranslucent(a) || isTranslucent(b)) {
             const aT = isTransparent(a);
@@ -70,14 +88,14 @@ voxelBlockGenerator.getMesh = function({voxels, depths}, dims, voxelAsync) {
             aT && (a = a | TRANSPARENT_MASK);
             bT && (b = b | TRANSPARENT_MASK);
 
-            // both are transparent, add to both directions
-            if (aT && bT) {
+            // both are transparent and not models, add to both directions
+            if (aT && bT && !aM && !bM) {
               // nothing
-            // if a is solid and b is not there or transparent
-            } else if (a && (!b || bT)) {
+            // if a is solid and not a model and b is not there or transparent or a model
+            } else if (a && !aM && (!b || bT || bM)) {
               b = 0;
-            // if b is solid and a is not there or transparent
-            } else if (b && (!a || aT)) {
+            // if b is solid and node a model and a is not there or transparent or a model
+            } else if (b && !bM && (!a || aT || aM)) {
               a = 0;
             // dont draw this face
             } else {
@@ -175,10 +193,6 @@ voxelBlockGenerator.getMesh = function({voxels, depths}, dims, voxelAsync) {
   }
 
   return {vertices: vertices.concat(tVertices), faces: faces.concat(tFaces)};
-
-  function getType(voxels, offset) {
-    return voxels[offset];
-  }
 
   function isTransparent(type) {
     return voxelAsync.isTransparent(type);

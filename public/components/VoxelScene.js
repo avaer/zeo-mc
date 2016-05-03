@@ -68,8 +68,15 @@ export default class VoxelScene extends React.Component {
     const initializeWorkers = cb => {
       const {seed} = this.props;
       const chunkSize = CHUNK_SIZE;
-      const {_faceNormalMaterials: faceNormalMaterials, _blockMeshFaceFrameUvs: blockMeshFaceFrameUvs, _planeMeshFrameUvs: planeMeshFrameUvs} = textureAtlas;
-      const voxelAsyncOpts = {seed, chunkSize, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs};
+      const {
+        _atlasUvs: atlasUvs,
+        _faceNormalMaterials: faceNormalMaterials,
+        _blockMeshFaceFrameUvs: blockMeshFaceFrameUvs,
+        _planeMeshFrameUvs: planeMeshFrameUvs
+      } = textureAtlas;
+      const atlasDimensions = textureAtlas.getAtlasDimensions();
+      const {width: atlasWidth, height: atlasHeight} = atlasDimensions;
+      const voxelAsyncOpts = {seed, chunkSize, atlasWidth, atlasHeight, atlasUvs, faceNormalMaterials, blockMeshFaceFrameUvs, planeMeshFrameUvs};
       voxelAsync.init(voxelAsyncOpts);
 
       const workerOpts = voxelAsyncOpts;
@@ -270,13 +277,11 @@ export default class VoxelScene extends React.Component {
           lastMenu = now;
         });
 
-        game.on('hold', variant => {
+        game.on('hold', value => {
           if (holdValue) {
             stopHolding();
           }
 
-          const type = 'item';
-          const value = {type, variant};
           startHolding(value);
         });
       }

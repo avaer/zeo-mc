@@ -37,6 +37,7 @@
 
     "heap": "",
     "murmurhash-js": "",
+    "bit-buffer": "",
     "node-worker-pool": "",
     "indev": "",
     "aabb-3d": "0.0.0",
