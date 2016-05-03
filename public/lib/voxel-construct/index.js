@@ -74,6 +74,7 @@ VoxelConstruct.prototype.delete = function(pos) {
 VoxelConstruct.prototype.createDebris = function(pos, value, power) {
   const geometry = (() => {
     const cubeGeometry = new this._game.THREE.CubeGeometry(1, 1, 1);
+    cubeGeometry.applyMatrix(new this._game.THREE.Matrix4().makeTranslation(-0.5, 0.5, -0.5));
     const bufferGeometry = new this._game.THREE.BufferGeometry().fromGeometry(cubeGeometry);
     const normals = bufferGeometry.getAttribute('normal').array;
 
@@ -87,9 +88,9 @@ VoxelConstruct.prototype.createDebris = function(pos, value, power) {
   const mesh = (() => {
     const mesh = new this._game.THREE.Mesh(geometry, material);
     mesh.scale.set(0.25, 0.25, 0.25);
-    mesh.translateX(pos[0]);
+    mesh.translateX(0.5 + pos[0]);
     mesh.translateY(pos[1]);
-    mesh.translateZ(pos[2]);
+    mesh.translateZ(0.5 + pos[2]);
     return mesh;
   })();
   
@@ -99,9 +100,9 @@ VoxelConstruct.prototype.createDebris = function(pos, value, power) {
     collisionRadius: 22,
     value: value,
     velocity: {
-      x: Math.random() * 0.02 * power,
+      x: -0.02 + Math.random() * 0.04 * power,
       y: 0,
-      z: Math.random() * 0.02 * power
+      z: -0.02 + Math.random() * 0.04 * power,
     },
     _debris: true
   };
