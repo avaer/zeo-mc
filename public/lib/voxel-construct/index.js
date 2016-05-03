@@ -38,26 +38,30 @@ VoxelConstruct.prototype.delete = function(pos) {
     
     const {type} = value;
     if (type === 'block') {
-      const {variant: {block}} = value;
-      for (let i = 0; i < this._yield; i++) {
-        let item = this.createDebris(pos, block, this._power);
-        item = this._game.addItem(item);
+      const {variant} = value;
+      const {model} = variant;
+      if (!model) {
+        const {block} = variant;
+        for (let i = 0; i < this._yield; i++) {
+          let item = this.createDebris(pos, block, this._power);
+          item = this._game.addItem(item);
 
-        const time = this._expire.start + Math.random() * (this._expire.end - this._expire.start);
+          const time = this._expire.start + Math.random() * (this._expire.end - this._expire.start);
 
-        (item => {
-          this._game.setTimeout(() => {
-            this._game.removeItem(item);
-          }, time);
-        })(item);
-      }
+          (item => {
+            this._game.setTimeout(() => {
+              this._game.removeItem(item);
+            }, time);
+          })(item);
+        }
 
-      const onTopPos = [pos[0], pos[1] + 1, pos[2]];
-      const onTopValue = this._game.getValue(onTopPos);
-      if (onTopValue) {
-        const {type: onTopType} = onTopValue;
-        if (onTopType === 'vegetation' || onTopType === 'effect') {
-          this._game.deleteValue(onTopValue);
+        const onTopPos = [pos[0], pos[1] + 1, pos[2]];
+        const onTopValue = this._game.getValue(onTopPos);
+        if (onTopValue) {
+          const {type: onTopType} = onTopValue;
+          if (onTopType === 'vegetation' || onTopType === 'effect') {
+            this._game.deleteValue(onTopValue);
+          }
         }
       }
     }
