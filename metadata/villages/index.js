@@ -1,3 +1,5 @@
+"use strict";
+
 const Blocks = require('../blocks/index');
 const BLOCKS = Blocks.BLOCKS;
 
@@ -10,6 +12,8 @@ const Blacksmith = require('./Blacksmith');
 const ButcherShop = require('./ButcherShop');
 const Church = require('./Church');
 const Library = require('./Library');
+
+const floor = Math.floor;
 
 const VILLAGE_RATE_PER_CHUNK = 0.1;
 const WELL_OFFSET = [2, 2];
@@ -36,6 +40,7 @@ const BUILDING_INDEX = (() => {
 
 function make(opts) {
   const position = opts.position;
+  const chunkSize = opts.chunkSize;
   const getHeight = opts.getHeight;
   const getLand = opts.getLand;
   const getTree = opts.getTree;
@@ -44,29 +49,30 @@ function make(opts) {
   const wellNoiseZ = opts.wellNoiseZ;
   const onPoint = opts.onPoint;
 
-  const chunkX = position.chunkX;
-  const chunkZ = position.chunkZ;
+  const startX = position[0];
+  const startZ = position[1];
 
-  const chunkNoiseN = chunkNoise.in2D(chunkX, chunkZ);
+  const chunkNoiseN = chunkNoise.in2D(startX, startZ);
   if (chunkNoiseN < VILLAGE_RATE_PER_CHUNK) {
-    const wellNoiseXN = wellNoiseX.in2D(chunkX, chunkZ);
+    const wellNoiseXN = wellNoiseX.in2D(startX, startZ);
     const wellX = startX + floor(wellNoiseXN * chunkSize) + WELL_OFFSET[0];
-    const wellNoiseZN = wellNoiseZ.in2D(chunkX, chunkZ);
-    const wellZ = startZ + floor(villageWellNoiseZN * chunkSize) + WELL_OFFSET[1];
-    const position = [wellX, wellZ];
+    const wellNoiseZN = wellNoiseZ.in2D(startX, startZ);
+    const wellZ = startZ + floor(wellNoiseZN * chunkSize) + WELL_OFFSET[1];
+    const wellPosition = [wellX, wellZ];
 
     // attempt to build main well
     if (_canBuild({
       type: 'well',
-      position,
+      position: wellPosition,
       getLand,
-      getTree
+      getTree,
     })) {
       // build main well
       _makeBuilding({
         type: 'well',
-        position,
-        onPoint
+        position: wellPosition,
+        getHeight,
+        onPoint,
       });
 
       // XXX build roads and the rest of the buildings here
@@ -90,13 +96,13 @@ function _canBuild(opts) {
   const depth = dimensions.depth;
   return _everyHorizontalPoint({
     startX,
-    startY,
+    startZ,
     width,
     depth,
   }, (x, z) => getLand(x, z) && !getTree(x, z));
 }
 
-function _forEachBuildingHorizontalPoint(opts, fn) {
+function _forEachHorizontalPoint(opts, fn) {
   const startX = opts.startX;
   const startZ = opts.startZ;
   const width = opts.width;
@@ -128,6 +134,9 @@ function _everyHorizontalPoint(opts, predicate) {
 function _makeBuilding(opts) {
   const type = opts.type;
   const position = opts.position;
+  const getHeight = opts.getHeight;
+  const onPoint = opts.onPoint;
+
   const startX = position[0];
   const startZ = position[1];
 
@@ -137,10 +146,11 @@ function _makeBuilding(opts) {
   const width = dimensions.width;
   const depth = dimensions.depth;
   const yOffset = building.getYOffset();
+  const layers = building.getLayers();
 
-  const maxCoveredY = (() => {
+  const yBase = (() => {
     let result = 0;
-    _forEachBuildingHorizontalPoint({
+    _forEachHorizontalPoint({
       startX,
       startZ,
       width,
@@ -153,31 +163,31 @@ function _makeBuilding(opts) {
     });
     return result;
   })();
-  const startY = maxCoveredY + yOffset;
+  const startY = yBase + yOffset;
 
   _makeBase();
   _makeLayers();
 
   function _makeBase() {
-    _forEachBuildingHorizontalPoint({
+    _forEachHorizontalPoint({
       startX,
       startZ,
       width,
       depth,
     }, (x, z) => {
-      const h = getHeight(x, y);
+      const h = getHeight(x, z);
       for (let y = h + 1; y < startY; y++) {
-        onPoint(x, y, z, BLOCKS['cobblestone']); // XXX set block metadata here as well
+        onPoint(x, y, z, BLOCKS['cobblestone']);
       }
     });
   }
 
   function _makeLayers() {
-    const numKLayers = layers.length;
+    const numLayers = layers.length;
     for (let i = 0; i < numLayers; i++) {
       const y = startY + i;
 
-      _forEachBuildingHorizontalPoint({
+      _forEachHorizontalPoint({
         startX,
         startZ,
         width,
@@ -186,9 +196,11 @@ function _makeBuilding(opts) {
         const j = x - startX;
         const k = z - startZ;
         const block = building.getBlock(j, i, k);
-        const value = block.type;
+        if (block) {
+          const value = block.type;
 
-        onPoint(x, y, z, value);
+          onPoint(x, y, z, value); // XXX set block metadata here as well
+        }
       });
     }
   }

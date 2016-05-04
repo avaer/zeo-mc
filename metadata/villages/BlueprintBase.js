@@ -6,8 +6,9 @@ class BlueprintBase {
   }
 
   getDimensions() {
-    const width = this.layers[0].length;
-    const depth = this.layers.length;
+    const baseLayout = this.layers[0].layout;
+    const width = baseLayout[0].length;
+    const depth = baseLayout.length;
     return {width, depth};
   }
 
@@ -15,9 +16,18 @@ class BlueprintBase {
     return this.yOffset;
   }
 
-  getBlock(x, z) {
-    const blockKey = this.layers[z][x];
-    return this.legend[blockKey] || null;
+  getLayers() {
+    return this.layers;
+  }
+
+  getBlock(x, y, z) {
+    const layer = this.layers[y];
+    const legend = layer.legend;
+    const layout = layer.layout;
+
+    const blockKey = layout[z][x];
+    const block = legend[blockKey] || null;
+    return block;
   }
 }
 
