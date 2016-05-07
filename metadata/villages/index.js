@@ -47,7 +47,7 @@ function make(opts) {
   const chunkNoise = opts.chunkNoise;
   const wellNoiseX = opts.wellNoiseX;
   const wellNoiseZ = opts.wellNoiseZ;
-  const onPoint = opts.onPoint;
+  const setVoxel = opts.setVoxel;
 
   const startX = position[0];
   const startZ = position[1];
@@ -72,7 +72,7 @@ function make(opts) {
         type: 'well',
         position: wellPosition,
         getHeight,
-        onPoint,
+        setVoxel,
       });
 
       // XXX build roads and the rest of the buildings here
@@ -135,7 +135,7 @@ function _makeBuilding(opts) {
   const type = opts.type;
   const position = opts.position;
   const getHeight = opts.getHeight;
-  const onPoint = opts.onPoint;
+  const setVoxel = opts.setVoxel;
 
   const startX = position[0];
   const startZ = position[1];
@@ -177,7 +177,7 @@ function _makeBuilding(opts) {
     }, (x, z) => {
       const h = getHeight(x, z);
       for (let y = h + 1; y < startY; y++) {
-        onPoint(x, y, z, BLOCKS['cobblestone']);
+        setVoxel(x, y, z, BLOCKS['cobblestone']);
       }
     });
   }
@@ -198,8 +198,11 @@ function _makeBuilding(opts) {
         const block = building.getBlock(j, i, k);
         if (block) {
           const value = block.type;
+          const model = block.model;
+          const direction = block.direction;
+          const depth = block.depth;
 
-          onPoint(x, y, z, value); // XXX set block metadata here as well
+          setVoxel(x, y, z, value, {model, direction, depth});
         }
       });
     }
