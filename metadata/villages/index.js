@@ -14,6 +14,7 @@ const Church = require('./Church');
 const Library = require('./Library');
 
 const floor = Math.floor;
+const min = Math.min;
 
 const VILLAGE_RATE_PER_CHUNK = 0.1;
 const WELL_OFFSET = [2, 2];
@@ -38,6 +39,36 @@ const BUILDING_INDEX = (() => {
   return result;
 })();
 
+const ROAD_DIRECTIONS = [ 'north', 'east', 'south', 'west'];
+const ROAD_DIRECTION_START_OFFSETS = {
+  'north': [0, -3],
+  'east': [4, 0],
+  'south': [0, 4],
+  'west': [-3, 0],
+};
+const ROAD_DIRECTION_INCREMENTS = {
+  'north': [0, -1],
+  'east': [1, 0],
+  'south': [0, 1],
+  'west': [-1, 0],
+};
+const ROAD_PREV_DIRECTIONS = {
+  'north': 'west',
+  'east': 'north',
+  'south': 'east',
+  'west': 'south',
+};
+const ROAD_NEXT_DIRECTIONS = {
+  'north': 'east',
+  'east': 'south',
+  'south': 'west',
+  'west': 'north',
+};
+const MAX_ROAD_LENGTH_MIN = 4;
+const MAX_ROAD_LENGTH_MAX = 32;
+const ROAD_LENGTH_MIN = 4;
+const ROAD_LENGTH_MAX = 16;
+
 function make(opts) {
   const position = opts.position;
   const chunkSize = opts.chunkSize;
@@ -47,6 +78,9 @@ function make(opts) {
   const chunkNoise = opts.chunkNoise;
   const wellNoiseX = opts.wellNoiseX;
   const wellNoiseZ = opts.wellNoiseZ;
+  const roadMaxLengthNoise = opts.roadMaxLengthNoise;
+  const roadLengthNoise = opts.roadLengthNoise;
+  const roadDirectionNoise = opts.roadDirectionNoise;
   const setVoxel = opts.setVoxel;
 
   const startX = position[0];
@@ -54,11 +88,13 @@ function make(opts) {
 
   const chunkNoiseN = chunkNoise.in2D(startX, startZ);
   if (chunkNoiseN < VILLAGE_RATE_PER_CHUNK) {
-    const wellNoiseXN = wellNoiseX.in2D(startX, startZ);
-    const wellX = startX + floor(wellNoiseXN * chunkSize) + WELL_OFFSET[0];
-    const wellNoiseZN = wellNoiseZ.in2D(startX, startZ);
-    const wellZ = startZ + floor(wellNoiseZN * chunkSize) + WELL_OFFSET[1];
-    const wellPosition = [wellX, wellZ];
+    const wellPosition = _getWellPosition({
+      startX,
+      startZ,
+      chunkSize,
+      wellNoiseX,
+      wellNoiseZ,
+    });
 
     // attempt to build main well
     if (_canBuild({
@@ -75,9 +111,33 @@ function make(opts) {
         setVoxel,
       });
 
+      _makeRoads({
+        wellPosition,
+        roadLengthNoise,
+        roadMaxLengthNoise,
+        roadDirectionNoise,
+        getHeight,
+        setVoxel,
+      });
+
       // XXX build roads and the rest of the buildings here
     }
   }
+}
+
+function _getWellPosition(opts) {
+  const startX = opts.startX;
+  const startZ = opts.startZ;
+  const chunkSize = opts.chunkSize;
+  const wellNoiseX = opts.wellNoiseX;
+  const wellNoiseZ = opts.wellNoiseZ;
+
+  const wellNoiseXN = wellNoiseX.in2D(startX, startZ);
+  const wellX = startX + floor(wellNoiseXN * chunkSize) + WELL_OFFSET[0];
+  const wellNoiseZN = wellNoiseZ.in2D(startX, startZ);
+  const wellZ = startZ + floor(wellNoiseZN * chunkSize) + WELL_OFFSET[1];
+  const wellPosition = [wellX, wellZ];
+  return wellPosition;
 }
 
 function _canBuild(opts) {
@@ -208,6 +268,90 @@ function _makeBuilding(opts) {
     }
   }
   // XXX make sure to handle the bottom-up offsetted well generation case
+}
+
+function _makeRoads(opts) {
+  const wellPosition = opts.wellPosition;
+  const roadLengthNoise = opts.roadLengthNoise;
+  const roadMaxLengthNoise = opts.roadMaxLengthNoise;
+  const roadDirectionNoise = opts.roadDirectionNoise;
+  const getHeight = opts.getHeight;
+  const setVoxel = opts.setVoxel;
+
+  function _makeRoad(opts) {
+    const startPosition = opts.startPosition;
+    const direction = opts.direction;
+    const length = opts.length;
+    const maxLength = opts.maxLength;
+
+    const startX = startPosition[0];
+    const startZ = startPosition[1];
+    const increment = ROAD_DIRECTION_INCREMENTS[direction];
+    const incrementX = increment[0];
+    const incrementZ = increment[1];
+
+    const localLength = min(
+      ROAD_LENGTH_MIN + floor(maxLengthNoiseN * (ROAD_LENGTH_MAX - ROAD_LENGTH_MIN)),
+      maxLength - prevLength
+    );
+    for (let i = 0; i < localLength; i++) {
+      const x = startX + i * incrementX;
+      const z = startZ + i * incrementZ;
+      const y = getHeight(x, z);
+      setVoxel(x, y, z, BLOCKS['cobblestone']);
+    }
+    const newLength = prevLength + localLength;
+    const remainingLength = maxLength - newLength;
+    if (remainingLength > 0) {
+      const endX = startX + localLength * incrementX;
+      const endZ = startZ + localLength * incrementZ;
+      const nextStartPosition = [endX, endZ];
+      const nextDirection = (() => {
+        const nextDirectionOffset = (() => {
+          const directionNoiseN = roadDirectionNoise.in2D(endX, endZ);
+          if (directionNoiseN < 1/3) {
+            return -1;
+          } else if (directionNoiseN < 2/3) {
+            return 0;
+          } else {
+            return 1;
+          }
+        })();
+        if (nextDirectionOffset === -1) {
+          return ROAD_PREV_DIRECTIONS[direction];
+        } else if (nextDirectionOffset === 1) {
+          return ROAD_NEXT_DIRECTIONS[direction];
+        } else {
+          return direction;
+        }
+      })();
+
+      _makeRoad({
+        startPosition: nextStartPosition,
+        direction: nextDirection,
+        length: newLength,
+        maxLength,
+      });
+    }
+  }
+
+  ROAD_DIRECTIONS.forEach(direction => {
+    const startOffset = ROAD_DIRECTION_START_OFFSETS[direction];
+    const startX = wellPosition[0] + startOffset[0];
+    const startZ = wellPosition[1] + startOffset[1];
+    const startPosition = [startX, startZ];
+    const maxLengthNoiseN = roadMaxLengthNoise.in2D(startX, startZ);
+    const maxLength = MAX_ROAD_LENGTH_MIN + floor(maxLengthNoiseN * (MAX_ROAD_LENGTH_MAX - MAX_ROAD_LENGTH_MIN));
+
+    _makeRoad({
+      startPosition,
+      direction,
+      length: 0,
+      maxLength,
+    });
+
+    // XXX also generate other buildings here
+  });
 }
 
 const api = {
