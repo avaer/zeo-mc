@@ -6,13 +6,18 @@ const request = require('request');
 const mkdirp = require('mkdirp');
 
 const PNG_DIRECTORY = path.join(__dirname, 'png');
-const NUM_SKIN_PAGES = 200;
+const START_SKIN_PAGE = 0;
+const END_SKIN_PAGE = 1000;
 
 function recursePages(cb) {
   const map = {};
 
   (function recursePage(i) {
-    if (i < NUM_SKIN_PAGES) {
+    if (i <= END_SKIN_PAGE) {
+      console.log('------------');
+      console.log('PAGE ' + i);
+      console.log('------------');
+
       request.get({
         url: 'http://www.minecraftskins.com/latest/' + i + '/',
         encoding: 'utf8',
@@ -44,10 +49,10 @@ function recursePages(cb) {
           const pend = err => {
             error = error || err;
             if (--pending === 0) {
-              if (!err) {
+              if (!error) {
                 next();
               } else {
-                cb(err);
+                cb(error);
               }
             }
           };
@@ -63,12 +68,12 @@ function recursePages(cb) {
             });
             req.on('response', res => {
               if (res.statusCode >= 200 && res.statusCode < 300 && res.headers['content-type'] !== 'text/html') {
-                const skinFilePath = path.join(PNG_DIRECTORY, name);
+                const skinFilePath = path.join(PNG_DIRECTORY, name + '-' + id + '.png');
                 const ws = fs.createWriteStream(skinFilePath);
                 res.pipe(ws);
 
-                res.on('error', err => { pend(err); });
-                res.on('finish', () => { pend(); });
+                ws.on('error', err => { pend(err); });
+                ws.on('finish', () => { pend(); });
               } else {
                 console.warn('FAILED: ' + description);
                 pend();
@@ -83,7 +88,7 @@ function recursePages(cb) {
     } else {
       cb();
     }
-  })(0);
+  })(START_SKIN_PAGE);
 }
 
 mkdirp(PNG_DIRECTORY, err => {
