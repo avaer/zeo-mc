@@ -302,8 +302,8 @@ function _makeBuilding(opts) {
 
 function _makeRoads(opts) {
   const wellPosition = opts.wellPosition;
-  const roadLengthNoise = opts.roadLengthNoise;
   const roadMaxLengthNoise = opts.roadMaxLengthNoise;
+  const roadLengthNoise = opts.roadLengthNoise;
   const roadDirectionNoise = opts.roadDirectionNoise;
   const getHeight = opts.getHeight;
   const setVoxel = opts.setVoxel;
