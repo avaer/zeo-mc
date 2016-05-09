@@ -1,4 +1,4 @@
-"use strict";
+ "use strict";
 
 const Blocks = require('../blocks/index');
 const BLOCKS = Blocks.BLOCKS;
@@ -38,6 +38,7 @@ const BUILDING_INDEX = (() => {
   });
   return result;
 })();
+const BUILDING_RATE = 0.1;
 
 const ROAD_DIRECTIONS = [ 'north', 'east', 'south', 'west'];
 const ROAD_DIRECTION_START_OFFSETS = {
@@ -64,6 +65,7 @@ const ROAD_NEXT_DIRECTIONS = {
   'south': 'west',
   'west': 'north',
 };
+const ROAD_RATE = 0.5;
 const MAX_ROAD_LENGTH_MIN = 4;
 const MAX_ROAD_LENGTH_MAX = 32;
 const ROAD_LENGTH_MIN = 4;
@@ -80,9 +82,12 @@ function make(opts) {
   const chunkNoise = opts.chunkNoise;
   const wellNoiseX = opts.wellNoiseX;
   const wellNoiseZ = opts.wellNoiseZ;
+  const roadNoise = opts.roadNoise;
   const roadMaxLengthNoise = opts.roadMaxLengthNoise;
   const roadLengthNoise = opts.roadLengthNoise;
   const roadDirectionNoise = opts.roadDirectionNoise;
+  const buildingNoise = opts.buildingNoise;
+  const buildingTypeNoise = opts.buildingTypeNoise;
   const setVoxel = opts.setVoxel;
 
   const startX = position[0];
@@ -129,8 +134,11 @@ function make(opts) {
 
       _makeRoads({
         wellPosition,
-        roadLengthNoise,
+        roadNoise,
         roadMaxLengthNoise,
+        roadLengthNoise,
+        buildingNoise,
+        buildingTypeNoise,
         roadDirectionNoise,
         getHeight,
         setVoxel,
@@ -302,9 +310,12 @@ function _makeBuilding(opts) {
 
 function _makeRoads(opts) {
   const wellPosition = opts.wellPosition;
+  const roadNoise = opts.roadNoise;
   const roadMaxLengthNoise = opts.roadMaxLengthNoise;
   const roadLengthNoise = opts.roadLengthNoise;
   const roadDirectionNoise = opts.roadDirectionNoise;
+  const buildingNoise = opts.buildingNoise;
+  const buildingTypeNoise = opts.buildingTypeNoise;
   const getHeight = opts.getHeight;
   const setVoxel = opts.setVoxel;
   const setVillageMap = opts.setVillageMap;
@@ -331,6 +342,9 @@ function _makeRoads(opts) {
       const y = getHeight(x, z);
       setVoxel(x, y, z, BLOCKS['cobblestone']);
       setVillageMap(x, z);
+      // XXX double the road width
+      // XXX prematurely halt road generation if hitting a used part of the village
+      // XXX generate building here, on the opposite side of the road curvature
     }
     const newLength = prevLength + localLength;
     const remainingLength = maxLength - newLength;
@@ -372,17 +386,19 @@ function _makeRoads(opts) {
     const startX = wellPosition[0] + startOffset[0];
     const startZ = wellPosition[1] + startOffset[1];
     const startPosition = [startX, startZ];
-    const maxLengthNoiseN = roadMaxLengthNoise.in2D(startX, startZ);
-    const maxLength = MAX_ROAD_LENGTH_MIN + floor(maxLengthNoiseN * (MAX_ROAD_LENGTH_MAX - MAX_ROAD_LENGTH_MIN));
 
-    _makeRoad({
-      startPosition,
-      direction,
-      length: 0,
-      maxLength,
-    });
+    const roadNoiseN = roadNoise.in2D(startX, startZ);
+    if (roadNoiseN < ROAD_RATE) {
+      const maxLengthNoiseN = roadMaxLengthNoise.in2D(startX, startZ);
+      const maxLength = MAX_ROAD_LENGTH_MIN + floor(maxLengthNoiseN * (MAX_ROAD_LENGTH_MAX - MAX_ROAD_LENGTH_MIN));
 
-    // XXX also generate other buildings here
+      _makeRoad({
+        startPosition,
+        direction,
+        length: 0,
+        maxLength,
+      });
+    }
   });
 }
 
