@@ -68,6 +68,8 @@ const MAX_ROAD_LENGTH_MIN = 4;
 const MAX_ROAD_LENGTH_MAX = 32;
 const ROAD_LENGTH_MIN = 4;
 const ROAD_LENGTH_MAX = 16;
+const MAX_BUILDING_SIZE = 16;
+const BLOCK_PADDING = MAX_ROAD_LENGTH_MAX + MAX_BUILDING_SIZE;
 
 function make(opts) {
   const position = opts.position;
@@ -85,6 +87,18 @@ function make(opts) {
 
   const startX = position[0];
   const startZ = position[1];
+  const paddedChunkSize = chunkSize + BLOCK_PADDING;
+  const villageMap = new Uint8Array(paddedChunkSize * paddedChunkSize);
+  const getVillage = _makeGetVillage({
+    villageMap,
+    position,
+    paddedChunkSize,
+  });
+  const setVillage = _makeSetVillage({
+    villageMap,
+    position,
+    paddedChunkSize,
+  });
 
   const chunkNoiseN = chunkNoise.in2D(startX, startZ);
   if (chunkNoiseN < VILLAGE_RATE_PER_CHUNK) {
@@ -102,6 +116,7 @@ function make(opts) {
       position: wellPosition,
       getLand,
       getTree,
+      getVillage,
     })) {
       // build main well
       _makeBuilding({
@@ -109,6 +124,7 @@ function make(opts) {
         position: wellPosition,
         getHeight,
         setVoxel,
+        setVillageMap,
       });
 
       _makeRoads({
@@ -118,9 +134,8 @@ function make(opts) {
         roadDirectionNoise,
         getHeight,
         setVoxel,
+        setVillageMap,
       });
-
-      // XXX build roads and the rest of the buildings here
     }
   }
 }
@@ -145,6 +160,7 @@ function _canBuild(opts) {
   const position = opts.position;
   const getLand = opts.getLand;
   const getTree = opts.getTree;
+  const getVillage = opts.getVillage;
 
   const startX = position[0];
   const startZ = position[1];
@@ -159,7 +175,7 @@ function _canBuild(opts) {
     startZ,
     width,
     depth,
-  }, (x, z) => getLand(x, z) && !getTree(x, z));
+  }, (x, z) => getLand(x, z) && !getTree(x, z) && !getVillage(x, z));
 }
 
 function _forEachHorizontalPoint(opts, fn) {
@@ -196,6 +212,7 @@ function _makeBuilding(opts) {
   const position = opts.position;
   const getHeight = opts.getHeight;
   const setVoxel = opts.setVoxel;
+  const setVillageMap = opts.setVillageMap;
 
   const startX = position[0];
   const startZ = position[1];
@@ -227,6 +244,7 @@ function _makeBuilding(opts) {
 
   _makeBase();
   _makeLayers();
+  _logBase();
 
   function _makeBase() {
     _forEachHorizontalPoint({
@@ -267,6 +285,18 @@ function _makeBuilding(opts) {
       });
     }
   }
+
+  function _logBase() {
+    _forEachHorizontalPoint({
+      startX,
+      startZ,
+      width,
+      depth,
+    }, (x, z) => {
+      setVillageMap(x, z);
+    });
+  }
+
   // XXX make sure to handle the bottom-up offsetted well generation case
 }
 
@@ -277,6 +307,7 @@ function _makeRoads(opts) {
   const roadDirectionNoise = opts.roadDirectionNoise;
   const getHeight = opts.getHeight;
   const setVoxel = opts.setVoxel;
+  const setVillageMap = opts.setVillageMap;
 
   function _makeRoad(opts) {
     const startPosition = opts.startPosition;
@@ -299,6 +330,7 @@ function _makeRoads(opts) {
       const z = startZ + i * incrementZ;
       const y = getHeight(x, z);
       setVoxel(x, y, z, BLOCKS['cobblestone']);
+      setVillageMap(x, z);
     }
     const newLength = prevLength + localLength;
     const remainingLength = maxLength - newLength;
@@ -352,6 +384,38 @@ function _makeRoads(opts) {
 
     // XXX also generate other buildings here
   });
+}
+
+function _makeGetVillage(opts) {
+  const villageMap = opts.villageMap;
+  const position = opts.position;
+  const paddedChunkSize = opts.paddedChunkSize;
+
+  const startX = position[0] - paddedChunkSize;
+  const startZ = position[1] - paddedChunkSize;
+
+  return (x, z) => {
+    const rawX = x - startX;
+    const rawZ = z - startZ;
+    const idx = rawX + (rawZ * paddingSize);
+    return villageMap[idx] !== 0;
+  };
+}
+
+function _makeSetVillage(opts) {
+  const villageMap = opts.villageMap;
+  const position = opts.position;
+  const paddedChunkSize = opts.paddedChunkSize;
+
+  const startX = position[0] - paddedChunkSize;
+  const startZ = position[1] - paddedChunkSize;
+
+  return (x, z) => {
+    const rawX = x - startX;
+    const rawZ = z - startZ;
+    const idx = rawX + (rawZ * paddingSize);
+    villageMap[idx] = 1;
+  };
 }
 
 const api = {
