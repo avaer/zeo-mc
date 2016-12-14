@@ -2,6 +2,8 @@
 
 Minecraft in JavaScript.
 
+<img src="/screencap.gif?raw=true" width="424px">
+
 Features:
 
 - Formerly based on [voxel.js](https://github.com/maxogden/voxel-engine)
