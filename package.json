@@ -1,16 +1,16 @@
 {
-  "name": "kazmer",
+  "name": "zeo-mc",
   "version": "0.0.1",
-  "description": "kazmer.io",
+  "description": "Minecraft clone in javascript",
   "scripts": {
     "start": "node server.js",
     "lint": "eslint src"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/modulesio/kazmer"
+    "url": "https://github.com/modulesio/zeo-mc"
   },
-  "author": "Avaer Kazmer <a@kazmer.com>",
+  "author": "Avaer Kazmer <a@modules.io>",
   "dependencies": {
     "babel-core": "^6.0.20",
     "babel-eslint": "^4.1.3",

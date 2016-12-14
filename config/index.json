@@ -1,5 +1,5 @@
 {
-  "hostname": "kazmer.io",
+  "hostname": "zeo.sh",
   "port": 8000,
   "dataDirectory": "./data",
   "apiPrefix": "/api"
