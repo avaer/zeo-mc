@@ -34,7 +34,7 @@ const BUILDING_INDEX = (() => {
   return result;
 })();
 
-function make(opts) {
+const make = opts => {
   const position = opts.position;
   const getHeight = opts.getHeight;
   const getLand = opts.getLand;

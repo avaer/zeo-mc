@@ -9,6 +9,54 @@ const PlaneFire = require('./PlaneFire');
 
 const api = {};
 
+// helpers
+
+const _makePlaneMap = planes => {
+  const result = {};
+  planes.forEach(plane => {
+    const NAME = plane.NAME;
+    result[NAME] = plane;
+  });
+  return result;
+};
+
+const _makeVegetationSpecs = planes => {
+  const result = [];
+  planes.forEach(plane => {
+    const NAME = plane.NAME;
+    const MATERIALS = plane.MATERIALS;
+    MATERIALS.forEach((materials, i) => {
+      const spec = {
+        plane: NAME,
+        p: [i],
+        s: []
+      };
+      result.push(spec);
+    });
+  });
+  return result;
+};
+
+const _makeWeatherSpecs = planes => {
+  return planes.map(plane => {
+    const NAME = plane.NAME;
+    const spec = {
+      plane: NAME
+    };
+    return spec;
+  });
+};
+
+const _makeEffectSpecs = planes => {
+  return planes.map(plane => {
+    const NAME = plane.NAME;
+    const spec = {
+      plane: NAME
+    };
+    return spec;
+  });
+};
+
 // planes
 
 api.PLANES = _makePlaneMap([
@@ -51,51 +99,3 @@ api.make = function(planeName, p, s) {
 };
 
 module.exports = api;
-
-// helpers
-
-function _makePlaneMap(planes) {
-  const result = {};
-  planes.forEach(plane => {
-    const NAME = plane.NAME;
-    result[NAME] = plane;
-  });
-  return result;
-}
-
-function _makeVegetationSpecs(planes) {
-  const result = [];
-  planes.forEach(plane => {
-    const NAME = plane.NAME;
-    const MATERIALS = plane.MATERIALS;
-    MATERIALS.forEach((materials, i) => {
-      const spec = {
-        plane: NAME,
-        p: [i],
-        s: []
-      };
-      result.push(spec);
-    });
-  });
-  return result;
-}
-
-function _makeWeatherSpecs(planes) {
-  return planes.map(plane => {
-    const NAME = plane.NAME;
-    const spec = {
-      plane: NAME
-    };
-    return spec;
-  });
-}
-
-function _makeEffectSpecs(planes) {
-  return planes.map(plane => {
-    const NAME = plane.NAME;
-    const spec = {
-      plane: NAME
-    };
-    return spec;
-  });
-}
