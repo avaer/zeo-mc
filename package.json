@@ -24,7 +24,7 @@
     "webpack": "^1.12.2",
     "webpack-dev-server": "^1.12.1",
 
-    "spdy": "",
+    "spdy": "git://github.com/anandsuresh/node-spdy.git#fix/agentGoAway",
     "express": "",
     "ws": "",
     "mime": "",
