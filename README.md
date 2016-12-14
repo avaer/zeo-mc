@@ -1,10 +1,10 @@
-#### zeo-mc
+## zeo-mc
 
 Minecraft in JavaScript.
 
 <img src="/screencap.gif?raw=true" width="424px">
 
-Features:
+#### Features
 
 - Formerly based on [voxel.js](https://github.com/maxogden/voxel-engine)
 - Pure JavaScript/THREE.js
@@ -16,3 +16,14 @@ Features:
 - Image-to-pixel-mesher to render weapons/items from an image
 - Weather effects like rain
 - Portal gun! With rendered portals you can walk through
+
+#### Usage
+
+- Node 6
+
+```sh
+npm install
+npm start
+```
+
+Open https://localhost:8000 (yes, needs to be HTTPS).
