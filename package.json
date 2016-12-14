@@ -29,8 +29,8 @@
     "ws": "",
     "mime": "",
     "st": "",
-    "react": "",
-    "react-dom": "",
+    "react": "15.1.0",
+    "react-dom": "15.1.0",
     "immutable": "",
 
     "voxel-trajectory": "",
