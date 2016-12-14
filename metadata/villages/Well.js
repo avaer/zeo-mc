@@ -64,10 +64,10 @@ const LAYERS = [
   },
 ]).concat(_repeat({
   legend: {
-    'F': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'northwest'},
-    'E': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'northeast'},
-    'N': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'southwest'},
-    'C': {type: BLOCKS['planks_oak'], model: 'fence_ne', direction: 'southeast'},
+    'F': {type: BLOCKS['planks_oak'], model: 'fence_post'},
+    'E': {type: BLOCKS['planks_oak'], model: 'fence_post'},
+    'N': {type: BLOCKS['planks_oak'], model: 'fence_post'},
+    'C': {type: BLOCKS['planks_oak'], model: 'fence_post'},
   },
   layout: [
     [' ', ' ', ' ', ' ', ' ', ' '],

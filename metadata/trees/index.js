@@ -129,7 +129,7 @@ const TREES = [
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
     const eatNoise2 = opts.eatNoise2;
-    const onPoint = opts.onPoint;
+    const setVoxel = opts.setVoxel;
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
@@ -142,7 +142,7 @@ const TREES = [
     const leafRadius = ((height - base) / 2) * (OAK_LEAVES_RADIUS_RATIO_MIN + (leafN * (OAK_LEAVES_RADIUS_RATIO_MAX - OAK_LEAVES_RADIUS_RATIO_MIN)));
     for (let i = 0; i < height; i++) {
       const yi = y + i;
-      onPoint(x, yi, z, OAK_LOG_VALUE);
+      setVoxel(x, yi, z, OAK_LOG_VALUE);
 
       if (i >= base) {
         _leafPoints((j, k) => {
@@ -155,7 +155,7 @@ const TREES = [
             const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * OAK_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
-              onPoint(xi, yi, zi, OAK_LEAVES_VALUE);
+              setVoxel(xi, yi, zi, OAK_LEAVES_VALUE);
             }
           }
         });
@@ -163,7 +163,7 @@ const TREES = [
     }
 
     const yi = y + snappedHeight;
-    onPoint(x, yi, z, OAK_LEAVES_VALUE);
+    setVoxel(x, yi, z, OAK_LEAVES_VALUE);
   },
 
   // spruce
@@ -185,7 +185,7 @@ const TREES = [
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
     const eatNoise2 = opts.eatNoise2;
-    const onPoint = opts.onPoint;
+    const setVoxel = opts.setVoxel;
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
@@ -214,21 +214,21 @@ const TREES = [
             const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * SPRUCE_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
-              onPoint(xi, yi, zi, SPRUCE_LEAVES_VALUE);
+              setVoxel(xi, yi, zi, SPRUCE_LEAVES_VALUE);
               numLeaves++;
             }
           }
         });
 
         const value = numLeaves > 0 ? SPRUCE_LOG_VALUE : SPRUCE_LEAVES_VALUE;
-        onPoint(x, yi, z, value);
+        setVoxel(x, yi, z, value);
       } else {
-        onPoint(x, yi, z, SPRUCE_LOG_VALUE);
+        setVoxel(x, yi, z, SPRUCE_LOG_VALUE);
       }
     }
 
     const yi = y + snappedHeight;
-    onPoint(x, yi, z, SPRUCE_LEAVES_VALUE);
+    setVoxel(x, yi, z, SPRUCE_LEAVES_VALUE);
   },
 
   // birch
@@ -250,7 +250,7 @@ const TREES = [
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
     const eatNoise2 = opts.eatNoise2;
-    const onPoint = opts.onPoint;
+    const setVoxel = opts.setVoxel;
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
@@ -277,20 +277,20 @@ const TREES = [
             const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * BIRCH_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
-              onPoint(xi, yi, zi, BIRCH_LEAVES_VALUE);
+              setVoxel(xi, yi, zi, BIRCH_LEAVES_VALUE);
             }
           }
         });
 
         const value = (i < (base + ((height - base) / 2))) ? BIRCH_LOG_VALUE : BIRCH_LEAVES_VALUE;
-        onPoint(x, yi, z, value);
+        setVoxel(x, yi, z, value);
       } else {
-        onPoint(x, yi, z, BIRCH_LOG_VALUE);
+        setVoxel(x, yi, z, BIRCH_LOG_VALUE);
       }
     }
 
     const yi = y + snappedHeight;
-    onPoint(x, yi, z, BIRCH_LEAVES_VALUE);
+    setVoxel(x, yi, z, BIRCH_LEAVES_VALUE);
   },
 
   // jungle
@@ -312,7 +312,7 @@ const TREES = [
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
     const eatNoise2 = opts.eatNoise2;
-    const onPoint = opts.onPoint;
+    const setVoxel = opts.setVoxel;
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
@@ -337,7 +337,7 @@ const TREES = [
             const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * JUNGLE_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
-              onPoint(xi, yi, zi, JUNGLE_LEAVES_VALUE);
+              setVoxel(xi, yi, zi, JUNGLE_LEAVES_VALUE);
             }
           }
         });
@@ -373,11 +373,11 @@ const TREES = [
       LEAVES_SIZE
     );
     makeCanopy(x, yi, z, topCanopySize)
-    // onPoint(x, yi, z, JUNGLE_LEAVES_VALUE);
+    // setVoxel(x, yi, z, JUNGLE_LEAVES_VALUE);
 
     for (let i = 0; i < height - 2; i++) {
       const yi = y + i;
-      onPoint(x, yi, z, JUNGLE_LOG_VALUE);
+      setVoxel(x, yi, z, JUNGLE_LOG_VALUE);
     }
   },
 
@@ -400,7 +400,7 @@ const TREES = [
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
     const eatNoise2 = opts.eatNoise2;
-    const onPoint = opts.onPoint;
+    const setVoxel = opts.setVoxel;
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
@@ -453,7 +453,7 @@ const TREES = [
             const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * ACACIA_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
-              onPoint(xi, yi, zi, ACACIA_LEAVES_VALUE);
+              setVoxel(xi, yi, zi, ACACIA_LEAVES_VALUE);
             }
           }
         });
@@ -464,7 +464,7 @@ const TREES = [
       const yi = y + i;
 
       if (i < fork) {
-        onPoint(x, yi, z, ACACIA_LOG_VALUE);
+        setVoxel(x, yi, z, ACACIA_LOG_VALUE);
       } else {
         const forkHeight = i - fork;
 
@@ -472,7 +472,7 @@ const TREES = [
         const yil = yi;
         const zil = round(z + forkAxes[0][1] * (forkHeight * forkLeftAngle));
         if (i < snappedForkLeftHeight) {
-          onPoint(xil, yil, zil, ACACIA_LOG_VALUE);
+          setVoxel(xil, yil, zil, ACACIA_LOG_VALUE);
         } else if (i === snappedForkLeftHeight) {
           const canopySize = round((forkLeftHeight - fork) / 2);
           makeCanopy(xil, yi, zil, canopySize);
@@ -482,7 +482,7 @@ const TREES = [
         const yir = yi - snappedForkHeightOffset;
         const zir = round(z + forkAxes[1][1] * (forkHeight * forkRightAngle));
         if (i < snappedForkRightHeight) {
-          onPoint(xir, yir, zir, ACACIA_LOG_VALUE);
+          setVoxel(xir, yir, zir, ACACIA_LOG_VALUE);
         } else if (i === snappedForkRightHeight) {
           const canopySize = round((forkRightHeight - fork) / 2);
           makeCanopy(xir, yir, zir, canopySize);
@@ -510,7 +510,7 @@ const TREES = [
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
     const eatNoise2 = opts.eatNoise2;
-    const onPoint = opts.onPoint;
+    const setVoxel = opts.setVoxel;
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
@@ -540,7 +540,7 @@ const TREES = [
             const leafEatN = eatNoise.in3D(xi, yi, zi);
             const leafEatProbability = leafDistance * DARK_OAK_LEAVES_EAT_RATIO;
             if (leafEatN > leafEatProbability) {
-              onPoint(xi, yi, zi, DARK_OAK_LEAVES_VALUE);
+              setVoxel(xi, yi, zi, DARK_OAK_LEAVES_VALUE);
             }
           }
         });
@@ -559,7 +559,7 @@ const TREES = [
           const branchEatN = eatNoise2.in3D(xi, yi, zi);
           const branchEatProbability = branchDistance * DARK_OAK_BRANCHES_EAT_RATIO;
           if (branchEatN > branchEatProbability) {
-            onPoint(xi, yi, zi, DARK_OAK_LOG_VALUE);
+            setVoxel(xi, yi, zi, DARK_OAK_LOG_VALUE);
           }
         }
       });
@@ -568,7 +568,7 @@ const TREES = [
         _trunkPoints((j, k) => {
           const xi = x + j;
           const zi = z + k;
-          onPoint(xi, yi, zi, DARK_OAK_LOG_VALUE);
+          setVoxel(xi, yi, zi, DARK_OAK_LOG_VALUE);
         });
       }
     }
@@ -593,7 +593,7 @@ const TREES = [
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
     const eatNoise2 = opts.eatNoise2;
-    const onPoint = opts.onPoint;
+    const setVoxel = opts.setVoxel;
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
@@ -602,7 +602,7 @@ const TREES = [
 
     for (let i = 0; i < height; i++) {
       const yi = y + i;
-      onPoint(x, yi, z, HUGE_RED_MUSHROOM_TRUNK_VALUE);
+      setVoxel(x, yi, z, HUGE_RED_MUSHROOM_TRUNK_VALUE);
     }
 
     const yi = y + snappedHeight;
@@ -616,7 +616,7 @@ const TREES = [
       const xd = abs(j);
       const zd = abs(k);
       if (xd < leafRadius - 1 && zd < leafRadius - 1) {
-        onPoint(xi, yi, zi, HUGE_RED_MUSHROOM_CANOPY_VALUE);
+        setVoxel(xi, yi, zi, HUGE_RED_MUSHROOM_CANOPY_VALUE);
       }
     });
     for (let i = -1; i < snappedLeafRadius; i++) {
@@ -631,7 +631,7 @@ const TREES = [
         ) {
           const xi = x + j;
           const zi = z + k;
-          onPoint(xi, yi, zi, HUGE_RED_MUSHROOM_CANOPY_VALUE);
+          setVoxel(xi, yi, zi, HUGE_RED_MUSHROOM_CANOPY_VALUE);
         }
       });
     }
@@ -656,7 +656,7 @@ const TREES = [
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
     const eatNoise2 = opts.eatNoise2;
-    const onPoint = opts.onPoint;
+    const setVoxel = opts.setVoxel;
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
@@ -665,7 +665,7 @@ const TREES = [
 
     for (let i = 0; i < snappedHeight; i++) {
       const yi = y + i;
-      onPoint(x, yi, z, HUGE_BROWN_MUSHROOM_TRUNK_VALUE);
+      setVoxel(x, yi, z, HUGE_BROWN_MUSHROOM_TRUNK_VALUE);
     }
 
     const yi = y + snappedHeight;
@@ -678,7 +678,7 @@ const TREES = [
       const xd = abs(j);
       const zd = abs(k);
       if ((xd < leafRadius - 1 || zd < leafRadius - 1) && (xd < leafRadius && zd < leafRadius)) {
-        onPoint(xi, yi, zi, HUGE_BROWN_MUSHROOM_CANOPY_VALUE);
+        setVoxel(xi, yi, zi, HUGE_BROWN_MUSHROOM_CANOPY_VALUE);
       }
     });
   },
@@ -702,7 +702,7 @@ const TREES = [
     const leafNoise = opts.leafNoise;
     const eatNoise = opts.eatNoise;
     const eatNoise2 = opts.eatNoise2;
-    const onPoint = opts.onPoint;
+    const setVoxel = opts.setVoxel;
     const voxelUtils = opts.voxelUtils;
 
     const heightNoiseN = heightNoise.in2D(x, z);
@@ -712,7 +712,7 @@ const TREES = [
     for (let i = 0; i < snappedHeight; i++) {
       const yi = y + i;
       const value = (i === snappedHeight - 1) ? CACTUS_TOP_VALUE : CACTUS_SIDE_VALUE;
-      onPoint(x, yi, z, value);
+      setVoxel(x, yi, z, value);
     }
   },
 
