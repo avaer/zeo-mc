@@ -3,11 +3,12 @@
 const path = require('path');
 const fs = require('fs');
 const request = require('request');
+const bluebird = require('bluebird');
 const mkdirp = require('mkdirp');
 const htmlToText = require('html-to-text');
 
 const PNG_DIRECTORY = path.join(__dirname, 'png');
-const START_SKIN_PAGE = 0;
+const START_SKIN_PAGE = 160;
 const END_SKIN_PAGE = 1000;
 
 function recursePages(startSkinPage, endSkinPage, cb) {
@@ -49,20 +50,8 @@ function recursePages(startSkinPage, endSkinPage, cb) {
           };
 
           if (skinSpecs.length > 0) {
-            let pending = skinSpecs.length;
-            let error = null;
-            const pend = err => {
-              error = error || err;
-              if (--pending === 0) {
-                if (!error) {
-                  next();
-                } else {
-                  cb(error);
-                }
-              }
-            };
 
-            skinSpecs.forEach(skinSpec => {
+            bluebird.map(skinSpecs, skinSpec => new Promise((accept, reject) => {
               (function retry() {
                 const name = skinSpec.name;
                 const id = skinSpec.id;
@@ -79,26 +68,32 @@ function recursePages(startSkinPage, endSkinPage, cb) {
                     const ws = fs.createWriteStream(skinFilePath);
                     res.pipe(ws);
 
-                    ws.on('error', err => { pend(err); });
-                    ws.on('finish', () => { pend(); });
+                    ws.on('error', err => { reject(err); });
+                    ws.on('finish', () => { accept(); });
                   } else {
                     console.warn('FAILED: ' + description);
-                    pend();
+                    accept();
                   }
                 });
                 req.on('error', err => {
-                  if (err.code === 'ETIMEDOUT' || err.code === 'ESOCKETTIMEDOUT') {
-                    retry();
-                  } else {
-                    pend(err);
-                  }
+                  reject(err);
                 });
               })();
-            });
+            }, {
+              concurrency: 4,
+            }))
+              .then(() => {
+                next();
+              })
+              .catch(err => {
+                console.warn(err);
+
+                next();
+              });
           } else {
             console.log('no skins', text.length);
 
-            retry();
+            next();
           }
         });
       })();
